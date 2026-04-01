@@ -1,0 +1,38 @@
+{
+  "scenarios": {
+    "default": {
+      "success": true,
+      "tables": [
+        { "id": "T1", "label": "1번", "status": "OCCUPIED", "orderSummary": "김치찌개 외 2건", "totalAmount": 465000, "guests": 3, "elapsedTimeMin": 45 },
+        { "id": "T2", "label": "2번", "status": "EMPTY", "orderSummary": "", "totalAmount": 0, "guests": 0, "elapsedTimeMin": 0 },
+        { "id": "T3", "label": "3번", "status": "PAYING", "orderSummary": "삼겹살 외 5건", "totalAmount": 1635000, "guests": 4, "elapsedTimeMin": 70 },
+        { "id": "T4", "label": "4번", "status": "EMPTY", "orderSummary": "", "totalAmount": 0, "guests": 0, "elapsedTimeMin": 0 },
+        { "id": "T5", "label": "5번", "status": "OCCUPIED", "orderSummary": "제육볶음 외 1건", "totalAmount": 340000, "guests": 2, "elapsedTimeMin": 15 },
+        { "id": "T6", "label": "6번", "status": "OCCUPIED", "orderSummary": "돌솥비빔밥 외 3건", "totalAmount": 800000, "guests": 5, "elapsedTimeMin": 55 },
+        { "id": "T7", "label": "7번", "status": "EMPTY", "orderSummary": "", "totalAmount": 0, "guests": 0, "elapsedTimeMin": 0 },
+        { "id": "T8", "label": "8번", "status": "PAYING", "orderSummary": "냉면 외 2건", "totalAmount": 665000, "guests": 2, "elapsedTimeMin": 50 },
+        { "id": "T9", "label": "9번", "status": "OCCUPIED", "orderSummary": "된장찌개", "totalAmount": 150000, "guests": 1, "elapsedTimeMin": 10 },
+        { "id": "T10", "label": "10번", "status": "EMPTY", "orderSummary": "", "totalAmount": 0, "guests": 0, "elapsedTimeMin": 0 },
+        { "id": "T11", "label": "11번", "status": "EMPTY", "orderSummary": "", "totalAmount": 0, "guests": 0, "elapsedTimeMin": 0 },
+        { "id": "T12", "label": "12번", "status": "OCCUPIED", "orderSummary": "불고기 외 4건", "totalAmount": 1180000, "guests": 3, "elapsedTimeMin": 35 }
+      ]
+    },
+    "empty": {
+      "success": true,
+      "tables": [
+        { "id": "T1", "label": "1번", "status": "EMPTY", "orderSummary": "", "totalAmount": 0, "guests": 0, "elapsedTimeMin": 0 },
+        { "id": "T2", "label": "2번", "status": "EMPTY", "orderSummary": "", "totalAmount": 0, "guests": 0, "elapsedTimeMin": 0 },
+        { "id": "T3", "label": "3번", "status": "EMPTY", "orderSummary": "", "totalAmount": 0, "guests": 0, "elapsedTimeMin": 0 },
+        { "id": "T4", "label": "4번", "status": "EMPTY", "orderSummary": "", "totalAmount": 0, "guests": 0, "elapsedTimeMin": 0 },
+        { "id": "T5", "label": "5번", "status": "EMPTY", "orderSummary": "", "totalAmount": 0, "guests": 0, "elapsedTimeMin": 0 },
+        { "id": "T6", "label": "6번", "status": "EMPTY", "orderSummary": "", "totalAmount": 0, "guests": 0, "elapsedTimeMin": 0 },
+        { "id": "T7", "label": "7번", "status": "EMPTY", "orderSummary": "", "totalAmount": 0, "guests": 0, "elapsedTimeMin": 0 },
+        { "id": "T8", "label": "8번", "status": "EMPTY", "orderSummary": "", "totalAmount": 0, "guests": 0, "elapsedTimeMin": 0 },
+        { "id": "T9", "label": "9번", "status": "EMPTY", "orderSummary": "", "totalAmount": 0, "guests": 0, "elapsedTimeMin": 0 },
+        { "id": "T10", "label": "10번", "status": "EMPTY", "orderSummary": "", "totalAmount": 0, "guests": 0, "elapsedTimeMin": 0 },
+        { "id": "T11", "label": "11번", "status": "EMPTY", "orderSummary": "", "totalAmount": 0, "guests": 0, "elapsedTimeMin": 0 },
+        { "id": "T12", "label": "12번", "status": "EMPTY", "orderSummary": "", "totalAmount": 0, "guests": 0, "elapsedTimeMin": 0 }
+      ]
+    }
+  }
+}

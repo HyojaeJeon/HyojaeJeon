@@ -1,0 +1,70 @@
+{
+  "scenarios": {
+    "default": {
+      "success": true,
+      "categories": [
+        { "id": "C1", "name": "인기메뉴", "sortOrder": 1 },
+        { "id": "C2", "name": "찌개/탕", "sortOrder": 2 },
+        { "id": "C3", "name": "볶음/구이", "sortOrder": 3 },
+        { "id": "C4", "name": "밥/면", "sortOrder": 4 },
+        { "id": "C5", "name": "사이드", "sortOrder": 5 },
+        { "id": "C6", "name": "음료", "sortOrder": 6 },
+        { "id": "C7", "name": "세트메뉴", "sortOrder": 7 },
+        { "id": "C8", "name": "주류", "sortOrder": 8 },
+        { "id": "C9", "name": "디저트", "sortOrder": 9 },
+        { "id": "C10", "name": "특선", "sortOrder": 10 }
+      ],
+      "items": [
+        { "id": "M1", "categoryId": "C1", "name": "김치찌개", "nameVi": "Canh kim chi", "price": 150000, "imageUrl": "https://images.unsplash.com/photo-1498654896293-37aacf113fd9?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M2", "categoryId": "C1", "name": "제육볶음", "nameVi": "Thịt heo xào cay", "price": 190000, "imageUrl": "https://images.unsplash.com/photo-1583224964978-2d54898c3a5d?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M3", "categoryId": "C1", "name": "된장찌개", "nameVi": "Canh tương đậu", "price": 150000, "imageUrl": "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M4", "categoryId": "C1", "name": "삼겹살", "nameVi": "Ba chỉ nướng", "price": 265000, "imageUrl": "https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M5", "categoryId": "C1", "name": "돌솥비빔밥", "nameVi": "Cơm trộn nồi đá", "price": 170000, "imageUrl": "https://images.unsplash.com/photo-1553163147-622ab57be1c7?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M6", "categoryId": "C1", "name": "불고기", "nameVi": "Thịt bò nướng", "price": 225000, "imageUrl": "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": true },
+        { "id": "M30", "categoryId": "C1", "name": "순두부찌개", "nameVi": "Canh đậu phụ non", "price": 150000, "imageUrl": "https://images.unsplash.com/photo-1569058242252-623df46b5025?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M31", "categoryId": "C1", "name": "닭갈비", "nameVi": "Gà xào cay", "price": 209000, "imageUrl": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M32", "categoryId": "C1", "name": "냉면", "nameVi": "Mì lạnh", "price": 170000, "imageUrl": "https://images.unsplash.com/photo-1569718212165-3a8922ada9a6?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M33", "categoryId": "C1", "name": "비빔밥", "nameVi": "Cơm trộn", "price": 150000, "imageUrl": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M34", "categoryId": "C1", "name": "계란말이", "nameVi": "Trứng cuộn", "price": 115000, "imageUrl": "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M35", "categoryId": "C1", "name": "김치전", "nameVi": "Bánh kim chi", "price": 150000, "imageUrl": "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M36", "categoryId": "C1", "name": "부대찌개", "nameVi": "Lẩu quân đội", "price": 170000, "imageUrl": "https://images.unsplash.com/photo-1574484284002-952d92456975?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M37", "categoryId": "C1", "name": "오겹살", "nameVi": "Năm chỉ nướng", "price": 285000, "imageUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M38", "categoryId": "C1", "name": "잔치국수", "nameVi": "Mì tiệc", "price": 115000, "imageUrl": "https://images.unsplash.com/photo-1555126634-323283e090fa?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M39", "categoryId": "C1", "name": "두부김치", "nameVi": "Đậu phụ kim chi", "price": 190000, "imageUrl": "https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M40", "categoryId": "C1", "name": "감자탕", "nameVi": "Canh xương khoai tây", "price": 475000, "imageUrl": "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M41", "categoryId": "C1", "name": "감자전", "nameVi": "Bánh khoai tây", "price": 135000, "imageUrl": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M42", "categoryId": "C1", "name": "콜라", "nameVi": "Cola", "price": 35000, "imageUrl": "https://images.unsplash.com/photo-1554866585-cd94860890b7?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M43", "categoryId": "C1", "name": "맥주", "nameVi": "Bia", "price": 95000, "imageUrl": "https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M44", "categoryId": "C1", "name": "소주", "nameVi": "Soju", "price": 95000, "imageUrl": "https://images.unsplash.com/photo-1574484284002-952d92456975?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M45", "categoryId": "C1", "name": "사이다", "nameVi": "Nước chanh", "price": 35000, "imageUrl": "https://images.unsplash.com/photo-1625772299848-391b6a87d7b5?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+
+        { "id": "M7", "categoryId": "C2", "name": "김치찌개", "nameVi": "Canh kim chi", "price": 150000, "imageUrl": "https://images.unsplash.com/photo-1498654896293-37aacf113fd9?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M8", "categoryId": "C2", "name": "된장찌개", "nameVi": "Canh tương đậu", "price": 150000, "imageUrl": "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M9", "categoryId": "C2", "name": "순두부찌개", "nameVi": "Canh đậu phụ non", "price": 150000, "imageUrl": "https://images.unsplash.com/photo-1569058242252-623df46b5025?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M10", "categoryId": "C2", "name": "부대찌개", "nameVi": "Lẩu quân đội", "price": 170000, "imageUrl": "https://images.unsplash.com/photo-1574484284002-952d92456975?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M11", "categoryId": "C2", "name": "감자탕", "nameVi": "Canh xương khoai tây", "price": 475000, "imageUrl": "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": true },
+
+        { "id": "M12", "categoryId": "C3", "name": "제육볶음", "nameVi": "Thịt heo xào cay", "price": 190000, "imageUrl": "https://images.unsplash.com/photo-1583224964978-2d54898c3a5d?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M13", "categoryId": "C3", "name": "삼겹살", "nameVi": "Ba chỉ nướng", "price": 265000, "imageUrl": "https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M14", "categoryId": "C3", "name": "오겹살", "nameVi": "Năm chỉ nướng", "price": 285000, "imageUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M15", "categoryId": "C3", "name": "불고기", "nameVi": "Thịt bò nướng", "price": 225000, "imageUrl": "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M16", "categoryId": "C3", "name": "닭갈비", "nameVi": "Gà xào cay", "price": 209000, "imageUrl": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+
+        { "id": "M17", "categoryId": "C4", "name": "비빔밥", "nameVi": "Cơm trộn", "price": 150000, "imageUrl": "https://images.unsplash.com/photo-1553163147-622ab57be1c7?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M18", "categoryId": "C4", "name": "돌솥비빔밥", "nameVi": "Cơm trộn nồi đá", "price": 170000, "imageUrl": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M19", "categoryId": "C4", "name": "냉면", "nameVi": "Mì lạnh", "price": 170000, "imageUrl": "https://images.unsplash.com/photo-1569718212165-3a8922ada9a6?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M20", "categoryId": "C4", "name": "잔치국수", "nameVi": "Mì tiệc", "price": 115000, "imageUrl": "https://images.unsplash.com/photo-1555126634-323283e090fa?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+
+        { "id": "M21", "categoryId": "C5", "name": "계란말이", "nameVi": "Trứng cuộn", "price": 115000, "imageUrl": "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M22", "categoryId": "C5", "name": "김치전", "nameVi": "Bánh kim chi", "price": 150000, "imageUrl": "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M23", "categoryId": "C5", "name": "두부김치", "nameVi": "Đậu phụ kim chi", "price": 190000, "imageUrl": "https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M24", "categoryId": "C5", "name": "감자전", "nameVi": "Bánh khoai tây", "price": 135000, "imageUrl": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": true },
+
+        { "id": "M25", "categoryId": "C6", "name": "콜라", "nameVi": "Cola", "price": 35000, "imageUrl": "https://images.unsplash.com/photo-1554866585-cd94860890b7?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M26", "categoryId": "C6", "name": "사이다", "nameVi": "Nước chanh", "price": 35000, "imageUrl": "https://images.unsplash.com/photo-1625772299848-391b6a87d7b5?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M27", "categoryId": "C6", "name": "소주", "nameVi": "Soju", "price": 95000, "imageUrl": "https://images.unsplash.com/photo-1574484284002-952d92456975?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false },
+        { "id": "M28", "categoryId": "C6", "name": "맥주", "nameVi": "Bia", "price": 95000, "imageUrl": "https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=400&h=400&q=80", "isSoldOut": false }
+      ]
+    }
+  }
+}

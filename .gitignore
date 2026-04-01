@@ -1,0 +1,68 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Next.js build output
+.next/
+out/
+
+# Build artifacts
+HyojungPOS-Main/Build/
+HyojungPOS-Set/Build/
+
+# CEF SDK binaries (too large for git)
+HyojungPOS-Main/Presentation/CEF/SDK/Release/
+HyojungPOS-Main/Presentation/CEF/SDK/Resources/
+HyojungPOS-Main/Presentation/CEF/SDK/include/
+HyojungPOS-Main/Presentation/CEF/SDK/libcef_dll_wrapper/
+
+# Visual Studio
+*.suo
+*.user
+*.userosscache
+*.sln.docstats
+*.ncb
+*.aps
+*.cachefile
+.vs/
+x64/
+x86/
+Debug/
+Release/
+ipch/
+*.pch
+*.pdb
+*.ilk
+*.obj
+*.log
+*.tlog
+*.iobj
+*.ipdb
+*.idb
+*.opendb
+*.db
+*.sdf
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+Log/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Claude Code
+.claude/
