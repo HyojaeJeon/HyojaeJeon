@@ -8,7 +8,7 @@
 - 중앙 서버 동기화와 backlog 재전송을 담당하는 워커 영역이다.
 
 ### 담당 범위
-- ConnectivityService, OutboxDispatcher, SyncWorker, SyncStateRepository
+- ConnectivityService, OutboxDispatcher, SyncWorker, SyncStateStore
 
 ### 규칙
 - 동기화 성공과 로컬 거래 성공을 분리해서 다룬다.
@@ -28,7 +28,7 @@
 - Đây là vùng worker phụ trách đồng bộ với máy chủ trung tâm và retransmit backlog.
 
 ### Phạm vi phụ trách
-- ConnectivityService, OutboxDispatcher, SyncWorker và SyncStateRepository
+- ConnectivityService, OutboxDispatcher, SyncWorker và SyncStateStore
 
 ### Quy tắc
 - Phải tách biệt thành công sync với thành công giao dịch cục bộ.

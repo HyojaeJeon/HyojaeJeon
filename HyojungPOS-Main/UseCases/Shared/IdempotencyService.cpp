@@ -1,7 +1,7 @@
 #include "IdempotencyService.h"
-#include "../../Infrastructure/Persistence/Idempotency/RequestLedgerRepository.h"
+#include "../../Infrastructure/Persistence/MSSQL/Stores/RequestLedgerStore.h"
 
-IdempotencyService::IdempotencyService(RequestLedgerRepository* ledger)
+IdempotencyService::IdempotencyService(RequestLedgerStore* ledger)
     : ledger_(ledger)
 {
 }

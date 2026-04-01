@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useGetTablesQuery, useGetMenuQuery } from '@store/api/index';
 import TableCard from '../../../design-system/organisms/TableCard';
 import MenuCard from '../../../design-system/organisms/MenuCard';
@@ -120,6 +120,8 @@ function OrderScreenPreview() {
   const totalAmount = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const [orderOffset, setOrderOffset] = useState(0);
 
+  const orderVisibleCount = 5;
+
   const handleAddToCart = useCallback((menuId) => {
     const menuItem = allItems.find((m) => m.id === menuId);
     if (!menuItem || menuItem.isSoldOut) return;
@@ -130,131 +132,172 @@ function OrderScreenPreview() {
     });
   }, [allItems]);
 
+  // 새 아이템 추가 시 마지막 페이지로 자동 이동
+  const prevCartLen = useRef(cart.length);
+  useEffect(() => {
+    if (cart.length > prevCartLen.current && cart.length > orderVisibleCount) {
+      setOrderOffset(Math.max(0, cart.length - orderVisibleCount));
+    }
+    prevCartLen.current = cart.length;
+  }, [cart.length]);
+
   const handleCatSelect = (catId) => { setActiveCatId(catId); setMenuPage(0); };
 
-  return (
-    <div className="w-full h-full flex bg-white">
+  const orderVisible = cart.slice(orderOffset, orderOffset + orderVisibleCount);
+  const canOrderPrev = orderOffset > 0;
+  const canOrderNext = orderOffset + orderVisibleCount < cart.length;
 
-      {/* ═══ Left: Menu Content (no side margins) ═══ */}
-      <div className="flex-1 flex flex-col h-full min-w-0">
-        {/* Header */}
-        <header className="h-12 bg-white border-b border-gray-100 flex items-center px-5 shrink-0">
+  return (
+    <div className="w-full h-full flex flex-col bg-white">
+
+      {/* ═══ Header — FULL WIDTH (메뉴 + 주문내역 모두 포함) ═══ */}
+      <header className="h-12 bg-white border-b border-gray-100 flex items-center shrink-0">
+        <div className="flex items-center px-5 flex-1 min-w-0">
           <button type="button" className="text-gray-400 mr-3 cursor-pointer active:text-gray-600">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path d="M12 4l-6 6 6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
           <h1 className="text-sm font-bold text-gray-900">테이블 1번</h1>
-        </header>
-
-        {/* Category Bar — with inline blur mask + arrows on right */}
-        <div className="h-12 bg-white border-b border-gray-100 shrink-0 relative">
-          {/* Category buttons */}
-          <div className="flex items-center h-full px-2 gap-1.5">
-            {visibleCats.map((cat) => (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => handleCatSelect(cat.id)}
-                className={`
-                  flex-1 h-9 text-[12px] font-semibold rounded-lg
-                  transition-colors duration-100 cursor-pointer select-none truncate px-2
-                  ${activeCatId === cat.id
-                    ? 'bg-soft-red-500 text-white'
-                    : 'text-gray-500 bg-gray-50 active:bg-gray-100'}
-                `}
-              >
-                {cat.name}
-              </button>
-            ))}
-          </div>
-          {/* Right dark overlay + < > icons — wide, black semi-transparent */}
-          <div
-            className="absolute right-0 top-0 bottom-0 flex items-center justify-center gap-3 select-none"
-            style={{
-              width: 100,
-              background: 'rgba(0, 0, 0, 0.55)',
-            }}
-          >
-            <button
-              type="button"
-              disabled={!canCatLeft}
-              onClick={() => setCatOffset((o) => Math.max(0, o - 1))}
-              className={`w-10 h-10 flex items-center justify-center cursor-pointer ${canCatLeft ? 'opacity-100 active:opacity-60' : 'opacity-20 cursor-default'}`}
-            >
-              <IconLeft size={22} color="#fff" />
-            </button>
-            <button
-              type="button"
-              disabled={!canCatRight}
-              onClick={() => setCatOffset((o) => Math.min(categories.length - visibleCatCount, o + 1))}
-              className={`w-10 h-10 flex items-center justify-center cursor-pointer ${canCatRight ? 'opacity-100 active:opacity-60' : 'opacity-20 cursor-default'}`}
-            >
-              <IconRight size={22} color="#fff" />
-            </button>
-          </div>
         </div>
-
-        {/* Menu Grid — FULL WIDTH, no side padding, tight gap */}
-        <div className="flex-1 p-1 overflow-hidden bg-pos-surface">
-          <div
-            className="grid grid-cols-5 gap-1 h-full"
-            style={{ gridTemplateRows: 'repeat(4, 1fr)' }}
-          >
-            {pageItems.map((menu) => (
-              <MenuCard key={menu.id} menu={menu} onAdd={handleAddToCart} />
-            ))}
-            {Array.from({ length: Math.max(0, itemsPerPage - pageItems.length) }).map((_, i) => (
-              <div key={`empty-${i}`} className="rounded-xl border border-dashed border-gray-200 bg-gray-50/50" />
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ═══ Center: Right-side Navigation Panel (56px) ═══
-           Groups ALL navigation arrows in one column.
-           Top = Category </>  |  Bottom = Page ▲/▼        */}
-      <div className="w-14 shrink-0 bg-gray-50 border-l border-r border-gray-100 flex flex-col">
-        {/* Spacer for header + category bar alignment */}
-        <div className="h-24 shrink-0" />
-
-        {/* Menu page arrows — fill remaining height, large touch targets */}
-        <div className="flex-1 flex flex-col">
-          <NavBtn
-            disabled={!canPageUp}
-            onClick={() => setMenuPage((p) => p - 1)}
-            className="flex-1 rounded-none"
-          >
-            <IconUp size={22} color={canPageUp ? '#374151' : '#D1D5DB'} />
-          </NavBtn>
-
-          {/* Page indicator */}
-          <div className="h-8 flex items-center justify-center shrink-0 bg-white border-y border-gray-100">
-            <span className="text-[10px] font-bold text-gray-400 tabular-nums">
-              {totalPages > 0 ? `${menuPage + 1}/${totalPages}` : '-'}
+        <div className="w-[300px] shrink-0 flex items-center px-4 border-l border-gray-100 h-full">
+          <h2 className="text-sm font-bold text-gray-900">주문 내역</h2>
+          {cart.length > 0 && (
+            <span className="text-[11px] font-semibold min-w-[20px] h-5 flex items-center justify-center px-1.5 bg-soft-red-50 text-soft-red-500 rounded-full ml-2">
+              {cart.length}
             </span>
+          )}
+          {/* 주문내역 < > 페이지 버튼 */}
+          <div className="ml-auto flex gap-1">
+            <NavBtn disabled={!canOrderPrev} onClick={() => setOrderOffset((o) => Math.max(0, o - orderVisibleCount))} className="w-8 h-8">
+              <IconLeft size={16} color={canOrderPrev ? '#374151' : '#D1D5DB'} />
+            </NavBtn>
+            <NavBtn disabled={!canOrderNext} onClick={() => setOrderOffset((o) => Math.min(cart.length - orderVisibleCount, o + orderVisibleCount))} className="w-8 h-8">
+              <IconRight size={16} color={canOrderNext ? '#374151' : '#D1D5DB'} />
+            </NavBtn>
+          </div>
+        </div>
+      </header>
+
+      {/* ═══ Body — 좌측(카테고리+그리드+네비) | 우측(주문내역) ═══ */}
+      <div className="flex-1 flex min-h-0">
+
+        {/* ── Left: Category + Grid + Nav ── */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Category Bar + [<][>] */}
+          <div className="h-12 flex shrink-0 border-b border-gray-100">
+            <div className="flex-1 flex items-center px-2 gap-1.5 min-w-0 bg-white">
+              {visibleCats.map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => handleCatSelect(cat.id)}
+                  className={`
+                    flex-1 h-9 text-[12px] font-semibold rounded-lg
+                    transition-colors duration-100 cursor-pointer select-none truncate px-2
+                    ${activeCatId === cat.id
+                      ? 'bg-soft-red-500 text-white'
+                      : 'text-gray-500 bg-gray-50 active:bg-gray-100'}
+                  `}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+            <div className="border-l border-gray-100 bg-gray-50" style={{ width: 56 }}>
+              <NavBtn disabled={!canCatLeft} onClick={() => setCatOffset((o) => Math.max(0, o - 1))} className="w-full h-full rounded-none">
+                <IconLeft size={20} color={canCatLeft ? '#374151' : '#D1D5DB'} />
+              </NavBtn>
+            </div>
+            <div className="border-l border-gray-100 bg-gray-50" style={{ width: 56 }}>
+              <NavBtn disabled={!canCatRight} onClick={() => setCatOffset((o) => Math.min(categories.length - visibleCatCount, o + 1))} className="w-full h-full rounded-none">
+                <IconRight size={20} color={canCatRight ? '#374151' : '#D1D5DB'} />
+              </NavBtn>
+            </div>
           </div>
 
-          <NavBtn
-            disabled={!canPageDown}
-            onClick={() => setMenuPage((p) => p + 1)}
-            className="flex-1 rounded-none"
-          >
-            <IconDown size={22} color={canPageDown ? '#374151' : '#D1D5DB'} />
-          </NavBtn>
+          {/* Menu Grid + ▲▼ nav */}
+          <div className="flex-1 flex min-h-0">
+            <div className="flex-1 p-1 overflow-hidden bg-pos-surface min-w-0">
+              <div className="grid grid-cols-5 gap-1 h-full" style={{ gridTemplateRows: 'repeat(4, 1fr)' }}>
+                {pageItems.map((menu) => (
+                  <MenuCard key={menu.id} menu={menu} onAdd={handleAddToCart} />
+                ))}
+                {Array.from({ length: Math.max(0, itemsPerPage - pageItems.length) }).map((_, i) => (
+                  <div key={`empty-${i}`} className="rounded-xl border border-dashed border-gray-200 bg-gray-50/50" />
+                ))}
+              </div>
+            </div>
+            <div className="shrink-0 bg-gray-50 border-l border-r border-gray-100 flex flex-col" style={{ width: 56 }}>
+              <NavBtn disabled={!canPageUp} onClick={() => setMenuPage((p) => p - 1)} className="flex-1 rounded-none">
+                <IconUp size={22} color={canPageUp ? '#374151' : '#D1D5DB'} />
+              </NavBtn>
+              <div className="h-8 flex items-center justify-center shrink-0 bg-white border-y border-gray-100">
+                <span className="text-[10px] font-bold text-gray-400 tabular-nums">
+                  {totalPages > 0 ? `${menuPage + 1}/${totalPages}` : '-'}
+                </span>
+              </div>
+              <NavBtn disabled={!canPageDown} onClick={() => setMenuPage((p) => p + 1)} className="flex-1 rounded-none">
+                <IconDown size={22} color={canPageDown ? '#374151' : '#D1D5DB'} />
+              </NavBtn>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Right: Order area (300px) — 헤더 바로 아래부터 아이템 표시 ── */}
+        <div className="w-[300px] shrink-0 bg-white border-l border-gray-200 flex flex-col">
+          {/* Items — 최대 5개, 헤더 < >로 페이지 전환 */}
+          <div className="flex-1 overflow-hidden">
+            {cart.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full gap-2 px-6">
+                <svg width="24" height="24" viewBox="0 0 28 28" fill="none" className="text-gray-300">
+                  <path d="M7 7h1.5l2.8 11.2h8.4L22.5 7H24" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="12" cy="23" r="1.5" fill="currentColor" /><circle cx="19" cy="23" r="1.5" fill="currentColor" />
+                </svg>
+                <p className="text-xs text-gray-400 text-center">메뉴를 선택해주세요</p>
+              </div>
+            ) : (
+              <div className="p-2 space-y-1.5">
+                {orderVisible.map((item, idx) => (
+                  <div key={orderOffset + idx} className="bg-gray-50 rounded-xl px-3 py-2">
+                    {/* Row 1: 아이템명 + 합계 */}
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs font-semibold text-gray-900 truncate flex-1 min-w-0 mr-2">{item.name}</p>
+                      <span className="text-xs font-bold text-gray-900 shrink-0 tabular-nums">{(item.price * item.quantity).toLocaleString()}₫</span>
+                    </div>
+                    {/* Row 2: 단가 + 수량 증감 */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-gray-400 tabular-nums">{item.price.toLocaleString()}₫</span>
+                      <div className="flex items-center shrink-0">
+                        <button type="button" onClick={() => setCart((prev) => {
+                          const q = prev.find(c => c.name === item.name)?.quantity;
+                          if (q <= 1) return prev.filter(c => c.name !== item.name);
+                          return prev.map(c => c.name === item.name ? { ...c, quantity: c.quantity - 1 } : c);
+                        })} className="w-9 h-9 flex items-center justify-center rounded-lg bg-white border border-gray-200 text-gray-600 text-sm font-bold cursor-pointer active:bg-gray-100">−</button>
+                        <span className="text-sm font-bold text-gray-900 w-8 text-center tabular-nums">{item.quantity}</span>
+                        <button type="button" onClick={() => setCart((prev) => prev.map(c => c.name === item.name ? { ...c, quantity: c.quantity + 1 } : c))}
+                          className="w-9 h-9 flex items-center justify-center rounded-lg bg-white border border-gray-200 text-gray-600 text-sm font-bold cursor-pointer active:bg-gray-100">+</button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Total + Pay */}
+          <div className="p-4 border-t border-gray-100 shrink-0 space-y-3">
+            <div className="flex justify-between items-end">
+              <span className="text-xs text-gray-500">총 결제 금액</span>
+              <span className="text-xl font-extrabold text-soft-red-500 tabular-nums">{totalAmount.toLocaleString()}<span className="text-sm font-bold ml-0.5">₫</span></span>
+            </div>
+            <button type="button" onClick={() => alert('결제!')} disabled={cart.length === 0}
+              className={`w-full h-12 rounded-xl text-sm font-bold transition-transform duration-150 cursor-pointer ${cart.length === 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-soft-red-500 text-white active:scale-[0.98] shadow-pos-card'}`}>
+              결제하기
+            </button>
+          </div>
         </div>
       </div>
-
-      {/* ═══ Right: Order Sidebar (300px) ═══ */}
-      <OrderSidebar
-        orderItems={cart}
-        totalAmount={totalAmount}
-        onCheckout={() => alert('결제!')}
-        isLoading={false}
-        scrollOffset={orderOffset}
-        onScrollUp={() => setOrderOffset((o) => Math.max(0, o - 1))}
-        onScrollDown={() => setOrderOffset((o) => Math.min(cart.length - 1, o + 1))}
-      />
     </div>
   );
 }

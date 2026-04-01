@@ -13,12 +13,12 @@
 #include <string>
 #include <optional>
 
-// 전방 선언
-class RequestLedgerRepository;
+// Forward declaration
+class RequestLedgerStore;
 
 class IdempotencyService {
 public:
-    explicit IdempotencyService(RequestLedgerRepository* ledger);
+    explicit IdempotencyService(RequestLedgerStore* ledger);
 
     enum class CheckResult {
         NEW_REQUEST,         // 새 요청 → 정상 실행 진행
@@ -60,5 +60,5 @@ public:
                     const std::string& error_code);
 
 private:
-    RequestLedgerRepository* ledger_;  // non-owning
+    RequestLedgerStore* ledger_;  // non-owning
 };

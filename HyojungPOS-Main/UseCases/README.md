@@ -35,7 +35,7 @@
 - Dữ liệu nghiệp vụ + Ledger + Outbox phải được xử lý trong cùng một đơn vị công việc.
 
 ### Được phép làm
-- Phối hợp nhiều Manager và repository hạ tầng để hoàn tất một tác vụ.
+- Phoi hop nhieu Manager va store/adaptor ha tang de hoan tat mot tac vu.
 - Quyết định phạm vi cho phép khi offline và việc chặn giao dịch cần phê duyệt bên ngoài.
 
 ### Không được làm

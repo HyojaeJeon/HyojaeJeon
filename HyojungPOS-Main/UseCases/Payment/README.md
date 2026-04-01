@@ -35,7 +35,7 @@
 - Tách riêng hậu xử lý như sự kiện UI/ACK/in ấn sau khi commit.
 
 ### Được phép làm
-- Phối hợp Domain Manager và repository để tạo luồng thực thi.
+- Phoi hop Domain Manager va store/adaptor de tao luong thuc thi.
 - Ngăn chạy trùng theo idempotencyKey và requestId.
 
 ### Không được làm
