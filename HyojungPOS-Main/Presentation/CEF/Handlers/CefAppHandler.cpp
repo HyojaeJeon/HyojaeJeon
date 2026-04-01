@@ -2,6 +2,19 @@
 
 CefAppHandler::CefAppHandler() {}
 
+void CefAppHandler::OnRegisterCustomSchemes(CefRawPtr<CefSchemeRegistrar> registrar)
+{
+    // "app" 스킴을 standard + local + CORS + secure + CSP bypass로 등록
+    // Đăng ký scheme "app" với standard + local + CORS + secure + CSP bypass
+    registrar->AddCustomScheme("app",
+        CEF_SCHEME_OPTION_STANDARD |
+        CEF_SCHEME_OPTION_LOCAL |
+        CEF_SCHEME_OPTION_CORS_ENABLED |
+        CEF_SCHEME_OPTION_SECURE |
+        CEF_SCHEME_OPTION_CSP_BYPASSING |
+        CEF_SCHEME_OPTION_FETCH_ENABLED);
+}
+
 void CefAppHandler::OnBeforeCommandLineProcessing(
     const CefString& process_type,
     CefRefPtr<CefCommandLine> command_line)

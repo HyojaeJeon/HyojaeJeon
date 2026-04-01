@@ -1,29 +1,19 @@
 /**
- * Restaurant.cpp — Điểm vào ứng dụng POS (MFC + CEF)
- * Restaurant.cpp — POS 앱 진입점 (MFC + CEF)
- *
- * Tương đương code cũ / 대응하는 기존 코드:
- *   HJ-POS-TEST/Restaurant.cpp — CRestaurantApp::InitInstance()
+ * Restaurant.cpp — Điểm vào ứng dụng POS (Win32 + CEF)
+ * Restaurant.cpp — POS 앱 진입점 (Win32 + CEF)
  *
  * Luồng khởi động / 부팅 흐름:
- *   1. MFC WinApp khởi tạo / MFC WinApp 초기화
- *   2. CEF khởi tạo (CefBootstrap::InitCef)
- *      CEF 초기화
- *   3. Dependency lắp ráp (ComposeApp)
- *      의존성 조립
- *   4. CEF Browser tạo → hiển thị app://pos/index.html
+ *   1. WinMain → Khởi tạo CEF / CEF 초기화
+ *   2. Tạo Win32 window 1024x768 / Win32 윈도우 생성
+ *   3. Lắp ráp dependency (ComposeApp) / 의존성 조립
+ *   4. Tạo CEF Browser → hiển thị app://pos/index.html
  *      CEF 브라우저 생성 → app://pos/index.html 표시
- *   5. MFC message loop chạy
- *      MFC 메시지 루프 실행
- *
- * ※ Code cũ: InitInstance() → tạo hàng loạt Dialog (TableDlg, OrderDlg...)
- *    기존: InitInstance() → Dialog 대량 생성 (TableDlg, OrderDlg...)
- * ※ Code mới: InitInstance() → CEF Browser 1개 → Next.js React
- *    신규: InitInstance() → CEF 브라우저 1개 → Next.js React
+ *   5. Win32 message loop / Win32 메시지 루프
  */
 
-#include <afxwin.h>
-#include "Restaurant.h"
+#include <windows.h>
+#include <string>
+
 #include "CefBootstrap.h"
 #include "../Bootstrap/ServiceRegistry.h"
 #include "../Bootstrap/AppCompositionRoot.h"
@@ -33,196 +23,154 @@
 // Biến toàn cục / 전역 변수
 // ══════════════════════════════════════════
 
-// Đối tượng ứng dụng MFC duy nhất / 유일한 MFC 앱 객체
-CRestaurantApp theApp;
+static ServiceRegistry g_Registry;
+static CefRefPtr<CefBrowserDlg> g_BrowserDlg;
+static HWND g_hMainWnd = nullptr;
 
-// Service registry — Nơi chứa tất cả service đã lắp ráp
-// 서비스 레지스트리 — 조립된 모든 서비스를 보관하는 곳
-ServiceRegistry g_Registry;
-
-// CEF Browser dialog — Cửa sổ duy nhất hosting CEF
-// CEF 브라우저 다이얼로그 — CEF를 호스팅하는 유일한 윈도우
-CefBrowserDlg* g_BrowserDlg = nullptr;
-
+static const wchar_t* kWindowClass = L"HyojungPOS_MainWindow";
+static const wchar_t* kWindowTitle = L"HyojungPOS";
+static const int kWidth  = 1024;
+static const int kHeight = 768;
 
 // ══════════════════════════════════════════
-// MFC Message Map
+// Window Procedure / 윈도우 프로시저
 // ══════════════════════════════════════════
 
-BEGIN_MESSAGE_MAP(CRestaurantApp, CWinApp)
-END_MESSAGE_MAP()
-
-
-// ══════════════════════════════════════════
-// Constructor
-// ══════════════════════════════════════════
-
-CRestaurantApp::CRestaurantApp()
+static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    // Tương tự code cũ: CRestaurantApp::CRestaurantApp() — rỗng
-    // 기존 코드와 동일: CRestaurantApp::CRestaurantApp() — 비어있음
-}
-
-
-// ══════════════════════════════════════════
-// InitInstance — Khởi động ứng dụng
-// InitInstance — 앱 시작
-//
-// Đây là hàm "main" thực chất của MFC app.
-// 이것이 MFC 앱의 실질적인 "main" 함수.
-// ══════════════════════════════════════════
-
-BOOL CRestaurantApp::InitInstance()
-{
-    CWinApp::InitInstance();
-
-    // ──────────────────────────────────────
-    // Bước 1: Khởi tạo MFC cơ bản
-    // 1단계: MFC 기본 초기화
-    //
-    // Tương tự code cũ: AfxEnableControlContainer(), CoInitialize...
-    // 기존 코드와 유사: AfxEnableControlContainer(), CoInitialize...
-    // ──────────────────────────────────────
-    AfxEnableControlContainer();
-    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-
-    // ──────────────────────────────────────
-    // Bước 2: Xác định đường dẫn / 경로 결정
-    //
-    // exe_dir: Thư mục chứa exe hiện tại
-    //          현재 exe가 있는 디렉토리
-    // pos_ui_out: PosUI/out/ — Next.js static build
-    // subprocess: CefSubprocess.exe — CEF renderer
-    // ──────────────────────────────────────
-    TCHAR exe_path[MAX_PATH];
-    ::GetModuleFileName(NULL, exe_path, MAX_PATH);
-    CString exe_dir = exe_path;
-    exe_dir = exe_dir.Left(exe_dir.ReverseFind(_T('\\')));
-
-    // PosUI build output — Được phục vụ qua app://pos/ scheme
-    // PosUI 빌드 결과물 — app://pos/ 스킴으로 서빙됨
-    CString pos_ui_out = exe_dir + _T("\\PosUI\\out");
-
-    // CEF renderer subprocess
-    CString subprocess = exe_dir + _T("\\CefSubprocess.exe");
-
-    // Cache cho CEF (trình duyệt data, cookies...)
-    // CEF용 캐시 (브라우저 데이터, 쿠키...)
-    CString cache_path = exe_dir + _T("\\cache");
-
-    // ──────────────────────────────────────
-    // Bước 3: Khởi tạo CEF
-    // 3단계: CEF 초기화
-    //
-    // CefBootstrap::InitCef() sẽ:
-    //   - Đăng ký app://pos/ custom scheme
-    //     app://pos/ 커스텀 스킴 등록
-    //   - Bật multi-threaded message loop
-    //     멀티스레드 메시지 루프 활성화
-    //   - Tắt GPU (POS 안정성)
-    //     GPU 비활성화 (POS 안정성)
-    //   - Bật remote debugging (debug mode)
-    //     원격 디버깅 활성화 (디버그 모드)
-    // ──────────────────────────────────────
-    CT2A subprocess_a(subprocess);
-    CT2A pos_ui_out_a(pos_ui_out);
-    CT2A cache_path_a(cache_path);
-
-    if (!CefBootstrap::InitCef(
-            subprocess_a.m_psz,
-            pos_ui_out_a.m_psz,
-            cache_path_a.m_psz))
+    switch (msg)
     {
-        AfxMessageBox(_T("CEF 초기화 실패 / CEF initialization failed"));
-        return FALSE;
+    case WM_SIZE:
+    {
+        // Resize CEF browser theo cửa sổ / CEF 브라우저를 윈도우에 맞춰 리사이즈
+        if (g_BrowserDlg && g_BrowserDlg->IsBrowserCreated()) {
+            HWND browser_hwnd = g_BrowserDlg->GetBrowser()->GetHost()->GetWindowHandle();
+            if (browser_hwnd) {
+                RECT rc;
+                ::GetClientRect(hWnd, &rc);
+                ::MoveWindow(browser_hwnd, 0, 0, rc.right, rc.bottom, TRUE);
+            }
+        }
+        return 0;
     }
 
-    // ──────────────────────────────────────
-    // Bước 4: Tạo CEF Browser Dialog
-    // 4단계: CEF 브라우저 다이얼로그 생성
-    //
-    // Đây là cửa sổ chính duy nhất của POS.
-    // 이것이 POS의 유일한 메인 윈도우.
-    //
-    // Code cũ: CRestaurantDlg → MFC Dialog có hàng trăm button
-    // 기존: CRestaurantDlg → 버튼 수백 개가 있는 MFC Dialog
-    //
-    // Code mới: CefBrowserDlg → CEF Browser 1개 → Next.js
-    // 신규: CefBrowserDlg → CEF 브라우저 1개 → Next.js
-    // ──────────────────────────────────────
-    g_BrowserDlg = new CefBrowserDlg();
+    case WM_CLOSE:
+        // Đóng CEF browser trước / CEF 브라우저 먼저 닫기
+        if (g_BrowserDlg) {
+            g_BrowserDlg->CloseBrowser();
+        }
+        ::DestroyWindow(hWnd);
+        return 0;
 
-    // ──────────────────────────────────────
-    // Bước 5: Lắp ráp dependency
-    // 5단계: 의존성 조립
-    //
-    // AppCompositionRoot tạo tất cả service:
-    // AppCompositionRoot가 모든 서비스 생성:
-    //   Infrastructure → Domain → UseCases → Presentation
-    //
-    // Truyền g_BrowserDlg để PosRealTimeSender có thể
-    // gửi sự kiện đến UI.
-    // g_BrowserDlg를 전달하여 PosRealTimeSender가
-    // UI에 이벤트를 보낼 수 있게 한다.
-    // ──────────────────────────────────────
-    ComposeApp(g_Registry, g_BrowserDlg);
+    case WM_DESTROY:
+        ::PostQuitMessage(0);
+        return 0;
+    }
 
-    // ──────────────────────────────────────
-    // Bước 6: Tạo browser và hiển thị Next.js
-    // 6단계: 브라우저 생성 및 Next.js 표시
-    //
-    // app://pos/index.html → PosUI/out/index.html
-    // CefSchemeHandler sẽ map URL này sang file cục bộ
-    // CefSchemeHandler가 이 URL을 로컬 파일로 매핑
-    //
-    // Giải pháp: 1024x768 cố định (thiết kế POS)
-    // 해상도: 1024x768 고정 (POS 설계)
-    // ──────────────────────────────────────
-    g_BrowserDlg->CreateBrowser(
-        m_pMainWnd ? m_pMainWnd->GetSafeHwnd() : NULL,
-        "app://pos/index.html"
-    );
-
-    // Đặt dialog làm cửa sổ chính / 다이얼로그를 메인 윈도우로 설정
-    m_pMainWnd = g_BrowserDlg;
-
-    return TRUE;
+    return ::DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
-
 // ══════════════════════════════════════════
-// ExitInstance — Dọn dẹp khi thoát
-// ExitInstance — 종료 시 정리
+// Tạo cửa sổ chính / 메인 윈도우 생성
 // ══════════════════════════════════════════
 
-int CRestaurantApp::ExitInstance()
+static HWND CreateMainWindow(HINSTANCE hInstance)
 {
-    // ──────────────────────────────────────
-    // Bước 1: Đóng CEF browser
-    // 1단계: CEF 브라우저 닫기
-    //
-    // ※ CloseBrowser() chỉ gọi ở đây (shutdown).
-    //    Trong khi chạy, KHÔNG BAO GIỜ gọi CloseBrowser.
-    //    CloseBrowser()는 여기(종료 시)에서만 호출.
-    //    실행 중에는 절대 CloseBrowser 호출 금지.
-    // ──────────────────────────────────────
-    if (g_BrowserDlg) {
-        g_BrowserDlg->CloseBrowser();
-        delete g_BrowserDlg;
-        g_BrowserDlg = nullptr;
+    WNDCLASSEX wc = {};
+    wc.cbSize        = sizeof(WNDCLASSEX);
+    wc.style         = CS_HREDRAW | CS_VREDRAW;
+    wc.lpfnWndProc   = WndProc;
+    wc.hInstance     = hInstance;
+    wc.hCursor       = ::LoadCursor(nullptr, IDC_ARROW);
+    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    wc.lpszClassName = kWindowClass;
+    wc.hIcon         = ::LoadIcon(nullptr, IDI_APPLICATION);
+    ::RegisterClassEx(&wc);
+
+    // WS_POPUP: Không viền, không title bar — toàn bộ 1024x768 là nội dung
+    // WS_POPUP: 테두리 없음, 타이틀바 없음 — 전체 1024x768이 콘텐츠
+    // Đặt giữa màn hình / 화면 중앙 배치
+    int screenW = ::GetSystemMetrics(SM_CXSCREEN);
+    int screenH = ::GetSystemMetrics(SM_CYSCREEN);
+    int posX = (screenW - kWidth) / 2;
+    int posY = (screenH - kHeight) / 2;
+
+    HWND hWnd = ::CreateWindowEx(
+        0,
+        kWindowClass,
+        kWindowTitle,
+        WS_POPUP | WS_VISIBLE,
+        posX, posY,
+        kWidth, kHeight,
+        nullptr, nullptr, hInstance, nullptr);
+
+    return hWnd;
+}
+
+// ══════════════════════════════════════════
+// Xác định đường dẫn / 경로 결정
+// ══════════════════════════════════════════
+
+static std::wstring GetExeDir()
+{
+    wchar_t path[MAX_PATH];
+    ::GetModuleFileNameW(nullptr, path, MAX_PATH);
+    std::wstring dir(path);
+    auto pos = dir.rfind(L'\\');
+    if (pos != std::wstring::npos) dir = dir.substr(0, pos);
+    return dir;
+}
+
+// ══════════════════════════════════════════
+// WinMain — Điểm vào chính / 메인 진입점
+// ══════════════════════════════════════════
+
+int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int nCmdShow)
+{
+    // DPI awareness — ngăn Windows scale cửa sổ / Windows 스케일링 방지
+    ::SetProcessDPIAware();
+    std::wstring exe_dir    = GetExeDir();
+    std::wstring subprocess = exe_dir + L"\\CefSubprocess.exe";
+    std::wstring pos_ui_out = exe_dir + L"\\PosUI\\out";
+    std::wstring cache_path = exe_dir + L"\\cache";
+
+    // Bước 1: Khởi tạo CEF / 1단계: CEF 초기화
+    if (!CefBootstrap::InitCef(subprocess, pos_ui_out, cache_path))
+    {
+        ::MessageBoxW(nullptr, L"CEF 초기화 실패 / CEF initialization failed",
+                      L"Error", MB_OK | MB_ICONERROR);
+        return 1;
     }
 
-    // ──────────────────────────────────────
-    // Bước 2: Tắt CEF
-    // 2단계: CEF 종료
-    // ──────────────────────────────────────
+    // Bước 2: Tạo Win32 window / 2단계: Win32 윈도우 생성
+    g_hMainWnd = CreateMainWindow(hInstance);
+    if (!g_hMainWnd) {
+        CefBootstrap::ShutdownCef();
+        return 1;
+    }
+
+    ::ShowWindow(g_hMainWnd, nCmdShow);
+    ::UpdateWindow(g_hMainWnd);
+
+    // Bước 3: Lắp ráp dependency / 3단계: 의존성 조립
+    g_BrowserDlg = new CefBrowserDlg();
+    ComposeApp(g_Registry, g_BrowserDlg.get());
+
+    // Bước 4: Tạo CEF browser / 4단계: CEF 브라우저 생성
+    g_BrowserDlg->CreateBrowser(g_hMainWnd, L"app://pos/pos/order/index.html");
+
+    // Bước 5: Win32 message loop / 5단계: Win32 메시지 루프
+    // CEF chạy multi_threaded_message_loop nên chỉ cần Win32 loop
+    // CEF가 multi_threaded_message_loop이므로 Win32 루프만 필요
+    MSG msg;
+    while (::GetMessage(&msg, nullptr, 0, 0)) {
+        ::TranslateMessage(&msg);
+        ::DispatchMessage(&msg);
+    }
+
+    // Bước 6: Dọn dẹp / 6단계: 정리
+    g_BrowserDlg = nullptr;
     CefBootstrap::ShutdownCef();
 
-    // ──────────────────────────────────────
-    // Bước 3: Dọn COM
-    // 3단계: COM 정리
-    // ──────────────────────────────────────
-    CoUninitialize();
-
-    return CWinApp::ExitInstance();
+    return static_cast<int>(msg.wParam);
 }

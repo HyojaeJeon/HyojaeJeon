@@ -1,4 +1,5 @@
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+/* CDN font import 제거 — app:// 스킴에서 외부 CDN 접근 시 CSS 렌더 차단됨 */
+/* CDN font import loại bỏ — truy cập CDN ngoài từ app:// gây chặn render CSS */
 @import "tailwindcss";
 
 @theme {
@@ -53,21 +54,22 @@
   --shadow-pos-sidebar: 2px 0 16px rgba(0,0,0,0.04);
 }
 
-@font-face {
-  font-family: 'Pretendard';
-  src: url('/fonts/Pretendard-Black.ttf') format('truetype');
-  font-weight: 900;
-  font-display: swap;
-}
+/* 로컬 Pretendard 폰트 — CEF 오프라인 환경 / Phông chữ cục bộ Pretendard — môi trường CEF offline */
+@font-face { font-family: 'Pretendard'; src: url('/fonts/Pretendard-Regular.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Pretendard'; src: url('/fonts/Pretendard-Medium.woff2') format('woff2'); font-weight: 500; font-display: swap; }
+@font-face { font-family: 'Pretendard'; src: url('/fonts/Pretendard-SemiBold.woff2') format('woff2'); font-weight: 600; font-display: swap; }
+@font-face { font-family: 'Pretendard'; src: url('/fonts/Pretendard-Bold.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'Pretendard'; src: url('/fonts/Pretendard-ExtraBold.woff2') format('woff2'); font-weight: 800; font-display: swap; }
+@font-face { font-family: 'Pretendard'; src: url('/fonts/Pretendard-Black.woff2') format('woff2'); font-weight: 900; font-display: swap; }
 
 html, body {
-  width: 100vw;
-  height: 100vh;
-  overflow: auto;
+  width: 1024px;
+  height: 768px;
+  overflow: hidden;
   touch-action: none;
   margin: 0;
   padding: 0;
-  background: var(--color-pos-surface);
+  background: var(--color-pos-bg);
   color: var(--color-pos-text);
   font-family: 'Pretendard', 'Noto Sans KR', 'Arial', sans-serif;
   user-select: none;

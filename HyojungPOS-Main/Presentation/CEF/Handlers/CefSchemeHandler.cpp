@@ -70,6 +70,13 @@ CefRefPtr<CefResourceHandler> PosSchemeHandlerFactory::Create(
     std::wstring full_path = base_path_ + wide_relative;
     std::string mime = GuessMimeType(full_path);
 
+    // Debug log — yêu cầu resource / 리소스 요청 로그
+    {
+        std::wstring log = L"[SchemeHandler] URL: " + std::wstring(url.begin(), url.end()) +
+                           L" → Path: " + full_path + L" MIME: " + std::wstring(mime.begin(), mime.end()) + L"\n";
+        ::OutputDebugStringW(log.c_str());
+    }
+
     return new PosResourceHandler(full_path, mime);
 }
 
@@ -92,7 +99,13 @@ bool PosResourceHandler::Open(
         ss << ifs.rdbuf();
         file_data_ = ss.str();
     }
-    // 파일이 없으면 file_data_는 빈 상태 → 404
+
+    // Debug log — kết quả đọc file / 파일 읽기 결과 로그
+    {
+        std::wstring log = L"[SchemeHandler] Open: " + file_path_ +
+                           L" → " + (file_data_.empty() ? L"NOT FOUND (404)" : (L"OK (" + std::to_wstring(file_data_.size()) + L" bytes)")) + L"\n";
+        ::OutputDebugStringW(log.c_str());
+    }
     return true;
 }
 
@@ -109,6 +122,14 @@ void PosResourceHandler::GetResponseHeaders(
         response->SetStatus(200);
         response->SetMimeType(mime_type_);
         response_length = static_cast<int64_t>(file_data_.size());
+
+        // CORS headers — cần cho font loading và fetch
+        // CORS 헤더 — 폰트 로딩과 fetch에 필요
+        CefResponse::HeaderMap headers;
+        response->GetHeaderMap(headers);
+        headers.insert(std::make_pair("Access-Control-Allow-Origin", "*"));
+        headers.insert(std::make_pair("Access-Control-Allow-Methods", "GET"));
+        response->SetHeaderMap(headers);
     }
 }
 

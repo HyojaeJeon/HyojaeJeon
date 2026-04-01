@@ -2,9 +2,7 @@ import '@styles/globals.css';
 import StoreProvider from '@providers/StoreProvider';
 import PosRealTimeReceiver from '@providers/PosRealTimeReceiver';
 
-export const metadata = {
-  title: 'HyojungPOS',
-};
+export const metadata = {};
 
 export default function RootLayout({ children }) {
   return (

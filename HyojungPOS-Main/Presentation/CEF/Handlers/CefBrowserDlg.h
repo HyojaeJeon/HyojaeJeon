@@ -1,12 +1,14 @@
 #pragma once
 /**
- * CefBrowserDlg — MFC Dialog 안에 CEF 브라우저를 호스팅
+ * CefBrowserDlg — Hosting CEF browser bên trong Win32 window
+ * CefBrowserDlg — Win32 윈도우 안에 CEF 브라우저 호스팅
  *
- * 핵심 규칙:
- * - 메인 CefBrowser는 POS 실행 중 단일 인스턴스로 유지
- * - 화면 전환 시 CloseBrowser 호출 금지
- * - 브라우저 창은 1024x768 고정
+ * Quy tắc chính / 핵심 규칙:
+ * - CefBrowser duy nhất suốt thời gian chạy POS / POS 실행 중 단일 CefBrowser 유지
+ * - Không gọi CloseBrowser khi chuyển màn hình / 화면 전환 시 CloseBrowser 호출 금지
  */
+
+#include <windows.h>
 
 #include "include/cef_client.h"
 #include "include/cef_life_span_handler.h"
@@ -25,26 +27,17 @@ public:
     CefBrowserDlg();
     ~CefBrowserDlg();
 
-    /**
-     * 브라우저 생성 — MFC 윈도우 핸들을 부모로 지정
-     * @param parent_hwnd  부모 MFC CWnd의 HWND
-     * @param url          초기 URL (예: "app://pos/")
-     */
+    // Tạo browser — parent là Win32 HWND / 브라우저 생성 — 부모는 Win32 HWND
     void CreateBrowser(HWND parent_hwnd, const std::wstring& url);
 
-    /** 브라우저가 생성되었는지 여부 */
     bool IsBrowserCreated() const { return browser_ != nullptr; }
 
-    /** 현재 브라우저 인스턴스 */
     CefRefPtr<CefBrowser> GetBrowser() const { return browser_; }
 
-    /**
-     * JS를 브라우저에서 실행
-     * PosRealTimeSender가 이벤트 전송 시 사용
-     */
+    // Thực thi JS trên browser / 브라우저에서 JS 실행
     void ExecuteJavaScript(const std::string& js_code);
 
-    /** POS 종료 시에만 호출 — 브라우저 닫기 */
+    // Chỉ gọi khi thoát POS / POS 종료 시에만 호출
     void CloseBrowser();
 
     // CefClient
@@ -57,9 +50,11 @@ public:
     bool DoClose(CefRefPtr<CefBrowser> browser) override;
     void OnBeforeClose(CefRefPtr<CefBrowser> browser) override;
 
-    // CefRequestHandler — renderer crash 감지
+    // CefRequestHandler — Phát hiện renderer crash / 렌더러 크래시 감지
     void OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
-                                   TerminationStatus status) override;
+                                   TerminationStatus status,
+                                   int error_code,
+                                   const CefString& error_string) override;
 
 private:
     CefRefPtr<CefBrowser> browser_;

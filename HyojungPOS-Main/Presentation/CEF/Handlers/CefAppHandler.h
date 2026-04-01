@@ -17,6 +17,10 @@ public:
         return this;
     }
 
+    // Đăng ký custom scheme "app" — cần gọi trước CefInitialize
+    // 커스텀 스킴 "app" 등록 — CefInitialize 전에 호출 필요
+    void OnRegisterCustomSchemes(CefRawPtr<CefSchemeRegistrar> registrar) override;
+
     void OnBeforeCommandLineProcessing(
         const CefString& process_type,
         CefRefPtr<CefCommandLine> command_line) override;

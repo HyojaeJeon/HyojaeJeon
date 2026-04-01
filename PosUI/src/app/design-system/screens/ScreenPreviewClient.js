@@ -193,7 +193,8 @@ function OrderScreenPreview() {
                   type="button"
                   onClick={() => handleCatSelect(cat.id)}
                   className={`
-                    flex-1 h-9 text-[12px] font-semibold rounded-lg
+                    flex-1 h-9 flex items-center justify-center
+                    text-[12px] font-semibold rounded-lg
                     transition-colors duration-100 cursor-pointer select-none truncate px-2
                     ${activeCatId === cat.id
                       ? 'bg-soft-red-500 text-white'
@@ -292,7 +293,7 @@ function OrderScreenPreview() {
               <span className="text-xl font-extrabold text-soft-red-500 tabular-nums">{totalAmount.toLocaleString()}<span className="text-sm font-bold ml-0.5">₫</span></span>
             </div>
             <button type="button" onClick={() => alert('결제!')} disabled={cart.length === 0}
-              className={`w-full h-12 rounded-xl text-sm font-bold transition-transform duration-150 cursor-pointer ${cart.length === 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-soft-red-500 text-white active:scale-[0.98] shadow-pos-card'}`}>
+              className={`w-full h-12 flex items-center justify-center rounded-xl text-sm font-bold transition-transform duration-150 cursor-pointer ${cart.length === 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-soft-red-500 text-white active:scale-[0.98] shadow-pos-card'}`}>
               결제하기
             </button>
           </div>

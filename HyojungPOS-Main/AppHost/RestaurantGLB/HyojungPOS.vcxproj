@@ -40,7 +40,7 @@
        ════════════════════════════════════════════ -->
   <PropertyGroup Label="Globals">
     <ProjectGuid>{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}</ProjectGuid>
-    <Keyword>MFCProj</Keyword>
+    <Keyword>Win32Proj</Keyword>
     <ProjectName>HyojungPOS</ProjectName>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -54,27 +54,27 @@
        ════════════════════════════════════════════ -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <UseOfMfc>Dynamic</UseOfMfc>
+    <UseOfMfc>false</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <UseOfMfc>Dynamic</UseOfMfc>
+    <UseOfMfc>false</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <UseOfMfc>Dynamic</UseOfMfc>
+    <UseOfMfc>false</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <UseOfMfc>Dynamic</UseOfMfc>
+    <UseOfMfc>false</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
 
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -102,7 +102,7 @@
        ════════════════════════════════════════════ -->
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <Optimization>Disabled</Optimization>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
@@ -112,12 +112,13 @@
            HJ-POS-TEST와 유사하나 CEF SDK 추가 -->
       <AdditionalIncludeDirectories>
         $(ProjectDir)..\..\;
-        $(ProjectDir)..\..\Presentation\CEF\SDK\include;
+        $(ProjectDir)..\..\Presentation\CEF\SDK;
         %(AdditionalIncludeDirectories)
       </AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;_REST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;WIN32;_DEBUG;_WINDOWS;_REST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/utf-8 /wd4819 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -127,11 +128,9 @@
            CEF wrapper lib 경로 추가 -->
       <AdditionalLibraryDirectories>
         $(ProjectDir)..\..\Presentation\CEF\SDK\Release;
-        $(ProjectDir)..\..\Presentation\CEF\SDK\libcef_dll_wrapper\Release;
+        $(ProjectDir)..\..\Presentation\CEF\SDK\libcef_dll_wrapper\Debug;
         %(AdditionalLibraryDirectories)
       </AdditionalLibraryDirectories>
-      <!-- ── Link libraries / 링크 라이브러리 ──
-           HJ-POS-TEST 기본 + CEF 추가 -->
       <AdditionalDependencies>
         libcef.lib;
         libcef_dll_wrapper.lib;
@@ -147,22 +146,23 @@
     </Link>
   </ItemDefinitionGroup>
 
-  <!-- Debug|x64 — x64 구성 (Win32와 동일, 플랫폼만 다름) -->
+  <!-- Debug|x64 -->
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <Optimization>Disabled</Optimization>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <AdditionalIncludeDirectories>
         $(ProjectDir)..\..\;
-        $(ProjectDir)..\..\Presentation\CEF\SDK\include;
+        $(ProjectDir)..\..\Presentation\CEF\SDK;
         %(AdditionalIncludeDirectories)
       </AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN64;_DEBUG;_WINDOWS;_REST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;WIN64;_DEBUG;_WINDOWS;_REST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/utf-8 /wd4819 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -170,7 +170,7 @@
       <OutputFile>$(OutDir)$(TargetName).exe</OutputFile>
       <AdditionalLibraryDirectories>
         $(ProjectDir)..\..\Presentation\CEF\SDK\Release;
-        $(ProjectDir)..\..\Presentation\CEF\SDK\libcef_dll_wrapper\Release;
+        $(ProjectDir)..\..\Presentation\CEF\SDK\libcef_dll_wrapper\Debug;
         %(AdditionalLibraryDirectories)
       </AdditionalLibraryDirectories>
       <AdditionalDependencies>
@@ -198,12 +198,13 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <AdditionalIncludeDirectories>
         $(ProjectDir)..\..\;
-        $(ProjectDir)..\..\Presentation\CEF\SDK\include;
+        $(ProjectDir)..\..\Presentation\CEF\SDK;
         %(AdditionalIncludeDirectories)
       </AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;_REST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;WIN32;NDEBUG;_WINDOWS;_REST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/utf-8 /wd4819 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -238,12 +239,13 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <AdditionalIncludeDirectories>
         $(ProjectDir)..\..\;
-        $(ProjectDir)..\..\Presentation\CEF\SDK\include;
+        $(ProjectDir)..\..\Presentation\CEF\SDK;
         %(AdditionalIncludeDirectories)
       </AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN64;NDEBUG;_WINDOWS;_REST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;WIN64;NDEBUG;_WINDOWS;_REST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/utf-8 /wd4819 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -286,21 +288,7 @@
     <ClCompile Include="..\..\Presentation\CEF\Handlers\CefSchemeHandler.cpp" />
     <ClCompile Include="..\..\Presentation\CEF\Handlers\BrowserRecoveryManager.cpp" />
 
-    <!-- ── InternalBridge: Giao tiếp UI ↔ C++ / UI ↔ C++ 통신 ── -->
-    <ClCompile Include="..\..\Presentation\CEF\InternalBridge\PosRequestResponder.cpp" />
-    <ClCompile Include="..\..\Presentation\CEF\InternalBridge\PosRealTimeSender.cpp" />
-    <ClCompile Include="..\..\Presentation\CEF\InternalBridge\PosRequestActions\Table\TableActions.cpp" />
-    <ClCompile Include="..\..\Presentation\CEF\InternalBridge\PosRequestActions\System\SystemActions.cpp" />
-
-    <!-- ── UseCases ── -->
-    <ClCompile Include="..\..\UseCases\Shared\TransactionRunner.cpp" />
-    <ClCompile Include="..\..\UseCases\Shared\IdempotencyService.cpp" />
-    <ClCompile Include="..\..\UseCases\Shared\OperationLockService.cpp" />
-    <ClCompile Include="..\..\UseCases\Table\SelectTableUseCase.cpp" />
-    <ClCompile Include="..\..\UseCases\Table\RefreshTablesUseCase.cpp" />
-
-    <!-- ── Domain ── -->
-    <ClCompile Include="..\..\Domain\Table\TableMgr.cpp" />
+    <!-- ── TODO P1: InternalBridge, UseCases, Domain은 MSSQL 통합 시 활성화 ── -->
   </ItemGroup>
 
   <!-- ════════════════════════════════════════════
