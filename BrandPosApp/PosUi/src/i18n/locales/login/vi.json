@@ -1,0 +1,13 @@
+{
+  "brandName": "Hyojeong POS",
+  "brandSubtitle": "Giải pháp POS tích hợp",
+  "version": "v2.5.1",
+  "businessDate": "Ngày kinh doanh",
+  "staffId": "Mã nhân viên",
+  "password": "Mật khẩu",
+  "openingAmount": "Tiền đầu ca",
+  "changeAmount": "Tiền thừa",
+  "loginFailed": "Đăng nhập thất bại",
+  "login": "Đăng nhập",
+  "orderLogin": "Đăng nhập đơn hàng"
+}

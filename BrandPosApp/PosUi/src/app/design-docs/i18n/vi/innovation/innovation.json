@@ -1,0 +1,43 @@
+{
+  "docs": {
+    "innovation_framework": {
+      "title": "Khung khác biệt hóa, đổi mới và 13 tính năng AI cốt lõi",
+      "category": "Khác biệt hóa, Đổi mới",
+      "description": "Tài liệu tổng hợp hướng đi khác biệt hóa và các tính năng AI cốt lõi để bộ sản phẩm Platform POS vượt ra ngoài công cụ đặt hàng/thanh toán/quản lý đơn thuần, trở thành mạng lưới thần kinh vận hành kết nối trụ sở thương hiệu, đại lý, chi nhánh và Edge POS.",
+      "sections": {
+        "market_frame": {
+          "title": "Khung nhìn lại thị trường",
+          "content": "POS hiện tại dừng lại ở mức **nhập đơn hàng, xử lý thanh toán, báo cáo doanh thu, quản lý tồn kho/khách hàng cơ bản, thiết kế UI**. Những yếu tố này quan trọng nhưng không tạo ra khả năng phòng thủ mạnh trên thị trường.\n\nTrong thời đại AI, sản phẩm này không phải là POS mà phải là:\n\n- **Mạng lưới thần kinh vận hành cửa hàng**\n- **Nền tảng giám sát kết nối trụ sở và đại lý**\n- **Hệ thống phát hiện sớm các dấu hiệu bất thường tại chi nhánh**\n- **Động cơ vận hành vòng kín dẫn đến hành động thực tế**\n\nCấu trúc: `Thu thập tín hiệu → Phân tích AI → Đề xuất hoặc tự động xử lý → Phản hồi kết quả → Học hỏi`"
+        },
+        "differentiation_principles": {
+          "title": "Nguyên tắc khác biệt hóa",
+          "content": "### Kết quả quan trọng hơn thiết kế\n\nChủ cửa hàng trả tiền không phải vì giao diện đẹp. Ít nhất một trong những điều sau phải thực sự cải thiện:\n\n- Doanh thu tăng lên\n- Tổn thất giảm đi\n- Thời gian vận hành giảm\n- Phục hồi sự cố nhanh hơn\n- Mở rộng dễ dàng hơn\n\n### AI là động cơ vận hành, không phải chatbot\n\nNếu triển khai AI như chatbot thì khác biệt hóa sẽ yếu. AI phải tìm ra dấu hiệu bất thường, suy luận nguyên nhân, đề xuất hành động và tự động thực thi khi cần.\n\n### Giám sát và thực thi đồng thời\n\n`SuperAdmin → RegionalDistributor → BrandHQ → Branch → EdgePos → Device` — AI phải hoạt động xuyên suốt các tầng này."
+        },
+        "ai_13_features": {
+          "title": "13 tính năng AI cốt lõi",
+          "content": "| Ưu tiên | Tính năng | Người dùng chính | Giá trị cốt lõi |\n|---|---|---|---|\n| **P0** | Phát hiện giao dịch bất thường/thất thoát doanh thu | BrandHQ, SuperAdmin, Branch | Phát hiện tổn thất sớm |\n| **P0** | Dự báo nhu cầu | Branch, BrandHQ | Tối ưu tồn kho/nhân lực/lượng chuẩn bị |\n| **P0** | Đề xuất đặt hàng/tồn kho | Branch, BrandHQ | Giảm hết hàng·tồn kho dư thừa |\n| **P0** | Chẩn đoán sự cố/đề xuất khắc phục Edge POS | Branch, EdgePos, RegionalDistributor | Giảm sự cố tại hiện trường |\n| **P0** | Hộp thư đơn hàng tích hợp | Branch, BrandHQ | Hấp thụ đơn hàng kênh ngoài thành đơn nội bộ |\n| **P0** | Tự động cấu trúc hóa yêu cầu | Branch, EdgePos | Văn bản tự do → cấu trúc, rút ngắn thời gian nhập |\n| **P0** | Công cụ tính toán/đơn giản hóa thanh toán | Branch, EdgePos | Tự động hóa tính toán và quyết toán |\n| **P0** | Copilot vận hành | Branch, BrandHQ | Quyết định hành động tiếp theo nhanh chóng |\n| **P1** | Kỹ thuật thực đơn/tối ưu biên lợi nhuận | BrandHQ | Cấu trúc thực đơn có lợi nhuận cao |\n| **P1** | Huấn luyện nhân viên/hỗ trợ SOP | Branch | Giảm chi phí đào tạo·sai sót |\n| **P1** | Điểm sức khỏe chi nhánh và giải thích nguyên nhân | BrandHQ, RegionalDistributor | Phát hiện nhanh chi nhánh có vấn đề |\n| **P2** | Phân tích triển khai/chất lượng vận hành đại lý | RegionalDistributor, SuperAdmin | Chuẩn hóa chất lượng lắp đặt/hỗ trợ |\n| **P2** | Tự động hóa khuyến mãi/thử nghiệm | BrandHQ, SuperAdmin | Học hỏi từ hiệu quả thực tế |"
+        },
+        "pos_value": {
+          "title": "Giá trị thực tế POS mang lại cho chủ cửa hàng",
+          "content": "### Tăng doanh thu\nTối ưu mix thực đơn, đề xuất khuyến mãi theo khung giờ, nhắm mục tiêu tái ghé thăm/mua lại, đề xuất phiếu giảm giá theo phân khúc khách hàng, đề xuất marketing phản ánh sự khác biệt phản hồi theo chi nhánh\n\n### Giảm chi phí\nĐề xuất đặt hàng dựa trên lượng bán, cảnh báo tồn kho dư/thiếu, phân tích tỷ lệ hủy, đề xuất nhân lực giờ cao điểm, phát hiện sớm sự cố thiết bị, phát hiện lạm dụng hủy/hoàn tiền/giảm giá\n\n### Thông minh mua hàng\nĐề xuất nguồn nguyên liệu dựa trên thực đơn, so sánh giá/thời gian giao/số lượng đặt tối thiểu theo nhà cung cấp, đề xuất nhà cung cấp thay thế, phản ánh lịch sử chất lượng/khiếu nại nguyên liệu. Chuyển đổi POS thành **copilot mua hàng**.\n\n### Thông minh thị trường/xu hướng\nXu hướng lượng bán theo danh mục, khác biệt bán hàng theo khu vực/chi nhánh, phân tích ảnh hưởng mùa/thời tiết/sự kiện, benchmark toàn quốc, theo dõi hiệu quả khuyến mãi"
+        },
+        "priority_interpretation": {
+          "title": "Giải thích mức ưu tiên",
+          "content": "### P0 — Phải làm trước\nPhát hiện giao dịch bất thường/thất thoát, dự báo nhu cầu, đề xuất tồn kho/đặt hàng, chẩn đoán sự cố/đề xuất khắc phục, Copilot vận hành, hộp thư đơn hàng tích hợp, tự động cấu trúc hóa yêu cầu, công cụ tính toán/đơn giản hóa thanh toán\n\n### P1 — Liên kết trực tiếp doanh thu/chi phí\nĐề xuất nguồn nguyên liệu dựa trên thực đơn, đề xuất đặt hàng/tồn kho, đề xuất marketing, phân tích xu hướng bán theo danh mục, giải thích nguyên nhân doanh thu theo chi nhánh\n\n### P2 — Khác biệt hóa thương hiệu/đại lý\nHuấn luyện nhân viên/hỗ trợ SOP, điểm sức khỏe chi nhánh và giải thích nguyên nhân, kỹ thuật thực đơn, phân tích triển khai/chất lượng vận hành đại lý, tự động hóa khuyến mãi/thử nghiệm\n\n### P3 — Sức mạnh phòng thủ nền tảng\nTối ưu hóa chiến dịch tự động, benchmark lợi nhuận toàn quốc, so sánh xu hướng đa quốc gia/đa thương hiệu"
+        },
+        "what_not_to_build": {
+          "title": "Những gì không nên xây dựng",
+          "content": "Lựa chọn yếu trong thị trường này:\n\n- **Chatbot đơn thuần** — Nhốt AI trong khung chat thì khác biệt hóa vận hành yếu\n- **Hệ thống chỉ có dashboard đẹp** — Chỉ hiển thị mà không có hành động thì vô nghĩa\n- **BI chỉ tích lũy dữ liệu mà không hành động** — Không dẫn đến thực thi thì không có giá trị\n- **Thông báo AI không có trách nhiệm vận hành** — Phải đi từ giải thích đến thực thi"
+        },
+        "implementation_order": {
+          "title": "Thứ tự triển khai",
+          "content": "### Giai đoạn 1: Đo lường\nTích lũy mọi hành động phát sinh tại cửa hàng và trụ sở dưới dạng tín hiệu — đơn hàng, thanh toán, hủy, hoàn tiền, biến động tồn kho, lỗi thiết bị, thao tác nhân viên, đơn hàng kênh ngoài, văn bản yêu cầu gốc, sự kiện tính toán/quyết toán\n\n### Giai đoạn 2: Phát hiện\nPhân biệt mẫu bình thường và bất thường — tỷ lệ hủy bất thường, hoàn tiền tăng đột biến, lỗi thiết bị lặp lại, doanh thu giảm mạnh, chậm nhập đơn, nhập thủ công quá nhiều, lỗi/thiếu sót tính toán\n\n### Giai đoạn 3: Đề xuất\nKhông dừng ở phát hiện vấn đề mà đề xuất hành động tiếp theo — đề xuất đặt hàng, điều chỉnh nhân lực, điều chỉnh thực đơn, thứ tự khắc phục sự cố, đề xuất mẫu đơn hàng\n\n### Giai đoạn 4: Tự động hóa\nTự động hóa công việc lặp lại dựa trên phê duyệt — tự động hóa thông báo, tự động tạo bản nháp đặt hàng, tự động thực thi playbook xử lý sự cố, tự động nạp đơn hàng ngoài"
+        },
+        "innovation_paradigms": {
+          "title": "5 mô hình đổi mới lớn",
+          "content": "### 1. Vision-AI POS — \"Quản lý Hàn Quốc không bao giờ gian lận\"\nĐồng bộ CCTV timeline với POS, khi nhân viên mở ngăn tiền mà không thanh toán, hoặc nhấn hủy đơn/hoàn tiền/giảm giá tùy ý, tự động cắt clip CCTV 15 giây trước và sau, push đến ứng dụng chủ cửa hàng.\n\n### 2. Cross-Lingual OS — \"Phiên dịch hai chiều thời gian thực phá vỡ tháp Babel\"\nKhi ông chủ Hàn Quốc chỉ thị bằng tiếng Hàn, popup tiếng Việt hiện trên POS/KDS cửa hàng, và khi nhân viên Việt Nam nói thì thông báo tiếng Hàn được gửi. Giao diện ngôn ngữ bất đối xứng.\n\n### 3. Point of Sourcing — \"Thương mại điện tử mua chung nguyên liệu B2B\"\nDự báo nhu cầu dựa trên dữ liệu POS, tổng hợp khối lượng toàn bộ cửa hàng, đàm phán trực tiếp với nhà bán sỉ để có giá tốt nhất, cung cấp đặt hàng một chạm cho chủ cửa hàng. Cung cấp POS gần miễn phí và kiếm lời từ biên phân phối.\n\n### 4. Micro-Financing Hub — \"Ngân hàng fintech chuyên dụng cho cửa hàng\"\nTính điểm tín dụng cửa hàng từ dữ liệu POS, cung cấp tạm ứng tiền mặt (Cash Advance) liên kết với công ty tài chính địa phương ngay trên màn hình POS. Hoàn trả được tự động trừ từ doanh thu thẻ/QR hàng ngày.\n\n### 5. Zero-UI & Marketing xã hội tự hành\nVoice POS (nhân viên đặt hàng bằng giọng nói), Zalo mini app + VietQR tự động hóa khách quen, marketing tự hành nhận diện thời tiết/tình huống — khi mưa lớn tự động tăng giá trên app giao hàng + gửi phiếu giảm giá qua Zalo."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "docs": {
+    "business_overview": {
+      "title": "Business Overview",
+      "category": "Business Plan",
+      "description": "A document summarizing what this platform is, who it is for, and why it is needed now — from the operator's perspective.",
+      "sections": {
+        "vision": {
+          "title": "Vision",
+          "content": "This platform is **not just POS software.**\n\nIt is a **food service operations platform** that connects a 4-tier business structure in a single system: store transactions → multi-location brand management → regional exclusive distribution → platform-wide governance.\n\nCore value per tier:\n- Store Owner: Protect revenue without theft/leakage, operate without language barriers\n- Brand HQ: Control dozens of locations from one dashboard\n- Distribution Partner: Earn stable revenue through exclusive regional distribution rights\n- Platform Operator: Generate revenue from data and transaction flows across hundreds of brands, governing the entire ecosystem"
+        },
+        "product_tiers": {
+          "title": "4-Tier Product Structure",
+          "content": "| Tier | Product | User | Core Value |\n|---|---|---|---|\n| **Tier 1: Store POS** | Edge POS | Owner, Manager, Cashier | Fast, accurate daily order/payment/inventory processing |\n| **Tier 2: Brand Operations** | Brand Operations Portal | Brand HQ, Regional Manager | Manage menus/prices/staff/sales across all locations from one place |\n| **Tier 3: Distribution** | Distribution Partner Portal | Distribution Partner | Recruit/sell/install/support stores via exclusive regional rights |\n| **Tier 4: Platform Governance** | Platform Management System | Platform Operator | Contract/deploy/monitor all partners and brands; monetize data |\n\n**Distribution Partner vs Platform Operator:**\n- **Distribution Partner**: Signs an exclusive regional distribution contract with the Platform Operator. Directly recruits, sells, installs, and supports POS products/equipment to store owners in their territory. Responsible for local installation, training, and support.\n- **Platform Operator**: The organization that plans, develops, and operates this entire project. Manages technology development, partner contracts, licensing policies, AI/data services, and global expansion strategy."
+        },
+        "why_now": {
+          "title": "Why Now",
+          "content": "- Vietnam's food service market growing 15% annually — Korean restaurant brands expanding rapidly\n- Existing POS systems are **single-store only** — incapable of multi-location/multi-country operations\n- Top concern for Korean store owners: **Cannot trust local staff** → explosive demand for remote monitoring/control\n- AI technology maturity — anomaly detection, demand forecasting, and auto-ordering are now production-ready\n- Growing need for integrated order management across delivery apps (Fooding, GrabFood)"
+        },
+        "core_problem": {
+          "title": "Core Problem We Solve",
+          "content": "**When the owner is not at the store, money leaks.**\n\n- Employee discount abuse, cash shortfalls, inventory theft — 2~5% of revenue disappears\n- Checking orders separately on each delivery app — missed orders, double-entry errors\n- Korean-Vietnamese communication failures — order mistakes, customer complaints, staff turnover\n- Headquarters cannot see location performance at a glance — problem stores are discovered too late\n- Suppliers (distributors) manage each store individually — costs increase as they scale\n\nThis platform structurally solves these problems by connecting the information flow across all tiers: **Store → Brand → Distribution → Platform**."
+        }
+      }
+    },
+    "business_model": {
+      "title": "Business Model",
+      "category": "Business Plan",
+      "description": "A document outlining the platform's revenue structure, pricing strategy, and revenue model for each participant.",
+      "sections": {
+        "revenue_tiers": {
+          "title": "3-Tier Revenue Structure",
+          "content": "### Tier 1: Subscription Revenue (Direct Sales)\n\n| Item | Unit Price | Description |\n|---|---|---|\n| Store License | $50~300/mo/location | Base POS usage fee |\n| Analytics Premium | $200~500/mo/brand | AI sales analysis, demand forecasting |\n| Technical Support | $100~1,000/mo | SLA-based support tiers |\n\n### Tier 2: Ecosystem Revenue (Indirect Sales)\n\n| Item | Margin | Description |\n|---|---|---|\n| Group Purchasing Commission | 2~5% | Bulk food ingredient purchasing brokerage margin |\n| Micro-finance Commission | 1~3% | Revenue data-based advance settlement/loan brokerage |\n| Data License | $10K~100K/mo | Market insights for suppliers/competitors |\n| Payment Commission | 0.5~2% | Payment gateway margin |\n\n### Tier 3: Channel Revenue (Partner Sales)\n\n| Item | Margin | Description |\n|---|---|---|\n| Distribution Partner Margin | 15~25% | Share of regional subscription fees |\n| White Label | 10~20% | Locally branded custom deployment |\n| Onboarding Consulting | $5K~50K/deal | Large brand onboarding services |"
+        },
+        "participants": {
+          "title": "Participant Roles and Revenue",
+          "content": "| Participant | Role | Revenue Source | Key Motivation |\n|---|---|---|---|\n| **Platform Operator** | Technology development, overall ecosystem governance | Subscriptions + Data + Financial fees | Ecosystem expansion → revenue maximization |\n| **Distribution Partner** | Exclusive regional distribution, store recruitment/sales/install/support | Subscription share + Procurement commissions | Exclusive territory → stable revenue |\n| **Brand HQ** | Menu/pricing/policy management, multi-location ops | Revenue growth + Cost reduction | Multi-location efficiency |\n| **Store Owner** | Daily transaction execution | Theft prevention + Cost savings | Operational stability |\n| **Ingredient Suppliers** | Ingredient supply | Stable customer base | Bulk orders |\n| **Financial Partners** | Micro-financing | Loan interest | Verified sales data |\n\n**Key distinction**: The Platform Operator **builds** the product; the Distribution Partner **sells** it in their region. Partners sign exclusive distribution contracts and directly recruit, install, and support stores in their territory."
+        },
+        "lockin": {
+          "title": "Lock-In Effect",
+          "content": "High switching costs at every tier make it difficult to switch to competitors:\n\n- **Store Owner**: Transaction history data + Staff retraining + Delivery app re-integration\n- **Brand**: Policy/menu rebuild + Report history loss + Reinstall at dozens of locations\n- **Distribution Partner**: Exclusive contract + Local customer base + Installation/support infrastructure investment\n- **Platform**: Data aggregate scale → Purchasing power → Supplier discounts → More signups (network effect)"
+        },
+        "pricing_strategy": {
+          "title": "Pricing Strategy",
+          "content": "**Korean Market (Premium):**\n- KRW 150K~300K/mo/location (Theft Prevention + real-time translation justify premium)\n- CCTV-integrated AI monitoring: +KRW 100K/mo\n- Brand HQ analytics dashboard: +KRW 500K/mo\n\n**Vietnamese Market (Penetration Pricing):**\n- Basic POS features: Free or minimal fee\n- Revenue recovered through food ingredient Group Purchasing commissions\n- Premium features (AI analytics, inventory optimization): $30~100/mo\n\n**Core Principle**: Secure cash through subscriptions in the Korean market → Expand the ecosystem through purchasing power in Vietnam"
+        }
+      }
+    },
+    "target_market": {
+      "title": "Target Market",
+      "category": "Business Plan",
+      "description": "A document outlining market size, customer segments, and regional market entry strategies.",
+      "sections": {
+        "segments": {
+          "title": "Customer Segments",
+          "content": "### Priority 1: Korean Restaurant Owners in Vietnam\n\n- **Size**: 3,000~5,000 Korean-owned restaurants in Ho Chi Minh City/Hanoi\n- **Core Pain**: Trust issues with local staff, inability to manage remotely, language barrier\n- **Willingness to Pay**: $150~300/mo (Theft Prevention + translation provide sufficient value)\n- **Killer Feature**: CCTV-AI anomaly detection, bidirectional real-time translation\n- **Go-to-Market**: Korean Chamber of Commerce, Korean restaurant communities, word of mouth\n\n### Priority 2: Local Vietnamese Small-Medium Restaurants\n\n- **Size**: 500K+ restaurants in Vietnam\n- **Core Pain**: Monthly subscription burden, digital transformation challenges, ingredient cost pressure\n- **Willingness to Pay**: $0~30/mo (instead pay via purchasing commissions)\n- **Killer Feature**: Free POS + food ingredient Group Purchasing discounts\n- **Go-to-Market**: Zalo communities, regional distributor networks\n\n### Priority 3: Multi-Location Franchise Brands\n\n- **Size**: 200+ franchises with 10+ locations in Vietnam\n- **Core Pain**: HQ-location policy inconsistency, inability to compare performance, menu deployment delays\n- **Willingness to Pay**: $500~3,000/mo/brand\n- **Killer Feature**: Unified dashboard, one-click menu/price deployment\n- **Go-to-Market**: B2B sales, pilot programs"
+        },
+        "market_size": {
+          "title": "Market Size",
+          "content": "| Market | TAM | SAM | SOM (3yr) |\n|---|---|---|---|\n| Vietnam F&B POS | $2B | $200M | $10M |\n| Korean-Operated Stores | $50M | $30M | $5M |\n| Southeast Asia Expansion | $10B | $500M | $20M |\n\n**TAM**: Total Addressable Market / **SAM**: Serviceable Addressable Market / **SOM**: 3-Year Target\n\nKey Metrics:\n- Vietnam F&B industry CAGR: 15%\n- Korean F&B brand Vietnam entry: 200+ new per year\n- POS digitization rate: Currently 30% → 70% projected by 2028"
+        },
+        "entry_strategy": {
+          "title": "Market Entry Strategy",
+          "content": "### Phase 1: Establish Beachhead (0~6 months)\n- Target: 50 Korean-owned restaurants in Ho Chi Minh City\n- Strategy: **Solve the trust problem** with CCTV-AI monitoring + real-time translation\n- Goal: 60%+ paid conversion rate, $15K monthly revenue\n\n### Phase 2: Local Expansion (6~18 months)\n- Target: 500 local Vietnamese small-medium restaurants\n- Strategy: **Free POS + food ingredient Group Purchasing** model\n- Goal: $50K monthly revenue from purchasing commissions\n\n### Phase 3: Franchise Acquisition (12~24 months)\n- Target: 20 franchise brands with 10+ locations\n- Strategy: Brand operations portal + AI analytics **premium package**\n- Goal: $1K~3K/mo per brand, $40K monthly revenue\n\n### Phase 4: Ecosystem Expansion (24+ months)\n- Target: Expand into 2~3 additional Southeast Asian countries\n- Strategy: Regional Distribution Partner contracts + white label\n- Goal: Transition to platform transaction volume-based revenue model"
+        },
+        "competitive_landscape": {
+          "title": "Competitive Landscape",
+          "content": "| Competitor | Strengths | Weaknesses | Our Differentiator |\n|---|---|---|---|\n| **KIS/KSNET** (Korea) | Card payment stability | Cannot expand overseas, no AI | Multi-country + AI + Translation |\n| **Sapo POS** (Vietnam) | Local market share | Weak multi-location management, no Korean | Korea-Vietnam bidirectional |\n| **Lightspeed** (Global) | Global brand | Weak localization, high pricing | Vietnam-specialized + Group Purchasing |\n| **Grab POS** | Delivery integration | Basic POS features | Full-stack operations platform |\n\n**Key Differentiator**: No competitor offers **CCTV-AI monitoring + real-time translation + food ingredient Group Purchasing** simultaneously."
+        }
+      }
+    },
+    "roadmap": {
+      "title": "Roadmap",
+      "category": "Business Plan",
+      "description": "A document outlining milestones and timelines from product development to market entry.",
+      "sections": {
+        "milestones": {
+          "title": "Key Milestones",
+          "content": "| Timing | Milestone | Key Deliverables | Success Criteria |\n|---|---|---|---|\n| **Q2 2026** | MVP Launch | Table→Order→Payment 3 core screens | 5 pilot stores operational |\n| **Q3 2026** | Delivery Integration | Fooding/GrabFood order integration | 50% reduction in delivery order processing time |\n| **Q4 2026** | Brand Portal | Multi-location management dashboard | 3 brand contracts signed |\n| **Q1 2027** | AI Phase 1 | Anomaly detection + CCTV integration | 90%+ detection accuracy |\n| **Q2 2027** | Group Purchasing | Food ingredient marketplace | $100K+ monthly transaction volume |\n| **Q3 2027** | Regional Expansion | Hanoi + Da Nang entry | 100 stores milestone |\n| **Q4 2027** | Financial Services | Revenue-based micro-loans | $50K+ monthly loan disbursement |"
+        },
+        "development_phases": {
+          "title": "Development Phase Priorities",
+          "content": "### P0 — Launch Essential (Currently in Development)\n- Table/Order/Payment 3 core screens\n- Offline-first local DB architecture\n- CEF + Next.js screen transitions\n- Basic bridge communication (POS ↔ UI)\n- Idempotency/transaction safeguards\n\n### P1 — Pre-Pilot Essential\n- Delivery app integration (Fooding MQTT)\n- Kitchen display\n- Receipt printing\n- Basic sales reports\n- Staff permission management\n\n### P2 — Growth Phase\n- Brand operations portal\n- AI anomaly detection\n- CCTV integration\n- Real-time translation (Korean ↔ Vietnamese)\n- Demand forecasting + Auto-ordering\n\n### P3 — Ecosystem Phase\n- Food ingredient Group Purchasing marketplace\n- Micro-finance services\n- Regional Distribution Partner portal\n- Southeast Asia multi-country deployment"
+        },
+        "investment_timeline": {
+          "title": "Investment and P&L Timeline",
+          "content": "| Timing | Cumulative Investment | Monthly Revenue | Monthly Cost | P&L |\n|---|---|---|---|---|\n| 2026 Q2 | $200K | $0 | $30K | Loss |\n| 2026 Q4 | $350K | $5K | $35K | Loss |\n| 2027 Q2 | $500K | $30K | $45K | Loss |\n| 2027 Q4 | $650K | $80K | $55K | **Break-even** |\n| 2028 Q2 | $700K | $200K | $70K | Profit |\n\n**Break-even Point**: Q4 2027 (150 stores + 10 brands + Group Purchasing launch)\n**Payback**: H1 2028 (Cumulative profit turning positive)"
+        }
+      }
+    }
+  }
+}

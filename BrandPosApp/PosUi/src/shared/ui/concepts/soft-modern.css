@@ -1,0 +1,57 @@
+/**
+ * Concept: 소프트 모던
+ *
+ * 넉넉한 여백, 부드러운 곡선, 미세한 그림자.
+ * 카드는 그림자로 구분. 보더는 최소. 여유 있는 간격.
+ * 밝고 따뜻한 배경에 선명한 브랜드색.
+ */
+[data-concept="soft-modern"] {
+  /* 색상 */
+  --color-primary-50:  #FFF1F2;
+  --color-primary-100: #FFE4E6;
+  --color-primary-200: #FECDD3;
+  --color-primary-300: #FDA4AF;
+  --color-primary-400: #FB7185;
+  --color-primary-500: #E63946;
+  --color-primary-600: #DC2626;
+  --color-primary-700: #B91C2C;
+
+  /* 배경/표면 — 따뜻한 오프화이트 */
+  --color-pos-bg:            #FFFFFE;
+  --color-pos-surface:       #FAF9F7;
+  --color-pos-border:        #F0EDE8;
+  --color-pos-border-strong:  #E0DBD3;
+
+  /* 둥글기 — 넉넉하게 */
+  --radius-pos-xs:    0.5rem;
+  --radius-pos-sm:    0.625rem;
+  --radius-pos-md:    0.75rem;
+  --radius-pos-lg:    1rem;
+  --radius-pos-xl:    1.25rem;
+  --radius-pos-2xl:   1.5rem;
+  --radius-pos-btn:   0.75rem;
+  --radius-pos-card:  1rem;
+  --radius-pos-input: 0.625rem;
+
+  /* 그림자 — 카드 구분의 주 수단. 넓고 부드럽게 */
+  --shadow-pos-soft:  0 1px 3px rgba(0,0,0,0.04);
+  --shadow-pos-card:  0 2px 12px rgba(0,0,0,0.05), 0 0 0 0 transparent;
+  --shadow-pos-hover: 0 6px 24px rgba(0,0,0,0.07);
+  --shadow-pos-modal: 0 16px 48px rgba(0,0,0,0.10);
+
+  /* 간격 — 여유 있게 (기본 대비 +10~20%) */
+  --spacing-touch:      3.25rem;
+  --spacing-touch-lg:   3.75rem;
+  --spacing-touch-nav:  2.75rem;
+
+  /* 폰트 굵기 — 살짝 가볍게 */
+  --font-weight-regular:  400;
+  --font-weight-medium:   500;
+  --font-weight-semibold: 600;
+  --font-weight-bold:     700;
+
+  /* 보더 — 최소한 (카드는 그림자로 구분) */
+  --border-pos-thin:    0px;
+  --border-pos-default: 0px;
+  --border-pos-thick:   1px;
+}

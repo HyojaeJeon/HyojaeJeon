@@ -1,0 +1,11 @@
+{
+  "cash": "현금",
+  "card": "카드",
+  "point": "포인트",
+  "coupon": "쿠폰",
+  "discount": "할인",
+  "combined": "복합결제",
+  "serviceCharge": "봉사료",
+  "nocash": "무현금",
+  "cashbill": "현금영수증"
+}

@@ -1,0 +1,158 @@
+{
+  "docs": {
+    "db_table_master": {
+      "title": "DB 전체 테이블/컬럼 마스터",
+      "category": "DB 설계",
+      "description": "현재 플랫폼의 정규화된 DB 정의와 HJ-POS 레거시의 전체 테이블/컬럼을 모아둔 전수 인벤토리. 필터링 이전의 최대 포괄본이며, 이후 정규화/제거/호환 계층 분리를 진행한다.",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "이 파일은 **현재 플랫폼의 정규화된 DB 정의**와 **HJ-POS 레거시의 전체 테이블/컬럼**을 한 번에 모아둔 전수 인벤토리다.\n\n기준은 필터링 이전의 최대 포괄본이며, 이후 별도 문서에서 정규화/제거/호환 계층 분리를 진행한다."
+        },
+        "current_platform_count": {
+          "title": "현재 플랫폼 DB 정의",
+          "content": "현재 플랫폼에서 실제 정의된 테이블 그룹:\n\n- **Shared/ReferenceData**: Language, Region, Currency 등 Central과 Edge가 공통 참조하는 기준 데이터\n- **SuperAdmin/Governance**: SuperAdminUser, PlatformLicense, PlatformPolicy, AuditLog 등\n- **RegionalDistributor/Channel**: DistributorProfile, Territory, DistributorContract, BrandAssignment 등\n- **BrandHQ/MasterData**: BrandProfile, Branch, BrandMenuCategory, BrandMenuItem 등\n- **EdgePOS/OperationalCore**: EdgePosTerminal, Device, DeviceBinding, LocalSetting 등\n\n저장 위치: Central PostgreSQL (Prisma + raw SQL) + Edge SQLite (C++ native wrapper)"
+        },
+        "legacy_count": {
+          "title": "레거시 DB 규모",
+          "content": "HJ-POS-TEST 레거시 DB:\n\n- MSSQL 기반\n- 주문, 결제, 테이블, 고객, 재고, 직원, 장치, 설정 등 전 도메인 포괄\n- 현재 신규 플랫폼에서는 SQLite로 마이그레이션 진행 중\n- 레거시 스키마는 역엔지니어링 참조 원본으로만 사용"
+        },
+        "structure": {
+          "title": "구조",
+          "content": "전체 DB는 5개 영역으로 분류:\n\n| 영역 | 저장 위치 | 원본 |\n|---|---|---|\n| **Shared Reference Data** | Central PostgreSQL + Edge SQLite cache | Central |\n| **SuperAdmin Governance** | Central PostgreSQL | Central |\n| **RegionalDistributor Channel** | Central PostgreSQL | Central |\n| **BrandHQ MasterData** | Central PostgreSQL | Central |\n| **EdgePOS OperationalCore** | Edge SQLite | Edge (로컬) |\n\n동기화 방향: Shared/SuperAdmin/RegionalDistributor/BrandHQ → Downstream (Edge로 내려보냄), EdgePOS → Upstream (중앙으로 올림)"
+        }
+      }
+    },
+    "db_shared_reference": {
+      "title": "Shared Reference Data",
+      "category": "DB 설계",
+      "description": "Central과 Edge가 공통으로 참조하는 기준 데이터의 실제 정의서. 공용 자산(SharedAssets)은 번역 파일/리소스 패키지이고, 이 문서는 DB 참조 데이터만 다룬다.",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "Central과 Edge가 공통으로 참조하는 기준 데이터의 1차 실제 정의서다.\n\n- 소유 주체: `SuperAdmin/CentralApi`\n- 저장 위치: Central PostgreSQL + Edge SQLite cache\n- 원본: Central\n- 동기화 방향: Downstream\n- 보존 정책: 영구 보존\n- 삭제 정책: Soft delete"
+        },
+        "language_table": {
+          "title": "Language 테이블",
+          "content": "| 컬럼명 | 타입 | 의미 |\n|---|---|---|\n| `Id` | uuid / TEXT | 내부 식별자 |\n| `LanguageCode` | varchar(10) | `ko-KR`, `vi-VN`, `en-US` |\n| `NativeName` | varchar(100) | 원어 표기명 |\n| `DisplayName` | varchar(100) | UI 표시명 |\n| `Direction` | varchar(5) | 텍스트 방향 (LTR/RTL) |\n| `IsDefault` | boolean | 기본 언어 여부 |\n| `IsActive` | boolean | 사용 가능 여부 |\n\nUnique: `LanguageCode`, Check: `Direction in ('LTR', 'RTL')`\n\n사용 시나리오: 포털/Edge 초기 언어 선택, 플랫폼 초기 seed, 언어명/활성화 상태 변경, Edge는 중앙 기준값을 내려받아 사용"
+        },
+        "region_table": {
+          "title": "Region 테이블",
+          "content": "| 컬럼명 | 타입 | 의미 |\n|---|---|---|\n| `Id` | uuid / TEXT | 내부 식별자 |\n| `RegionCode` | varchar(20) | 지역 코드 |\n| `CountryCode` | varchar(10) | 국가 코드 |\n| `RegionName` | varchar(120) | 지역명 |\n| `CurrencyCode` | char(3) | 기본 통화 코드 |\n| `TimeZoneCode` | varchar(50) | 기본 타임존 |\n| `IsActive` | boolean | 사용 가능 여부 |\n\nUnique: `RegionCode`\n\n사용 시나리오: 대리점 관할 지역 매핑, Edge 초기 설정 시 지역 기반 기본값 자동 적용, 세금/통화/타임존 기본값 결정"
+        },
+        "currency_table": {
+          "title": "Currency 테이블",
+          "content": "| 컬럼명 | 타입 | 의미 |\n|---|---|---|\n| `Id` | uuid / TEXT | 내부 식별자 |\n| `CurrencyCode` | char(3) | ISO 4217 코드 (KRW, VND, USD) |\n| `CurrencyName` | varchar(100) | 통화 이름 |\n| `Symbol` | varchar(10) | 표시 기호 |\n| `DecimalPlaces` | integer | 소수점 자릿수 |\n| `IsActive` | boolean | 사용 가능 여부 |\n\nUnique: `CurrencyCode`\n\n사용 시나리오: 결제 금액 표시, 정산/리포트 통화 단위, 다국가 지원 시 통화 변환 기준"
+        }
+      }
+    },
+    "db_superadmin_governance": {
+      "title": "SuperAdmin Governance",
+      "category": "DB 설계",
+      "description": "SuperAdmin 플랫폼의 거버넌스 데이터 — 운영자 계정, 라이선스, 정책, 감사 로그 테이블 정의.",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "SuperAdmin 플랫폼의 핵심 거버넌스 테이블을 정의한다.\n\n- 소유 주체: `SuperAdmin/CentralApi`\n- 저장 위치: Central PostgreSQL\n- 동기화 방향: Downstream (정책/라이선스 → Edge)\n- 읽는 주체: 전체 Portal, CentralApi, SyncWorkers"
+        },
+        "superadmin_user": {
+          "title": "SuperAdminUser 테이블",
+          "content": "플랫폼 운영자 계정 테이블.\n\n주요 컬럼: `Id`, `Email`, `DisplayName`, `Role` (PlatformSuperAdmin / PlatformSupportEngineer), `IsActive`, `LastLoginAt`, `CreatedAt`, `UpdatedAt`\n\n역할:\n- **PlatformSuperAdmin**: 여러 브랜드 생성, 정지, 배포, 지원\n- **PlatformSupportEngineer**: 장애 분석, 원격 지원, 로그 열람"
+        },
+        "platform_license": {
+          "title": "PlatformLicense 테이블",
+          "content": "브랜드별/지역별 라이선스 관리.\n\n주요 컬럼: `Id`, `RegionalDistributorId`, `BrandHQId`, `LicenseType`, `MaxEdgePos`, `ExpiresAt`, `IsActive`, `CreatedAt`, `UpdatedAt`\n\n사용 시나리오:\n- 대리점별 라이선스 풀 할당\n- 브랜드별 EdgePos 최대 수량 제어\n- 만료 알림 및 갱신 추적"
+        },
+        "platform_policy": {
+          "title": "PlatformPolicy 테이블",
+          "content": "글로벌/지역/브랜드 정책 관리.\n\n주요 컬럼: `Id`, `PolicyType`, `Scope` (Global / RegionalDistributor / BrandHQ / Branch), `ScopeId`, `PolicyVersion`, `PolicyData` (JSONB), `IsActive`, `CreatedAt`\n\n사용 시나리오:\n- 글로벌 RBAC 정책 배포\n- 지역별 세금/결제 규제 반영\n- 브랜드별 기능 플래그 관리"
+        },
+        "audit_log": {
+          "title": "AuditLog 테이블",
+          "content": "전체 플랫폼 감사 로그.\n\n주요 컬럼: `Id`, `ActorId`, `ActorRole`, `Action`, `TargetType`, `TargetId`, `Detail` (JSONB), `IpAddress`, `CreatedAt`\n\n사용 시나리오:\n- 민감 데이터 접근 추적\n- 정책 변경 이력 보존\n- 장애 원인 분석 시 행동 타임라인 재구성"
+        }
+      }
+    },
+    "db_distributor_channel": {
+      "title": "RegionalDistributor Channel",
+      "category": "DB 설계",
+      "description": "지역/국가 유통 파트너의 프로필, 관할 지역, 계약, 브랜드 할당 테이블 정의.",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "RegionalDistributor 계층의 핵심 데이터 테이블을 정의한다.\n\n- 소유 주체: `SuperAdmin/CentralApi`\n- 저장 위치: Central PostgreSQL\n- 읽는 주체: RegionalDistributorPortal, SuperAdmin/Portal\n- 동기화 방향: Downstream (필요한 정보만 Edge로)"
+        },
+        "distributor_profile": {
+          "title": "DistributorProfile 테이블",
+          "content": "대리점/유통 파트너 프로필.\n\n주요 컬럼: `Id` (= `RegionalDistributorId`), `CompanyName`, `CountryCode`, `ContactEmail`, `ContactPhone`, `Status` (Active / Suspended / Terminated), `CreatedAt`, `UpdatedAt`\n\n사용 시나리오:\n- 대리점 생성/승인/정지\n- 지역별 대리점 목록 조회"
+        },
+        "territory": {
+          "title": "Territory 테이블",
+          "content": "대리점 관할 지역 매핑.\n\n주요 컬럼: `Id`, `RegionalDistributorId`, `RegionId`, `TerritoryCode`, `IsExclusive`, `EffectiveFrom`, `EffectiveTo`, `IsActive`\n\n사용 시나리오:\n- 독점 유통권 기간 관리\n- 지역 중복 배정 방지\n- 지역별 배포 대상 계산"
+        },
+        "distributor_contract": {
+          "title": "DistributorContract 테이블",
+          "content": "대리점 계약 관리.\n\n주요 컬럼: `Id`, `RegionalDistributorId`, `ContractType`, `StartDate`, `EndDate`, `CommissionRate`, `Status` (Draft / Active / Expired / Terminated), `CreatedAt`\n\n사용 시나리오:\n- 계약 상태 추적\n- 수수료율 관리\n- 갱신 알림"
+        },
+        "brand_assignment": {
+          "title": "BrandAssignment 테이블",
+          "content": "대리점 → 브랜드 할당.\n\n주요 컬럼: `Id`, `RegionalDistributorId`, `BrandHQId`, `AssignedAt`, `RevokedAt`, `IsActive`\n\n사용 시나리오:\n- 대리점이 관리하는 브랜드 목록\n- 브랜드 온보딩 시 대리점 자동 연결\n- 할당 해제 이력 관리"
+        }
+      }
+    },
+    "db_brandhq_master": {
+      "title": "BrandHQ MasterData",
+      "category": "DB 설계",
+      "description": "브랜드 본사의 마스터 데이터 — 브랜드 프로필, 지점, 메뉴 카테고리, 메뉴 아이템 테이블 정의.",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "BrandHQ 계층의 마스터 데이터 테이블을 정의한다.\n\n- 소유 주체: `BrandHQ` (CentralApi를 경유)\n- 저장 위치: Central PostgreSQL\n- 동기화 방향: Downstream (메뉴/가격/정책 → Edge)\n- 읽는 주체: BrandHQPortal, EdgePos (동기화 후 로컬 캐시)"
+        },
+        "brand_profile": {
+          "title": "BrandProfile 테이블",
+          "content": "브랜드 본사 프로필.\n\n주요 컬럼: `Id` (= `BrandHQId`), `BrandName`, `RegionalDistributorId`, `BusinessCategory`, `DefaultLanguageCode`, `DefaultCurrencyCode`, `LogoUrl`, `Status`, `CreatedAt`, `UpdatedAt`\n\n사용 시나리오:\n- 브랜드 온보딩\n- 대리점 → 브랜드 연결\n- 브랜드별 기본 설정 관리"
+        },
+        "branch": {
+          "title": "Branch 테이블",
+          "content": "브랜드 산하 지점/매장.\n\n주요 컬럼: `Id` (= `BranchId`), `BrandHQId`, `BranchName`, `BranchCode`, `Address`, `RegionId`, `TimeZoneCode`, `Status` (Active / Closed / Suspended), `CreatedAt`, `UpdatedAt`\n\n사용 시나리오:\n- 지점 생성/수정/정지\n- 지점별 override 관리\n- 배포 대상 계산"
+        },
+        "brand_menu_category": {
+          "title": "BrandMenuCategory 테이블",
+          "content": "브랜드 메뉴 카테고리.\n\n주요 컬럼: `Id`, `BrandHQId`, `CategoryName`, `ParentCategoryId`, `SortOrder`, `IsActive`, `CatalogVersion`, `CreatedAt`, `UpdatedAt`\n\n사용 시나리오:\n- 메뉴 카테고리 계층 구조 관리\n- 카탈로그 버전별 배포\n- Edge에서 카테고리 트리 표시"
+        },
+        "brand_menu_item": {
+          "title": "BrandMenuItem 테이블",
+          "content": "브랜드 메뉴 아이템(상품).\n\n주요 컬럼: `Id`, `BrandHQId`, `CategoryId`, `ItemName`, `ItemCode`, `BasePrice`, `TaxRate`, `Description`, `ImageUrl`, `IsActive`, `CatalogVersion`, `CreatedAt`, `UpdatedAt`\n\n사용 시나리오:\n- 상품 등록/수정\n- 가격 정책 적용\n- Edge 동기화 시 메뉴 데이터 전달"
+        }
+      }
+    },
+    "db_edgepos_core": {
+      "title": "EdgePOS OperationalCore",
+      "category": "DB 설계",
+      "description": "Edge POS 단말의 운영 핵심 테이블 — 단말 정보, 장치 관리, 장치 바인딩, 로컬 설정 정의.",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "Edge POS 단말의 운영 핵심 테이블을 정의한다.\n\n- 소유 주체: `EdgePos` (로컬)\n- 저장 위치: Edge SQLite\n- 원본: Edge (로컬 DB가 업무 데이터 원본)\n- 동기화 방향: Upstream (운영 데이터를 중앙으로 올림)\n- 운영 모델: **Offline-First**, 로컬 commit이 업무 성공의 기준"
+        },
+        "edge_pos_terminal": {
+          "title": "EdgePosTerminal 테이블",
+          "content": "Edge POS 단말 정보.\n\n주요 컬럼: `Id` (= `EdgePosId`), `BrandHQId`, `BranchId`, `RegionalDistributorId`, `TerminalCode`, `TerminalName`, `InstalledVersion`, `LastSyncAt`, `Status` (Active / Offline / Maintenance), `CreatedAt`, `UpdatedAt`\n\n사용 시나리오:\n- POS 기동 시 자기 식별 정보 로드\n- 중앙 플랫폼에서 단말 상태 모니터링\n- 버전 배포 대상 계산"
+        },
+        "device": {
+          "title": "Device 테이블",
+          "content": "EdgePos에 연결된 주변기기 목록.\n\n주요 컬럼: `Id` (= `DeviceId`), `EdgePosId`, `DeviceType` (Printer / CardReader / Scanner / Scale / CashDrawer), `DeviceName`, `ConnectionType` (USB / Network / Serial / Bluetooth), `ConnectionAddress`, `Status`, `LastCheckedAt`\n\n사용 시나리오:\n- 장치 등록/검색\n- 연결 상태 실시간 확인\n- 장애 진단 시 장치 이력 조회"
+        },
+        "device_binding": {
+          "title": "DeviceBinding 테이블",
+          "content": "장치 바인딩 (어떤 장치가 어떤 역할로 바인딩되었는지).\n\n주요 컬럼: `Id`, `EdgePosId`, `DeviceId`, `BindingRole` (KitchenPrinter / CustomerPrinter / LabelPrinter / MainCardReader 등), `Priority`, `IsActive`, `CreatedAt`\n\n사용 시나리오:\n- 주방 프린터 라우팅\n- 카드리더기 우선순위 지정\n- Setup/Maintenance 모드에서 바인딩 구성"
+        },
+        "local_setting": {
+          "title": "LocalSetting 테이블",
+          "content": "Edge POS 로컬 설정 (EdgePos Override).\n\n주요 컬럼: `Id`, `EdgePosId`, `SettingKey`, `SettingValue`, `SourceLayer` (Global / RegionalDistributor / BrandHQ / Branch / EdgePos), `PolicyVersion`, `AppliedAt`, `CreatedAt`\n\n사용 시나리오:\n- 설정 상속 모델의 최종 적용 값 저장\n- 어떤 값이 어느 계층에서 왔는지 추적\n- 중앙에서 배포된 정책과 로컬 override 구분"
+        }
+      }
+    }
+  }
+}

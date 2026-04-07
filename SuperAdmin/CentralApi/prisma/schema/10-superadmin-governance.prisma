@@ -1,0 +1,196 @@
+// ─────────────────────────────────────────────
+// SuperAdmin Governance
+// 한국어: 공급사(SuperAdmin) 거버넌스 영역 - 플랫폼 관리자 계정, 라이선스, 정책, 감사 로그, 배포 관리
+// Tiếng Việt: Khu vực quản trị nhà cung cấp (SuperAdmin) - tài khoản quản trị viên nền tảng, giấy phép, chính sách, nhật ký kiểm toán, quản lý triển khai
+// ─────────────────────────────────────────────
+
+// 한국어: 플랫폼 최상위 관리자(SuperAdmin) 사용자 테이블.
+//   공급사 내부 직원 계정을 관리한다. PLATFORM_SUPER_ADMIN, PLATFORM_SUPPORT_ENGINEER 등의 역할을 가진다.
+//   소프트 삭제(deletedAt)를 지원하며, 마지막 로그인 시각과 비밀번호 변경 시각을 추적한다.
+//
+// Tiếng Việt: Bảng người dùng quản trị viên cấp cao nhất (SuperAdmin) của nền tảng.
+//   Quản lý tài khoản nhân viên nội bộ nhà cung cấp. Có các vai trò như PLATFORM_SUPER_ADMIN, PLATFORM_SUPPORT_ENGINEER.
+//   Hỗ trợ xóa mềm (deletedAt), theo dõi thời điểm đăng nhập cuối và thời điểm thay đổi mật khẩu.
+model SuperAdminUser {
+  id                String    @id @default(uuid()) @db.Uuid
+  loginId           String    @unique @db.VarChar(100)       // 한국어: 로그인 ID (고유) / Tiếng Việt: ID đăng nhập (duy nhất)
+  passwordHash      String    @db.VarChar(255)               // 한국어: bcrypt 해시된 비밀번호 / Tiếng Việt: Mật khẩu đã hash bằng bcrypt
+  displayName       String    @db.VarChar(120)               // 한국어: 표시 이름 / Tiếng Việt: Tên hiển thị
+  email             String?   @unique @db.VarChar(200)       // 한국어: 이메일 (선택, 고유) / Tiếng Việt: Email (tùy chọn, duy nhất)
+  phone             String?   @db.VarChar(30)                // 한국어: 전화번호 (선택) / Tiếng Việt: Số điện thoại (tùy chọn)
+  roleCode          String    @db.VarChar(50)                // 한국어: 역할 코드 (ROLE_HIERARCHY 참조) / Tiếng Việt: Mã vai trò (tham chiếu ROLE_HIERARCHY)
+  status            String    @default("Active") @db.VarChar(20) // 한국어: 계정 상태 (Active/Inactive/Suspended) / Tiếng Việt: Trạng thái tài khoản
+  lastLoginAt       DateTime? @db.Timestamptz()              // 한국어: 마지막 로그인 시각 / Tiếng Việt: Thời điểm đăng nhập cuối
+  passwordChangedAt DateTime? @db.Timestamptz()              // 한국어: 마지막 비밀번호 변경 시각 / Tiếng Việt: Thời điểm thay đổi mật khẩu cuối
+  createdAt         DateTime  @default(now()) @db.Timestamptz()
+  updatedAt         DateTime  @updatedAt @db.Timestamptz()
+  deletedAt         DateTime? @db.Timestamptz()              // 한국어: 소프트 삭제 시각 / Tiếng Việt: Thời điểm xóa mềm
+
+  // 한국어: 역할+상태 복합 인덱스 - 활성 관리자 목록 조회 최적화
+  // Tiếng Việt: Chỉ mục kết hợp vai trò+trạng thái - tối ưu truy vấn danh sách quản trị viên hoạt động
+  @@index([roleCode, status], name: "idx_superadmin_role_status")
+}
+
+// 한국어: 플랫폼 라이선스 테이블.
+//   대리점, 브랜드, 지점 등 다양한 범위(scope)에 대한 라이선스를 관리한다.
+//   최대 지점 수, 최대 단말기 수, 허용 국가 코드 등의 라이선스 조건을 포함한다.
+//   유효 기간(effectiveFrom ~ effectiveTo)으로 라이선스 기한을 제어한다.
+//
+// Tiếng Việt: Bảng giấy phép nền tảng.
+//   Quản lý giấy phép cho các phạm vi (scope) khác nhau như đại lý, thương hiệu, chi nhánh.
+//   Bao gồm điều kiện giấy phép như số chi nhánh tối đa, số thiết bị đầu cuối tối đa, mã quốc gia cho phép.
+//   Kiểm soát thời hạn giấy phép bằng khoảng thời gian hiệu lực (effectiveFrom ~ effectiveTo).
+model PlatformLicense {
+  id                 String    @id @default(uuid()) @db.Uuid
+  scopeType          String    @db.VarChar(30)               // 한국어: 범위 유형 (Distributor/BrandHQ/Branch) / Tiếng Việt: Loại phạm vi
+  scopeId            String    @db.Uuid                      // 한국어: 범위 대상 ID / Tiếng Việt: ID đối tượng phạm vi
+  licenseCode        String    @unique @db.VarChar(80)       // 한국어: 라이선스 코드 (고유) / Tiếng Việt: Mã giấy phép (duy nhất)
+  licenseType        String    @db.VarChar(40)               // 한국어: 라이선스 유형 (Trial/Standard/Enterprise) / Tiếng Việt: Loại giấy phép
+  status             String    @default("Active") @db.VarChar(20)
+  effectiveFrom      DateTime  @db.Date                      // 한국어: 유효 시작일 / Tiếng Việt: Ngày bắt đầu hiệu lực
+  effectiveTo        DateTime? @db.Date                      // 한국어: 유효 종료일 (null이면 무기한) / Tiếng Việt: Ngày kết thúc hiệu lực (null = vô thời hạn)
+  maxBranchCount     Int       @default(0)                   // 한국어: 최대 허용 지점 수 / Tiếng Việt: Số chi nhánh tối đa cho phép
+  maxTerminalCount   Int       @default(0)                   // 한국어: 최대 허용 단말기 수 / Tiếng Việt: Số thiết bị đầu cuối tối đa cho phép
+  allowedCountryCode String?   @db.VarChar(10)               // 한국어: 허용 국가 코드 / Tiếng Việt: Mã quốc gia cho phép
+  licensePayloadJson Json      @default("{}")                 // 한국어: 추가 라이선스 설정 JSON / Tiếng Việt: JSON cấu hình giấy phép bổ sung
+  createdAt          DateTime  @default(now()) @db.Timestamptz()
+  updatedAt          DateTime  @updatedAt @db.Timestamptz()
+  deletedAt          DateTime? @db.Timestamptz()
+
+  // 한국어: 범위+상태 복합 인덱스 - 특정 대상의 활성 라이선스 조회 최적화
+  // Tiếng Việt: Chỉ mục kết hợp phạm vi+trạng thái - tối ưu truy vấn giấy phép hoạt động của đối tượng cụ thể
+  @@index([scopeType, scopeId, status], name: "idx_license_scope")
+  // 한국어: 유효 기간 인덱스 - 기간별 라이선스 검색 최적화
+  // Tiếng Việt: Chỉ mục khoảng hiệu lực - tối ưu tìm kiếm giấy phép theo khoảng thời gian
+  @@index([effectiveFrom, effectiveTo], name: "idx_license_validity")
+}
+
+// 한국어: 플랫폼 정책 테이블.
+//   전체 플랫폼, 대리점, 브랜드, 지점 등 다양한 범위에 적용되는 설정/정책을 관리한다.
+//   버전 관리를 지원하여 정책 변경 이력을 추적할 수 있다.
+//   scopeId가 null이면 전역(Global) 정책을 의미한다.
+//
+// Tiếng Việt: Bảng chính sách nền tảng.
+//   Quản lý cài đặt/chính sách áp dụng cho các phạm vi khác nhau: toàn nền tảng, đại lý, thương hiệu, chi nhánh.
+//   Hỗ trợ quản lý phiên bản để theo dõi lịch sử thay đổi chính sách.
+//   scopeId = null nghĩa là chính sách toàn cục (Global).
+model PlatformPolicy {
+  id              String   @id @default(uuid()) @db.Uuid
+  policyKey       String   @db.VarChar(120)                  // 한국어: 정책 키 (예: "max_login_attempts") / Tiếng Việt: Khóa chính sách (ví dụ: "max_login_attempts")
+  scopeType       String   @db.VarChar(30)                   // 한국어: 범위 유형 (Global/Distributor/BrandHQ/Branch) / Tiếng Việt: Loại phạm vi
+  scopeId         String?  @db.Uuid                          // 한국어: 범위 대상 ID (null이면 전역) / Tiếng Việt: ID đối tượng phạm vi (null = toàn cục)
+  policyValueJson Json     @default("{}")                     // 한국어: 정책 값 JSON / Tiếng Việt: Giá trị chính sách dạng JSON
+  version         Int      @default(1)                        // 한국어: 정책 버전 (변경 시 증가) / Tiếng Việt: Phiên bản chính sách (tăng khi thay đổi)
+  isActive        Boolean  @default(true)                     // 한국어: 활성 여부 / Tiếng Việt: Trạng thái hoạt động
+  createdAt       DateTime @default(now()) @db.Timestamptz()
+  updatedAt       DateTime @updatedAt @db.Timestamptz()
+
+  // 한국어: 정책키+범위+버전 고유 제약 - 동일 범위에서 같은 키의 같은 버전 중복 방지
+  // Tiếng Việt: Ràng buộc duy nhất khóa chính sách+phạm vi+phiên bản - ngăn trùng lặp cùng phiên bản của cùng khóa trong cùng phạm vi
+  @@unique([policyKey, scopeType, scopeId, version], name: "uq_policy_scope_version")
+  // 한국어: 범위+키+활성 복합 인덱스 - 특정 범위의 활성 정책 빠른 조회
+  // Tiếng Việt: Chỉ mục kết hợp phạm vi+khóa+hoạt động - truy vấn nhanh chính sách hoạt động của phạm vi cụ thể
+  @@index([scopeType, scopeId, policyKey, isActive], name: "idx_policy_scope_key")
+}
+
+// 한국어: 감사 로그(Audit Log) 테이블.
+//   플랫폼에서 발생하는 모든 중요 작업의 이력을 기록한다.
+//   누가(actor), 무엇을(action/target), 언제, 어디서(IP) 수행했는지를 추적한다.
+//   변경 전후 데이터를 JSON으로 저장하여 상세한 변경 이력을 제공한다.
+//   삽입 전용(INSERT-only) 테이블로, 수정/삭제가 없다.
+//
+// Tiếng Việt: Bảng nhật ký kiểm toán (Audit Log).
+//   Ghi lại lịch sử tất cả các thao tác quan trọng xảy ra trên nền tảng.
+//   Theo dõi ai (actor), làm gì (action/target), khi nào, ở đâu (IP) đã thực hiện.
+//   Lưu dữ liệu trước và sau thay đổi dạng JSON để cung cấp lịch sử thay đổi chi tiết.
+//   Bảng chỉ chèn (INSERT-only), không có sửa/xóa.
+model AuditLog {
+  id             String   @id @default(uuid()) @db.Uuid
+  actorType      String   @db.VarChar(30)                    // 한국어: 행위자 유형 (SuperAdmin/ChannelUser/System) / Tiếng Việt: Loại tác nhân
+  actorId        String?  @db.Uuid                           // 한국어: 행위자 ID / Tiếng Việt: ID tác nhân
+  actionType     String   @db.VarChar(80)                    // 한국어: 작업 유형 (CREATE/UPDATE/DELETE 등) / Tiếng Việt: Loại hành động (CREATE/UPDATE/DELETE, v.v.)
+  targetType     String   @db.VarChar(80)                    // 한국어: 대상 엔티티 유형 / Tiếng Việt: Loại thực thể đích
+  targetId       String?  @db.Uuid                           // 한국어: 대상 엔티티 ID / Tiếng Việt: ID thực thể đích
+  requestId      String?  @db.VarChar(120)                   // 한국어: 요청 추적용 ID (멱등성 키와 연계 가능) / Tiếng Việt: ID theo dõi yêu cầu (có thể liên kết với khóa idempotency)
+  beforeDataJson Json?                                       // 한국어: 변경 전 데이터 / Tiếng Việt: Dữ liệu trước thay đổi
+  afterDataJson  Json?                                       // 한국어: 변경 후 데이터 / Tiếng Việt: Dữ liệu sau thay đổi
+  ipAddress      String?  @db.VarChar(45)                    // 한국어: 요청자 IP (IPv4/IPv6 호환) / Tiếng Việt: IP người yêu cầu (tương thích IPv4/IPv6)
+  userAgent      String?                                     // 한국어: 요청자 User-Agent / Tiếng Việt: User-Agent của người yêu cầu
+  createdAt      DateTime @default(now()) @db.Timestamptz()
+
+  // 한국어: 대상별 시간 역순 인덱스 - 특정 엔티티의 변경 이력 최신순 조회
+  // Tiếng Việt: Chỉ mục thứ tự thời gian giảm dần theo đối tượng - truy vấn lịch sử thay đổi mới nhất của thực thể cụ thể
+  @@index([targetType, targetId, createdAt(sort: Desc)], name: "idx_audit_target")
+  // 한국어: 행위자별 시간 역순 인덱스 - 특정 사용자의 활동 이력 최신순 조회
+  // Tiếng Việt: Chỉ mục thứ tự thời gian giảm dần theo tác nhân - truy vấn lịch sử hoạt động mới nhất của người dùng cụ thể
+  @@index([actorType, actorId, createdAt(sort: Desc)], name: "idx_audit_actor")
+  // 한국어: 커서 페이지네이션 인덱스 - createdAt/id 복합 키셋 페이지네이션 최적화
+  // Tiếng Việt: Chỉ mục phân trang con trỏ - tối ưu keyset pagination bằng createdAt/id
+  @@index([createdAt(sort: Desc), id(sort: Desc)], name: "idx_audit_cursor")
+}
+
+// 한국어: 배포 패키지 테이블.
+//   Edge POS 애플리케이션 등 배포 가능한 소프트웨어 패키지를 관리한다.
+//   패키지 코드+버전 조합으로 고유하게 식별하며, 아티팩트 URL과 체크섬을 저장한다.
+//   DeployRelease와 1:N 관계로 특정 범위에 대한 배포를 추적한다.
+//
+// Tiếng Việt: Bảng gói triển khai.
+//   Quản lý các gói phần mềm có thể triển khai như ứng dụng Edge POS.
+//   Nhận dạng duy nhất bằng tổ hợp mã gói+phiên bản, lưu URL artifact và checksum.
+//   Quan hệ 1:N với DeployRelease để theo dõi triển khai cho các phạm vi cụ thể.
+model DeployPackage {
+  id             String    @id @default(uuid()) @db.Uuid
+  packageCode    String    @db.VarChar(80)                   // 한국어: 패키지 코드 (예: "edge-pos-app") / Tiếng Việt: Mã gói (ví dụ: "edge-pos-app")
+  version        String    @db.VarChar(50)                   // 한국어: 패키지 버전 (SemVer) / Tiếng Việt: Phiên bản gói (SemVer)
+  platformTarget String    @db.VarChar(30)                   // 한국어: 대상 플랫폼 (Windows-x86/Windows-x64) / Tiếng Việt: Nền tảng đích (Windows-x86/Windows-x64)
+  artifactUrl    String                                      // 한국어: 아티팩트 다운로드 URL / Tiếng Việt: URL tải artifact
+  checksum       String    @db.VarChar(128)                  // 한국어: 무결성 검증용 체크섬 (SHA-256) / Tiếng Việt: Checksum xác minh tính toàn vẹn (SHA-256)
+  releasedAt     DateTime? @db.Timestamptz()                 // 한국어: 릴리스 시각 / Tiếng Việt: Thời điểm phát hành
+  createdAt      DateTime  @default(now()) @db.Timestamptz()
+  updatedAt      DateTime  @updatedAt @db.Timestamptz()
+  deletedAt      DateTime? @db.Timestamptz()
+
+  // 한국어: 이 패키지로 생성된 배포 릴리스 목록
+  // Tiếng Việt: Danh sách bản phát hành triển khai được tạo từ gói này
+  releases         DeployRelease[]  @relation("PackageReleases")
+  // 한국어: 이 패키지를 롤백 대상으로 지정한 릴리스 목록
+  // Tiếng Việt: Danh sách bản phát hành chỉ định gói này làm đích rollback
+  rollbackReleases DeployRelease[]  @relation("RollbackPackage")
+
+  // 한국어: 패키지코드+버전 고유 제약 - 동일 패키지의 동일 버전 중복 방지
+  // Tiếng Việt: Ràng buộc duy nhất mã gói+phiên bản - ngăn trùng lặp cùng phiên bản của cùng gói
+  @@unique([packageCode, version], name: "uq_package_code_version")
+  // 한국어: 플랫폼+릴리스일 인덱스 - 대상 플랫폼별 최신 릴리스 조회 최적화
+  // Tiếng Việt: Chỉ mục nền tảng+ngày phát hành - tối ưu truy vấn bản phát hành mới nhất theo nền tảng đích
+  @@index([platformTarget, releasedAt(sort: Desc)], name: "idx_deploy_package_target")
+}
+
+// 한국어: 배포 릴리스 테이블.
+//   특정 패키지를 특정 범위(대리점/브랜드/지점)에 배포하는 릴리스 이력을 관리한다.
+//   릴리스 상태(Planned/Deploying/Deployed/RolledBack)를 추적하며,
+//   롤백 시 이전 패키지 정보를 rollbackPackageId로 참조할 수 있다.
+//
+// Tiếng Việt: Bảng bản phát hành triển khai.
+//   Quản lý lịch sử phát hành triển khai gói cụ thể đến phạm vi cụ thể (đại lý/thương hiệu/chi nhánh).
+//   Theo dõi trạng thái phát hành (Planned/Deploying/Deployed/RolledBack),
+//   khi rollback có thể tham chiếu gói trước đó qua rollbackPackageId.
+model DeployRelease {
+  id                String    @id @default(uuid()) @db.Uuid
+  packageId         String    @db.Uuid                       // 한국어: 배포 패키지 FK / Tiếng Việt: FK gói triển khai
+  scopeType         String    @db.VarChar(30)                // 한국어: 배포 범위 유형 / Tiếng Việt: Loại phạm vi triển khai
+  scopeId           String    @db.Uuid                       // 한국어: 배포 범위 대상 ID / Tiếng Việt: ID đối tượng phạm vi triển khai
+  releaseStatus     String    @default("Planned") @db.VarChar(20) // 한국어: 릴리스 상태 / Tiếng Việt: Trạng thái phát hành
+  scheduledAt       DateTime? @db.Timestamptz()              // 한국어: 예정 배포 시각 / Tiếng Việt: Thời điểm triển khai dự kiến
+  deployedAt        DateTime? @db.Timestamptz()              // 한국어: 실제 배포 완료 시각 / Tiếng Việt: Thời điểm hoàn thành triển khai thực tế
+  rollbackPackageId String?   @db.Uuid                       // 한국어: 롤백 대상 이전 패키지 ID / Tiếng Việt: ID gói trước đó để rollback
+  releaseNote       String?                                  // 한국어: 릴리스 노트 / Tiếng Việt: Ghi chú phát hành
+  createdAt         DateTime  @default(now()) @db.Timestamptz()
+  updatedAt         DateTime  @updatedAt @db.Timestamptz()
+
+  package         DeployPackage  @relation("PackageReleases", fields: [packageId], references: [id])
+  rollbackPackage DeployPackage? @relation("RollbackPackage", fields: [rollbackPackageId], references: [id])
+
+  // 한국어: 범위+상태 인덱스 - 특정 대상의 배포 상태 조회 최적화
+  // Tiếng Việt: Chỉ mục phạm vi+trạng thái - tối ưu truy vấn trạng thái triển khai của đối tượng cụ thể
+  @@index([scopeType, scopeId, releaseStatus], name: "idx_deploy_release_scope")
+}

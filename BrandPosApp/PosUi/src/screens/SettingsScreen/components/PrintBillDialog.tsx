@@ -1,0 +1,123 @@
+'use client';
+
+/**
+ * PrintBillDialog (SET-PRINTBILL-DLG / PRINTBILL_DLG)
+ *
+ * 계산서(간이주문서) 인쇄 설정.
+ *
+ * Legacy: IDD_PRINTBILL_DLG
+ * Bridge: SETUP:PRINT_BILL:GET_CONFIG, SETUP:PRINT_BILL:SAVE
+ */
+
+import { useState, useCallback } from 'react';
+import FullScreenPanel from '@shared/ui/templates/FullScreenPanel';
+import Button from '@shared/ui/atoms/Button';
+import Checkbox from '@shared/ui/atoms/Checkbox';
+import Radio from '@shared/ui/atoms/Radio';
+
+// ─── Types ───
+
+type FontSize = 'small' | 'medium' | 'large';
+
+interface BillPrintItem {
+  key: string;
+  label: string;
+  visible: boolean;
+  fontSize: FontSize;
+}
+
+interface PrintBillDialogProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+const BILL_ITEMS: { key: string; label: string }[] = [
+  { key: 'topMargin', label: '상단여백' },
+  { key: 'title', label: '타이틀' },
+  { key: 'slipNumber', label: '전표번호' },
+  { key: 'tableName', label: '테이블명' },
+  { key: 'salesTime', label: '판매시간' },
+  { key: 'productMenu', label: '상품메뉴' },
+  { key: 'subtotal', label: '합계' },
+  { key: 'discount', label: '할인' },
+  { key: 'tax', label: '세금' },
+  { key: 'total', label: '총합계' },
+  { key: 'paymentInfo', label: '결제정보' },
+  { key: 'bottomMargin', label: '하단여백' },
+];
+
+const FONT_LABEL: Record<FontSize, string> = { small: '소', medium: '중', large: '대' };
+
+// ─── Component ───
+
+export default function PrintBillDialog({
+  open,
+  onClose,
+}: PrintBillDialogProps) {
+  const [items, setItems] = useState<BillPrintItem[]>(
+    BILL_ITEMS.map((bi) => ({
+      key: bi.key,
+      label: bi.label,
+      visible: true,
+      fontSize: 'medium',
+    }))
+  );
+
+  // TODO: RTK Query - setupApi.useGetPrintBillConfigQuery()
+  // TODO: RTK Query - setupApi.useSavePrintBillConfigMutation()
+
+  const handleToggleVisible = useCallback((key: string) => {
+    setItems((prev) =>
+      prev.map((it) => (it.key === key ? { ...it, visible: !it.visible } : it))
+    );
+  }, []);
+
+  const handleFontChange = useCallback((key: string, fontSize: FontSize) => {
+    setItems((prev) =>
+      prev.map((it) => (it.key === key ? { ...it, fontSize } : it))
+    );
+  }, []);
+
+  const handleSave = useCallback(() => {
+    // TODO: Bridge SETUP:PRINT_BILL:SAVE 호출
+  }, [items]);
+
+  return (
+    <FullScreenPanel
+      open={open}
+      onClose={onClose}
+      title="계산서 인쇄 설정"
+      footer={
+        <>
+          <Button variant="primary" size="sm" onClick={handleSave}>저장</Button>
+          <Button variant="secondary" size="sm" onClick={onClose}>닫기</Button>
+        </>
+      }
+    >
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="rounded-2xl bg-pos-surface shadow-pos-card p-4 flex flex-col gap-3">
+          {items.map((item) => (
+            <div key={item.key} className="flex items-center gap-4">
+              <Checkbox
+                checked={item.visible}
+                onChange={() => handleToggleVisible(item.key)}
+              />
+              <span className="w-28 text-sm text-pos-text">{item.label}</span>
+              <div className="flex gap-3">
+                {(['small', 'medium', 'large'] as const).map((fs) => (
+                  <Radio
+                    key={fs}
+                    name={`bill-font-${item.key}`}
+                    checked={item.fontSize === fs}
+                    onChange={() => handleFontChange(item.key, fs)}
+                    label={FONT_LABEL[fs]}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </FullScreenPanel>
+  );
+}

@@ -1,0 +1,16 @@
+{
+  "title": "Import Server Items",
+  "barcode": "Barcode",
+  "itemName": "Item Name",
+  "salePrice": "Sale Price",
+  "costPrice": "Cost Price",
+  "bigCategory": "Category",
+  "midCategory": "Subcategory",
+  "fetchCategories": "Fetch Categories",
+  "search": "Search",
+  "save": "Save",
+  "searchPlaceholder": "Item name / barcode",
+  "searchPrompt": "Enter a keyword and press Search",
+  "noResults": "No search results",
+  "noServerItems": "No server items"
+}

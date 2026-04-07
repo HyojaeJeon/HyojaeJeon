@@ -1,0 +1,185 @@
+// ─────────────────────────────────────────────
+// RegionalDistributor Channel Governance
+// 한국어: 지역 대리점(RegionalDistributor) 채널 거버넌스 영역 - 대리점 프로필, 관할 구역, 계약, 브랜드 배정, 배포 범위, 채널 사용자
+// Tiếng Việt: Khu vực quản trị kênh đại lý khu vực (RegionalDistributor) - hồ sơ đại lý, khu vực quản lý, hợp đồng, phân công thương hiệu, phạm vi triển khai, người dùng kênh
+// ─────────────────────────────────────────────
+
+// 한국어: 대리점(Distributor) 프로필 테이블.
+//   지역 대리점의 기본 정보, 법인명, 사업자번호, 국가, 관할 영역, 연락처 등을 관리한다.
+//   하위에 Territory, Contract, BrandAssignment, DeploymentScope, ChannelUser를 가진다.
+//   한 대리점이 여러 브랜드를 관리할 수 있으며, 브랜드와는 BrandAssignment로 연결된다.
+//
+// Tiếng Việt: Bảng hồ sơ đại lý (Distributor).
+//   Quản lý thông tin cơ bản của đại lý khu vực: tên pháp nhân, mã số kinh doanh, quốc gia, khu vực quản lý, liên hệ.
+//   Có các bảng con: Territory, Contract, BrandAssignment, DeploymentScope, ChannelUser.
+//   Một đại lý có thể quản lý nhiều thương hiệu, liên kết với thương hiệu qua BrandAssignment.
+model DistributorProfile {
+  id                  String    @id @default(uuid()) @db.Uuid
+  distributorCode     String    @unique @db.VarChar(50)      // 한국어: 대리점 코드 (고유) / Tiếng Việt: Mã đại lý (duy nhất)
+  companyName         String    @db.VarChar(200)             // 한국어: 회사명 / Tiếng Việt: Tên công ty
+  legalName           String?   @db.VarChar(200)             // 한국어: 법인명 / Tiếng Việt: Tên pháp nhân
+  businessNumber      String?   @unique @db.VarChar(50)      // 한국어: 사업자등록번호 (고유) / Tiếng Việt: Mã số kinh doanh (duy nhất)
+  countryCode         String    @db.VarChar(10)              // 한국어: 국가 코드 (ISO 3166-1) / Tiếng Việt: Mã quốc gia (ISO 3166-1)
+  territoryName       String    @db.VarChar(120)             // 한국어: 관할 영역 이름 / Tiếng Việt: Tên khu vực quản lý
+  defaultLanguageCode String    @default("en-US") @db.VarChar(10) // 한국어: 기본 언어 코드 / Tiếng Việt: Mã ngôn ngữ mặc định
+  status              String    @default("Active") @db.VarChar(20)
+  contactName         String?   @db.VarChar(120)             // 한국어: 담당자 이름 / Tiếng Việt: Tên người liên hệ
+  contactEmail        String?   @db.VarChar(200)             // 한국어: 담당자 이메일 / Tiếng Việt: Email người liên hệ
+  contactPhone        String?   @db.VarChar(30)              // 한국어: 담당자 전화번호 / Tiếng Việt: Số điện thoại người liên hệ
+  createdAt           DateTime  @default(now()) @db.Timestamptz()
+  updatedAt           DateTime  @updatedAt @db.Timestamptz()
+  deletedAt           DateTime? @db.Timestamptz()
+
+  // 한국어: 하위 관계 - 관할 구역, 계약, 브랜드 배정, 배포 범위, 채널 사용자, 브랜드
+  // Tiếng Việt: Quan hệ con - khu vực quản lý, hợp đồng, phân công thương hiệu, phạm vi triển khai, người dùng kênh, thương hiệu
+  territories  Territory[]
+  contracts    DistributorContract[]
+  assignments  BrandAssignment[]
+  scopes       DeploymentScope[]
+  channelUsers ChannelUser[]
+  brands       BrandProfile[]
+
+  @@index([countryCode, status], name: "idx_distributor_country_status")
+}
+
+// 한국어: 대리점 관할 구역(Territory) 테이블.
+//   대리점이 담당하는 지리적 영역을 정의한다.
+//   국가, 지역, 통화, 시간대 정보를 포함하며, 독점(exclusive) 여부를 지정할 수 있다.
+//
+// Tiếng Việt: Bảng khu vực quản lý (Territory) của đại lý.
+//   Định nghĩa vùng địa lý mà đại lý phụ trách.
+//   Bao gồm thông tin quốc gia, khu vực, tiền tệ, múi giờ, và có thể chỉ định độc quyền (exclusive).
+model Territory {
+  id            String   @id @default(uuid()) @db.Uuid
+  distributorId String   @db.Uuid                            // 한국어: 소속 대리점 FK / Tiếng Việt: FK đại lý sở hữu
+  countryCode   String   @db.VarChar(10)                     // 한국어: 국가 코드 / Tiếng Việt: Mã quốc gia
+  regionCode    String?  @db.VarChar(20)                     // 한국어: 지역 코드 (null이면 국가 전체) / Tiếng Việt: Mã khu vực (null = toàn quốc gia)
+  territoryName String   @db.VarChar(120)                    // 한국어: 영역명 / Tiếng Việt: Tên khu vực
+  currencyCode  String   @db.Char(3)                         // 한국어: 통화 코드 (ISO 4217) / Tiếng Việt: Mã tiền tệ (ISO 4217)
+  timeZoneCode  String   @db.VarChar(50)                     // 한국어: 시간대 (IANA) / Tiếng Việt: Múi giờ (IANA)
+  isExclusive   Boolean  @default(true)                      // 한국어: 독점 영역 여부 / Tiếng Việt: Khu vực độc quyền hay không
+  status        String    @default("Active") @db.VarChar(20)
+  createdAt     DateTime  @default(now()) @db.Timestamptz()
+  updatedAt     DateTime  @updatedAt @db.Timestamptz()
+  deletedAt     DateTime? @db.Timestamptz()
+
+  distributor DistributorProfile @relation(fields: [distributorId], references: [id])
+
+  @@index([distributorId, countryCode, regionCode], name: "idx_territory_distributor")
+}
+
+// 한국어: 대리점 계약(Contract) 테이블.
+//   대리점과 공급사(SuperAdmin) 간의 계약 정보를 관리한다.
+//   계약 유형, 기간, 독점 여부, 수익 분배율, 지원 등급 등을 포함한다.
+//
+// Tiếng Việt: Bảng hợp đồng (Contract) đại lý.
+//   Quản lý thông tin hợp đồng giữa đại lý và nhà cung cấp (SuperAdmin).
+//   Bao gồm loại hợp đồng, thời hạn, độc quyền hay không, tỷ lệ chia sẻ doanh thu, cấp hỗ trợ.
+model DistributorContract {
+  id               String    @id @default(uuid()) @db.Uuid
+  distributorId    String    @db.Uuid                        // 한국어: 대리점 FK / Tiếng Việt: FK đại lý
+  contractNo       String    @unique @db.VarChar(80)         // 한국어: 계약 번호 (고유) / Tiếng Việt: Số hợp đồng (duy nhất)
+  contractType     String    @db.VarChar(40)                 // 한국어: 계약 유형 / Tiếng Việt: Loại hợp đồng
+  startDate        DateTime  @db.Date                        // 한국어: 계약 시작일 / Tiếng Việt: Ngày bắt đầu hợp đồng
+  endDate          DateTime? @db.Date                        // 한국어: 계약 종료일 (null이면 무기한) / Tiếng Việt: Ngày kết thúc hợp đồng (null = vô thời hạn)
+  exclusiveFlag    Boolean   @default(false)                 // 한국어: 독점 계약 여부 / Tiếng Việt: Hợp đồng độc quyền hay không
+  revenueShareRate Decimal?  @db.Decimal(5, 2)               // 한국어: 수익 분배율 (%) / Tiếng Việt: Tỷ lệ chia sẻ doanh thu (%)
+  supportLevel     String    @default("Standard") @db.VarChar(30) // 한국어: 지원 등급 (Standard/Premium/Enterprise) / Tiếng Việt: Cấp hỗ trợ
+  status           String    @default("Active") @db.VarChar(20)
+  signedAt         DateTime? @db.Timestamptz()               // 한국어: 계약 서명 시각 / Tiếng Việt: Thời điểm ký hợp đồng
+  notes            String?                                   // 한국어: 비고 / Tiếng Việt: Ghi chú
+  createdAt        DateTime  @default(now()) @db.Timestamptz()
+  updatedAt        DateTime  @updatedAt @db.Timestamptz()
+  deletedAt        DateTime? @db.Timestamptz()
+
+  distributor DistributorProfile @relation(fields: [distributorId], references: [id])
+
+  @@index([distributorId, status, endDate], name: "idx_contract_distributor")
+}
+
+// 한국어: 브랜드 배정(Brand Assignment) 테이블.
+//   대리점에 브랜드를 배정하는 관계를 관리한다.
+//   하나의 브랜드에 여러 대리점이 배정될 수 있으며(예: 지역별 담당),
+//   배정 유형(Primary/Secondary)과 담당 매니저 정보를 포함한다.
+//
+// Tiếng Việt: Bảng phân công thương hiệu (Brand Assignment).
+//   Quản lý quan hệ phân công thương hiệu cho đại lý.
+//   Một thương hiệu có thể được phân công cho nhiều đại lý (ví dụ: phụ trách theo khu vực),
+//   bao gồm loại phân công (Primary/Secondary) và thông tin quản lý phụ trách.
+model BrandAssignment {
+  id               String   @id @default(uuid()) @db.Uuid
+  distributorId    String   @db.Uuid                         // 한국어: 대리점 FK / Tiếng Việt: FK đại lý
+  brandHQId        String   @db.Uuid                         // 한국어: 브랜드 본사 FK / Tiếng Việt: FK trụ sở thương hiệu
+  assignmentType   String   @default("Primary") @db.VarChar(30)  // 한국어: 배정 유형 (Primary/Secondary) / Tiếng Việt: Loại phân công
+  assignmentStatus String   @default("Active") @db.VarChar(20)   // 한국어: 배정 상태 / Tiếng Việt: Trạng thái phân công
+  startDate        DateTime @db.Date                         // 한국어: 배정 시작일 / Tiếng Việt: Ngày bắt đầu phân công
+  endDate          DateTime? @db.Date                        // 한국어: 배정 종료일 / Tiếng Việt: Ngày kết thúc phân công
+  accountManagerName String? @db.VarChar(120)                 // 한국어: 담당 매니저 이름 / Tiếng Việt: Tên quản lý phụ trách
+  notes            String?                                   // 한국어: 비고 / Tiếng Việt: Ghi chú
+  createdAt        DateTime  @default(now()) @db.Timestamptz()
+  updatedAt        DateTime  @updatedAt @db.Timestamptz()
+  deletedAt        DateTime? @db.Timestamptz()
+
+  distributor DistributorProfile @relation(fields: [distributorId], references: [id])
+  brand       BrandProfile       @relation(fields: [brandHQId], references: [id])
+
+  @@index([distributorId, brandHQId, assignmentStatus], name: "idx_brand_assignment")
+}
+
+// 한국어: 배포 범위(Deployment Scope) 테이블.
+//   대리점이 관리하는 배포 대상(브랜드/지점/단말기)에 대한 권한과 정책을 정의한다.
+//   어떤 대리점이 어떤 브랜드/지점/단말기에 대해 어떤 배포 작업을 수행할 수 있는지를 제어한다.
+//
+// Tiếng Việt: Bảng phạm vi triển khai (Deployment Scope).
+//   Định nghĩa quyền hạn và chính sách cho các đối tượng triển khai (thương hiệu/chi nhánh/thiết bị đầu cuối)
+//   mà đại lý quản lý. Kiểm soát đại lý nào có thể thực hiện thao tác triển khai nào
+//   trên thương hiệu/chi nhánh/thiết bị đầu cuối nào.
+model DeploymentScope {
+  id             String   @id @default(uuid()) @db.Uuid
+  distributorId  String   @db.Uuid                           // 한국어: 대리점 FK / Tiếng Việt: FK đại lý
+  brandHQId      String?  @db.Uuid                           // 한국어: 브랜드 FK (선택) / Tiếng Việt: FK thương hiệu (tùy chọn)
+  branchId       String?  @db.Uuid                           // 한국어: 지점 FK (선택) / Tiếng Việt: FK chi nhánh (tùy chọn)
+  edgePosId      String?  @db.Uuid                           // 한국어: Edge POS 단말기 FK (선택) / Tiếng Việt: FK thiết bị đầu cuối Edge POS (tùy chọn)
+  scopeType      String   @db.VarChar(30)                    // 한국어: 범위 유형 / Tiếng Việt: Loại phạm vi
+  allowedAction  String   @db.VarChar(80)                    // 한국어: 허용된 작업 (Deploy/Rollback/Monitor) / Tiếng Việt: Hành động được phép (Deploy/Rollback/Monitor)
+  versionPolicy  String    @default("LatestStable") @db.VarChar(50) // 한국어: 버전 정책 / Tiếng Việt: Chính sách phiên bản
+  createdAt      DateTime  @default(now()) @db.Timestamptz()
+  updatedAt      DateTime  @updatedAt @db.Timestamptz()
+  deletedAt      DateTime? @db.Timestamptz()
+
+  distributor DistributorProfile @relation(fields: [distributorId], references: [id])
+
+  @@index([distributorId, brandHQId, branchId, edgePosId], name: "idx_deployment_scope")
+}
+
+// 한국어: 채널 사용자(Channel User) 테이블.
+//   대리점 소속 사용자 계정을 관리한다.
+//   대리점별 loginId 고유 제약을 가지며, 대리점마다 독립적인 사용자 체계를 운영한다.
+//   SuperAdminUser와 별도의 테이블로 분리하여 인증/권한 체계를 독립적으로 관리한다.
+//
+// Tiếng Việt: Bảng người dùng kênh (Channel User).
+//   Quản lý tài khoản người dùng thuộc đại lý.
+//   Có ràng buộc loginId duy nhất theo từng đại lý, vận hành hệ thống người dùng độc lập cho mỗi đại lý.
+//   Tách bảng riêng với SuperAdminUser để quản lý hệ thống xác thực/quyền hạn độc lập.
+model ChannelUser {
+  id            String    @id @default(uuid()) @db.Uuid
+  distributorId String    @db.Uuid                           // 한국어: 소속 대리점 FK / Tiếng Việt: FK đại lý sở hữu
+  loginId       String    @db.VarChar(100)                   // 한국어: 로그인 ID (대리점 내 고유) / Tiếng Việt: ID đăng nhập (duy nhất trong đại lý)
+  passwordHash  String    @db.VarChar(255)                   // 한국어: bcrypt 해시된 비밀번호 / Tiếng Việt: Mật khẩu đã hash bằng bcrypt
+  displayName   String    @db.VarChar(120)                   // 한국어: 표시 이름 / Tiếng Việt: Tên hiển thị
+  email         String?   @db.VarChar(200)                   // 한국어: 이메일 (선택) / Tiếng Việt: Email (tùy chọn)
+  roleCode      String    @db.VarChar(50)                    // 한국어: 역할 코드 / Tiếng Việt: Mã vai trò
+  status        String    @default("Active") @db.VarChar(20)
+  lastLoginAt   DateTime? @db.Timestamptz()                  // 한국어: 마지막 로그인 시각 / Tiếng Việt: Thời điểm đăng nhập cuối
+  createdAt     DateTime  @default(now()) @db.Timestamptz()
+  updatedAt     DateTime  @updatedAt @db.Timestamptz()
+  deletedAt     DateTime? @db.Timestamptz()
+
+  distributor DistributorProfile @relation(fields: [distributorId], references: [id])
+
+  // 한국어: 대리점+로그인ID 고유 제약 - 동일 대리점 내 로그인ID 중복 방지
+  // Tiếng Việt: Ràng buộc duy nhất đại lý+ID đăng nhập - ngăn trùng lặp ID đăng nhập trong cùng đại lý
+  @@unique([distributorId, loginId], name: "uq_channel_user_login")
+  @@index([distributorId, roleCode, status], name: "idx_channel_user_distributor")
+}
+

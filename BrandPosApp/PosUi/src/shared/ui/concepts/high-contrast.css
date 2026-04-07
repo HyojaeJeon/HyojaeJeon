@@ -1,0 +1,67 @@
+/**
+ * Concept: 하이 콘트라스트
+ *
+ * 접근성 최우선. 순수 흑백 기반.
+ * 카드는 굵은 보더로 구분. 그림자 없음.
+ * 글자 굵고 크게. 밝은 환경에서도 선명.
+ * 색상 사용 극도로 절제 — 초록 포인트만.
+ */
+[data-concept="high-contrast"] {
+  /* 색상 — 초록 (흑백 위에서 가장 명확한 포인트) */
+  --color-primary-50:  #F0FDF4;
+  --color-primary-100: #DCFCE7;
+  --color-primary-200: #BBF7D0;
+  --color-primary-300: #86EFAC;
+  --color-primary-400: #4ADE80;
+  --color-primary-500: #16A34A;
+  --color-primary-600: #15803D;
+  --color-primary-700: #166534;
+
+  /* 배경/표면 — 순수 흑백 */
+  --color-pos-bg:            #FFFFFF;
+  --color-pos-surface:       #F5F5F5;
+  --color-pos-text:          #000000;
+  --color-pos-text-secondary:#333333;
+  --color-pos-text-muted:    #666666;
+  --color-pos-border:        #000000;
+  --color-pos-border-strong:  #000000;
+
+  /* 둥글기 — 최소 */
+  --radius-pos-xs:    0.125rem;
+  --radius-pos-sm:    0.1875rem;
+  --radius-pos-md:    0.25rem;
+  --radius-pos-lg:    0.3125rem;
+  --radius-pos-xl:    0.375rem;
+  --radius-pos-2xl:   0.5rem;
+  --radius-pos-btn:   0.25rem;
+  --radius-pos-card:  0.3125rem;
+  --radius-pos-input: 0.1875rem;
+
+  /* 그림자 — 없음 (보더가 전부) */
+  --shadow-pos-soft:  none;
+  --shadow-pos-card:  none;
+  --shadow-pos-hover: none;
+  --shadow-pos-modal: 0 0 0 3px #000000;
+
+  /* 간격 — 타이트 (큰 텍스트를 수용하기 위해) */
+  --spacing-touch:      3rem;
+  --spacing-touch-lg:   3.5rem;
+  --spacing-touch-nav:  2.5rem;
+
+  /* 폰트 굵기 — 모두 굵게 */
+  --font-weight-regular:  500;
+  --font-weight-medium:   600;
+  --font-weight-semibold: 700;
+  --font-weight-bold:     800;
+
+  /* 텍스트 크기 — 크게 (접근성) */
+  --text-2xs: 0.6875rem;
+  --text-xs:  0.8125rem;
+  --text-sm:  0.875rem;
+  --text-md:  1rem;
+
+  /* 보더 — 매우 굵게 (주 구분 수단) */
+  --border-pos-thin:    1.5px;
+  --border-pos-default: 2px;
+  --border-pos-thick:   3px;
+}

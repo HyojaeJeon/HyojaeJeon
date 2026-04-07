@@ -1,0 +1,79 @@
+// ─────────────────────────────────────────────
+// Shared Reference Data
+// 한국어: 공유 참조 데이터 영역 - 언어, 지역, 통화 등 플랫폼 전체에서 공통으로 참조하는 마스터 데이터
+// Tiếng Việt: Khu vực dữ liệu tham chiếu dùng chung - dữ liệu chủ được tham chiếu chung toàn nền tảng: ngôn ngữ, khu vực, tiền tệ
+// ─────────────────────────────────────────────
+
+// 한국어: 언어(Language) 참조 테이블.
+//   플랫폼에서 지원하는 언어 목록을 관리한다.
+//   i18n 시스템과 연동하여 UI/알림/보고서 등의 다국어 지원에 사용한다.
+//   direction 필드로 RTL(오른쪽→왼쪽) 언어도 지원할 수 있다.
+//
+// Tiếng Việt: Bảng tham chiếu ngôn ngữ (Language).
+//   Quản lý danh sách ngôn ngữ được nền tảng hỗ trợ.
+//   Liên kết với hệ thống i18n để hỗ trợ đa ngôn ngữ cho UI/thông báo/báo cáo.
+//   Trường direction cho phép hỗ trợ ngôn ngữ RTL (phải sang trái).
+model Language {
+  id           String    @id @default(uuid()) @db.Uuid
+  languageCode String    @unique @db.VarChar(10)             // 한국어: 언어 코드 (BCP 47, 예: ko-KR) / Tiếng Việt: Mã ngôn ngữ (BCP 47, ví dụ: vi-VN)
+  nativeName   String    @db.VarChar(100)                    // 한국어: 원어 이름 (예: 한국어) / Tiếng Việt: Tên bản ngữ (ví dụ: Tiếng Việt)
+  displayName  String    @db.VarChar(100)                    // 한국어: 표시 이름 (예: Korean) / Tiếng Việt: Tên hiển thị (ví dụ: Vietnamese)
+  direction    String    @default("LTR") @db.VarChar(5)      // 한국어: 텍스트 방향 (LTR/RTL) / Tiếng Việt: Hướng văn bản (LTR/RTL)
+  isDefault    Boolean   @default(false)                     // 한국어: 기본 언어 여부 / Tiếng Việt: Có phải ngôn ngữ mặc định
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now()) @db.Timestamptz()
+  updatedAt    DateTime  @updatedAt @db.Timestamptz()
+  deletedAt    DateTime? @db.Timestamptz()
+
+  @@index([isActive, isDefault], name: "idx_language_is_active")
+}
+
+// 한국어: 지역(Region) 참조 테이블.
+//   국가별 지역 정보와 해당 지역의 통화, 시간대를 관리한다.
+//   대리점 관할 구역(Territory), 지점(Branch) 등에서 참조 데이터로 사용한다.
+//
+// Tiếng Việt: Bảng tham chiếu khu vực (Region).
+//   Quản lý thông tin khu vực theo quốc gia cùng tiền tệ và múi giờ của khu vực đó.
+//   Sử dụng làm dữ liệu tham chiếu cho khu vực quản lý đại lý (Territory), chi nhánh (Branch), v.v.
+model Region {
+  id           String    @id @default(uuid()) @db.Uuid
+  regionCode   String    @unique @db.VarChar(20)             // 한국어: 지역 코드 (예: KR-SEOUL) / Tiếng Việt: Mã khu vực (ví dụ: VN-HCMC)
+  countryCode  String    @db.VarChar(10)                     // 한국어: 국가 코드 / Tiếng Việt: Mã quốc gia
+  regionName   String    @db.VarChar(120)                    // 한국어: 지역 이름 / Tiếng Việt: Tên khu vực
+  currencyCode String    @db.Char(3)                         // 한국어: 통화 코드 (ISO 4217) / Tiếng Việt: Mã tiền tệ (ISO 4217)
+  timeZoneCode String    @db.VarChar(50)                     // 한국어: 시간대 (IANA) / Tiếng Việt: Múi giờ (IANA)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now()) @db.Timestamptz()
+  updatedAt    DateTime  @updatedAt @db.Timestamptz()
+  deletedAt    DateTime? @db.Timestamptz()
+
+  @@index([countryCode, regionName], name: "idx_region_country")
+}
+
+// 한국어: 통화(Currency) 참조 테이블.
+//   플랫폼에서 지원하는 통화 정보를 관리한다.
+//   소수점 자릿수(decimalDigits), 반올림 모드(roundingMode) 등
+//   통화별 금액 계산 규칙을 정의한다.
+//   KRW/VND는 소수점 0자리, USD는 2자리 등 통화별 차이를 반영한다.
+//
+// Tiếng Việt: Bảng tham chiếu tiền tệ (Currency).
+//   Quản lý thông tin tiền tệ được nền tảng hỗ trợ.
+//   Định nghĩa quy tắc tính toán số tiền theo từng loại tiền tệ:
+//   số chữ số thập phân (decimalDigits), chế độ làm tròn (roundingMode).
+//   Phản ánh sự khác biệt theo tiền tệ: KRW/VND = 0 chữ số thập phân, USD = 2 chữ số.
+model Currency {
+  id            String    @id @default(uuid()) @db.Uuid
+  currencyCode  String    @unique @db.Char(3)                // 한국어: 통화 코드 (ISO 4217, 예: KRW) / Tiếng Việt: Mã tiền tệ (ISO 4217, ví dụ: VND)
+  currencyName  String    @db.VarChar(80)                    // 한국어: 통화 이름 / Tiếng Việt: Tên tiền tệ
+  symbol        String    @db.VarChar(10)                    // 한국어: 통화 기호 (₩, ₫, $) / Tiếng Việt: Ký hiệu tiền tệ (₩, ₫, $)
+  decimalDigits Int       @default(2) @db.SmallInt           // 한국어: 소수점 자릿수 / Tiếng Việt: Số chữ số thập phân
+  roundingMode  String    @default("HALF_UP") @db.VarChar(20) // 한국어: 반올림 모드 / Tiếng Việt: Chế độ làm tròn
+  isDefault     Boolean   @default(false)                    // 한국어: 기본 통화 여부 / Tiếng Việt: Có phải tiền tệ mặc định
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now()) @db.Timestamptz()
+  updatedAt     DateTime  @updatedAt @db.Timestamptz()
+  deletedAt     DateTime? @db.Timestamptz()
+
+  @@index([isDefault, isActive], name: "idx_currency_default")
+}
+

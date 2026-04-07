@@ -8,14 +8,14 @@ node_modules/
 out/
 
 # Build artifacts
-HyojungPOS-Main/Build/
-HyojungPOS-Set/Build/
+BrandPosApp/Build/
+BrandConfigApp/Build/
 
 # CEF SDK binaries (too large for git)
-HyojungPOS-Main/Presentation/CEF/SDK/Release/
-HyojungPOS-Main/Presentation/CEF/SDK/Resources/
-HyojungPOS-Main/Presentation/CEF/SDK/include/
-HyojungPOS-Main/Presentation/CEF/SDK/libcef_dll_wrapper/
+BrandPosApp/Presentation/CEF/SDK/Release/
+BrandPosApp/Presentation/CEF/SDK/Resources/
+BrandPosApp/Presentation/CEF/SDK/include/
+BrandPosApp/Presentation/CEF/SDK/libcef_dll_wrapper/
 
 # Visual Studio
 *.suo
@@ -66,3 +66,4 @@ Log/
 
 # Claude Code
 .claude/
+.gstack/

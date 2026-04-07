@@ -1,0 +1,16 @@
+{
+  "title": "Tải sản phẩm từ server",
+  "barcode": "Mã vạch",
+  "itemName": "Tên sản phẩm",
+  "salePrice": "Giá bán",
+  "costPrice": "Giá vốn",
+  "bigCategory": "Danh mục lớn",
+  "midCategory": "Danh mục con",
+  "fetchCategories": "Lấy danh mục",
+  "search": "Tìm kiếm",
+  "save": "Lưu",
+  "searchPlaceholder": "Tên sản phẩm / mã vạch",
+  "searchPrompt": "Nhập từ khóa và nhấn Tìm kiếm",
+  "noResults": "Không có kết quả tìm kiếm",
+  "noServerItems": "Không có sản phẩm từ server"
+}

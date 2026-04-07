@@ -1,0 +1,13 @@
+{
+  "brandName": "효정 POS",
+  "brandSubtitle": "통합 포스 솔루션",
+  "version": "v2.5.1",
+  "businessDate": "영업일",
+  "staffId": "사원번호",
+  "password": "비밀번호",
+  "openingAmount": "시작금",
+  "changeAmount": "거스름돈",
+  "loginFailed": "로그인에 실패했습니다",
+  "login": "로그인",
+  "orderLogin": "주문 로그인"
+}

@@ -1,0 +1,158 @@
+{
+  "docs": {
+    "db_table_master": {
+      "title": "DB Full Table/Column Master",
+      "category": "DB Design",
+      "description": "A comprehensive inventory combining the current platform's normalized DB definitions and the complete table/column set from the HJ-POS legacy. This is the maximum-scope version before filtering; normalization/removal/compatibility layer separation will follow.",
+      "sections": {
+        "purpose": {
+          "title": "Purpose",
+          "content": "This file is a comprehensive inventory that combines the **current platform's normalized DB definitions** and the **complete HJ-POS legacy table/column set** in one place.\n\nThe baseline is the maximum-scope version before filtering; normalization/removal/compatibility layer separation will be conducted in separate documents."
+        },
+        "current_platform_count": {
+          "title": "Current Platform DB Definitions",
+          "content": "Table groups actually defined in the current platform:\n\n- **Shared/ReferenceData**: Language, Region, Currency, etc. — reference data commonly used by both Central and Edge\n- **SuperAdmin/Governance**: SuperAdminUser, PlatformLicense, PlatformPolicy, AuditLog, etc.\n- **RegionalDistributor/Channel**: DistributorProfile, Territory, DistributorContract, BrandAssignment, etc.\n- **BrandHQ/MasterData**: BrandProfile, Branch, BrandMenuCategory, BrandMenuItem, etc.\n- **EdgePOS/OperationalCore**: EdgePosTerminal, Device, DeviceBinding, LocalSetting, etc.\n\nStorage location: Central PostgreSQL (Prisma + raw SQL) + Edge SQLite (C++ native wrapper)"
+        },
+        "legacy_count": {
+          "title": "Legacy DB Scale",
+          "content": "HJ-POS-TEST Legacy DB:\n\n- MSSQL-based\n- Covers all domains including orders, payments, tables, customers, inventory, employees, devices, and settings\n- Currently migrating to SQLite in the new platform\n- Legacy schema is used only as a reverse-engineering reference source"
+        },
+        "structure": {
+          "title": "Structure",
+          "content": "The entire DB is classified into 5 areas:\n\n| Area | Storage Location | Source of Truth |\n|---|---|---|\n| **Shared Reference Data** | Central PostgreSQL + Edge SQLite cache | Central |\n| **SuperAdmin Governance** | Central PostgreSQL | Central |\n| **RegionalDistributor Channel** | Central PostgreSQL | Central |\n| **BrandHQ MasterData** | Central PostgreSQL | Central |\n| **EdgePOS OperationalCore** | Edge SQLite | Edge (local) |\n\nSync direction: Shared/SuperAdmin/RegionalDistributor/BrandHQ → Downstream (pushed to Edge), EdgePOS → Upstream (pushed to Central)"
+        }
+      }
+    },
+    "db_shared_reference": {
+      "title": "Shared Reference Data",
+      "category": "DB Design",
+      "description": "Actual definitions for reference data commonly used by both Central and Edge. Shared assets (SharedAssets) are translation files/resource packages; this document covers DB reference data only.",
+      "sections": {
+        "purpose": {
+          "title": "Purpose",
+          "content": "This is the primary actual definition document for reference data commonly used by both Central and Edge.\n\n- Owner: `SuperAdmin/CentralApi`\n- Storage location: Central PostgreSQL + Edge SQLite cache\n- Source of truth: Central\n- Sync direction: Downstream\n- Retention policy: Permanent retention\n- Deletion policy: Soft delete"
+        },
+        "language_table": {
+          "title": "Language Table",
+          "content": "| Column Name | Type | Meaning |\n|---|---|---|\n| `Id` | uuid / TEXT | Internal identifier |\n| `LanguageCode` | varchar(10) | `ko-KR`, `vi-VN`, `en-US` |\n| `NativeName` | varchar(100) | Name in native language |\n| `DisplayName` | varchar(100) | UI display name |\n| `Direction` | varchar(5) | Text direction (LTR/RTL) |\n| `IsDefault` | boolean | Whether it is the default language |\n| `IsActive` | boolean | Whether it is available |\n\nUnique: `LanguageCode`, Check: `Direction in ('LTR', 'RTL')`\n\nUsage scenarios: Portal/Edge initial language selection, platform initial seed, language name/activation status changes, Edge downloads and uses values from Central"
+        },
+        "region_table": {
+          "title": "Region Table",
+          "content": "| Column Name | Type | Meaning |\n|---|---|---|\n| `Id` | uuid / TEXT | Internal identifier |\n| `RegionCode` | varchar(20) | Region code |\n| `CountryCode` | varchar(10) | Country code |\n| `RegionName` | varchar(120) | Region name |\n| `CurrencyCode` | char(3) | Default currency code |\n| `TimeZoneCode` | varchar(50) | Default timezone |\n| `IsActive` | boolean | Whether it is available |\n\nUnique: `RegionCode`\n\nUsage scenarios: Distributor jurisdiction mapping, automatic application of region-based defaults during Edge initial setup, default values for tax/currency/timezone"
+        },
+        "currency_table": {
+          "title": "Currency Table",
+          "content": "| Column Name | Type | Meaning |\n|---|---|---|\n| `Id` | uuid / TEXT | Internal identifier |\n| `CurrencyCode` | char(3) | ISO 4217 code (KRW, VND, USD) |\n| `CurrencyName` | varchar(100) | Currency name |\n| `Symbol` | varchar(10) | Display symbol |\n| `DecimalPlaces` | integer | Number of decimal places |\n| `IsActive` | boolean | Whether it is available |\n\nUnique: `CurrencyCode`\n\nUsage scenarios: Payment amount display, settlement/report currency units, currency conversion reference for multi-country support"
+        }
+      }
+    },
+    "db_superadmin_governance": {
+      "title": "SuperAdmin Governance",
+      "category": "DB Design",
+      "description": "SuperAdmin platform governance data — operator accounts, licenses, policies, and audit log table definitions.",
+      "sections": {
+        "purpose": {
+          "title": "Purpose",
+          "content": "Defines the core governance tables for the SuperAdmin platform.\n\n- Owner: `SuperAdmin/CentralApi`\n- Storage location: Central PostgreSQL\n- Sync direction: Downstream (policies/licenses → Edge)\n- Consumers: All Portals, CentralApi, SyncWorkers"
+        },
+        "superadmin_user": {
+          "title": "SuperAdminUser Table",
+          "content": "Platform operator account table.\n\nKey columns: `Id`, `Email`, `DisplayName`, `Role` (PlatformSuperAdmin / PlatformSupportEngineer), `IsActive`, `LastLoginAt`, `CreatedAt`, `UpdatedAt`\n\nRoles:\n- **PlatformSuperAdmin**: Create, suspend, deploy, and support multiple brands\n- **PlatformSupportEngineer**: Failure analysis, remote support, log access"
+        },
+        "platform_license": {
+          "title": "PlatformLicense Table",
+          "content": "License management per brand/region.\n\nKey columns: `Id`, `RegionalDistributorId`, `BrandHQId`, `LicenseType`, `MaxEdgePos`, `ExpiresAt`, `IsActive`, `CreatedAt`, `UpdatedAt`\n\nUsage scenarios:\n- Allocate license pools per distributor\n- Control maximum EdgePos count per brand\n- Expiration alerts and renewal tracking"
+        },
+        "platform_policy": {
+          "title": "PlatformPolicy Table",
+          "content": "Global/regional/brand policy management.\n\nKey columns: `Id`, `PolicyType`, `Scope` (Global / RegionalDistributor / BrandHQ / Branch), `ScopeId`, `PolicyVersion`, `PolicyData` (JSONB), `IsActive`, `CreatedAt`\n\nUsage scenarios:\n- Distribute global RBAC policies\n- Reflect regional tax/payment regulations\n- Manage feature flags per brand"
+        },
+        "audit_log": {
+          "title": "AuditLog Table",
+          "content": "Platform-wide audit log.\n\nKey columns: `Id`, `ActorId`, `ActorRole`, `Action`, `TargetType`, `TargetId`, `Detail` (JSONB), `IpAddress`, `CreatedAt`\n\nUsage scenarios:\n- Track sensitive data access\n- Preserve policy change history\n- Reconstruct action timelines during failure root cause analysis"
+        }
+      }
+    },
+    "db_distributor_channel": {
+      "title": "RegionalDistributor Channel",
+      "category": "DB Design",
+      "description": "Table definitions for regional/country distribution partner profiles, territories, contracts, and brand assignments.",
+      "sections": {
+        "purpose": {
+          "title": "Purpose",
+          "content": "Defines the core data tables for the RegionalDistributor tier.\n\n- Owner: `SuperAdmin/CentralApi`\n- Storage location: Central PostgreSQL\n- Consumers: RegionalDistributorPortal, SuperAdmin/Portal\n- Sync direction: Downstream (only necessary information to Edge)"
+        },
+        "distributor_profile": {
+          "title": "DistributorProfile Table",
+          "content": "Distributor/distribution partner profile.\n\nKey columns: `Id` (= `RegionalDistributorId`), `CompanyName`, `CountryCode`, `ContactEmail`, `ContactPhone`, `Status` (Active / Suspended / Terminated), `CreatedAt`, `UpdatedAt`\n\nUsage scenarios:\n- Create/approve/suspend distributors\n- Query distributor list by region"
+        },
+        "territory": {
+          "title": "Territory Table",
+          "content": "Distributor jurisdiction mapping.\n\nKey columns: `Id`, `RegionalDistributorId`, `RegionId`, `TerritoryCode`, `IsExclusive`, `EffectiveFrom`, `EffectiveTo`, `IsActive`\n\nUsage scenarios:\n- Manage exclusive distribution right periods\n- Prevent duplicate regional assignments\n- Calculate deployment targets by region"
+        },
+        "distributor_contract": {
+          "title": "DistributorContract Table",
+          "content": "Distributor contract management.\n\nKey columns: `Id`, `RegionalDistributorId`, `ContractType`, `StartDate`, `EndDate`, `CommissionRate`, `Status` (Draft / Active / Expired / Terminated), `CreatedAt`\n\nUsage scenarios:\n- Track contract status\n- Manage commission rates\n- Renewal alerts"
+        },
+        "brand_assignment": {
+          "title": "BrandAssignment Table",
+          "content": "Distributor → Brand assignment.\n\nKey columns: `Id`, `RegionalDistributorId`, `BrandHQId`, `AssignedAt`, `RevokedAt`, `IsActive`\n\nUsage scenarios:\n- List of brands managed by a distributor\n- Automatic distributor linking during brand onboarding\n- Assignment revocation history management"
+        }
+      }
+    },
+    "db_brandhq_master": {
+      "title": "BrandHQ MasterData",
+      "category": "DB Design",
+      "description": "Brand headquarters master data — brand profile, branch, menu category, and menu item table definitions.",
+      "sections": {
+        "purpose": {
+          "title": "Purpose",
+          "content": "Defines the master data tables for the BrandHQ tier.\n\n- Owner: `BrandHQ` (via CentralApi)\n- Storage location: Central PostgreSQL\n- Sync direction: Downstream (menu/pricing/policies → Edge)\n- Consumers: BrandHQPortal, EdgePos (local cache after sync)"
+        },
+        "brand_profile": {
+          "title": "BrandProfile Table",
+          "content": "Brand headquarters profile.\n\nKey columns: `Id` (= `BrandHQId`), `BrandName`, `RegionalDistributorId`, `BusinessCategory`, `DefaultLanguageCode`, `DefaultCurrencyCode`, `LogoUrl`, `Status`, `CreatedAt`, `UpdatedAt`\n\nUsage scenarios:\n- Brand onboarding\n- Distributor → Brand linking\n- Brand-level default settings management"
+        },
+        "branch": {
+          "title": "Branch Table",
+          "content": "Branches/stores under a brand.\n\nKey columns: `Id` (= `BranchId`), `BrandHQId`, `BranchName`, `BranchCode`, `Address`, `RegionId`, `TimeZoneCode`, `Status` (Active / Closed / Suspended), `CreatedAt`, `UpdatedAt`\n\nUsage scenarios:\n- Create/edit/suspend branches\n- Manage per-branch overrides\n- Calculate deployment targets"
+        },
+        "brand_menu_category": {
+          "title": "BrandMenuCategory Table",
+          "content": "Brand menu categories.\n\nKey columns: `Id`, `BrandHQId`, `CategoryName`, `ParentCategoryId`, `SortOrder`, `IsActive`, `CatalogVersion`, `CreatedAt`, `UpdatedAt`\n\nUsage scenarios:\n- Manage menu category hierarchy\n- Distribution by catalog version\n- Display category tree on Edge"
+        },
+        "brand_menu_item": {
+          "title": "BrandMenuItem Table",
+          "content": "Brand menu items (products).\n\nKey columns: `Id`, `BrandHQId`, `CategoryId`, `ItemName`, `ItemCode`, `BasePrice`, `TaxRate`, `Description`, `ImageUrl`, `IsActive`, `CatalogVersion`, `CreatedAt`, `UpdatedAt`\n\nUsage scenarios:\n- Product registration/edit\n- Pricing policy application\n- Menu data delivery during Edge sync"
+        }
+      }
+    },
+    "db_edgepos_core": {
+      "title": "EdgePOS OperationalCore",
+      "category": "DB Design",
+      "description": "Edge POS terminal operational core tables — terminal information, device management, device binding, and local settings definitions.",
+      "sections": {
+        "purpose": {
+          "title": "Purpose",
+          "content": "Defines the operational core tables for the Edge POS terminal.\n\n- Owner: `EdgePos` (local)\n- Storage location: Edge SQLite\n- Source of truth: Edge (local DB is the source of truth for operational data)\n- Sync direction: Upstream (operational data pushed to Central)\n- Operating model: **Offline-First**, local commit is the criterion for business success"
+        },
+        "edge_pos_terminal": {
+          "title": "EdgePosTerminal Table",
+          "content": "Edge POS terminal information.\n\nKey columns: `Id` (= `EdgePosId`), `BrandHQId`, `BranchId`, `RegionalDistributorId`, `TerminalCode`, `TerminalName`, `InstalledVersion`, `LastSyncAt`, `Status` (Active / Offline / Maintenance), `CreatedAt`, `UpdatedAt`\n\nUsage scenarios:\n- Load self-identification information at POS startup\n- Monitor terminal status from the central platform\n- Calculate version deployment targets"
+        },
+        "device": {
+          "title": "Device Table",
+          "content": "Peripheral devices connected to EdgePos.\n\nKey columns: `Id` (= `DeviceId`), `EdgePosId`, `DeviceType` (Printer / CardReader / Scanner / Scale / CashDrawer), `DeviceName`, `ConnectionType` (USB / Network / Serial / Bluetooth), `ConnectionAddress`, `Status`, `LastCheckedAt`\n\nUsage scenarios:\n- Device registration/discovery\n- Real-time connection status verification\n- Device history inquiry during failure diagnosis"
+        },
+        "device_binding": {
+          "title": "DeviceBinding Table",
+          "content": "Device binding (which device is bound to which role).\n\nKey columns: `Id`, `EdgePosId`, `DeviceId`, `BindingRole` (KitchenPrinter / CustomerPrinter / LabelPrinter / MainCardReader, etc.), `Priority`, `IsActive`, `CreatedAt`\n\nUsage scenarios:\n- Kitchen printer routing\n- Card reader priority assignment\n- Binding configuration in Setup/Maintenance mode"
+        },
+        "local_setting": {
+          "title": "LocalSetting Table",
+          "content": "Edge POS local settings (EdgePos Override).\n\nKey columns: `Id`, `EdgePosId`, `SettingKey`, `SettingValue`, `SourceLayer` (Global / RegionalDistributor / BrandHQ / Branch / EdgePos), `PolicyVersion`, `AppliedAt`, `CreatedAt`\n\nUsage scenarios:\n- Store the final applied value from the settings inheritance model\n- Track which layer a value originated from\n- Distinguish between centrally distributed policies and local overrides"
+        }
+      }
+    }
+  }
+}

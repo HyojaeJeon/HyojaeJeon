@@ -1,0 +1,317 @@
+{
+  "docs": {
+    "platform_architecture": {
+      "title": "Platform Final Architecture Reference",
+      "category": "Project Integration Design",
+      "description": "The top-level design document that establishes a single standard for the entire platform's technology stack, covering EdgePos / RegionalDistributorPortal / BrandHQPortal / SuperAdmin / CentralApi / SyncWorkers.",
+      "sections": {
+        "purpose": {
+          "title": "Purpose",
+          "content": "Problems this document addresses:\n\n- Different technology choices across projects\n- Confusion around UI / API / Worker / DB boundaries\n- Duplication of GraphQL / REST / Queue / Sync contracts\n- Inconsistent storage strategies between Edge and Central\n\n**Key takeaway**: `Edge uses C++ + CEF + Next.js + SQLite`, `Central uses Next.js + NestJS + Fastify + GraphQL + PostgreSQL`, `Shared layer uses TypeScript contracts`."
+        },
+        "platform_principles": {
+          "title": "Platform-Wide Principles",
+          "content": "- **TypeScript** is the default language for web and server\n- **C++** is used only for the Native Host and shared low-level layers\n- **GraphQL** is the default for central contracts\n- **REST** is used only in `SuperAdmin/CentralApi` via Fastify (exceptions: webhook, file upload, health check, auth callback)\n- **Edge is Offline-First**\n- **Central is Multi-Tenant**\n- **Edge local storage is SQLite**\n- **Central operational storage is PostgreSQL**\n- **Shared contracts have `SharedContracts` as the single source of truth**"
+        },
+        "standard_layers": {
+          "title": "Standard Business Layers",
+          "content": "| Layer | Role |\n|---|---|\n| **SuperAdmin** | Platform provider operations entity |\n| **RegionalDistributor** | Channel partner with exclusive distribution rights for a country/region |\n| **BrandHQ** | Brand headquarters operations entity |\n| **Branch** | Individual store/location under a brand |\n| **EdgePos** | POS terminal installed at a branch |\n| **Device** | Peripheral connected to an EdgePos |"
+        },
+        "db_identifiers": {
+          "title": "DB Identifier Standards",
+          "content": "Common identifiers shared across all central platform data and Edge POS data:\n\n| Identifier | Meaning |\n|---|---|\n| `SuperAdminId` | Platform operator account identifier |\n| `RegionalDistributorId` | Regional/country distribution partner identifier |\n| `BrandHQId` | Brand headquarters identifier |\n| `BranchId` | Branch/store identifier |\n| `EdgePosId` | Edge POS terminal identifier |\n| `DeviceId` | Peripheral device identifier |\n| `OperatorId` | Operator/staff account identifier |\n| `PolicyVersion` | Policy version identifier |\n| `CatalogVersion` | Menu/catalog version identifier |\n| `SyncCursor` | Synchronization position identifier |"
+        },
+        "project_specs": {
+          "title": "Confirmed SPEC Summary by Project",
+          "content": "| Project | Confirmed SPEC | DB / Storage | Contract / Communication |\n|---|---|---|---|\n| **BrandPosApp** | C++ + CEF + Next.js(TS) | SQLite local DB | cefQuery + realtime event |\n| **RegionalDistributorPortal** | Next.js(TS) + App Router | No direct DB access | Apollo Client + GraphQL-first |\n| **BrandHQPortal** | Next.js(TS) + App Router | No direct DB access | Apollo Client + GraphQL-first |\n| **SuperAdmin/Portal** | Next.js(TS) + App Router | No direct DB access | Apollo Client + GraphQL-first |\n| **SuperAdmin/CentralApi** | NestJS + Fastify + Apollo Server | Prisma + PostgreSQL + raw SQL | GraphQL-first, REST only via Fastify |\n| **SuperAdmin/SyncWorkers** | Node.js(TS) + BullMQ | Redis + Central DB | Queue-driven |\n| **SharedKernel** | C++ shared kernel | - | native helper / protocol |\n| **SharedContracts** | TypeScript contract package | - | DTO / enum / schema |\n| **SharedAssets** | versioned runtime assets | - | i18n / static assets |"
+        },
+        "shared_assets": {
+          "title": "Multilingual/SharedAssets Distribution Principles",
+          "content": "- `SharedAssets` is not a shared runtime server but a **version-controlled source package**\n- `SharedAssets/i18n/locales/` is the single translation source for all platforms\n- Each platform copies/packages the required locale assets in its own build pipeline\n- Default language set: `ko`, `vi`, `en`\n- User/brand/branch language preferences are managed via DB settings; actual display strings are resolved by locale key"
+        },
+        "full_stack_overview": {
+          "title": "Full Stack at a Glance",
+          "content": "```\nBrandPosApp (C++ + CEF + Next.js + SQLite)\n  └── Local Bridge / Device Control\n\nRegionalDistributorPortal (Next.js + GraphQL Client)\n  └── SuperAdmin/CentralApi\n\nBrandHQPortal (Next.js + GraphQL Client)\n  └── SuperAdmin/CentralApi\n\nSuperAdmin/Portal (Next.js + GraphQL Client)\n  └── SuperAdmin/CentralApi (NestJS + Fastify + Apollo)\n        ├── PostgreSQL + Prisma + Raw SQL\n        └── Redis / Cache / Queue\n              └── SyncWorkers (Node.js + BullMQ)\n```\n\nEdge POS writes to local SQLite first, then synchronizes with the central API via Outbox/Sync."
+        }
+      }
+    },
+    "superadmin_design": {
+      "title": "SuperAdmin Integrated Platform Design Document",
+      "category": "Project Integration Design",
+      "description": "Design document for the top-level SuperAdmin platform through which the POS provider operates, monitors, deploys, and supports multiple brands. This is not a single-store POS client document but an integrated platform for the provider to manage contracts, deployments, monitoring, and support across multiple brands.",
+      "sections": {
+        "goal": {
+          "title": "Goal Redefined",
+          "content": "The final product is divided into three tiers:\n\n1. **Edge POS** -- `.exe` installed on each store terminal, offline-first, handling orders/payments/tables/kitchen/device control\n2. **Brand HQ Platform** -- Management platform for a single brand to operate multiple branches in an integrated manner, covering menus/pricing/promotions/staff/branch settings/reports\n3. **Super Admin Platform** -- Platform for the POS provider to operate/monitor/deploy/support multiple brands, covering licensing/version deployment/failure monitoring/remote support/audit logs"
+        },
+        "confirmed_spec": {
+          "title": "Confirmed Spec",
+          "content": "| Component | Confirmed SPEC | Notes |\n|---|---|---|\n| SuperAdmin/Portal | Next.js(TS) + App Router + Apollo Client | Provider operations portal |\n| SuperAdmin/CentralApi | NestJS + Fastify + Apollo Server 5 | Multi-tenancy, RBAC, audit |\n| SuperAdmin/SyncWorkers | Node.js(TS) + BullMQ + Redis | outbox, retry, reconciliation |\n| SharedContracts | TypeScript contract package | Single source of shared contracts |\n| SharedAssets | runtime assets | i18n / static assets |"
+        },
+        "platform_overview": {
+          "title": "Full Platform at a Glance",
+          "content": "Two key statements:\n\n- The real-time source of truth for store operations is **Edge POS + Edge Local DB**\n- The integrated source of truth for brand/provider operations is the **Central Platform**\n\n```\nSuper Admin Platform (Provider Operations)\n  → Brand HQ Platform (Brand HQ Operations)\n    → Branch (Branch Operations)\n      → EdgePos (Store Execution Terminal)\n        → Edge Local DB (Local Business Source of Truth)\n```"
+        },
+        "multitenancy_model": {
+          "title": "Multi-Tenancy Hierarchy Model",
+          "content": "```\nSuperAdmin\n  └── RegionalDistributor\n        └── BrandHQ\n              └── Branch\n                    └── EdgePos\n                          └── Device\n```\n\nCore Principles:\n- `SuperAdmin` is the platform operations entity\n- `RegionalDistributor` is the channel/contract/support layer\n- `BrandHQ` is the operational source of truth for the brand\n- `Branch` is an independent operational unit\n- `EdgePos` is a transaction execution unit\n- `Device` belongs to an `EdgePos`\n- A single `EdgePos` belongs to exactly one `BrandHQ` and one `Branch`"
+        },
+        "core_identifiers": {
+          "title": "Core Identifiers",
+          "content": "Identifiers shared across all central platform data and Edge POS data:\n\n`SuperAdminId`, `RegionalDistributorId`, `BrandHQId`, `BranchId`, `EdgePosId`, `OperatorId`, `DeviceId`, `PolicyVersion`, `CatalogVersion`, `SyncCursor`\n\nWithout these identifiers:\n- Cannot distinguish which BrandHQ owns the data\n- Cannot aggregate which branch generated the revenue\n- Cannot trace which EdgePos caused a failure\n- Cannot verify which menu version was deployed"
+        },
+        "data_ownership": {
+          "title": "Data Ownership",
+          "content": "### Local Source of Truth (Edge POS + Edge Local DB)\nReal-time table status, in-progress orders, payment processing status, receipt/kitchen print status, device connection status, offline queue and recovery state\n\n### Brand Central Source of Truth (Brand HQ Platform)\nMenu master, pricing policies, promotion policies, branch operating policies, staff/permission templates, brand announcements, report/settlement standards\n\n### Provider Central Source of Truth (Super Admin Platform)\nBrand contracts/licensing, POS version deployment policies, feature flags, remote support permissions, overall failure status, global audit logs"
+        }
+      }
+    },
+    "distributor_design": {
+      "title": "RegionalDistributor Integrated Distribution Platform Design Document",
+      "category": "Project Integration Design",
+      "description": "Design document defining the ownership and management boundaries of the channel partner layer that holds exclusive distribution rights and deployment responsibilities at the country/region level. This is written from the perspective of distributors/channel partners, not the brand headquarters or store POS.",
+      "sections": {
+        "purpose": {
+          "title": "Purpose",
+          "content": "Five objectives of the RegionalDistributor layer:\n\n1. Model exclusive distribution rights at the country/region level\n2. Separate contract/license/deployment boundaries between the provider and brand headquarters\n3. Manage region-specific regulations, taxes, languages, payment methods, and support policies at the regional level\n4. Track brand onboarding and store rollouts from the local partner perspective\n5. Reflect the `SuperAdmin → RegionalDistributor → BrandHQ → Branch → EdgePos` hierarchy in documentation and DB identifiers"
+        },
+        "confirmed_spec": {
+          "title": "Confirmed Spec",
+          "content": "| Component | Confirmed SPEC | Notes |\n|---|---|---|\n| RegionalDistributorPortal | Next.js(TS) + App Router + Apollo Client | Dedicated web project for distributors/integrated distribution |\n| Central Connection | SuperAdmin/CentralApi (GraphQL API) | Query contracts/licenses/deployments/settlements |\n| UI State | Redux Toolkit when needed | Screen state, forms, filters |\n| Direct DB Access | None | All persistent data goes through the central API |"
+        },
+        "responsibility_position": {
+          "title": "Responsibility Position",
+          "content": "```\nSuperAdmin — Full control by the platform provider, global licensing/policy/audit\n  └── RegionalDistributor — Exclusive regional/country distribution rights, local contract/deployment/support coordination\n        └── BrandHQ — Brand HQ operations, menus/pricing/promotions/branch policies\n              └── Branch — Actual store operational unit\n                    └── EdgePos — Store real-time transaction execution unit\n                          └── Device — Printers, card readers, scanners, etc.\n```"
+        },
+        "management_scope": {
+          "title": "Management Scope",
+          "content": "**Directly Managed Scope:**\n- Exclusive regional/country distribution rights\n- Brand contract status\n- License quantities/expiration/distributable range\n- Local support SLA\n- Regional announcements/deployment policies\n- Regional regulatory compliance settings\n- Brand onboarding progress\n- Deployment/support/settlement tracking\n\n**Not Directly Owned:**\n- Brand menu/pricing source data\n- Real-time source of branch orders/payments\n- Transaction source in EdgePos local DB\n- Store operator attendance/identity management source"
+        },
+        "data_ownership": {
+          "title": "Data Ownership",
+          "content": "**RegionalDistributor Source Data:**\n`RegionalDistributorId`, `TerritoryCode`, `CountryCode`, `ContractId`, `LicensePoolId`, `RolloutBatchId`, `SupportSlaId`, `DistributorUserId`, `SettlementBatchId`\n\n**Boundary with BrandHQ Source Data:**\nMenu master, pricing source, real-time branch order source, payment authorization source, and table occupancy status source each belong to either `BrandHQ` or `EdgePos` as the source of truth."
+        },
+        "settings_inheritance": {
+          "title": "Settings Inheritance Model",
+          "content": "Settings evaluation priority:\n\n1. `Global Default`\n2. `RegionalDistributor Default`\n3. `BrandHQ Default`\n4. `Branch Override`\n5. `EdgePos Override`\n\nRules:\n- Regional regulations and payment provider restrictions go in `RegionalDistributor Default`\n- Brand-specific policies go in `BrandHQ Default`\n- Branch/terminal exceptions are limited to overrides\n- It must be traceable which layer a given value came from"
+        },
+        "deployment": {
+          "title": "Deployment and Onboarding",
+          "content": "RegionalDistributor serves as the middle hub for three flows:\n\n**1. Brand Onboarding** -- Contract registration, territory confirmation, license allocation\n\n**2. Downstream Distribution** -- Policies, catalogs, regional regulations, support template delivery\n\n**3. Upstream Reporting** -- Rollout results, failure summaries, settlement/support status\n\nFlow: `SuperAdmin → RegionalDistributor → BrandHQ → Branch → EdgePos`"
+        }
+      }
+    },
+    "brandhq_design": {
+      "title": "BrandHQ Brand & Branch Operations Platform Design Document",
+      "category": "Project Integration Design",
+      "description": "Design reference for the brand headquarters operations team to manage multiple branches in an integrated manner. BrandHQ is the source of truth for policies and master data, while Edge POS is the source of truth for real-time transactions.",
+      "sections": {
+        "goal": {
+          "title": "Goal",
+          "content": "Four objectives of the BrandHQ platform:\n\n1. Operate multiple branches under a single brand with common policies\n2. Centrally manage menus, pricing, promotions, and staff permissions\n3. Allow per-branch overrides while maintaining brand standards\n4. Serve as the deployment standard for policies and catalogs going down to Edge POS"
+        },
+        "confirmed_spec": {
+          "title": "Confirmed Spec",
+          "content": "| Component | Confirmed SPEC | Notes |\n|---|---|---|\n| BrandHQPortal | Next.js(TS) + App Router + Apollo Client | Brand HQ operations portal |\n| Central Connection | SuperAdmin/CentralApi (GraphQL API) | Menus/pricing/promotions/branches/reports |\n| Downstream Distribution Target | BrandPosApp / EdgePos | Policy/menu/pricing deployment |\n| On-Site Settings | BrandPosApp Setup/Maintenance mode | Peripherals, local settings, commissioning |"
+        },
+        "responsibility_flow": {
+          "title": "Responsibility at a Glance",
+          "content": "```\nBrandHQ Portal (Brand HQ Operations)\n  ├── BrandHQ Master (Menus/Pricing/Promotions)\n  ├── BrandHQ Policy (Operating Policies/Permission Templates)\n  └── Branch Override (Per-Branch Exception Settings)\n        └── Downstream Distribution\n              └── EdgePos (Store Terminal)\n                    └── Sales / Orders / Payments (Store Real-Time Transactions)\n                          └── Upstream Sync → BrandHQ\n```\n\nKey point: BrandHQ is the **source of truth for policies and master data**, Edge POS is the **source of truth for real-time transactions**"
+        },
+        "management_layers": {
+          "title": "Management Layer Model",
+          "content": "Base layers directly managed by BrandHQ:\n\n| Layer | Role |\n|---|---|\n| **BrandHQ** | Top-level management unit |\n| **Branch** | Independent operational unit |\n| **EdgePos** | Deployment target unit |\n| **OperatorTemplate** | Staff role template |\n| **Catalog** | Menus/pricing/categories |\n| **Policy** | Operating policies |\n\nPrinciple: Operator identity/attendance data and permission templates must be separable."
+        },
+        "data_ownership": {
+          "title": "Data Ownership",
+          "content": "### BrandHQ Source of Truth\nMenu master, pricing policies, promotion policies, tax/service operating policies, brand announcements, staff role templates\n\n### Branch Override Allowed Items\nPer-branch sale availability, per-branch pricing exceptions, per-branch promotion applicability, printer/kitchen routing, business hours/holidays\n\n### Edge POS Boundary\nBrandHQ does **not** directly own the following as source of truth: in-progress order status, payment processing status, table occupancy status, device connection status. This data always has Edge POS and Edge Local DB as the source of truth."
+        },
+        "settings_inheritance": {
+          "title": "Settings Inheritance Model",
+          "content": "Settings evaluation priority:\n\n1. `Global Default`\n2. `BrandHQ Default`\n3. `Branch Override`\n4. `EdgePos Override`\n\nRules:\n- Overrides should be minimized\n- It must be traceable which layer a given value came from\n- `PolicyVersion` and `CatalogVersion` must be managed together during deployment"
+        },
+        "deployment_sync": {
+          "title": "Deployment and Synchronization",
+          "content": "Two flows from the BrandHQ perspective:\n\n**Downstream Distribution** -- Deploy menus/pricing/policies to branches and terminals\n\n**Upstream Sync Consumption** -- Receive sales/status/errors from stores and reflect them in the operations dashboard\n\nKey principles:\n- Deployment is policy-centric\n- Upstream sync is operational visibility-centric\n- Real-time transaction success is determined by **local commit, not central API success**"
+        }
+      }
+    },
+    "edgepos_architecture": {
+      "title": "Edge POS Architecture Design Document",
+      "category": "Project Integration Design",
+      "description": "Design reference for converting the Edge POS UI installed at each branch to CEF + Next.js(TypeScript) + Redux Toolkit + RTK Query, while keeping C++ dedicated to business logic/SQLite local DB/server communication/peripherals.",
+      "sections": {
+        "decisions": {
+          "title": "Decisions",
+          "content": "| Item | Decision |\n|---|---|\n| **Platform** | x86/x64 dual build, CEF included, per-customer environment deployment |\n| **Migration Scope** | Core 3 screens first (Table, Order, Payment) |\n| **Next.js Serving** | Static build (`output: 'export'`) + CEF Custom Scheme (`app://pos/`) |\n| **Peripherals** | Kept in C++ → called from JS via cefQuery |\n| **Operating Model** | Offline-First, local DB is the source of truth for business data |\n| **State Management** | RTK Query unified, Redux slice for UI state only |\n| **Browser Lifecycle** | Single main CefBrowser instance, screen transitions via React routing |\n| **Layer Principle** | UI/Bridge → UseCases → DB/Manager → Infra unidirectional |\n| **Persistence** | No full Repository per Manager, only `*Store` separation |\n| **Deduplication** | Idempotency guaranteed via requestId + idempotencyKey |\n| **Final UI Goal** | Complete removal of MFC UI, convergence to CEF + Next.js |\n| **Dev Environment** | `app/design-system/` + Mock transport, UI development possible without C++ |\n| **CEF Stability** | CefLifeSpanHandler crash detection → automatic browser recreation → rehydration from local DB |"
+        },
+        "directory_structure": {
+          "title": "Directory Structure",
+          "content": "```\nBrandPosApp/\n├── AppHost/                  # Entry point, bootstrap, service assembly\n│   ├── Bootstrap/            # AppCompositionRoot, ServiceRegistry\n│   └── BrandPosHost/         # WinMain entry, CEF initialization\n├── Presentation/\n│   └── CEF/                  # CEF hosting, browser lifecycle\n│       ├── Handlers/         # CefAppHandler, CefBrowserDlg, SchemeHandler, Recovery\n│       └── InternalBridge/   # PosRequestResponder, PosRequestActions, PosRealTimeSender\n├── UseCases/                 # Use case orchestration\n│   ├── Shared/               # TransactionRunner, IdempotencyService, OperationLock\n│   ├── Table/                # SelectTableUseCase, RefreshTablesUseCase\n│   ├── Order/\n│   └── Payment/\n├── Domain/                   # Pure business rules and Managers\n│   ├── Table/\n│   ├── Order/\n│   ├── Payment/\n│   └── ...\n├── Infrastructure/           # SQLite, Sync, Device, ExternalBridge\n│   ├── Persistence/SQLite/\n│   ├── Sync/\n│   ├── Device/\n│   └── ExternalBridge/\n└── PosUi/                    # Next.js(TypeScript) UI\n    └── src/\n        ├── app/              # Next.js routes\n        ├── screens/          # Actual product screens\n        ├── design-system/    # Shared UI source library\n        ├── store/            # RTK Query + Redux slice\n        ├── bridge/           # C++ transport/command\n        └── shared/           # Shared utilities/composite components\n```"
+        },
+        "layer_summary": {
+          "title": "Layer Role Summary",
+          "content": "| Layer | Responsibility | Includes |\n|---|---|---|\n| **Presentation** | Screen, browser hosting, CEF single shell UI bridge | PosUi/, Presentation/CEF/, AppHost/ |\n| **InternalBridge** | Request routing, parameter validation, response formatting | PosRequestResponder, PosRequestActions, PosRealTimeSender |\n| **UseCases** | Use case orchestration, transactions, idempotency, locks, post-processing | SelectTableUseCase, TransactionRunner, IdempotencyService |\n| **Domain/Manager** | Business rules, computation, data manipulation | TableManager, OrderMgr, SaleMgr, CustMgr, ItemMgr |\n| **Infrastructure** | Local DB connection, synchronization, external integration, devices, network | DBAccess, ExternalBridge, Device, Sync |"
+        },
+        "posui_rules": {
+          "title": "PosUi Development Rules",
+          "content": "- `design-system/` is the **source** of shared UI, `app/design-system/` is the catalog/preview route\n- `screens/` contains actual product screens; screens shown in the catalog **reuse the screens/* implementation directly**\n- `posApi.js` is the root createApi, domain-specific `*Api.js` files use `injectEndpoints()`\n- Server state uses RTK Query cache as source of truth, Redux slice is for UI state only\n- `PosRequestSender.js` is the low-level transport, internally selecting `cefTransport` / `mockTransport`\n- `next dev` + `app/design-system/` + `mockTransport` combination enables UI development without C++"
+        },
+        "cef_usecases": {
+          "title": "CEF/Browser Operation Rules",
+          "content": "- Main CefBrowser maintains a **single instance**\n- `CloseBrowser` call is **prohibited** during screen transitions\n- Fixed `1024x768` resolution and touch usability standards must be followed\n- Renderer crash recovery is based on **DB/UseCase bootstrap data** (not browser memory)\n- Do not implement without respecting crash loop criteria and CEF recreation/recovery contracts"
+        },
+        "cross_layer_rules": {
+          "title": "Cross-Layer Rules",
+          "content": "**InternalBridge**: `PosRequestActions` must be a thin router. Direct SQL execution in Actions, direct composition of multiple Managers, and transaction/lock/idempotency handling are prohibited.\n\n**UseCases**: Coordinate the order of multiple Manager calls, check requestId/idempotencyKey, acquire operation locks, execute transactions, update Ledger/Outbox, control post-commit UI event/sync ACK/print order. **Only UseCases have the authority to decide UI events and call PosRealTimeSender.**\n\n**Domain/Manager**: Pure business computation, DB row creation/modification, domain result return. Direct PosRealTimeSender calls prohibited, external ACK dispatch decisions prohibited.\n\n**ExternalBridge**: External payload authentication/validation, external format → internal DTO conversion, UseCases invocation. Direct SQL execution, direct UI transmission, and arbitrary order/payment confirmation state decisions are prohibited."
+        },
+        "mfc_migration": {
+          "title": "MFC Migration Rules",
+          "content": "Existing Dialog code is separated into 4 destinations:\n\n1. **UI layout/buttons/Grid** → `PosUi/src/design-system/` + `PosUi/src/screens/`\n2. **Button click routing** → `CEF/InternalBridge/PosRequestActions/`\n3. **Use case coordination/transactions/idempotency/post-processing** → `UseCases/`\n4. **Actual DB queries/amount calculations/data processing** → `Domain/Manager` + `Infrastructure/Persistence`\n\nMigration order: UI separation → Actions router creation → UseCases extraction → DB/Manager cleanup"
+        },
+        "mandatory_requirements": {
+          "title": "Mandatory Requirements",
+          "content": "- **Golden Rule**: `ExternalBridge → UseCases → DB/Manager → PosRealTimeSender → UI`\n- Information not persisted to DB must not be displayed in the UI\n- ExternalBridge cannot directly call PosRealTimeSender\n- Manager also cannot directly call PosRealTimeSender\n- Payment/order/delivery reception must guarantee idempotency via `requestId + idempotencyKey`\n- Ledger states: `RECEIVED → PROCESSING → SUCCEEDED / FAILED / COMPENSATED`\n- Outbox states: `PENDING → DISPATCHING → ACKED / FAILED_RETRYABLE / FAILED_TERMINAL`"
+        },
+        "communication_design": {
+          "title": "Communication Design",
+          "content": "### PosRequest (UI → C++ Round-Trip)\n- Entry point: `PosUi/src/bridge/PosRequestSender.js`\n- C++ side: `PosRequestResponder → PosRequestActions → UseCases`\n\n### PosRealTime (C++ → UI One-Way)\n- C++ side: `UseCases → PosRealTimeSender`\n- UI side: `PosRealTimeReceiver`\n\n### JSON Envelope Rules\nAll messages have common headers: `v`, `requestId`, `timestamp`, `idempotencyKey` (conditional)\n\n### Device Error Rules\nDo not include a complete sentence in msg. Deliver via code-based fields: `type`, `device`, `code`, `msgKey`, `msgParams`, `severity`, `recoverable`, `retryable`, `action`"
+        },
+        "operational_gates": {
+          "title": "Operational Gates",
+          "content": "- Screen transitions and rollbacks are controlled via INI feature flags\n- Gradual migration starting with core 3 screens: Table → Order → Payment\n- Offline-First: local SQLite commit is the criterion for business success\n- RTK Query cache is not the recovery source\n- Recovery is based on: `local SQLite + Ledger + Outbox`"
+        },
+        "build_pipeline": {
+          "title": "Build Pipeline",
+          "content": "- x86/x64 dual build maintained\n- Next.js builds as static export with `output: 'export'`\n- CEF Custom Scheme (`app://pos/`) serves static files\n- `app://pos/` scheme handler provides static file routing rules\n- UI/CEF/resource version synchronization rules required"
+        }
+      }
+    },
+    "edgepos_az_guide": {
+      "title": "Edge POS End-to-End Flow A-Z Guide",
+      "category": "Project Integration Design",
+      "description": "A document that explains how Edge POS should operate from A to Z based on the final design standards. This is not a document evaluating current code completeness but a design reference for operational flow.",
+      "sections": {
+        "purpose": {
+          "title": "Purpose of This Document",
+          "content": "What this document covers:\n\n- Where POS execution begins\n- How C++ / CEF / Next.js(TypeScript) / RTK Query connect\n- What layers a user action on screen passes through to reach SQLite\n- How the screen refreshes after data is saved\n- How offline, synchronization, recovery, and setup modes work\n- At which point each file takes responsibility"
+        },
+        "one_page_summary": {
+          "title": "One-Page Summary",
+          "content": "| Aspect | Description |\n|---|---|\n| Execution Form | Native POS program running as `BrandPosApp.exe` |\n| UI | Next.js(TypeScript) runs inside CEF |\n| State Management | Server state via RTK Query, local UI state via Redux Toolkit slice |\n| Request Entry Point | All UI requests go through PosRequestSender |\n| Business Processing | UseCases coordinate transactions and sequencing |\n| Domain Rules | Domain/*Manager holds business rules |\n| Storage | Final storage is SQLite |\n| Real-Time Updates | C++ wakes the UI via PosRealTimeSender |\n| Recovery | Recovery is based on local store, not UI cache |"
+        },
+        "overall_flow": {
+          "title": "Overall Flow",
+          "content": "```\nBrandPosApp.exe\n  → AppHost / BrandPosHost\n    → Presentation/CEF\n      → PosUi / Next.js(TypeScript)\n        → RTK Query / Redux Toolkit\n        → PosRequestSender\n          → PosRequestResponder\n            → PosRequestActions\n              → UseCases\n                → Domain Managers\n                  → Infrastructure/Persistence/SQLite\n                    → SQLite local store\n              → PosRealTimeSender → PosRealTimeReceiver → UI\n              → Outbox / RequestLedger / RecoveryState\n                → Sync / Recovery\n```\n\nOne-line summary: `exe starts → CEF loads → Next.js UI displays → RTK Query prepares screen → request forwarded → UseCase → Domain → SQLite save → real-time event → screen update`"
+        },
+        "points_a_to_j": {
+          "title": "Starting Points A-J Detailed Flow",
+          "content": "### A. Execution Start\n`BrandPosApp.cpp` → `CefBootstrap.cpp` (CEF initialization) → `CefAppHandler.cpp` (handler registration) → `CefSchemeHandler.cpp` (`app://pos/` mapping) → `CefBrowserDlg.cpp` (browser creation) → `BrowserRecoveryManager.cpp` (crash recovery monitoring)\n\n### B. PosUi Load\nCEF reads PosUi's static build output: `layout.tsx` → `page.tsx` → `pos/table/page.tsx`, `pos/order/page.tsx`, `pos/payment/page.tsx`, Setup mode, Maintenance mode\n\n### C. Screen Initialization\nRTK Query reads initial data: table list, currently selected table, order list, pending payment status, system settings, device connection status. Screens do not create data themselves but render by reading existing state.\n\n### D. UI → C++ Request\n`screen → RTK Query mutation / bridge command → PosRequestSender → cefTransport → PosRequestResponder → PosRequestActions → UseCases`\n\n### E. Data Persistence\nUseCases start → Domain validation → SQLite `*Crud.cpp` save → RequestLedger record → Outbox enqueue → commit\n\n### F. Post-Save UI Update\n`PosRealTimeSender` → `CefBrowserDlg` (JS event dispatch) → `PosRealTimeReceiver` → RTK Query cache invalidation/update → Redux slice cleanup\n\n### G. Representative Business Flows\nTable selection, order creation, payment processing -- each follows UseCase → Domain → SQLite → RealTimeSender → UI update sequence\n\n### H. Setup/Maintenance Mode\nSetup: Initial installation, network/device configuration, branch/terminal binding, initial data\nMaintenance: Device inspection, settings reapplication, log collection, update execution\n\n### I. Synchronization\nOutbox → SyncDispatcher → Central API transmission → ACK → Outbox status update. If offline, held in queue; retransmitted on connectivity recovery.\n\n### J. Recovery\nOn process restart: recheck incomplete PROCESSING tasks, DB-based rehydration, Ledger-based deduplication, retransmission of unsent Outbox items."
+        }
+      }
+    },
+    "edgepos_checklist": {
+      "title": "Edge POS P0/P1 Design Refinement Checklist",
+      "category": "Project Integration Design",
+      "description": "A checklist that reviews mandatory refinement items by priority before production deployment of the Edge POS Architecture Design Document. P0 items block production deployment if incomplete. P1 items are recommended for completion before pilot.",
+      "sections": {
+        "p0_layer_boundaries": {
+          "title": "P0 -- Layer Boundaries",
+          "content": "- [ ] `PosRequestActions` does not perform direct SQL/Manager composition logic and only calls `UseCases`\n- [ ] `ExternalBridge` does not execute SQL directly\n- [ ] `ExternalBridge` does not call `PosRealTimeSender` directly\n- [ ] UI transmission uses only the single `PosRealTimeSender` path"
+        },
+        "p0_idempotency": {
+          "title": "P0 -- Idempotency / Deduplication",
+          "content": "- [ ] `requestId` and `idempotencyKey` are mandatory for payment requests\n- [ ] `requestId` tracking is applied to order creation/modification/cancellation\n- [ ] Persistent Ledger table records `RECEIVED/PROCESSING/SUCCEEDED/FAILED/COMPENSATED` states\n- [ ] On duplicate `idempotencyKey` receipt, existing result is returned instead of new execution"
+        },
+        "p0_transaction": {
+          "title": "P0 -- Transaction / Consistency",
+          "content": "- [ ] External ACK is not sent before DB persistence is complete\n- [ ] UI state is not updated before DB persistence is complete\n- [ ] Policy distinguishing print/device failure from DB save failure is documented\n- [ ] Each use case terminates within a single UseCase unit"
+        },
+        "p0_failure_recovery": {
+          "title": "P0 -- Failure Recovery",
+          "content": "- [ ] Procedure for rechecking incomplete `PROCESSING` tasks on process restart is implemented\n- [ ] Rules for re-querying incomplete payments are documented\n- [ ] Table/order/delivery data can be rehydrated from DB\n- [ ] Retransmission procedure exists for unsent external ACKs"
+        },
+        "p0_operational": {
+          "title": "P0 -- Operational Safeguards",
+          "content": "- [ ] Per-screen feature flags exist\n- [ ] Core 3 screens are structured to operate exclusively on the CEF single shell\n- [ ] Operational rollback conditions are documented\n- [ ] Pilot store rollout sequence is defined"
+        },
+        "p1_browser": {
+          "title": "P1 -- Browser / Runtime",
+          "content": "- [ ] Single `CefBrowser` instance strategy is reflected in implementation design\n- [ ] `root_cache_path` and `cache_path` are explicitly configured\n- [ ] Session cookie / localStorage persistence policy is documented\n- [ ] Remote debugging / devtools policy is differentiated between production and development"
+        },
+        "p1_performance": {
+          "title": "P1 -- Performance / Memory",
+          "content": "- [ ] x86 memory limit and allowed RSS baseline are defined\n- [ ] Long-duration soak test scenario exists\n- [ ] Target metrics for screen transition time, initial load time, and payment completion time\n- [ ] Gate for x64 transition when x86 targets are not met is documented"
+        },
+        "p1_contract": {
+          "title": "P1 -- Contract / Interface",
+          "content": "- [ ] Message Envelope standard is commonly applied across all channels\n- [ ] Usage rules for `v`, `requestId`, `timestamp`, `idempotencyKey` fields are finalized\n- [ ] Bridge request/response examples are documented\n- [ ] `VERSION_MISMATCH` handling UX is defined"
+        },
+        "p1_observability": {
+          "title": "P1 -- Observability",
+          "content": "- [ ] All logs include the `requestId` chain\n- [ ] Device logs, bridge logs, and business logs are separated\n- [ ] Operations guide specifies which logs to check first during failures\n- [ ] Tracking keys for external payment/VAN/MQTT responses are documented"
+        },
+        "p1_qa": {
+          "title": "P1 -- Quality Assurance",
+          "content": "- [ ] Bridge contract tests are automated\n- [ ] UseCase unit tests exist\n- [ ] Recovery tests after forced termination exist\n- [ ] Equivalence comparison scenarios between MFC results and new UI results exist"
+        },
+        "p1_deployment": {
+          "title": "P1 -- Deployment / Static Build",
+          "content": "- [ ] Next.js builds with `output: 'export'` as standard\n- [ ] List of features prohibited in static export is shared\n- [ ] `app://pos/` scheme handler provides static file routing rules\n- [ ] UI/CEF/resource version synchronization rules exist"
+        }
+      }
+    }
+  },
+  "az_flow": {
+    "a": {
+      "title": "Process Start",
+      "summary": "BrandPosApp.exe starts → CEF initialization → browser creation",
+      "detail": "1. `BrandPosApp.exe` runs → enters `WinMain`\n2. `CefBootstrap.cpp` initializes CEF runtime (command line args, settings)\n3. `CefAppHandler.cpp` registers browser process handler\n4. `CefSchemeHandler.cpp` registers `app://pos/` custom scheme\n5. `CefBrowserDlg.cpp` creates **single CEF browser instance** (1024×768)\n6. `BrowserRecoveryManager.cpp` starts renderer crash monitoring\n\n### Bootstrap Dependency Assembly\n\n`AppCompositionRoot.cpp`'s `ComposeApp()` function registers all services:\n\n```\nServiceRegistry\n├── Register<TableManager>()\n├── Register<TransactionRunner>()\n├── Register<IdempotencyService>()\n├── Register<OperationLockService>()\n├── Register<RequestLedgerStore>()\n├── Register<OutboxStore>()\n├── Register<PosRealTimeSender>(browser_dlg)\n└── Register<SelectTableUseCase>(table_mgr, tx_runner, idempotency, realtime_sender)\n```\n\n`ServiceRegistry` is a **type-index based DI container**:\n- `Register<T>(shared_ptr<T>)` — registers by interface type\n- `Resolve<T>()` — resolves by type\n- `Has<T>()` — checks registration\n\n**Key Principle**: Only **one** browser is maintained for the entire app lifetime. CloseBrowser must never be called during screen transitions."
+    },
+    "b": {
+      "title": "PosUI Loading (UI Loading)",
+      "summary": "CEF loads Next.js static build → initial screen rendering",
+      "detail": "1. CEF loads the Next.js static build output (`out/` folder) via the `app://pos/` scheme\n2. `layout.tsx` → `page.tsx` → initial route (`/pos/table`) rendering\n\n### StoreProvider Initialization\n\n`StoreProvider.tsx` creates the Redux Store as a **singleton**:\n\n```\nStoreProvider\n├── Maintains single store instance via useRef\n├── makeStore() → configureStore({\n│   reducer: {\n│     [posApi.reducerPath]: posApi.reducer,  // RTK Query cache\n│     ui: uiReducer                          // UI-only state\n│   },\n│   middleware: getDefault().concat(posApi.middleware)\n│ })\n└── Wraps children with React-Redux Provider\n```\n\n### PosRealTimeReceiver Registration\n\n`PosRealTimeReceiver.tsx` registers C++ → UI event listeners:\n\n```\nwindow.addEventListener('POS_NATIVE_EVENT', handler)\n\nEvent routing:\n├── TABLE_REFRESH    → invalidateTags(['Table'])\n├── ORDER_NEW        → invalidateTags(['Order','Table']) + toast\n├── ORDER_UPDATED    → invalidateTags(['Order'])\n├── PAYMENT_COMPLETE → invalidateTags(['Payment','Order','Table']) + clear processing\n├── SYNC_STATUS_CHANGED → invalidateTags(['Sync'])\n└── DEVICE_ERROR     → pushDeviceError to uiSlice\n```\n\n**Key Principle**: Uses `next export` static build, not `next dev`. No Node.js server at runtime."
+    },
+    "c": {
+      "title": "RTK Query Initialization (State Setup)",
+      "summary": "posApi createApi root → domain-specific injectEndpoints → hook generation",
+      "detail": "### posApi.ts — createApi Root\n\n```\nconst posApi = createApi({\n  reducerPath: 'posApi',\n  baseQuery: posBaseQuery,     // Routes all requests through PosRequestSender\n  tagTypes: ['Table', 'Order', 'Payment', 'Sync', 'System', 'Config'],\n  endpoints: () => ({})        // Empty — injected per domain via injectEndpoints\n})\n```\n\n`posBaseQuery` takes a `BridgeArg` interface and calls `PosRequestSender.sendRequest()`:\n```\ninterface BridgeArg {\n  cmd: string            // 'TABLE:GET_ALL', 'ORDER:ADD_ITEM', etc.\n  params: Record<string, unknown>\n  idempotencyKey?: string\n}\n```\n\n### tableApi.ts — Table Domain Endpoints\n\n```\ntableApi.injectEndpoints({\n  endpoints: (build) => ({\n    getTables: build.query<TableData, void>({\n      query: () => ({ cmd: 'TABLE:GET_ALL', params: {} }),\n      providesTags: ['Table']\n    }),\n    selectTable: build.mutation<unknown, { id: number }>({\n      query: ({ id }) => ({ cmd: 'TABLE:SELECT', params: { id } }),\n      invalidatesTags: ['Table']\n    })\n  })\n})\n\ninterface TableData {\n  tables: Array<{\n    id: number\n    name: string\n    label: string\n    status: 'E' | 'U' | 'L'  // Empty, Used(Occupied), Locked\n    floor: number\n  }>\n}\n```\n\n### orderApi.ts — Order/Menu Domain\n\n```\ngetMenu: query<MenuData, void>\n  → cmd: 'MENU:GET_ALL'\n  → providesTags: ['Order']\n\ngetOrder: query<OrderData, { tableId }>\n  → cmd: 'ORDER:GET'\n  → providesTags: ['Order']\n\naddOrderItem: mutation<unknown, { tableId, menuId, quantity }>\n  → cmd: 'ORDER:ADD_ITEM'\n  → invalidatesTags: ['Order', 'Table']\n\ninterface MenuData {\n  categories: Array<{ id, name, sort }>\n  items: Array<{ id, name, price, categoryId, ... }>\n}\n```\n\n### Hook Usage Example\n\n```\n// Auto-load data on screen entry\nconst { data, isLoading } = useGetTablesQuery()\n\n// Execute mutation on user action\nconst [selectTable] = useSelectTableMutation()\nawait selectTable({ id: 5 })\n// → invalidatesTags: ['Table'] → useGetTablesQuery auto-refetch\n```\n\n**Prohibited**: Copying RTK Query results to a slice. Introducing React Query in parallel. Calling `window.cefQuery` directly from components."
+    },
+    "d": {
+      "title": "Request Flow",
+      "summary": "UI → PosRequestSender → cefQuery → C++ Responder → Actions → UseCases",
+      "detail": "### PosRequestSender.ts — Envelope Creation & Transmission\n\n```\ninterface Envelope {\n  v: number              // Protocol version (currently 1)\n  requestId: string      // Auto-generated via crypto.randomUUID()\n  timestamp: string      // ISO 8601\n  cmd: string            // 'TABLE:SELECT'\n  params: Record<string, unknown>\n  idempotencyKey?: string\n}\n\ninterface PosResponse {\n  v: number\n  requestId: string\n  timestamp: string\n  ok: boolean\n  code: string           // 'OK' | 'BUSY' | 'DUPLICATE' | error code\n  data?: unknown\n  error?: { message: string }\n}\n```\n\n### Transport Selection\n\n```\ngetTransport():\n├── window.cefQuery exists? → cefTransport (actual POS)\n└── Otherwise              → mockTransport (dev mode)\n```\n\n### cefTransport.ts — CEF Native Call\n\n```\nwindow.cefQuery({\n  request: JSON.stringify(envelope),\n  onSuccess: (response) => JSON.parse(response),\n  onFailure: (errorCode, errorMessage) => throw Error\n})\n```\n\n### mockTransport.ts — Fake Responses for Development\n\n```\nSupported commands:\n├── 'TABLE:GET_ALL'  → Returns table.json fixture\n├── 'TABLE:SELECT'   → Changes target table status to 'U'\n├── 'MENU:GET_ALL'   → Returns menu.json fixture\n├── 'ORDER:GET'      → Returns empty order\n├── 'ORDER:ADD_ITEM' → Confirms item addition\n└── 'PAYMENT:EXECUTE'→ Returns payment success after 1.5s delay\n\nDev controls:\n- window.__MOCK_DELAY_MS = 200   // Simulate network delay\n- window.__MOCK_OFFLINE = true   // Simulate offline state\n```\n\n### C++ Side Reception: PosRequestResponder.cpp\n\n```\nReceive → JSON parse → Protocol version validation (v=1)\n→ Route by cmd prefix to domain:\n  ├── 'TABLE:*'   → TableActions::Handle()\n  ├── 'ORDER:*'   → OrderActions::Handle()\n  ├── 'PAYMENT:*' → PaymentActions::Handle()\n  └── 'SYSTEM:*'  → SystemActions::Handle()\n→ Build standard response format → JSON serialize → Return via cefQuery callback\n```\n\n### TableActions.cpp — Thin Router Example\n\n```\nTableActions::Handle(cmd, params_json, requestId, idempotencyKey)\n├── 'TABLE:GET_ALL'  → RefreshTablesUseCase.Execute(ctx)\n└── 'TABLE:SELECT'   → SelectTableUseCase.Execute(ctx, tableCode)\n\n// No business logic inside Actions — only UseCase invocation\n```\n\n**Prohibited**:\n- Executing SQL directly in Actions\n- Combining multiple Managers directly in Actions\n- Calling `window.cefQuery` directly from components"
+    },
+    "e": {
+      "title": "Persistence (Data Storage)",
+      "summary": "UseCases → idempotency check → lock acquisition → transaction → Domain → DB commit",
+      "detail": "### SelectTableUseCase — Actual Execution Flow\n\n```\nclass SelectTableUseCase {\n  // Dependencies (non-owning pointer)\n  TableManager* tableMgr_;\n  TransactionRunner* txRunner_;\n  IdempotencyService* idempotency_;\n  PosRealTimeSender* realtimeSender_;\n\n  UseCaseResult Execute(const RequestContext& ctx, int tableCode);\n}\n```\n\nExecution order:\n1. **Idempotency check** — `IdempotencyService::Check(idempotencyKey, requestId)`\n\n```\nenum class CheckResult {\n  NEW_REQUEST,        // New request → proceed with execution\n  DUPLICATE_SUCCESS,  // Already succeeded → return cached result\n  DUPLICATE_FAILED,   // Already failed → allow retry\n  IN_PROGRESS         // In progress → return BUSY\n}\n```\n\n2. **Operation lock acquisition** — `OperationLockService::TryAcquire(\"TABLE\", entityId)`\n\n```\nclass OperationLockService {\n  bool TryAcquire(domain, entityId)  // Returns false on failure → return Busy\n  void Release(domain, entityId)\n\n  // Domain-separated — enables parallel processing:\n  ├── \"TABLE\"   — table operation lock\n  ├── \"ORDER\"   — order operation lock\n  ├── \"PAYMENT\" — payment operation lock\n  └── \"PRINT\"   — print job lock\n\n  // RAII Guard: auto-release on scope exit\n  OperationLockService::Guard lock(\"TABLE\", \"5\");\n}\n```\n\n3. **Transaction execution** — `TransactionRunner::Run(work)`\n\n```\nRecords simultaneously within a single transaction:\n├── TableManager::OccupyTable(tableCode)  // Business data\n├── RequestLedgerStore::Upsert(...)        // Idempotency record\n│   Status: RECEIVED → PROCESSING → SUCCEEDED\n└── OutboxStore::Insert(...)               // Sync queue\n    Channel: \"SALES_UPLOAD\" | \"ORDER_SYNC\" | \"CHANGE_LOG\"\n\nok=true  → COMMIT\nok=false → ROLLBACK\nException → ROLLBACK\n```\n\n4. **Result model**\n\n```\nstruct UseCaseResult {\n  bool ok;\n  string code;\n  string dataJson;      // Response data on success\n  string errorMessage;  // Error message on failure\n  bool isReplay;        // Idempotency: whether reusing previous result\n\n  static Success(dataJson)\n  static Replay(dataJson)    // Duplicate request → return cache\n  static Fail(code, message)\n  static Busy(message)        // Lock acquisition failed\n  static IdempotencyConflict()\n}\n```\n\n### RequestLedgerStore — Idempotency Ledger\n\n```\nstruct LedgerEntry {\n  idempotencyKey, requestId\n  status: RECEIVED | PROCESSING | SUCCEEDED | FAILED | COMPENSATED\n  resultJson   // Response cache on success\n  createdAt, updatedAt\n}\n\nFindStaleProcessing(timeout=300s)  // Search for incomplete tasks during recovery\n```\n\n### OutboxStore — Sync Queue\n\n```\nstruct OutboxEntry {\n  channel: \"SALES_UPLOAD\" | \"ORDER_SYNC\" | \"CHANGE_LOG\"\n  payloadJson\n  status: PENDING | DISPATCHING | ACKED | FAILED_RETRYABLE | FAILED_TERMINAL\n  retryCount\n}\n\nProhibited: Card authorization, QR payments, delivery app real-time calls are NOT Outbox targets\n```\n\n### Sync vs Async — Guaranteeing POS Real-Time Speed\n\nWhy the \"DB first, UI second\" principle does not degrade POS speed:\n**Local SQLite INSERT = 1~5ms** — disk write on the same device, not a remote server.\n\n| Operation Type | Processing Method | Duration | Reason |\n|---|---|---|---|\n| **Local DB save** (order/payment/table) | **Sync** — DB first → UI second | 1~5ms | Ensures data integrity, perceived as instant |\n| **Central server sync** (Outbox → CentralApi) | **Async** — background queue after commit | 100ms~∞ | Network latency, retry on failure |\n| **Receipt printing / QR output** | **Async** — post-commit processing | 50~500ms | Device I/O, no UI blocking needed |\n| **External API** (card auth / QR payment) | **Sync wait** — save to DB after result | 1~30s | Cannot confirm without authorization |"
+    },
+    "f": {
+      "title": "UI Update (Post-Save Update)",
+      "summary": "Two-path separation: ① mutation success → direct cache patch ② external change → realtime event → granular tag invalidation",
+      "detail": "### Cache Update Strategy (Two-Path Separation Principle)\n\n#### Path 1: Result of my own mutation (immediate)\n\n```\nmutation success\n  → onQueryStarted + updateQueryData to directly patch RTK Query cache\n  → NO invalidatesTags (no refetch)\n  → Example: TABLE:SELECT success → change only that table's status to 'OCCUPIED'\n```\n\n#### Path 2: Realtime event from external change (async)\n\n```\nC++ PosRealTimeSender → CustomEvent('POS_NATIVE_EVENT')\n  → PosRealTimeReceiver receives\n  → isPendingRequest(requestId) check\n    - My request's result → skip (already handled by Path 1)\n    - External change → invalidate only granular tags\n```\n\n#### Granular Tag Rules\n\n```\nBefore (inefficient):\n  invalidateTags(['Table'])     ← full list refetch\n\nAfter (improved):\n  invalidateTags([\n    { type: 'Table', id: 3 },  ← only that table\n    { type: 'Floor', id: 1 },  ← only that floor\n  ])\n```\n\n#### Core Principles\n\n- **No double refetch for the same change**\n- **No full list reload for partial change**\n- **idempotencyKey required for state-changing mutations**\n\n### PosRealTimeSender.cpp — C++ → UI Event Broadcast\n\n```\nclass PosRealTimeSender {\n  void SendToUI(type, payloadJson, requestId)\n  // requestId included → UI can filter self-originated events\n\n  void NotifyTableChanged(floorId = 0)\n  void NotifyNewOrder(orderId, tableId)\n  void NotifyPaymentComplete(paymentId, orderId)\n  void NotifySyncStatusChanged(backlogCount, lastErrorCode)\n  void NotifyDeviceError(type, device, code, msgKey, ...)\n}\n```\n\n### Post-Processing Order (controlled by UseCases)\n\n```\nDB commit complete\n  ↓\n1. PosRealTimeSender → UI event (with requestId)\n  ↓\n2. Print job queuing (async)\n  ↓\n3. Central server sync ACK (async Outbox)\n```\n\n**Prohibited**: Calling PosRealTimeSender from Manager. Calling from ExternalBridge. Double refetch from mutation + realtime event."
+    },
+    "g": {
+      "title": "Core Use Cases",
+      "summary": "Table selection → order creation → payment processing: the 3 core flows",
+      "detail": "### Table Selection (SelectTableUseCase)\n\n```\nExecute(ctx, tableCode):\n1. IdempotencyService.Check(ctx.idempotencyKey)\n2. OperationLockService.TryAcquire(\"TABLE\", tableCode)\n3. TransactionRunner.Run(() => {\n     TableManager.OccupyTable(tableCode)\n     // Table status: E(Empty) → U(Used/Occupied)\n     LedgerStore.Upsert(key, SUCCEEDED, result)\n   })\n4. PosRealTimeSender.NotifyTableChanged()\n→ Result: UseCaseResult.Success({ tableCode, status: 'U' })\n```\n\n### Table Query (RefreshTablesUseCase)\n\n```\nExecute(ctx, floorId):\n// Read-only — no transaction/idempotency/lock needed\n1. TableManager.GetAllTables(floorId)\n→ Result: UseCaseResult.Success({ tables: [...] })\n```\n\n### TableManager — Business Rules\n\n```\nstruct TableResult {\n  bool success;\n  int tableCode;\n  string status;       // 'E' | 'U' | 'L'\n  string errorCode;\n  string error_detail;\n}\n\nOccupyTable(code):  Empty → Occupied (fails if already occupied/locked)\nReleaseTable(code): Occupied → Empty (fails if already empty)\nChangeTable(from, to): Validates from=Occupied + to=Empty\n```\n\n### Order Creation (CreateOrderUseCase) — P1\n\n```\nExecute(ctx, tableCode, items[]):\n1. Idempotency + lock(\"ORDER\")\n2. Transaction: OrderManager.CreateOrder() + add items + calculate amounts\n3. Ledger + Outbox records\n4. NotifyNewOrder() → kitchen print (async)\n```\n\n### Payment Processing (ExecutePaymentUseCase) — P1\n\n```\nExecute(ctx, order_id, payment_method, amount):\n1. Idempotency + lock(\"PAYMENT\")\n2. External payment API call (card/QR → sync wait)\n3. Transaction: SaleManager.ConfirmSale() + TableManager.ReleaseTable()\n4. Ledger(SUCCEEDED) + Outbox(SALES_UPLOAD)\n5. NotifyPaymentComplete() → receipt (async) → sync (async)\n```"
+    },
+    "h": {
+      "title": "Setup/Maintenance Mode",
+      "summary": "Setup mode during on-site installation → device connection/table setup/menu sync",
+      "detail": "BrandPosApp operates in two modes:\n\n### Operations Mode (Daily Operations)\n- Table → order → payment core flow\n- Offline-first, local SQLite is the source of truth\n\n### Setup/Maintenance Mode (On-Site Installation)\n- Device (printer/card reader/scale) connection setup\n- Table/floor layout configuration\n- Initial menu/pricing/policy sync from central server\n- Staff account and permission setup\n- INI feature flag configuration\n\n**Switch Method**: Same executable, internal mode branching\n**Access Control**: Administrator authentication required"
+    },
+    "i": {
+      "title": "Synchronization",
+      "summary": "Outbox → central server upload / SyncCursor-based downstream reception",
+      "detail": "### OutboxStore — Upstream (Edge → Central)\n\n```\nstruct OutboxEntry {\n  channel: \"SALES_UPLOAD\" | \"ORDER_SYNC\" | \"CHANGE_LOG\"\n  payloadJson\n  status: PENDING → DISPATCHING → ACKED\n  retryCount\n  lastError\n}\n\nFindPending(limit=50)  // Query unprocessed records\nGetBacklogCount()      // Unprocessed count → UI status display\n```\n\n### SyncStateStore — Sync Channel State Tracking\n\n```\nstruct SyncStateEntry {\n  channel\n  lastAttemptAt, lastSuccessAt\n  retryCount\n  lastError_code\n  backlogCount\n}\n\nIndependent tracking per channel:\n├── SALES_UPLOAD: Sales aggregate upload\n├── ORDER_SYNC: Order history sync\n└── CHANGE_LOG: Change log transmission\n```\n\n### Downstream (Central → Edge)\n- Menu/pricing/promotions → receive changes based on `SyncCursor`\n- Brand announcements, staff permission updates\n- `Checksum`-based integrity verification\n\n**Prohibited**: Putting card auth/cancel in Outbox. Putting QR payment requests in Outbox. Putting delivery app real-time accept/reject in Outbox."
+    },
+    "j": {
+      "title": "Recovery",
+      "summary": "Process restart → DB + Ledger-based state recovery → resume incomplete tasks",
+      "detail": "### Recovery Source: DB + Ledger (NOT browser memory/Redux)\n\n### On Process Restart\n\n```\n1. RecoveryState table → check last state\n2. RequestLedgerStore.FindStaleProcessing(timeout=300s)\n   → Search for tasks with status='PROCESSING' that are over 5 minutes old\n3. For each incomplete task:\n   ├── Compensatable → mark as COMPENSATED\n   ├── Retryable → re-execute\n   └── Indeterminate → FAILED + admin notification\n4. SyncCursor → identify sync resume point\n5. OutboxStore.FindPending() → retransmit unsent records\n6. Restore UI to safe initial state (table screen)\n```\n\n### On Renderer Crash\n\n```\nBrowserRecoveryManager:\n1. OnRenderProcessTerminated() callback received\n2. crashCount++\n3. crashCount >= 3 ? safe_mode : recreate browser\n4. On recreation, restore from DB-based bootstrap data\n   (Redux snapshot usage prohibited)\n```\n\n**Prohibited**: Using browser memory/Redux snapshot as recovery source."
+    }
+  }
+}

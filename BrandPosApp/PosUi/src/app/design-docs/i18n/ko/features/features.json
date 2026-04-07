@@ -1,0 +1,234 @@
+{
+  "docs": {
+    "feature_coverage_matrix": {
+      "title": "기능리스트 커버리지 매트릭스",
+      "category": "플랫폼 별 화면/기능리스트",
+      "description": "HJ-POS 레거시의 모든 기능 범주가 신규 플랫폼 문서들에 반영되었는지 확인하는 기준표다.",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "레거시 POS 기능 인벤토리(`FeatureInventory.md`)의 모든 기능 범주가 신규 플랫폼 문서에 매핑되었는지 확인하는 **누락 여부 체크포인트**다. 기능 상세는 각 플랫폼 문서를 따른다."
+        },
+        "coverage_table": {
+          "title": "커버리지 요약",
+          "content": "| Legacy 섹션 | 대표 범주 | 주 담당 문서 | 상태 |\n|---|---|---|---|\n| 1 | 전체 통계 요약 | 전체 문서 | Covered |\n| 2 | Table & Floor | 04-EdgePos-기능리스트 | Covered |\n| 3 | Sales & Payment | 04-EdgePos-기능리스트 | Covered |\n| 4 | Inventory & Menu | 04-EdgePos-기능리스트 | Covered |\n| 5 | Customer | 04-EdgePos-기능리스트 | Covered |\n| 6 | System & Admin | 01-SuperAdmin-기능리스트 | Covered |\n| 7 | External Bridge | 04-EdgePos-기능리스트 | Covered |\n| 8 | Kiosk | 04-EdgePos-기능리스트 | Covered |\n| 9 | Dialog inventory | 04-EdgePos-기능리스트 | Covered |"
+        },
+        "validation_results": {
+          "title": "검증 결과",
+          "content": "**플랫폼별 책임:**\n\n| Platform | 책임 범위 |\n|---|---|\n| **SuperAdmin** | 멀티테넌시, 대리점/브랜드 온보딩, 라이선스, 배포, 감사, 모니터링, 지원 |\n| **RegionalDistributor** | 지역/국가 유통권, 현지 계약, rollout 계획, 현지 지원, settlement 추적 |\n| **BrandHQ** | 메뉴, 가격, 프로모션, 지점 정책, 브랜드 리포트, 카탈로그 배포 |\n| **EdgePos** | 주문, 결제, 테이블, 고객, 재고, 키오스크, 장치 연동, 로컬 복구 |\n\n- 레거시 기능 범주 1~9는 모두 신규 플랫폼 문서에 매핑 완료\n- 상세 기능은 04(EdgePos)에 가장 많이 집중, 01/02/03은 운영/배포/정책 계층 담당\n- 이 매트릭스는 신규 기능 추가 시 함께 갱신 필요"
+        }
+      }
+    },
+    "superadmin_features": {
+      "title": "SuperAdmin 기능리스트",
+      "category": "플랫폼 별 화면/기능리스트",
+      "description": "공급사가 여러 브랜드와 대리점을 통합 운영하기 위해 필요한 상위 관리 기능 목록. 매장 운영 기능이 아니라 플랫폼 전체를 통제하는 기능만 다룬다.",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "공급사가 여러 브랜드와 대리점을 통합 운영하기 위해 필요한 기능을 정리한다. 매장 운영 기능이 아니라, **플랫폼 전체를 통제하는 상위 관리 기능만** 다룬다."
+        },
+        "tenant_org_mgmt": {
+          "title": "테넌트/조직 관리",
+          "content": "- 대리점(RegionalDistributor) 생성/승인/정지\n- 브랜드 본사(BrandHQ) 온보딩\n- 지점 계층 연결 및 조직 구조 관리\n- 계정 소유권과 운영 권한 이관"
+        },
+        "license_deploy": {
+          "title": "라이선스/배포 관리",
+          "content": "- 브랜드별/지역별 라이선스 발급\n- 버전 배포 정책 관리\n- 롤아웃 대상 및 단계적 배포 제어\n- 배포 실패/재시도/승인 상태 추적"
+        },
+        "policy_audit": {
+          "title": "정책/감사/보안",
+          "content": "- 글로벌 RBAC 정책\n- 감사 로그 조회\n- 정책 템플릿 배포\n- 보안/접근 제어 기준 관리"
+        },
+        "monitoring": {
+          "title": "운영 모니터링",
+          "content": "- 브랜드/대리점/지점 상태 모니터링\n- 장애 알림과 헬스체크\n- 원격 지원 기록\n- 배포 상태와 동기화 상태 추적"
+        },
+        "contract_mgmt": {
+          "title": "중앙 계약 관리",
+          "content": "- `SuperAdmin/CentralApi`의 GraphQL contract 관리\n- REST 예외 엔드포인트 사용 범위 관리\n- `SharedContracts` 버전 관리"
+        },
+        "non_responsibility": {
+          "title": "비책임 범위",
+          "content": "- 주문, 결제, 테이블, 재고 같은 **매장 원본 데이터는 소유하지 않는다**\n- Edge POS의 로컬 장치 연결을 직접 처리하지 않는다\n- BrandHQ의 운영 화면을 중복 구현하지 않는다\n- `System & Admin`의 상위 통제 기능을 SuperAdmin으로 승격\n- 레거시 POS의 운영 데이터는 EdgePos로 귀속"
+        }
+      }
+    },
+    "distributor_features": {
+      "title": "RegionalDistributor 기능리스트",
+      "category": "플랫폼 별 화면/기능리스트",
+      "description": "국가/지역 단위 독점 유통권을 가진 대리점 계층의 책임을 정의한다. 브랜드 본사와 공급사 사이의 계약, rollout, 지원 경계를 분리한다.",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "국가/지역 단위 독점 유통권을 가진 대리점 계층의 책임을 정의한다. 브랜드 본사와 공급사 사이의 계약, rollout, 지원 경계를 분리한다."
+        },
+        "territory_mgmt": {
+          "title": "지역/국가 유통권 관리",
+          "content": "- 국가/지역 독점 권리 관리\n- 담당 브랜드 목록 관리\n- 지역별 운영 허용 범위 관리\n- 지역별 정책/규제/세금 기준 반영"
+        },
+        "brand_onboarding": {
+          "title": "브랜드 온보딩",
+          "content": "- BrandHQ 신규 등록 지원\n- 설치 범위와 rollout 일정 조율\n- 초기 배포 패키지 전달\n- 현지 지원 채널 연결"
+        },
+        "contract_settlement": {
+          "title": "계약/정산",
+          "content": "- 대리점 계약 상태 관리\n- 라이선스/계약 갱신 추적\n- 현지 정산 기준 관리\n- 수수료/지원 비용 트래킹"
+        },
+        "regional_dashboard": {
+          "title": "지역 운영 대시보드",
+          "content": "- 지역별 설치 현황\n- 지점 활성화 현황\n- 장애/배포/지원 이력 확인\n- 브랜드별 운영 상태 요약"
+        },
+        "non_responsibility": {
+          "title": "비책임 범위",
+          "content": "- 실제 매장 주문/결제 데이터는 다루지 않는다\n- EdgePos 장치 드라이버나 로컬 DB를 직접 제어하지 않는다\n- BrandHQ의 메뉴/가격/직원 운영 화면을 중복 구현하지 않는다\n- 레거시 HJ-POS에 직접 존재하던 기능은 거의 없으며, 신규 플랫폼에서 추가 정의되는 계층\n- 배포, 지원, 감사, 정산의 상위 책임은 레거시 운영 기능의 외곽을 흡수"
+        }
+      }
+    },
+    "brandhq_features": {
+      "title": "BrandHQ 기능리스트",
+      "category": "플랫폼 별 화면/기능리스트",
+      "description": "하나의 브랜드가 여러 지점을 통합 운영할 때 필요한 기능을 정의한다. 매장 운영의 정책 원본과 카탈로그 원본을 관리한다.",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "하나의 브랜드가 여러 지점을 통합 운영할 때 필요한 기능을 정의한다. **매장 운영의 정책 원본과 카탈로그 원본**을 관리한다."
+        },
+        "menu_catalog": {
+          "title": "메뉴/카탈로그 관리",
+          "content": "- 상품/메뉴 마스터 관리\n- 가격 정책과 세금 정책 관리\n- 프로모션/할인 이벤트 관리\n- 지점별 카탈로그 배포"
+        },
+        "branch_ops": {
+          "title": "지점 운영",
+          "content": "- 지점 생성/수정/정지\n- 지점별 override 관리\n- 지점 권한 템플릿 관리\n- 지점 운영 현황 조회"
+        },
+        "org_employee": {
+          "title": "조직/직원 관리",
+          "content": "- 브랜드 조직 구조 관리\n- 직원 권한/역할 템플릿 관리\n- 운영자 계정 분리\n- 지점 단위 접근 제어"
+        },
+        "report_settlement": {
+          "title": "리포트/정산",
+          "content": "- 매출 리포트\n- 지점별 실적 비교\n- 정책별 효과 추적\n- 중앙 API를 통한 조회/분석"
+        },
+        "edgepos_link": {
+          "title": "EdgePos 연계",
+          "content": "- EdgePos로 내려갈 정책/카탈로그 배포\n- Setup/Maintenance 모드에서 현장 설정 적용\n- 장치 템플릿과 로컬 커미셔닝 정보 관리"
+        },
+        "non_responsibility": {
+          "title": "비책임 범위",
+          "content": "- 주문/결제 거래의 **실시간 원본은 소유하지 않는다**\n- 지역 독점 유통권과 공급사 전체 배포 정책은 SuperAdmin/RegionalDistributor 책임\n- 로컬 장치 제어는 BrandPosApp 내부 모드에서 수행\n- `Inventory & Menu`, `Customer`, `System & Admin` 중 브랜드 운영에 필요한 부분을 흡수\n- 상품/메뉴/가격/프로모션의 관리 흐름은 BrandHQ의 핵심 책임"
+        }
+      }
+    },
+    "edgepos_features": {
+      "title": "EdgePOS 기능리스트",
+      "category": "플랫폼 별 화면/기능리스트",
+      "description": "HJ-POS-TEST 레거시 프로젝트(MFC/C++ POS, ~55만 줄)의 전체 기능을 EdgePos 책임 관점으로 재정리한 최종본. 22개 Manager 클래스, 610개+ 메서드, 350개 다이얼로그를 포함한다.",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "레거시 기능의 대부분은 이 문서에 들어간다. SuperAdmin / RegionalDistributor / BrandHQ 문서는 상위 운영 책임만 분리해서 다룬다.\n\n**분석 대상**: HJ-POS-TEST (MFC/C++ POS, ~55만 줄)\n**분석 방법**: 5개 전문 에이전트 병렬 분석 (Manager 클래스 전수 조사, IDD_ 다이얼로그 전수 조사, resource.h 스캔)"
+        },
+        "stats_summary": {
+          "title": "전체 통계 요약",
+          "content": "| 구분 | 수량 |\n|---|---|\n| C++ 소스 파일 (.h/.cpp) | 941개 |\n| Manager 클래스 | 22개 |\n| 공개 메서드 (추출) | 610개+ |\n| IDD_ 다이얼로그 정의 | 350개 (메인 243 + Set 107) |\n| 결제 게이트웨이 | 7개 (BCCard, Infoplus, ZaloPay, HJVietPay, NAPAS, BIDV, WeTax) |\n| 지원 언어 | 3개 (한국어, 영어, 베트남어) |\n| 배달 대행사 연동 | 6개 |\n\n**중요도 기준**: P0=핵심 매출 흐름(전환 1차), P1=운영 필수(전환 2차), P2=보조/관리(전환 3차)\n\n| Domain | Manager | 메서드 | 다이얼로그 | P0 | P1 | P2 |\n|---|---|---|---|---|---|---|\n| Table & Floor | 1 | ~40 | 12 | 8 | 10 | 6 |\n| Sales & Payment | 2+6GW | ~150 | 30 | 22 | 18 | 12 |\n| Inventory & Menu | 2 | ~170 | 25 | 12 | 15 | 10 |\n| Customer | 1 | ~80 | 15 | 8 | 12 | 8 |\n| System & Admin | 6+Print | ~120 | 120 | 10 | 15 | 20 |\n| External Bridge | 4+MQTT+HTTP | ~50 | 6 | 8 | 6 | 4 |\n| Kiosk | - | - | 22 | 5 | 8 | 6 |\n| **합계** | **22** | **~610** | **~230** | **73** | **84** | **66** |"
+        },
+        "table_floor": {
+          "title": "테이블/플로어 (Table & Floor)",
+          "content": "Manager: `CTableMgr` (DB/TableMgr.h, DB/TableMgr.cpp)\n\n주요 기능:\n- **테이블 초기화/조회**: InitTable, GetTableFromTableCode, GetTableFromID (P0)\n- **테이블 상태 관리**: ClearTableAll, TableOrderClear, ClearOrderFromID (P0)\n- **테이블 잠금/동기화**: UseSysnCheck, SetUseSysn, ChangeTableFromSock (P0)\n- **테이블 이동/합석**: ChangeTable (빈 테이블 이동 또는 주문 합석, 금액/수량 합산) (P0)\n- **테이블 그룹 관리**: SetGroupView, ChangeGroupAlphabetFromSock (P1)\n- **테이블 메모**: UpdateTableMemo (P1)\n- **예약 관리**: CAppointTableviewDlg (P1)\n- **포장/배달 테이블 코드**: 포장/배달 전용 코드 관리 (P1)"
+        },
+        "sales_payment": {
+          "title": "매출/결제 (Sales & Payment)",
+          "content": "Manager: `COrderMgr` + `CSaleMgr` + 7개 결제 게이트웨이\n\n주요 기능:\n- **주문 생성/수정/취소**: 메뉴 선택, 수량, 옵션, 요청사항 (P0)\n- **결제 처리**: 현금/카드/QR/포인트/쿠폰/외상/분할결제 (P0)\n- **더치페이**: 금액/인원/항목별 분할 결제 (P0)\n- **영수증 인쇄**: 주방/고객/배달 전표 (P0)\n- **결제 게이트웨이**: BCCard, Infoplus, ZaloPay, HJVietPay, NAPAS, BIDV, WeTax (P0)\n- **비동기 결제**: QR결제 등 비동기 결과 알림 (P1)\n- **환불/취소**: 결제 건 취소/부분 환불 (P0)"
+        },
+        "inventory_menu": {
+          "title": "상품/메뉴/재고 (Inventory & Menu)",
+          "content": "Manager: `CItemMgr` + `CStockMgr`\n\n주요 기능:\n- **상품 관리**: 상품 등록/수정/삭제, 카테고리, 옵션 (P0)\n- **재고 관리**: 입고/출고, 현황 조회, 날짜별 이력 (P1)\n- **매입 관리**: 공급자별 입고, 매입 수정, 매입 장부 (P1)\n- **재고 정산**: 실사/정산, 재고 조정 (P1)\n- **세트메뉴**: 세트 구성, PLU 코드 관리 (P1)"
+        },
+        "customer": {
+          "title": "고객 관리 (Customer)",
+          "content": "Manager: `CCustMgr`\n\n주요 기능:\n- **고객 등록/검색**: 신규 등록, 검색/선택, 정보 수정 (P0)\n- **고객 상세**: 확장 정보, 구매 이력 (P1)\n- **고객 보관 상품**: 입고/판매/사용 (P2)\n- **외상 관리**: 고객 외상 입금/관리 (P1)\n- **체인 고객**: 체인점 고객 공유 목록 (P2)"
+        },
+        "system_admin": {
+          "title": "시스템/관리 (System & Admin)",
+          "content": "Manager: `CConfigMgr` + `CPrinterMgr` + 기타 5개\n\n주요 기능:\n- **시스템 설정**: 전체 설정, 프린터 설정, 네트워크 설정 (P0)\n- **직원 관리**: 직원 선택/호출/알림, 근태 관리, 급여/수당 (P1)\n- **일일 정산**: 매출 집계, 마감 처리 (P0)\n- **프린터 제어**: 주방 프린터, 고객 프린터, 라벨 프린터 (P0)\n- **백업/복원**: DB 백업, 복원, 데이터 초기화 (P1)\n- **원격 지원**: 원격 접속, 장애 로그 수집 (P2)"
+        },
+        "external_bridge": {
+          "title": "외부 연동 (External Bridge)",
+          "content": "Manager: `CFoodingMgr` + 배달대행 4사 + MQTT + HTTP\n\n주요 기능:\n- **배달 대행**: 요기요, 쿠팡이츠, PAYCO vORDER, BM_NEW, MConnect, 카카오톡 (P0)\n- **Fooding 연동**: 주문 접수/상태 관리 (P0)\n- **MQTT**: 실시간 메시지 수신/발신 (P1)\n- **HTTP**: 외부 API 호출, webhook 수신 (P1)\n- **QR 결제**: VietQR, ZaloPay QR (P0)"
+        }
+      }
+    },
+    "screen_inventory": {
+      "title": "EdgePOS 전체 화면 인벤토리",
+      "category": "플랫폼 별 화면/기능리스트",
+      "description": "HJ-POS-TEST 레거시 프로젝트의 전체 화면(Dialog)을 전수 조사한 결과. PosUi(Next.js) 전환 시 화면 범위 확정, 디자인 시스템 사이드바 구성, 마이그레이션 우선순위 결정에 사용한다.",
+      "sections": {
+        "summary_table": {
+          "title": "화면 수 요약",
+          "content": "| 구분 | 화면 수 |\n|---|---|\n| POS 메인 화면 | 4 |\n| 결제/정산 | 12 |\n| 주문/메뉴 | 8 |\n| 테이블/예약 | 7 |\n| 배달 | 9 |\n| 고객 | 11 |\n| 직원 | 7 |\n| 재고/매입/장부 | 15 |\n| 상품권/포인트/쿠폰 | 6 |\n| 결제수단(QR/카드) | 10 |\n| 영수증/출력 | 5 |\n| 테이블오더 | 5 |\n| 주방 디스플레이 | 5 |\n| 유틸리티/공통 | 16 |\n| **합계 (설정 제외)** | **~142** |"
+        },
+        "pos_main": {
+          "title": "POS 메인 화면 (P0 전환 대상)",
+          "content": "| ID | 화면명 | 설명 | 우선순위 |\n|---|---|---|---|\n| M-01 | 메인 메뉴 | POS 진입점, 영업/설정/분석/회원/재고 등 메뉴 버튼 | P0 |\n| M-02 | 테이블 화면 | 층별 테이블 그리드, 테이블 선택/상태 표시 | P0 |\n| M-03 | 주문 화면 | 메뉴 버튼, 주문 목록, 수량 입력, 고객 정보 | P0 |\n| M-04 | 결제 화면 | 총액 계산, 할인 적용, 결제수단 선택, 정산 | P0 |"
+        },
+        "payment": {
+          "title": "결제/정산",
+          "content": "12개 화면: 결제 메인, 결제(베트남), 결제 빠른선택, 주문결제, 더치페이(금액/인원/항목별 분할), 기타 결제 설정, 결제 메모, 비동기 결제 알림 등"
+        },
+        "order": {
+          "title": "주문/메뉴",
+          "content": "8개 화면: 주문 메인, 주문 빠른선택, 주문 상품 상세, 주문 항목 목록, 주문 메시지/요청사항, PLU 세트, 세트메뉴 구성 등"
+        },
+        "table_reservation": {
+          "title": "테이블/예약",
+          "content": "7개 화면: 테이블 메인, 테이블 빠른선택, 테이블 선택(합석/이동), 테이블 메시지, 그룹 체크아웃, 예약 관리, 예약 테이블 뷰"
+        },
+        "delivery": {
+          "title": "배달",
+          "content": "9개 화면: 배달 관리(MFC/Sciter v1/v2), 배달 주소, 배달 출력, 배달대행, 주소 입력, 발신번호 표시"
+        },
+        "customer": {
+          "title": "고객",
+          "content": "11개 화면: 고객 등록, 고객 검색, 고객 정보 입력/조회/상세, 고객 전체 등록, 고객 보관 상품(입고/판매/사용), 외상 관리, 체인 고객 목록"
+        },
+        "employee": {
+          "title": "직원",
+          "content": "7개 화면: 직원 선택, 직원 호출, 직원 알림, 근태 관리, 근태 지급, 근태 수정, 근태 설정"
+        },
+        "stock": {
+          "title": "재고/매입/장부",
+          "content": "15개 화면: 재고 관리, 재고 입력/조회/날짜 조회/정산/입고, 매입 관리/수정, 일일 장부, 월간 장부, 원가 관리 등"
+        },
+        "gift_point": {
+          "title": "상품권/포인트",
+          "content": "6개 화면: 상품권 등록/발행/사용/조회, 포인트 관리, 쿠폰 관리"
+        },
+        "payment_methods": {
+          "title": "결제수단(QR/카드)",
+          "content": "10개 화면: 카드 승인, VietQR, ZaloPay, NAPAS, BIDV, 현금, 외상, 포인트결제, 쿠폰결제, 혼합결제"
+        },
+        "receipt": {
+          "title": "영수증/출력",
+          "content": "5개 화면: 영수증 미리보기, 영수증 인쇄, 주방 전표 인쇄, 배달 전표 인쇄, 라벨 인쇄"
+        },
+        "table_order": {
+          "title": "테이블오더",
+          "content": "5개 화면: 테이블오더 메인, 메뉴 브라우저, 주문 확인, 결제, 완료 화면"
+        },
+        "kitchen": {
+          "title": "주방 디스플레이",
+          "content": "5개 화면: 주방 메인, 주문 대기열, 조리 완료, 알림, 설정"
+        },
+        "utility": {
+          "title": "유틸리티/공통",
+          "content": "16개 화면: 키보드 입력, 숫자 입력, 날짜 선택, 메시지 팝업, 진행 표시, 비밀번호 입력, 확인 다이얼로그, 목록 선택, 이미지 뷰어, 바코드 스캔, 인쇄 미리보기, 도움말, 정보 표시, 에러 표시, 대기 화면, 로딩 화면"
+        },
+        "flow_diagram": {
+          "title": "화면 전환 흐름",
+          "content": "```\n메인 메뉴 (M-01)\n  ├── 테이블 화면 (M-02) → 주문 화면 (M-03) → 결제 화면 (M-04)\n  ├── 배달 관리 (DEL-01~04)\n  ├── 고객 관리 (CUS-01~11)\n  ├── 재고 관리 (STK-01~15)\n  ├── 직원 관리 (EMP-01~07)\n  └── 시스템 설정\n\n핵심 매출 흐름 (P0):\n  테이블 선택 → 주문 입력 → 결제 처리 → 영수증 출력\n```"
+        }
+      }
+    }
+  }
+}

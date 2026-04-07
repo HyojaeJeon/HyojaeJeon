@@ -1,0 +1,265 @@
+// ─────────────────────────────────────────────
+// BrandHQ Master Data
+// 한국어: 브랜드 본사(BrandHQ) 마스터 데이터 영역 - 브랜드 프로필, 지점, 메뉴 카테고리/항목, 가격 정책, 프로모션, 지점 오버라이드, 운영자 템플릿
+// Tiếng Việt: Khu vực dữ liệu chủ trụ sở thương hiệu (BrandHQ) - hồ sơ thương hiệu, chi nhánh, danh mục/mặt hàng menu, chính sách giá, khuyến mãi, ghi đè chi nhánh, mẫu nhân viên vận hành
+// ─────────────────────────────────────────────
+
+// 한국어: 브랜드 프로필 테이블.
+//   브랜드 본사의 기본 정보를 관리한다. 대리점에 소속되며, 하위에 지점, 메뉴, 가격 정책 등을 가진다.
+//   POS 시스템에서 사용하는 메뉴, 가격, 프로모션의 마스터 데이터 원본이다.
+//   Edge POS는 이 데이터를 동기화하여 로컬 SQLite에 캐싱한다.
+//
+// Tiếng Việt: Bảng hồ sơ thương hiệu.
+//   Quản lý thông tin cơ bản của trụ sở thương hiệu. Thuộc đại lý, có các bảng con: chi nhánh, menu, chính sách giá.
+//   Là nguồn dữ liệu chủ (master data) cho menu, giá, khuyến mãi được sử dụng trong hệ thống POS.
+//   Edge POS đồng bộ dữ liệu này và cache vào SQLite cục bộ.
+model BrandProfile {
+  id                  String    @id @default(uuid()) @db.Uuid
+  distributorId       String    @db.Uuid                     // 한국어: 소속 대리점 FK / Tiếng Việt: FK đại lý sở hữu
+  brandCode           String    @unique @db.VarChar(50)      // 한국어: 브랜드 코드 (고유) / Tiếng Việt: Mã thương hiệu (duy nhất)
+  brandName           String    @db.VarChar(200)             // 한국어: 브랜드 이름 / Tiếng Việt: Tên thương hiệu
+  countryCode         String    @db.VarChar(10)              // 한국어: 국가 코드 / Tiếng Việt: Mã quốc gia
+  defaultLanguageCode String    @db.VarChar(10)              // 한국어: 기본 언어 코드 / Tiếng Việt: Mã ngôn ngữ mặc định
+  businessNumber      String?   @db.VarChar(50)              // 한국어: 사업자등록번호 / Tiếng Việt: Mã số kinh doanh
+  contactName         String?   @db.VarChar(120)             // 한국어: 담당자 이름 / Tiếng Việt: Tên người liên hệ
+  contactEmail        String?   @db.VarChar(200)             // 한국어: 담당자 이메일 / Tiếng Việt: Email người liên hệ
+  contactPhone        String?   @db.VarChar(30)              // 한국어: 담당자 전화번호 / Tiếng Việt: Số điện thoại người liên hệ
+  status              String    @default("Active") @db.VarChar(20)
+  createdAt           DateTime  @default(now()) @db.Timestamptz()
+  updatedAt           DateTime  @updatedAt @db.Timestamptz()
+  deletedAt           DateTime? @db.Timestamptz()
+
+  distributor    DistributorProfile @relation(fields: [distributorId], references: [id])
+  assignments    BrandAssignment[]
+  branches       Branch[]
+  menuCategories BrandMenuCategory[]
+  menuItems      BrandMenuItem[]
+  pricePolicies  PricePolicy[]
+  promotions     Promotion[]
+  operatorTemplates OperatorTemplate[]
+
+  @@index([distributorId, status], name: "idx_brand_distributor_status")
+}
+
+// 한국어: 지점(Branch) 테이블.
+//   브랜드에 소속된 개별 매장/지점 정보를 관리한다.
+//   주소, 시간대, 영업시간, 개폐점일 등의 매장 운영 정보를 포함한다.
+//   각 지점에는 여러 Edge POS 단말기(EdgePosTerminal)가 등록될 수 있다.
+//   지점별 설정 오버라이드(BranchOverride)를 통해 본사 기본값을 개별 조정할 수 있다.
+//
+// Tiếng Việt: Bảng chi nhánh (Branch).
+//   Quản lý thông tin cửa hàng/chi nhánh riêng lẻ thuộc thương hiệu.
+//   Bao gồm thông tin vận hành cửa hàng: địa chỉ, múi giờ, giờ kinh doanh, ngày khai/đóng.
+//   Mỗi chi nhánh có thể đăng ký nhiều thiết bị đầu cuối Edge POS (EdgePosTerminal).
+//   Có thể điều chỉnh riêng giá trị mặc định trụ sở qua ghi đè chi nhánh (BranchOverride).
+model Branch {
+  id                  String    @id @default(uuid()) @db.Uuid
+  brandHQId           String    @db.Uuid                     // 한국어: 브랜드 본사 FK / Tiếng Việt: FK trụ sở thương hiệu
+  distributorId       String    @db.Uuid                     // 한국어: 대리점 FK (역정규화) / Tiếng Việt: FK đại lý (denormalization)
+  branchCode          String    @unique @db.VarChar(50)      // 한국어: 지점 코드 (고유) / Tiếng Việt: Mã chi nhánh (duy nhất)
+  branchName          String    @db.VarChar(200)             // 한국어: 지점 이름 / Tiếng Việt: Tên chi nhánh
+  branchType          String    @default("Store") @db.VarChar(30) // 한국어: 지점 유형 (Store/Warehouse/Office) / Tiếng Việt: Loại chi nhánh
+  countryCode         String    @db.VarChar(10)              // 한국어: 국가 코드 / Tiếng Việt: Mã quốc gia
+  regionCode          String?   @db.VarChar(20)              // 한국어: 지역 코드 / Tiếng Việt: Mã khu vực
+  addressLine1        String?   @db.VarChar(255)             // 한국어: 주소 1 / Tiếng Việt: Địa chỉ dòng 1
+  addressLine2        String?   @db.VarChar(255)             // 한국어: 주소 2 / Tiếng Việt: Địa chỉ dòng 2
+  postalCode          String?   @db.VarChar(20)              // 한국어: 우편번호 / Tiếng Việt: Mã bưu chính
+  timeZoneCode        String    @db.VarChar(50)              // 한국어: 시간대 (IANA) / Tiếng Việt: Múi giờ (IANA)
+  defaultLanguageCode String    @db.VarChar(10)              // 한국어: 기본 언어 코드 / Tiếng Việt: Mã ngôn ngữ mặc định
+  businessHoursJson   Json      @default("{}")               // 한국어: 영업시간 JSON / Tiếng Việt: JSON giờ kinh doanh
+  status              String    @default("Active") @db.VarChar(20)
+  openingDate         DateTime? @db.Date                     // 한국어: 개점일 / Tiếng Việt: Ngày khai trương
+  closingDate         DateTime? @db.Date                     // 한국어: 폐점일 / Tiếng Việt: Ngày đóng cửa
+  createdAt           DateTime  @default(now()) @db.Timestamptz()
+  updatedAt           DateTime  @updatedAt @db.Timestamptz()
+  deletedAt           DateTime? @db.Timestamptz()
+
+  brand     BrandProfile      @relation(fields: [brandHQId], references: [id])
+  overrides BranchOverride[]
+  terminals EdgePosTerminal[]
+
+  @@index([brandHQId, status], name: "idx_branch_brand_status")
+  // 한국어: 대리점+지역 인덱스 - 대리점이 관리하는 지역별 지점 조회 최적화
+  // Tiếng Việt: Chỉ mục đại lý+khu vực - tối ưu truy vấn chi nhánh theo khu vực do đại lý quản lý
+  @@index([distributorId, regionCode], name: "idx_branch_distributor")
+}
+
+// 한국어: 브랜드 메뉴 카테고리 테이블.
+//   브랜드의 메뉴 분류 체계를 관리한다.
+//   부모-자식 자기참조(self-referencing) 관계로 다단계 카테고리 구조를 지원한다.
+//   displayOrder로 카테고리 표시 순서를 제어한다.
+//
+// Tiếng Việt: Bảng danh mục menu thương hiệu.
+//   Quản lý hệ thống phân loại menu của thương hiệu.
+//   Hỗ trợ cấu trúc danh mục đa cấp thông qua quan hệ tự tham chiếu (self-referencing) cha-con.
+//   Điều khiển thứ tự hiển thị danh mục bằng displayOrder.
+model BrandMenuCategory {
+  id               String    @id @default(uuid()) @db.Uuid
+  brandHQId        String    @db.Uuid                        // 한국어: 브랜드 FK / Tiếng Việt: FK thương hiệu
+  categoryCode     String    @db.VarChar(60)                 // 한국어: 카테고리 코드 / Tiếng Việt: Mã danh mục
+  categoryName     String    @db.VarChar(200)                // 한국어: 카테고리 이름 / Tiếng Việt: Tên danh mục
+  parentCategoryId String?   @db.Uuid                        // 한국어: 부모 카테고리 FK (null이면 최상위) / Tiếng Việt: FK danh mục cha (null = cấp cao nhất)
+  displayOrder     Int       @default(0)                     // 한국어: 표시 순서 / Tiếng Việt: Thứ tự hiển thị
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now()) @db.Timestamptz()
+  updatedAt        DateTime  @updatedAt @db.Timestamptz()
+  deletedAt        DateTime? @db.Timestamptz()
+
+  brand    BrandProfile       @relation(fields: [brandHQId], references: [id])
+  // 한국어: 자기참조 관계 - 부모/자식 카테고리 트리 구성
+  // Tiếng Việt: Quan hệ tự tham chiếu - cấu trúc cây danh mục cha/con
+  parent   BrandMenuCategory? @relation("CategoryHierarchy", fields: [parentCategoryId], references: [id])
+  children BrandMenuCategory[] @relation("CategoryHierarchy")
+  items    BrandMenuItem[]
+
+  @@unique([brandHQId, categoryCode], name: "uq_menu_category_brand")
+  @@index([brandHQId, parentCategoryId, displayOrder], name: "idx_menu_category_brand")
+}
+
+// 한국어: 브랜드 메뉴 항목(Menu Item) 테이블.
+//   브랜드가 판매하는 개별 상품/메뉴 항목의 마스터 데이터를 관리한다.
+//   기본 가격(basePrice), 세율(taxRate), 단위(unitType), 품절 상태(isSoldOut) 등을 포함한다.
+//   카테고리에 소속되며, 브랜드 내에서 itemCode가 고유하다.
+//
+// Tiếng Việt: Bảng mặt hàng menu (Menu Item) thương hiệu.
+//   Quản lý dữ liệu chủ của từng sản phẩm/mặt hàng menu mà thương hiệu bán.
+//   Bao gồm giá cơ sở (basePrice), thuế suất (taxRate), loại đơn vị (unitType), trạng thái hết hàng (isSoldOut).
+//   Thuộc danh mục, itemCode duy nhất trong phạm vi thương hiệu.
+model BrandMenuItem {
+  id             String    @id @default(uuid()) @db.Uuid
+  brandHQId      String    @db.Uuid                          // 한국어: 브랜드 FK / Tiếng Việt: FK thương hiệu
+  itemCode       String    @db.VarChar(60)                   // 한국어: 상품 코드 / Tiếng Việt: Mã sản phẩm
+  itemName       String    @db.VarChar(200)                  // 한국어: 상품 이름 / Tiếng Việt: Tên sản phẩm
+  categoryId     String    @db.Uuid                          // 한국어: 소속 카테고리 FK / Tiếng Việt: FK danh mục sở hữu
+  itemType       String    @default("Standard") @db.VarChar(30)   // 한국어: 상품 유형 (Standard/Combo/Option) / Tiếng Việt: Loại sản phẩm
+  basePrice      Decimal   @default(0) @db.Decimal(14, 2)    // 한국어: 기본 판매가 / Tiếng Việt: Giá bán cơ sở
+  taxRate        Decimal   @default(0) @db.Decimal(5, 2)     // 한국어: 세율 (%) / Tiếng Việt: Thuế suất (%)
+  unitType       String    @default("EA") @db.VarChar(20)    // 한국어: 판매 단위 (EA/KG/SET 등) / Tiếng Việt: Đơn vị bán (EA/KG/SET, v.v.)
+  isSoldOut      Boolean   @default(false)                   // 한국어: 품절 여부 / Tiếng Việt: Trạng thái hết hàng
+  displayOrder   Int       @default(0)                       // 한국어: 표시 순서 / Tiếng Việt: Thứ tự hiển thị
+  searchKeywords String?                                     // 한국어: 검색용 키워드 / Tiếng Việt: Từ khóa tìm kiếm
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now()) @db.Timestamptz()
+  updatedAt      DateTime  @updatedAt @db.Timestamptz()
+  deletedAt      DateTime? @db.Timestamptz()
+
+  brand    BrandProfile      @relation(fields: [brandHQId], references: [id])
+  category BrandMenuCategory @relation(fields: [categoryId], references: [id])
+
+  @@unique([brandHQId, itemCode], name: "uq_menu_item_brand")
+  @@index([brandHQId, categoryId, displayOrder], name: "idx_menu_item_brand_category")
+}
+
+// 한국어: 가격 정책(Price Policy) 테이블.
+//   브랜드 단위로 적용되는 가격 조정 정책을 관리한다.
+//   할인, 할증, 시간대별 가격 등의 규칙을 JSON(ruleJson)으로 저장한다.
+//   유효 기간(effectiveFrom ~ effectiveTo)으로 정책 적용 기간을 제어한다.
+//
+// Tiếng Việt: Bảng chính sách giá (Price Policy).
+//   Quản lý chính sách điều chỉnh giá áp dụng theo đơn vị thương hiệu.
+//   Lưu các quy tắc như giảm giá, phụ thu, giá theo khung giờ dưới dạng JSON (ruleJson).
+//   Kiểm soát khoảng thời gian áp dụng chính sách bằng (effectiveFrom ~ effectiveTo).
+model PricePolicy {
+  id            String    @id @default(uuid()) @db.Uuid
+  brandHQId     String    @db.Uuid                           // 한국어: 브랜드 FK / Tiếng Việt: FK thương hiệu
+  policyCode    String    @db.VarChar(60)                    // 한국어: 정책 코드 / Tiếng Việt: Mã chính sách
+  policyName    String    @db.VarChar(200)                   // 한국어: 정책 이름 / Tiếng Việt: Tên chính sách
+  policyType    String    @db.VarChar(30)                    // 한국어: 정책 유형 (Discount/Surcharge/TimeBase) / Tiếng Việt: Loại chính sách
+  ruleJson      Json      @default("{}")                     // 한국어: 가격 규칙 JSON / Tiếng Việt: JSON quy tắc giá
+  effectiveFrom DateTime  @db.Date                           // 한국어: 유효 시작일 / Tiếng Việt: Ngày bắt đầu hiệu lực
+  effectiveTo   DateTime? @db.Date                           // 한국어: 유효 종료일 / Tiếng Việt: Ngày kết thúc hiệu lực
+  status        String    @default("Active") @db.VarChar(20)
+  createdAt     DateTime  @default(now()) @db.Timestamptz()
+  updatedAt     DateTime  @updatedAt @db.Timestamptz()
+  deletedAt     DateTime? @db.Timestamptz()
+
+  brand BrandProfile @relation(fields: [brandHQId], references: [id])
+
+  @@unique([brandHQId, policyCode], name: "uq_price_policy_brand")
+  @@index([brandHQId, policyType, status], name: "idx_price_policy_brand")
+}
+
+// 한국어: 프로모션(Promotion) 테이블.
+//   브랜드 단위로 적용되는 판매 촉진 이벤트를 관리한다.
+//   프로모션 유형, 적용 규칙(ruleJson), 시작/종료 시각을 포함한다.
+//   가격 정책(PricePolicy)과 별도로 관리되며, 기간 한정 이벤트에 사용한다.
+//
+// Tiếng Việt: Bảng khuyến mãi (Promotion).
+//   Quản lý các sự kiện khuyến mại áp dụng theo đơn vị thương hiệu.
+//   Bao gồm loại khuyến mãi, quy tắc áp dụng (ruleJson), thời điểm bắt đầu/kết thúc.
+//   Quản lý riêng biệt với chính sách giá (PricePolicy), sử dụng cho sự kiện giới hạn thời gian.
+model Promotion {
+  id            String    @id @default(uuid()) @db.Uuid
+  brandHQId     String    @db.Uuid                           // 한국어: 브랜드 FK / Tiếng Việt: FK thương hiệu
+  promotionCode String    @db.VarChar(60)                    // 한국어: 프로모션 코드 / Tiếng Việt: Mã khuyến mãi
+  promotionName String    @db.VarChar(200)                   // 한국어: 프로모션 이름 / Tiếng Việt: Tên khuyến mãi
+  promotionType String    @db.VarChar(30)                    // 한국어: 프로모션 유형 (BuyNGetM/PercentOff/FixedOff) / Tiếng Việt: Loại khuyến mãi
+  ruleJson      Json      @default("{}")                     // 한국어: 프로모션 규칙 JSON / Tiếng Việt: JSON quy tắc khuyến mãi
+  startAt       DateTime  @db.Timestamptz()                  // 한국어: 시작 시각 / Tiếng Việt: Thời điểm bắt đầu
+  endAt         DateTime? @db.Timestamptz()                  // 한국어: 종료 시각 (null이면 무기한) / Tiếng Việt: Thời điểm kết thúc (null = vô thời hạn)
+  status        String    @default("Active") @db.VarChar(20)
+  createdAt     DateTime  @default(now()) @db.Timestamptz()
+  updatedAt     DateTime  @updatedAt @db.Timestamptz()
+  deletedAt     DateTime? @db.Timestamptz()
+
+  brand BrandProfile @relation(fields: [brandHQId], references: [id])
+
+  @@unique([brandHQId, promotionCode], name: "uq_promotion_brand")
+  @@index([brandHQId, status, startAt(sort: Desc)], name: "idx_promotion_brand")
+}
+
+// 한국어: 지점 오버라이드(Branch Override) 테이블.
+//   브랜드 본사의 기본 설정을 지점 단위로 개별 조정할 수 있는 키-값 쌍을 관리한다.
+//   버전 관리를 지원하여 오버라이드 변경 이력을 추적할 수 있다.
+//   예: 특정 지점의 영업시간, 배달 가능 여부, 결제 수단 설정 등을 본사와 다르게 설정.
+//
+// Tiếng Việt: Bảng ghi đè chi nhánh (Branch Override).
+//   Quản lý các cặp khóa-giá trị có thể điều chỉnh riêng cài đặt mặc định trụ sở thương hiệu theo đơn vị chi nhánh.
+//   Hỗ trợ quản lý phiên bản để theo dõi lịch sử thay đổi ghi đè.
+//   Ví dụ: cài đặt giờ kinh doanh, khả năng giao hàng, phương thức thanh toán khác với trụ sở cho chi nhánh cụ thể.
+model BranchOverride {
+  id               String   @id @default(uuid()) @db.Uuid
+  branchId         String   @db.Uuid                         // 한국어: 지점 FK / Tiếng Việt: FK chi nhánh
+  overrideKey      String   @db.VarChar(120)                 // 한국어: 오버라이드 키 / Tiếng Việt: Khóa ghi đè
+  overrideValueJson Json    @default("{}")                    // 한국어: 오버라이드 값 JSON / Tiếng Việt: Giá trị ghi đè dạng JSON
+  version          Int      @default(1)                      // 한국어: 버전 / Tiếng Việt: Phiên bản
+  status           String    @default("Active") @db.VarChar(20)
+  createdAt        DateTime  @default(now()) @db.Timestamptz()
+  updatedAt        DateTime  @updatedAt @db.Timestamptz()
+  deletedAt        DateTime? @db.Timestamptz()
+
+  branch Branch @relation(fields: [branchId], references: [id])
+
+  // 한국어: 지점+키+버전 고유 제약 - 동일 키의 동일 버전 중복 방지
+  // Tiếng Việt: Ràng buộc duy nhất chi nhánh+khóa+phiên bản - ngăn trùng lặp cùng phiên bản của cùng khóa
+  @@unique([branchId, overrideKey, version], name: "uq_branch_override")
+  @@index([branchId, overrideKey, status], name: "idx_branch_override")
+}
+
+// 한국어: 운영자 템플릿(Operator Template) 테이블.
+//   브랜드 본사가 정의하는 역할별 권한 템플릿을 관리한다.
+//   지점에 배치되는 운영자(STORE_OPERATOR, BRANCH_MANAGER 등)의 기본 권한 세트를 정의한다.
+//   지점에서 운영자를 생성할 때 이 템플릿을 기반으로 권한을 부여한다.
+//
+// Tiếng Việt: Bảng mẫu nhân viên vận hành (Operator Template).
+//   Quản lý các mẫu quyền hạn theo vai trò do trụ sở thương hiệu định nghĩa.
+//   Định nghĩa bộ quyền hạn mặc định cho nhân viên vận hành (STORE_OPERATOR, BRANCH_MANAGER, v.v.)
+//   được phân bổ tại chi nhánh. Khi tạo nhân viên vận hành tại chi nhánh, cấp quyền dựa trên mẫu này.
+model OperatorTemplate {
+  id             String    @id @default(uuid()) @db.Uuid
+  brandHQId      String    @db.Uuid                          // 한국어: 브랜드 FK / Tiếng Việt: FK thương hiệu
+  templateCode   String    @db.VarChar(60)                   // 한국어: 템플릿 코드 / Tiếng Việt: Mã mẫu
+  templateName   String    @db.VarChar(200)                  // 한국어: 템플릿 이름 / Tiếng Việt: Tên mẫu
+  roleCode       String    @db.VarChar(50)                   // 한국어: 대상 역할 코드 / Tiếng Việt: Mã vai trò đích
+  permissionJson Json      @default("{}")                     // 한국어: 권한 설정 JSON / Tiếng Việt: JSON cấu hình quyền hạn
+  status         String    @default("Active") @db.VarChar(20)
+  createdAt      DateTime  @default(now()) @db.Timestamptz()
+  updatedAt      DateTime  @updatedAt @db.Timestamptz()
+  deletedAt      DateTime? @db.Timestamptz()
+
+  brand BrandProfile @relation(fields: [brandHQId], references: [id])
+
+  @@unique([brandHQId, templateCode], name: "uq_operator_template_brand")
+  @@index([brandHQId, roleCode, status], name: "idx_operator_template_brand")
+}
+

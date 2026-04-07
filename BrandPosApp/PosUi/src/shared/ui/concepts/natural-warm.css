@@ -1,0 +1,60 @@
+/**
+ * Concept: 내추럴 웜
+ *
+ * 따뜻한 크림색 배경. 둥글고 부드러운 형태.
+ * 카드는 미세한 보더 + 은은한 그림자 병행.
+ * 자연스러운 갈색 계열 브랜드색. 카페/베이커리 느낌.
+ */
+[data-concept="natural-warm"] {
+  /* 색상 — 따뜻한 앰버/브라운 */
+  --color-primary-50:  #FDF8F3;
+  --color-primary-100: #F9EDE0;
+  --color-primary-200: #F0D9BC;
+  --color-primary-300: #E0B888;
+  --color-primary-400: #D49C5E;
+  --color-primary-500: #B87A3A;
+  --color-primary-600: #9A6530;
+  --color-primary-700: #7D5228;
+
+  /* 배경/표면 — 크림색 */
+  --color-pos-bg:            #FBF9F5;
+  --color-pos-surface:       #F5F1EA;
+  --color-pos-text:          #3D3229;
+  --color-pos-text-secondary:#7A6E60;
+  --color-pos-text-muted:    #A89A8A;
+  --color-pos-border:        #E8E0D4;
+  --color-pos-border-strong:  #D4C9B8;
+
+  /* 둥글기 — 부드럽게 */
+  --radius-pos-xs:    0.5rem;
+  --radius-pos-sm:    0.625rem;
+  --radius-pos-md:    0.75rem;
+  --radius-pos-lg:    1rem;
+  --radius-pos-xl:    1.25rem;
+  --radius-pos-2xl:   1.5rem;
+  --radius-pos-btn:   0.75rem;
+  --radius-pos-card:  1rem;
+  --radius-pos-input: 0.625rem;
+
+  /* 그림자 — 따뜻한 톤의 은은한 그림자 */
+  --shadow-pos-soft:  0 1px 3px rgba(120,80,40,0.06);
+  --shadow-pos-card:  0 1px 6px rgba(120,80,40,0.06), 0 0 0 1px rgba(120,80,40,0.04);
+  --shadow-pos-hover: 0 4px 16px rgba(120,80,40,0.08);
+  --shadow-pos-modal: 0 12px 40px rgba(60,40,20,0.14);
+
+  /* 간격 — 넉넉하게 (편안함 강조) */
+  --spacing-touch:      3.25rem;
+  --spacing-touch-lg:   3.75rem;
+  --spacing-touch-nav:  2.75rem;
+
+  /* 폰트 굵기 — 중간 */
+  --font-weight-regular:  400;
+  --font-weight-medium:   500;
+  --font-weight-semibold: 600;
+  --font-weight-bold:     700;
+
+  /* 보더 — 미세 (그림자와 병행) */
+  --border-pos-thin:    1px;
+  --border-pos-default: 1px;
+  --border-pos-thick:   1.5px;
+}

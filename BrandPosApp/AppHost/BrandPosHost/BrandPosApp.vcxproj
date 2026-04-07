@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  BrandPosApp.vcxproj — POS 메인 실행 파일 프로젝트
+  BrandPosApp.vcxproj — Dự án file thực thi POS chính
+
+  Tham khảo / 참고: HJ-POS-TEST/Restaurant.vcxproj
+  Thay đổi chính / 주요 변경:
+    - Thêm CEF SDK include/lib paths / CEF SDK include/lib 경로 추가
+    - Thêm x64 platform (song song với Win32) / x64 플랫폼 추가 (Win32와 병행)
+    - Output đến Build/ / 빌드 결과물 Build/ 출력
+    - Loại bỏ Sciter, thêm CEF / Sciter 제거, CEF 추가
+-->
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- ════════════════════════════════════════════
+       Cấu hình build / 빌드 구성
+       x86/x64 듀얼 빌드 (설계 문서 결정사항)
+       ════════════════════════════════════════════ -->
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+
+  <!-- ════════════════════════════════════════════
+       Thuộc tính toàn cục / 전역 속성
+       ════════════════════════════════════════════ -->
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectName>BrandPosApp</ProjectName>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+
+  <!-- ════════════════════════════════════════════
+       Cấu hình từng configuration / 각 구성별 설정
+       Tham khảo HJ-POS-TEST: MFC Dynamic, Unicode, v145
+       참고 HJ-POS-TEST: MFC Dynamic, Unicode, v145
+       ════════════════════════════════════════════ -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+
+  <!-- ════════════════════════════════════════════
+       Thư mục output / 출력 디렉토리
+       Tham khảo HJ-POS-TEST: Debug → Build/, Release → Bin/
+       참고 HJ-POS-TEST: Debug → Build/, Release → Bin/
+       ════════════════════════════════════════════ -->
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <OutDir>$(ProjectDir)..\..\Build\</OutDir>
+    <IntDir>$(ProjectDir)..\..\obj\$(Configuration)_$(Platform)\</IntDir>
+    <TargetName>BrandPosAppD</TargetName>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <OutDir>$(ProjectDir)..\..\Build\</OutDir>
+    <IntDir>$(ProjectDir)..\..\obj\$(Configuration)_$(Platform)\</IntDir>
+    <TargetName>BrandPosApp</TargetName>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+
+  <!-- ════════════════════════════════════════════
+       Debug|Win32 — Biên dịch / 컴파일 설정
+       ════════════════════════════════════════════ -->
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <Optimization>Disabled</Optimization>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <!-- ── Include paths / 인클루드 경로 ──
+           Tương tự HJ-POS-TEST nhưng thêm CEF SDK
+           HJ-POS-TEST와 유사하나 CEF SDK 추가 -->
+      <AdditionalIncludeDirectories>
+        $(ProjectDir)..\..\;
+        $(ProjectDir)..\..\Presentation\CEF\SDK;
+        %(AdditionalIncludeDirectories)
+      </AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;WIN32;_DEBUG;_WINDOWS;_REST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/utf-8 /wd4819 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <OutputFile>$(OutDir)$(TargetName).exe</OutputFile>
+      <!-- ── Library paths / 라이브러리 경로 ──
+           CEF wrapper lib 경로 추가 -->
+      <AdditionalLibraryDirectories>
+        $(ProjectDir)..\..\Presentation\CEF\SDK\Release;
+        $(ProjectDir)..\..\Presentation\CEF\SDK\libcef_dll_wrapper\Debug;
+        %(AdditionalLibraryDirectories)
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+        libcef.lib;
+        libcef_dll_wrapper.lib;
+        user32.lib;
+        winmm.lib;
+        Imm32.lib;
+        netapi32.lib;
+        Version.lib;
+        UxTheme.lib;
+        Ws2_32.lib;
+        %(AdditionalDependencies)
+      </AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+
+  <!-- Debug|x64 -->
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <Optimization>Disabled</Optimization>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <AdditionalIncludeDirectories>
+        $(ProjectDir)..\..\;
+        $(ProjectDir)..\..\Presentation\CEF\SDK;
+        %(AdditionalIncludeDirectories)
+      </AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;WIN64;_DEBUG;_WINDOWS;_REST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/utf-8 /wd4819 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <OutputFile>$(OutDir)$(TargetName).exe</OutputFile>
+      <AdditionalLibraryDirectories>
+        $(ProjectDir)..\..\Presentation\CEF\SDK\Release;
+        $(ProjectDir)..\..\Presentation\CEF\SDK\libcef_dll_wrapper\Debug;
+        %(AdditionalLibraryDirectories)
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+        libcef.lib;
+        libcef_dll_wrapper.lib;
+        user32.lib;
+        winmm.lib;
+        Imm32.lib;
+        netapi32.lib;
+        Version.lib;
+        UxTheme.lib;
+        Ws2_32.lib;
+        %(AdditionalDependencies)
+      </AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+
+  <!-- Release|Win32 -->
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <Optimization>MaxSpeed</Optimization>
+      <WarningLevel>Level3</WarningLevel>
+      <StringPooling>true</StringPooling>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AdditionalIncludeDirectories>
+        $(ProjectDir)..\..\;
+        $(ProjectDir)..\..\Presentation\CEF\SDK;
+        %(AdditionalIncludeDirectories)
+      </AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;WIN32;NDEBUG;_WINDOWS;_REST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/utf-8 /wd4819 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <OutputFile>$(OutDir)$(TargetName).exe</OutputFile>
+      <AdditionalLibraryDirectories>
+        $(ProjectDir)..\..\Presentation\CEF\SDK\Release;
+        $(ProjectDir)..\..\Presentation\CEF\SDK\libcef_dll_wrapper\Release;
+        %(AdditionalLibraryDirectories)
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+        libcef.lib;
+        libcef_dll_wrapper.lib;
+        user32.lib;
+        winmm.lib;
+        Imm32.lib;
+        netapi32.lib;
+        Version.lib;
+        UxTheme.lib;
+        Ws2_32.lib;
+        %(AdditionalDependencies)
+      </AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+
+  <!-- Release|x64 -->
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <Optimization>MaxSpeed</Optimization>
+      <WarningLevel>Level3</WarningLevel>
+      <StringPooling>true</StringPooling>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AdditionalIncludeDirectories>
+        $(ProjectDir)..\..\;
+        $(ProjectDir)..\..\Presentation\CEF\SDK;
+        %(AdditionalIncludeDirectories)
+      </AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;WIN64;NDEBUG;_WINDOWS;_REST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/utf-8 /wd4819 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <OutputFile>$(OutDir)$(TargetName).exe</OutputFile>
+      <AdditionalLibraryDirectories>
+        $(ProjectDir)..\..\Presentation\CEF\SDK\Release;
+        $(ProjectDir)..\..\Presentation\CEF\SDK\libcef_dll_wrapper\Release;
+        %(AdditionalLibraryDirectories)
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+        libcef.lib;
+        libcef_dll_wrapper.lib;
+        user32.lib;
+        winmm.lib;
+        Imm32.lib;
+        netapi32.lib;
+        Version.lib;
+        UxTheme.lib;
+        Ws2_32.lib;
+        %(AdditionalDependencies)
+      </AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+
+  <!-- ════════════════════════════════════════════
+       Source files / 소스 파일 목록
+
+       Dùng wildcard theo thư mục để các source mới vào đúng build
+       새 소스가 구조에 맞게 자동으로 빌드에 포함되도록 폴더 단위로 등록
+       ════════════════════════════════════════════ -->
+  <ItemGroup>
+    <ClCompile Include="BrandPosApp.cpp" />
+    <ClCompile Include="CefBootstrap.cpp" />
+    <ClCompile Include="..\Bootstrap\AppCompositionRoot.cpp" />
+
+    <ClCompile Include="..\..\Presentation\CEF\Handlers\*.cpp" />
+    <ClCompile Include="..\..\Presentation\CEF\InternalBridge\*.cpp" />
+    <ClCompile Include="..\..\Presentation\CEF\InternalBridge\PosRequestActions\*\*.cpp" />
+
+    <ClCompile Include="..\..\UseCases\*\*.cpp" />
+    <ClCompile Include="..\..\Domain\*\*.cpp" />
+
+    <ClCompile Include="..\..\Infrastructure\Persistence\MSSQL\DBAccess.cpp" />
+    <ClCompile Include="..\..\Infrastructure\Persistence\MSSQL\AdoWraper.cpp" />
+    <ClCompile Include="..\..\Infrastructure\Persistence\MSSQL\Core\*.cpp" />
+    <ClCompile Include="..\..\Infrastructure\Persistence\MSSQL\Migration\DataBaseUpdate.cpp" />
+    <ClCompile Include="..\..\Infrastructure\Persistence\MSSQL\Migration\SchemaVersion.cpp" />
+    <ClCompile Include="..\..\Infrastructure\Persistence\MSSQL\Migration\Versions\*.cpp" />
+    <ClCompile Include="..\..\Infrastructure\Persistence\MSSQL\Stores\*.cpp" />
+    <ClCompile Include="..\..\Infrastructure\Persistence\MSSQL\Tables\*\*.cpp" />
+  </ItemGroup>
+
+  <!-- ════════════════════════════════════════════
+       Header files / 헤더 파일 목록
+       ════════════════════════════════════════════ -->
+  <ItemGroup>
+    <ClInclude Include="BrandPosApp.h" />
+    <ClInclude Include="CefBootstrap.h" />
+    <ClInclude Include="..\Bootstrap\ServiceRegistry.h" />
+    <ClInclude Include="..\Bootstrap\AppCompositionRoot.h" />
+
+    <ClInclude Include="..\..\Presentation\CEF\Handlers\*.h" />
+    <ClInclude Include="..\..\Presentation\CEF\InternalBridge\*.h" />
+    <ClInclude Include="..\..\Presentation\CEF\InternalBridge\PosRequestActions\*\*.h" />
+
+    <ClInclude Include="..\..\UseCases\*\*.h" />
+    <ClInclude Include="..\..\Domain\*\*.h" />
+
+    <ClInclude Include="..\..\Infrastructure\Persistence\MSSQL\DBAccess.h" />
+    <ClInclude Include="..\..\Infrastructure\Persistence\MSSQL\AdoWraper.h" />
+    <ClInclude Include="..\..\Infrastructure\Persistence\MSSQL\Core\*.h" />
+    <ClInclude Include="..\..\Infrastructure\Persistence\MSSQL\Migration\DataBaseUpdate.h" />
+    <ClInclude Include="..\..\Infrastructure\Persistence\MSSQL\Migration\SchemaVersion.h" />
+    <ClInclude Include="..\..\Infrastructure\Persistence\MSSQL\Migration\Versions\*.h" />
+    <ClInclude Include="..\..\Infrastructure\Persistence\MSSQL\Stores\*.h" />
+    <ClInclude Include="..\..\Infrastructure\Persistence\MSSQL\Tables\*\*.h" />
+  </ItemGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>

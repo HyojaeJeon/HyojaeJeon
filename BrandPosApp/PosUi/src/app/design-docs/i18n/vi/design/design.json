@@ -1,0 +1,317 @@
+{
+  "docs": {
+    "platform_architecture": {
+      "title": "Tài liệu kiến trúc chuẩn Platform",
+      "category": "Thiết kế tổng hợp dự án",
+      "description": "Tài liệu thiết kế cấp cao nhất cố định tech stack của toàn bộ nền tảng bao gồm EdgePos / RegionalDistributorPortal / BrandHQPortal / SuperAdmin / CentralApi / SyncWorkers thành một tiêu chuẩn duy nhất.",
+      "sections": {
+        "purpose": {
+          "title": "Mục đích",
+          "content": "Vấn đề mà tài liệu này giải quyết:\n\n- Lựa chọn công nghệ khác nhau theo từng dự án\n- Nhầm lẫn ranh giới UI / API / Worker / DB\n- Trùng lặp hợp đồng GraphQL / REST / Queue / Sync\n- Không nhất quán chiến lược lưu trữ giữa Edge và Central\n\n**Tóm tắt một dòng**: `Edge là C++ + CEF + Next.js + SQLite`, `Trung tâm là Next.js + NestJS + Fastify + GraphQL + PostgreSQL`, `Chia sẻ là hợp đồng TypeScript`."
+        },
+        "platform_principles": {
+          "title": "Nguyên tắc toàn nền tảng",
+          "content": "- **TypeScript** là ngôn ngữ mặc định cho web/server\n- **C++** chỉ sử dụng cho Native Host và tầng low-level dùng chung\n- **GraphQL** là giá trị mặc định cho hợp đồng trung tâm\n- **REST** chỉ sử dụng qua Fastify tại `SuperAdmin/CentralApi` (ngoại lệ: webhook, file upload, health check, auth callback)\n- **Edge là Offline-First**\n- **Trung tâm là Multi-Tenant**\n- **Lưu trữ cục bộ Edge là SQLite**\n- **Lưu trữ vận hành trung tâm là PostgreSQL**\n- **Hợp đồng chung có `SharedContracts` là nguồn gốc duy nhất**"
+        },
+        "standard_layers": {
+          "title": "Tầng kinh doanh tiêu chuẩn",
+          "content": "| Tầng | Vai trò |\n|---|---|\n| **SuperAdmin** | Chủ thể vận hành nhà cung cấp nền tảng |\n| **RegionalDistributor** | Đại lý/đối tác kênh có quyền phân phối độc quyền quốc gia/khu vực |\n| **BrandHQ** | Chủ thể vận hành trụ sở thương hiệu |\n| **Branch** | Cửa hàng/chi nhánh riêng lẻ trực thuộc thương hiệu |\n| **EdgePos** | Thiết bị đầu cuối POS được lắp đặt tại chi nhánh |\n| **Device** | Thiết bị ngoại vi kết nối với EdgePos |"
+        },
+        "db_identifiers": {
+          "title": "Tiêu chuẩn định danh DB",
+          "content": "Định danh chung được chia sẻ giữa tất cả dữ liệu nền tảng trung tâm và dữ liệu Edge POS:\n\n| Định danh | Ý nghĩa |\n|---|---|\n| `SuperAdminId` | Định danh tài khoản vận hành viên nền tảng |\n| `RegionalDistributorId` | Định danh đối tác phân phối khu vực/quốc gia |\n| `BrandHQId` | Định danh trụ sở thương hiệu |\n| `BranchId` | Định danh chi nhánh/cửa hàng |\n| `EdgePosId` | Định danh đầu cuối Edge POS |\n| `DeviceId` | Định danh thiết bị ngoại vi |\n| `OperatorId` | Định danh tài khoản vận hành viên/nhân viên |\n| `PolicyVersion` | Định danh phiên bản chính sách |\n| `CatalogVersion` | Định danh phiên bản thực đơn/catalog |\n| `SyncCursor` | Định danh vị trí đồng bộ |"
+        },
+        "project_specs": {
+          "title": "Tóm tắt SPEC xác nhận theo dự án",
+          "content": "| Project | SPEC xác nhận | DB / Storage | Hợp đồng / Truyền thông |\n|---|---|---|---|\n| **BrandPosApp** | C++ + CEF + Next.js(TS) | SQLite local DB | cefQuery + realtime event |\n| **RegionalDistributorPortal** | Next.js(TS) + App Router | Không truy cập DB trực tiếp | Apollo Client + GraphQL-first |\n| **BrandHQPortal** | Next.js(TS) + App Router | Không truy cập DB trực tiếp | Apollo Client + GraphQL-first |\n| **SuperAdmin/Portal** | Next.js(TS) + App Router | Không truy cập DB trực tiếp | Apollo Client + GraphQL-first |\n| **SuperAdmin/CentralApi** | NestJS + Fastify + Apollo Server | Prisma + PostgreSQL + raw SQL | GraphQL-first, REST only via Fastify |\n| **SuperAdmin/SyncWorkers** | Node.js(TS) + BullMQ | Redis + Central DB | Queue-driven |\n| **SharedKernel** | C++ shared kernel | - | native helper / protocol |\n| **SharedContracts** | TypeScript contract package | - | DTO / enum / schema |\n| **SharedAssets** | versioned runtime assets | - | i18n / static assets |"
+        },
+        "shared_assets": {
+          "title": "Nguyên tắc phân phối đa ngôn ngữ/SharedAssets",
+          "content": "- `SharedAssets` không phải server runtime chung mà là **gói nguồn gốc có quản lý phiên bản**\n- `SharedAssets/i18n/locales/` là nguồn gốc dịch thuật duy nhất cho tất cả nền tảng\n- Mỗi nền tảng sao chép/đóng gói tài sản locale cần thiết trong pipeline build của mình\n- Bộ ngôn ngữ hỗ trợ mặc định: `ko`, `vi`, `en`\n- Tùy chọn ngôn ngữ theo người dùng/thương hiệu/chi nhánh được quản lý bằng cài đặt DB, chuỗi hiển thị thực tế được giải mã bằng locale key"
+        },
+        "full_stack_overview": {
+          "title": "Tổng quan toàn bộ stack",
+          "content": "```\nBrandPosApp (C++ + CEF + Next.js + SQLite)\n  └── Local Bridge / Device Control\n\nRegionalDistributorPortal (Next.js + GraphQL Client)\n  └── SuperAdmin/CentralApi\n\nBrandHQPortal (Next.js + GraphQL Client)\n  └── SuperAdmin/CentralApi\n\nSuperAdmin/Portal (Next.js + GraphQL Client)\n  └── SuperAdmin/CentralApi (NestJS + Fastify + Apollo)\n        ├── PostgreSQL + Prisma + Raw SQL\n        └── Redis / Cache / Queue\n              └── SyncWorkers (Node.js + BullMQ)\n```\n\nEdge POS ghi vào SQLite cục bộ trước, sau đó đồng bộ với API trung tâm thông qua Outbox/Sync."
+        }
+      }
+    },
+    "superadmin_design": {
+      "title": "Tài liệu thiết kế nền tảng tổng hợp SuperAdmin",
+      "category": "Thiết kế tổng hợp dự án",
+      "description": "Tài liệu thiết kế nền tảng SuperAdmin cấp cao nhất, nơi nhà cung cấp POS vận hành/giám sát/triển khai/hỗ trợ nhiều thương hiệu. Đây không phải tài liệu POS client đơn lẻ cho một cửa hàng, mà là nền tảng tổng hợp để nhà cung cấp ký hợp đồng·triển khai·giám sát·hỗ trợ nhiều thương hiệu.",
+      "sections": {
+        "goal": {
+          "title": "Tái định nghĩa mục tiêu",
+          "content": "Sản phẩm cuối cùng được chia thành 3 tầng:\n\n1. **Edge POS** — File `.exe` được cài đặt trên mỗi đầu cuối cửa hàng, ưu tiên offline, đặt hàng/thanh toán/bàn/bếp/điều khiển thiết bị\n2. **Brand HQ Platform** — Nền tảng quản lý tổng hợp để một thương hiệu vận hành nhiều chi nhánh, thực đơn/giá/khuyến mãi/nhân viên/cài đặt chi nhánh/báo cáo\n3. **Super Admin Platform** — Nền tảng để nhà cung cấp POS vận hành/giám sát/triển khai/hỗ trợ nhiều thương hiệu, giấy phép/triển khai phiên bản/giám sát sự cố/hỗ trợ từ xa/nhật ký kiểm toán"
+        },
+        "confirmed_spec": {
+          "title": "Spec xác nhận",
+          "content": "| Thành phần | SPEC xác nhận | Ghi chú |\n|---|---|---|\n| SuperAdmin/Portal | Next.js(TS) + App Router + Apollo Client | Portal vận hành nhà cung cấp |\n| SuperAdmin/CentralApi | NestJS + Fastify + Apollo Server 5 | Multi-tenancy, RBAC, audit |\n| SuperAdmin/SyncWorkers | Node.js(TS) + BullMQ + Redis | outbox, retry, reconciliation |\n| SharedContracts | TypeScript contract package | Nguồn gốc duy nhất hợp đồng chung |\n| SharedAssets | runtime assets | i18n / static assets |"
+        },
+        "platform_overview": {
+          "title": "Tổng quan toàn nền tảng",
+          "content": "2 câu cốt lõi:\n\n- Nguồn gốc thời gian thực của vận hành cửa hàng là **Edge POS + Edge Local DB**\n- Nguồn gốc tổng hợp của vận hành thương hiệu/nhà cung cấp là **Nền tảng trung tâm**\n\n```\nSuper Admin Platform (vận hành nhà cung cấp)\n  → Brand HQ Platform (vận hành trụ sở thương hiệu)\n    → Branch (vận hành chi nhánh)\n      → EdgePos (đầu cuối thực thi cửa hàng)\n        → Edge Local DB (nguồn gốc nghiệp vụ cục bộ)\n```"
+        },
+        "multitenancy_model": {
+          "title": "Mô hình tầng multi-tenancy",
+          "content": "```\nSuperAdmin\n  └── RegionalDistributor\n        └── BrandHQ\n              └── Branch\n                    └── EdgePos\n                          └── Device\n```\n\nNguyên tắc cốt lõi:\n- `SuperAdmin` là chủ thể vận hành nền tảng\n- `RegionalDistributor` là tầng kênh/hợp đồng/hỗ trợ\n- `BrandHQ` là nguồn gốc vận hành thương hiệu\n- `Branch` là đơn vị vận hành độc lập\n- `EdgePos` là đơn vị thực thi giao dịch\n- `Device` thuộc về `EdgePos`\n- Một `EdgePos` chỉ thuộc về một `BrandHQ` và một `Branch`"
+        },
+        "core_identifiers": {
+          "title": "Định danh cốt lõi",
+          "content": "Định danh được chia sẻ giữa tất cả dữ liệu nền tảng trung tâm và dữ liệu Edge POS:\n\n`SuperAdminId`, `RegionalDistributorId`, `BrandHQId`, `BranchId`, `EdgePosId`, `OperatorId`, `DeviceId`, `PolicyVersion`, `CatalogVersion`, `SyncCursor`\n\nNếu không có định danh này:\n- Không thể phân biệt dữ liệu thuộc BrandHQ nào\n- Không thể tổng hợp doanh thu thuộc chi nhánh nào\n- Không thể theo dõi EdgePos nào gây ra sự cố\n- Không thể xác minh phiên bản thực đơn nào đã được triển khai"
+        },
+        "data_ownership": {
+          "title": "Quyền sở hữu dữ liệu",
+          "content": "### Nguồn gốc cục bộ (Edge POS + Edge Local DB)\nTrạng thái bàn thời gian thực, đơn hàng đang xử lý, trạng thái thanh toán đang xử lý, trạng thái in hóa đơn/bếp, trạng thái kết nối thiết bị, hàng đợi offline và trạng thái khôi phục\n\n### Nguồn gốc trung tâm thương hiệu (Brand HQ Platform)\nMaster thực đơn, chính sách giá, chính sách khuyến mãi, chính sách vận hành thuế/dịch vụ, thông báo thương hiệu, mẫu nhân viên/quyền, tiêu chuẩn báo cáo/quyết toán\n\n### Nguồn gốc trung tâm nhà cung cấp (Super Admin Platform)\nHợp đồng/giấy phép thương hiệu, chính sách triển khai phiên bản POS, feature flag, quyền hỗ trợ từ xa, tình hình sự cố tổng thể, nhật ký kiểm toán toàn cầu"
+        }
+      }
+    },
+    "distributor_design": {
+      "title": "Tài liệu thiết kế nền tảng phân phối tổng hợp RegionalDistributor",
+      "category": "Thiết kế tổng hợp dự án",
+      "description": "Tài liệu thiết kế xác định quyền sở hữu và ranh giới quản lý của tầng đối tác kênh có quyền phân phối và trách nhiệm triển khai cấp quốc gia/khu vực. Đây không phải tài liệu từ góc nhìn trụ sở thương hiệu hay POS cửa hàng, mà từ góc nhìn đại lý/đối tác kênh.",
+      "sections": {
+        "purpose": {
+          "title": "Mục đích",
+          "content": "5 mục đích của tầng RegionalDistributor:\n\n1. Mô hình hóa quyền phân phối độc quyền cấp quốc gia/khu vực\n2. Phân tách ranh giới hợp đồng/giấy phép/triển khai giữa nhà cung cấp và trụ sở thương hiệu\n3. Quản lý quy định, thuế, ngôn ngữ, phương thức thanh toán, chính sách hỗ trợ theo khu vực ở cấp khu vực\n4. Theo dõi onboarding thương hiệu và rollout cửa hàng từ góc nhìn đối tác địa phương\n5. Phản ánh hệ thống `SuperAdmin → RegionalDistributor → BrandHQ → Branch → EdgePos` trong tài liệu và định danh DB"
+        },
+        "confirmed_spec": {
+          "title": "Spec xác nhận",
+          "content": "| Thành phần | SPEC xác nhận | Ghi chú |\n|---|---|---|\n| RegionalDistributorPortal | Next.js(TS) + App Router + Apollo Client | Dự án Web chuyên dụng đại lý/phân phối tổng hợp |\n| Kết nối trung tâm | SuperAdmin/CentralApi (GraphQL API) | Tra cứu dữ liệu hợp đồng/giấy phép/triển khai/quyết toán |\n| Trạng thái UI | Redux Toolkit sử dụng khi cần | Trạng thái màn hình, form, bộ lọc |\n| Truy cập DB trực tiếp | Không có | Tất cả dữ liệu bền vững đều qua API trung tâm |"
+        },
+        "responsibility_position": {
+          "title": "Vị trí trách nhiệm",
+          "content": "```\nSuperAdmin — Kiểm soát toàn bộ nhà cung cấp nền tảng, giấy phép/chính sách/kiểm toán toàn cầu\n  └── RegionalDistributor — Quyền phân phối độc quyền khu vực/quốc gia, điều phối hợp đồng·triển khai·hỗ trợ địa phương\n        └── BrandHQ — Vận hành trụ sở thương hiệu, thực đơn/giá/khuyến mãi/chính sách chi nhánh\n              └── Branch — Đơn vị vận hành cửa hàng thực tế\n                    └── EdgePos — Đơn vị thực thi giao dịch thời gian thực cửa hàng\n                          └── Device — Máy in, máy đọc thẻ, máy quét...\n```"
+        },
+        "management_scope": {
+          "title": "Phạm vi quản lý",
+          "content": "**Phạm vi quản lý trực tiếp:**\n- Quyền phân phối độc quyền khu vực/quốc gia\n- Trạng thái hợp đồng thương hiệu\n- Số lượng giấy phép/hết hạn/phạm vi triển khai cho phép\n- SLA hỗ trợ địa phương\n- Chính sách thông báo/triển khai theo khu vực\n- Cài đặt đối phó quy định theo khu vực\n- Trạng thái tiến hành onboarding thương hiệu\n- Theo dõi triển khai/hỗ trợ/quyết toán\n\n**Phạm vi không sở hữu trực tiếp:**\n- Nguồn gốc thực đơn/giá thương hiệu\n- Nguồn gốc thời gian thực đơn hàng/thanh toán chi nhánh\n- Nguồn gốc giao dịch DB cục bộ EdgePos\n- Nguồn gốc quản lý đi làm/tên thật vận hành viên cửa hàng"
+        },
+        "data_ownership": {
+          "title": "Quyền sở hữu dữ liệu",
+          "content": "**Dữ liệu nguồn gốc RegionalDistributor:**\n`RegionalDistributorId`, `TerritoryCode`, `CountryCode`, `ContractId`, `LicensePoolId`, `RolloutBatchId`, `SupportSlaId`, `DistributorUserId`, `SettlementBatchId`\n\n**Ranh giới với nguồn gốc BrandHQ:**\nMaster thực đơn, nguồn gốc giá, nguồn gốc đơn hàng thời gian thực chi nhánh, nguồn gốc phê duyệt thanh toán, nguồn gốc trạng thái chiếm dụng bàn — mỗi cái thuộc về `BrandHQ` hoặc `EdgePos` tương ứng."
+        },
+        "settings_inheritance": {
+          "title": "Mô hình kế thừa cài đặt",
+          "content": "Thứ tự ưu tiên đánh giá cài đặt:\n\n1. `Global Default`\n2. `RegionalDistributor Default`\n3. `BrandHQ Default`\n4. `Branch Override`\n5. `EdgePos Override`\n\nQuy tắc:\n- Quy định khu vực hoặc giới hạn nhà thanh toán đặt trong `RegionalDistributor Default`\n- Chính sách riêng thương hiệu đặt trong `BrandHQ Default`\n- Ngoại lệ theo chi nhánh/đầu cuối giới hạn ở override\n- Phải có khả năng theo dõi giá trị đến từ tầng nào"
+        },
+        "deployment": {
+          "title": "Triển khai và onboarding",
+          "content": "RegionalDistributor là hub trung gian của 3 luồng sau:\n\n**1. Onboarding thương hiệu** — Đăng ký hợp đồng, xác nhận quyền khu vực, phân bổ giấy phép\n\n**2. Triển khai hướng xuống** — Chuyển giao chính sách, catalog, quy định khu vực, mẫu hỗ trợ\n\n**3. Báo cáo hướng lên** — Kết quả rollout, tóm tắt sự cố, trạng thái quyết toán/hỗ trợ\n\nLuồng: `SuperAdmin → RegionalDistributor → BrandHQ → Branch → EdgePos`"
+        }
+      }
+    },
+    "brandhq_design": {
+      "title": "Tài liệu thiết kế nền tảng vận hành thương hiệu·chi nhánh BrandHQ",
+      "category": "Thiết kế tổng hợp dự án",
+      "description": "Tài liệu tiêu chuẩn thiết kế để tổ chức vận hành trụ sở thương hiệu quản lý tổng hợp nhiều chi nhánh. BrandHQ là nguồn gốc của chính sách và master, Edge POS là nguồn gốc của giao dịch thời gian thực.",
+      "sections": {
+        "goal": {
+          "title": "Mục tiêu",
+          "content": "4 mục đích của nền tảng BrandHQ:\n\n1. Một thương hiệu vận hành nhiều chi nhánh bằng chính sách chung\n2. Quản lý thực đơn, giá, khuyến mãi, quyền nhân viên tại trung tâm\n3. Cho phép override theo chi nhánh nhưng kiểm soát không phá vỡ tiêu chuẩn thương hiệu\n4. Trở thành tiêu chuẩn triển khai chính sách và catalog sẽ được đẩy xuống Edge POS"
+        },
+        "confirmed_spec": {
+          "title": "Spec xác nhận",
+          "content": "| Thành phần | SPEC xác nhận | Ghi chú |\n|---|---|---|\n| BrandHQPortal | Next.js(TS) + App Router + Apollo Client | Portal vận hành trụ sở thương hiệu |\n| Kết nối trung tâm | SuperAdmin/CentralApi (GraphQL API) | Thực đơn/giá/khuyến mãi/chi nhánh/báo cáo |\n| Đối tượng triển khai hướng xuống | BrandPosApp / EdgePos | Triển khai chính sách/thực đơn/giá |\n| Áp dụng cài đặt hiện trường | Chế độ BrandPosApp Setup/Maintenance | Thiết bị ngoại vi, cài đặt cục bộ, commissioning |"
+        },
+        "responsibility_flow": {
+          "title": "Trách nhiệm tổng quan",
+          "content": "```\nBrandHQ Portal (vận hành trụ sở thương hiệu)\n  ├── BrandHQ Master (thực đơn/giá/khuyến mãi)\n  ├── BrandHQ Policy (chính sách vận hành/mẫu quyền)\n  └── Branch Override (cài đặt ngoại lệ theo chi nhánh)\n        └── Downstream Distribution (triển khai hướng xuống)\n              └── EdgePos (đầu cuối cửa hàng)\n                    └── Sales / Orders / Payments (giao dịch thời gian thực cửa hàng)\n                          └── Upstream Sync (đồng bộ hướng lên) → BrandHQ\n```\n\nCốt lõi: BrandHQ là **nguồn gốc chính sách và master**, Edge POS là **nguồn gốc giao dịch thời gian thực**"
+        },
+        "management_layers": {
+          "title": "Mô hình tầng quản lý",
+          "content": "Các tầng cơ bản BrandHQ quản lý trực tiếp:\n\n| Tầng | Vai trò |\n|---|---|\n| **BrandHQ** | Đơn vị quản lý cấp cao nhất |\n| **Branch** | Đơn vị vận hành độc lập |\n| **EdgePos** | Đơn vị đối tượng triển khai |\n| **OperatorTemplate** | Mẫu vai trò nhân viên |\n| **Catalog** | Thực đơn/giá/danh mục |\n| **Policy** | Chính sách vận hành |\n\nNguyên tắc: Dữ liệu tên thật/đi làm vận hành viên và mẫu quyền phải có khả năng tách biệt."
+        },
+        "data_ownership": {
+          "title": "Quyền sở hữu dữ liệu",
+          "content": "### Nguồn gốc BrandHQ\nMaster thực đơn, chính sách giá, chính sách khuyến mãi, chính sách vận hành thuế/dịch vụ, thông báo thương hiệu, mẫu vai trò nhân viên\n\n### Mục cho phép Branch Override\nTrạng thái bán theo chi nhánh, ngoại lệ giá theo chi nhánh, áp dụng khuyến mãi theo chi nhánh, định tuyến máy in/bếp, giờ kinh doanh/nghỉ\n\n### Ranh giới Edge POS\nBrandHQ **không** sở hữu trực tiếp nguồn gốc của: trạng thái đơn hàng đang xử lý, trạng thái thanh toán đang xử lý, trạng thái chiếm dụng bàn, trạng thái kết nối thiết bị. Dữ liệu này luôn thuộc nguồn gốc Edge POS và Edge Local DB."
+        },
+        "settings_inheritance": {
+          "title": "Mô hình kế thừa cài đặt",
+          "content": "Thứ tự ưu tiên đánh giá cài đặt:\n\n1. `Global Default`\n2. `BrandHQ Default`\n3. `Branch Override`\n4. `EdgePos Override`\n\nQuy tắc:\n- Tối thiểu hóa override\n- Phải có khả năng theo dõi giá trị đến từ tầng nào\n- Quản lý `PolicyVersion`, `CatalogVersion` cùng khi triển khai"
+        },
+        "deployment_sync": {
+          "title": "Triển khai và đồng bộ",
+          "content": "2 luồng từ góc nhìn BrandHQ:\n\n**Downstream Distribution** — Triển khai thực đơn/giá/chính sách đến chi nhánh và đầu cuối\n\n**Upstream Sync Consumption** — Nhận doanh thu/trạng thái/lỗi từ cửa hàng và phản ánh lên màn hình vận hành\n\nNguyên tắc quan trọng:\n- Triển khai tập trung vào chính sách\n- Đồng bộ hướng lên tập trung vào khả năng hiển thị vận hành\n- Thành công giao dịch thời gian thực dựa trên **commit cục bộ, không phải thành công API trung tâm**"
+        }
+      }
+    },
+    "edgepos_architecture": {
+      "title": "Tài liệu kiến trúc Edge POS",
+      "category": "Thiết kế tổng hợp dự án",
+      "description": "Tài liệu tiêu chuẩn thiết kế chuyển đổi UI của Edge POS được cài đặt tại mỗi chi nhánh sang CEF + Next.js(TypeScript) + Redux Toolkit + RTK Query, giữ C++ chuyên trách logic nghiệp vụ/SQLite DB cục bộ/giao tiếp server/thiết bị ngoại vi.",
+      "sections": {
+        "decisions": {
+          "title": "Quyết định",
+          "content": "| Hạng mục | Quyết định |\n|---|---|\n| **Nền tảng** | Build kép x86/x64, bao gồm CEF, triển khai theo môi trường khách hàng |\n| **Phạm vi chuyển đổi** | 3 màn hình cốt lõi trước (bàn, đặt hàng, thanh toán) |\n| **Phục vụ Next.js** | Build tĩnh (`output: 'export'`) + CEF Custom Scheme (`app://pos/`) |\n| **Thiết bị ngoại vi** | Giữ C++ → gọi từ JS qua cefQuery |\n| **Mô hình vận hành** | Offline-First, DB cục bộ là nguồn gốc dữ liệu nghiệp vụ |\n| **Quản lý trạng thái** | Thống nhất RTK Query, Redux slice chỉ cho trạng thái UI |\n| **Vòng đời trình duyệt** | Giữ CefBrowser đơn lẻ, chuyển màn hình bằng React routing |\n| **Nguyên tắc tầng** | UI/Bridge → UseCases → DB/Manager → Infra một chiều |\n| **Bền vững hóa** | Không triển khai Repository toàn diện theo Manager, chỉ tách `*Store` |\n| **Xử lý trùng lặp** | Đảm bảo idempotency theo requestId + idempotencyKey |\n| **Mục tiêu UI cuối cùng** | Loại bỏ hoàn toàn MFC UI, hội tụ CEF + Next.js |\n| **Môi trường phát triển** | `app/design-system/` + Mock transport, phát triển UI không cần C++ |\n| **Ổn định CEF** | CefLifeSpanHandler phát hiện crash → tự động tái tạo trình duyệt → rehydrate dựa trên DB cục bộ |"
+        },
+        "directory_structure": {
+          "title": "Cấu trúc thư mục",
+          "content": "```\nBrandPosApp/\n├── AppHost/                  # Điểm vào thực thi, bootstrap, lắp ráp dịch vụ\n│   ├── Bootstrap/            # AppCompositionRoot, ServiceRegistry\n│   └── BrandPosHost/         # WinMain entry, khởi tạo CEF\n├── Presentation/\n│   └── CEF/                  # Hosting CEF, vòng đời trình duyệt\n│       ├── Handlers/         # CefAppHandler, CefBrowserDlg, SchemeHandler, Recovery\n│       └── InternalBridge/   # PosRequestResponder, PosRequestActions, PosRealTimeSender\n├── UseCases/                 # Điều phối use case\n│   ├── Shared/               # TransactionRunner, IdempotencyService, OperationLock\n│   ├── Table/                # SelectTableUseCase, RefreshTablesUseCase\n│   ├── Order/\n│   └── Payment/\n├── Domain/                   # Quy tắc nghiệp vụ thuần túy và Manager\n│   ├── Table/\n│   ├── Order/\n│   ├── Payment/\n│   └── ...\n├── Infrastructure/           # SQLite, Sync, Device, ExternalBridge\n│   ├── Persistence/SQLite/\n│   ├── Sync/\n│   ├── Device/\n│   └── ExternalBridge/\n└── PosUi/                    # Next.js(TypeScript) UI\n    └── src/\n        ├── app/              # Route Next.js\n        ├── screens/          # Màn hình sản phẩm thực tế\n        ├── design-system/    # Thư viện UI dùng chung gốc\n        ├── store/            # RTK Query + Redux slice\n        ├── bridge/           # C++ transport/command\n        └── shared/           # Tiện ích/component kết hợp dùng chung\n```"
+        },
+        "layer_summary": {
+          "title": "Tóm tắt vai trò theo tầng",
+          "content": "| Tầng | Trách nhiệm | Đối tượng bao gồm |\n|---|---|---|\n| **Presentation** | Màn hình, hosting trình duyệt, CEF single shell UI bridge | PosUi/, Presentation/CEF/, AppHost/ |\n| **InternalBridge** | Định tuyến yêu cầu, xác nhận tham số, định dạng phản hồi | PosRequestResponder, PosRequestActions, PosRealTimeSender |\n| **UseCases** | Điều phối use case, giao dịch, idempotency, lock, hậu xử lý | SelectTableUseCase, TransactionRunner, IdempotencyService |\n| **Domain/Manager** | Quy tắc kinh doanh, tính toán, thao tác dữ liệu | TableManager, OrderMgr, SaleMgr, CustMgr, ItemMgr |\n| **Infrastructure** | Kết nối DB cục bộ, đồng bộ, tích hợp ngoài, thiết bị, mạng | DBAccess, ExternalBridge, Device, Sync |"
+        },
+        "posui_rules": {
+          "title": "Quy tắc phát triển PosUi",
+          "content": "- `design-system/` là **nguồn gốc** UI dùng chung, `app/design-system/` là route catalog/preview\n- `screens/` là màn hình sản phẩm thực tế, màn hình xem trong catalog **tái sử dụng nguyên bản screens/*\n- `posApi.js` là createApi gốc, `*Api.js` theo domain sử dụng `injectEndpoints()`\n- Trạng thái server lấy cache RTK Query làm nguồn gốc, Redux slice chỉ cho trạng thái UI\n- `PosRequestSender.js` là transport cấp thấp, bên trong chọn `cefTransport` / `mockTransport`\n- Kết hợp `next dev` + `app/design-system/` + `mockTransport` cho phép phát triển UI không cần C++"
+        },
+        "cef_usecases": {
+          "title": "Quy tắc vận hành CEF/trình duyệt",
+          "content": "- CefBrowser chính giữ **đơn lẻ**\n- **Cấm** gọi `CloseBrowser` khi chuyển màn hình\n- Tuân thủ tiêu chuẩn độ phân giải cố định `1024x768` và khả năng sử dụng cảm ứng\n- Khôi phục renderer crash dựa trên **dữ liệu DB/UseCase bootstrap** (không phải bộ nhớ trình duyệt)\n- Không triển khai bỏ qua tiêu chuẩn crash loop và hợp đồng tái tạo/khôi phục CEF"
+        },
+        "cross_layer_rules": {
+          "title": "Quy tắc giữa các tầng",
+          "content": "**InternalBridge**: `PosRequestActions` phải là thin router. Cấm thực thi SQL trực tiếp trong Actions, kết hợp trực tiếp nhiều Manager, xử lý giao dịch/lock/idempotency.\n\n**UseCases**: Điều chỉnh thứ tự gọi nhiều Manager, kiểm tra requestId/idempotencyKey, thu nhận lock đơn vị công việc, thực thi giao dịch, cập nhật Ledger/Outbox, kiểm soát thứ tự sự kiện UI/sync ACK/in ấn sau commit. **Chỉ UseCases có quyền quyết định sự kiện UI và gọi PosRealTimeSender.**\n\n**Domain/Manager**: Tính toán nghiệp vụ thuần túy, tạo/sửa DB row, trả về kết quả domain. Cấm gọi trực tiếp PosRealTimeSender, cấm quyết định gửi ACK ngoài.\n\n**ExternalBridge**: Xác thực/xác nhận payload ngoài, chuyển đổi format ngoài → DTO nội bộ, gọi UseCases. Cấm thực thi SQL trực tiếp, cấm gửi UI trực tiếp, cấm quyết định tùy ý trạng thái xác nhận đơn hàng/thanh toán."
+        },
+        "mfc_migration": {
+          "title": "Quy tắc migration MFC",
+          "content": "Tách code Dialog cũ thành 4 nơi:\n\n1. **Layout UI/nút/Grid** → `PosUi/src/design-system/` + `PosUi/src/screens/`\n2. **Phân nhánh click nút** → `CEF/InternalBridge/PosRequestActions/`\n3. **Điều phối use case/giao dịch/idempotency/hậu xử lý** → `UseCases/`\n4. **Query DB thực tế/tính toán số tiền/xử lý dữ liệu** → `Domain/Manager` + `Infrastructure/Persistence`\n\nThứ tự migration: Tách UI → Tạo router Actions → Trích xuất UseCases → Chỉnh lý DB/Manager"
+        },
+        "mandatory_requirements": {
+          "title": "Yêu cầu bắt buộc tuân thủ",
+          "content": "- **Golden Rule**: `ExternalBridge → UseCases → DB/Manager → PosRealTimeSender → UI`\n- Không hiển thị thông tin chưa lưu vào DB lên UI\n- ExternalBridge không thể gọi trực tiếp PosRealTimeSender\n- Manager cũng không thể gọi trực tiếp PosRealTimeSender\n- Thanh toán/đặt hàng/giao hàng nhận phải đảm bảo idempotency theo `requestId + idempotencyKey`\n- Trạng thái Ledger: `RECEIVED → PROCESSING → SUCCEEDED / FAILED / COMPENSATED`\n- Trạng thái Outbox: `PENDING → DISPATCHING → ACKED / FAILED_RETRYABLE / FAILED_TERMINAL`"
+        },
+        "communication_design": {
+          "title": "Thiết kế truyền thông",
+          "content": "### PosRequest (UI → C++ khứ hồi)\n- Điểm vào: `PosUi/src/bridge/PosRequestSender.js`\n- Phía C++: `PosRequestResponder → PosRequestActions → UseCases`\n\n### PosRealTime (C++ → UI một chiều)\n- Phía C++: `UseCases → PosRealTimeSender`\n- Phía UI: `PosRealTimeReceiver`\n\n### Quy tắc phong bì JSON\nTất cả tin nhắn có header chung: `v`, `requestId`, `timestamp`, `idempotencyKey` (có điều kiện)\n\n### Quy tắc Device Error\nKhông gửi msg câu hoàn chỉnh. Truyền qua trường dựa trên mã: `type`, `device`, `code`, `msgKey`, `msgParams`, `severity`, `recoverable`, `retryable`, `action`"
+        },
+        "operational_gates": {
+          "title": "Cổng vận hành",
+          "content": "- Chuyển đổi và rollback màn hình được kiểm soát bằng INI feature flag\n- Chuyển đổi dần từ 3 màn hình cốt lõi: bàn → đặt hàng → thanh toán\n- Offline-First: Commit SQLite cục bộ là tiêu chuẩn thành công nghiệp vụ\n- Cache RTK Query không phải nguồn gốc khôi phục\n- Tiêu chuẩn khôi phục: `SQLite cục bộ + Ledger + Outbox`"
+        },
+        "build_pipeline": {
+          "title": "Pipeline build",
+          "content": "- Giữ build kép x86/x64\n- Next.js build tĩnh theo tiêu chuẩn `output: 'export'`\n- Phục vụ file tĩnh qua CEF Custom Scheme (`app://pos/`)\n- Scheme handler `app://pos/` cung cấp quy tắc routing file tĩnh\n- Cần quy tắc đồng bộ phiên bản UI/CEF/tài nguyên"
+        }
+      }
+    },
+    "edgepos_az_guide": {
+      "title": "Hướng dẫn toàn bộ luồng Edge POS A-Z",
+      "category": "Thiết kế tổng hợp dự án",
+      "description": "Tài liệu giải thích từ A đến Z cách Edge POS hoạt động dựa trên tiêu chuẩn thiết kế cuối cùng. Đây không phải tài liệu đánh giá mức độ hoàn thiện code thực tế mà là tài liệu tiêu chuẩn thiết kế luồng hoạt động.",
+      "sections": {
+        "purpose": {
+          "title": "Mục đích của tài liệu này",
+          "content": "Những gì tài liệu này giải thích:\n\n- POS bắt đầu từ đâu\n- C++ / CEF / Next.js(TypeScript) / RTK Query kết nối như thế nào\n- Thao tác nhập trên màn hình đi qua tầng nào đến SQLite\n- Sau khi lưu, màn hình được cập nhật như thế nào\n- Offline, đồng bộ, khôi phục, chế độ cài đặt hoạt động như thế nào\n- Mỗi file có trách nhiệm tại điểm nào"
+        },
+        "one_page_summary": {
+          "title": "Tóm tắt một trang",
+          "content": "| Góc nhìn | Mô tả |\n|---|---|\n| Hình thức thực thi | Chương trình POS native chạy `BrandPosApp.exe` |\n| UI | Next.js(TypeScript) hoạt động bên trong CEF |\n| Quản lý trạng thái | Trạng thái server là RTK Query, trạng thái UI cục bộ là Redux Toolkit slice |\n| Điểm vào yêu cầu | Yêu cầu UI đi vào qua PosRequestSender duy nhất |\n| Xử lý nghiệp vụ | UseCases điều phối giao dịch và thứ tự |\n| Quy tắc domain | Domain/*Manager nắm giữ quy tắc nghiệp vụ |\n| Lưu trữ | Kho lưu trữ cuối cùng là SQLite |\n| Cập nhật thời gian thực | C++ đánh thức lại UI qua PosRealTimeSender |\n| Khôi phục | Khôi phục dựa trên local store, không phải UI cache |"
+        },
+        "overall_flow": {
+          "title": "Luồng tổng thể",
+          "content": "```\nBrandPosApp.exe\n  → AppHost / BrandPosHost\n    → Presentation/CEF\n      → PosUi / Next.js(TypeScript)\n        → RTK Query / Redux Toolkit\n        → PosRequestSender\n          → PosRequestResponder\n            → PosRequestActions\n              → UseCases\n                → Domain Managers\n                  → Infrastructure/Persistence/SQLite\n                    → SQLite local store\n              → PosRealTimeSender → PosRealTimeReceiver → UI\n              → Outbox / RequestLedger / RecoveryState\n                → Sync / Recovery\n```\n\nTóm tắt một dòng: `Khởi động exe → Tải CEF → Hiển thị Next.js UI → Chuẩn bị màn hình bằng RTK Query → Chuyển tiếp yêu cầu → UseCase → Domain → Lưu SQLite → Sự kiện thời gian thực → Cập nhật màn hình`"
+        },
+        "points_a_to_j": {
+          "title": "Luồng chi tiết điểm bắt đầu A~J",
+          "content": "### A. Bắt đầu thực thi\n`BrandPosApp.cpp` → `CefBootstrap.cpp` (khởi tạo CEF) → `CefAppHandler.cpp` (đăng ký handler) → `CefSchemeHandler.cpp` (ánh xạ `app://pos/`) → `CefBrowserDlg.cpp` (tạo trình duyệt) → `BrowserRecoveryManager.cpp` (giám sát phục hồi crash)\n\n### B. Tải PosUi\nCEF đọc kết quả build tĩnh của PosUi: `layout.tsx` → `page.tsx` → `pos/table/page.tsx`, `pos/order/page.tsx`, `pos/payment/page.tsx`, chế độ Setup, chế độ Maintenance\n\n### C. Khởi tạo màn hình\nRTK Query đọc dữ liệu ban đầu: danh sách bàn, bàn đang chọn, danh sách đơn, trạng thái chờ thanh toán, cài đặt hệ thống, trạng thái kết nối thiết bị. Màn hình không tự tạo dữ liệu mà đọc trạng thái có sẵn để render.\n\n### D. Yêu cầu UI → C++\n`screen → RTK Query mutation / bridge command → PosRequestSender → cefTransport → PosRequestResponder → PosRequestActions → UseCases`\n\n### E. Lưu dữ liệu\nBắt đầu UseCases → Xác nhận Domain → Lưu SQLite `*Crud.cpp` → Ghi RequestLedger → Nạp Outbox → commit\n\n### F. Cập nhật UI sau khi lưu\n`PosRealTimeSender` → `CefBrowserDlg` (JS event dispatch) → `PosRealTimeReceiver` → Vô hiệu/cập nhật cache RTK Query → Dọn dẹp Redux slice\n\n### G. Luồng nghiệp vụ tiêu biểu\nChọn bàn, tạo đơn, xử lý thanh toán — mỗi cái theo thứ tự UseCase → Domain → SQLite → RealTimeSender → cập nhật UI\n\n### H. Chế độ Setup/Maintenance\nSetup: Cài đặt lần đầu, cài đặt mạng/thiết bị, binding branch/terminal, dữ liệu ban đầu\nMaintenance: Kiểm tra thiết bị, áp dụng lại cài đặt, thu thập log, thực thi cập nhật\n\n### I. Đồng bộ\nOutbox → SyncDispatcher → Gửi đến API trung tâm → ACK → Cập nhật trạng thái Outbox. Offline thì giữ trong hàng đợi, khi online khôi phục thì gửi lại.\n\n### J. Khôi phục\nKhi khởi động lại tiến trình: kiểm tra lại công việc PROCESSING chưa hoàn thành, rehydrate dựa trên DB, ngăn trùng lặp dựa trên Ledger, gửi lại các mục Outbox chưa gửi."
+        }
+      }
+    },
+    "edgepos_checklist": {
+      "title": "Danh mục kiểm tra bổ sung thiết kế Edge POS P0/P1",
+      "category": "Thiết kế tổng hợp dự án",
+      "description": "Danh mục kiểm tra các mục bổ sung bắt buộc trước khi phản ánh vận hành của tài liệu 04-Edge-POS-Kiến trúc-Thiết kế, theo thứ tự ưu tiên. P0 cấm phản ánh vận hành nếu chưa hoàn thành, P1 khuyến nghị hoàn thành trước pilot.",
+      "sections": {
+        "p0_layer_boundaries": {
+          "title": "P0 — Ranh giới tầng",
+          "content": "- [ ] `PosRequestActions` không thực hiện logic SQL/kết hợp Manager trực tiếp mà chỉ gọi `UseCases`\n- [ ] `ExternalBridge` không thực thi SQL trực tiếp\n- [ ] `ExternalBridge` không gọi trực tiếp `PosRealTimeSender`\n- [ ] Gửi UI chỉ sử dụng đường dẫn duy nhất `PosRealTimeSender`"
+        },
+        "p0_idempotency": {
+          "title": "P0 — Idempotency / Xử lý trùng lặp",
+          "content": "- [ ] `requestId`, `idempotencyKey` được áp dụng bắt buộc cho yêu cầu thanh toán\n- [ ] Theo dõi `requestId` cũng được áp dụng cho tạo/sửa/hủy đơn\n- [ ] Trạng thái `RECEIVED/PROCESSING/SUCCEEDED/FAILED/COMPENSATED` được ghi vào bảng Ledger bền vững\n- [ ] Khi nhận lại `idempotencyKey` trùng, trả về kết quả hiện có thay vì thực thi mới"
+        },
+        "p0_transaction": {
+          "title": "P0 — Giao dịch / Tính nhất quán",
+          "content": "- [ ] Không gửi ACK ngoài trước khi hoàn thành bền vững hóa DB\n- [ ] Không cập nhật trạng thái UI trước khi hoàn thành bền vững hóa DB\n- [ ] Chính sách phân biệt lỗi in/thiết bị và lỗi lưu DB đã được tài liệu hóa\n- [ ] Một use case kết thúc trong một đơn vị UseCase"
+        },
+        "p0_failure_recovery": {
+          "title": "P0 — Khôi phục sự cố",
+          "content": "- [ ] Quy trình kiểm tra lại công việc `PROCESSING` chưa hoàn thành khi khởi động lại tiến trình đã được triển khai\n- [ ] Quy tắc tra cứu lại thanh toán chưa hoàn thành đã được tài liệu hóa\n- [ ] Dữ liệu bàn/đơn/giao hàng có thể rehydrate dựa trên DB\n- [ ] Có quy trình gửi lại các mục ACK ngoài chưa gửi"
+        },
+        "p0_operational": {
+          "title": "P0 — Thiết bị an toàn vận hành",
+          "content": "- [ ] Feature flag cấp màn hình tồn tại\n- [ ] 3 màn hình cốt lõi được chỉnh lý chỉ hoạt động trên cơ sở CEF single shell\n- [ ] Điều kiện rollback vận hành đã được tài liệu hóa\n- [ ] Thứ tự triển khai cửa hàng pilot đã được xác định"
+        },
+        "p1_browser": {
+          "title": "P1 — Trình duyệt / Runtime",
+          "content": "- [ ] Chiến lược đơn lẻ `CefBrowser` đã được phản ánh trong thiết kế triển khai\n- [ ] `root_cache_path`, `cache_path` được cài đặt rõ ràng\n- [ ] Chính sách duy trì session cookie / localStorage đã được tài liệu hóa\n- [ ] Chính sách remote debugging / devtools được phân biệt theo vận hành/phát triển"
+        },
+        "p1_performance": {
+          "title": "P1 — Hiệu năng / Bộ nhớ",
+          "content": "- [ ] Giới hạn bộ nhớ x86 và tiêu chuẩn RSS cho phép đã được xác định\n- [ ] Kịch bản soak test dài hạn tồn tại\n- [ ] Mục tiêu thời gian chuyển màn hình, thời gian tải đầu tiên, thời gian hoàn thành thanh toán\n- [ ] Cổng chuyển đổi x64 khi không đạt tiêu chuẩn x86 đã được tài liệu hóa"
+        },
+        "p1_contract": {
+          "title": "P1 — Hợp đồng / Giao diện",
+          "content": "- [ ] Tiêu chuẩn Envelope tin nhắn được áp dụng chung cho tất cả kênh\n- [ ] Quy tắc sử dụng trường `v`, `requestId`, `timestamp`, `idempotencyKey` đã được cố định\n- [ ] Ví dụ yêu cầu/phản hồi Bridge đã được tài liệu hóa\n- [ ] UX xử lý `VERSION_MISMATCH` đã được xác định"
+        },
+        "p1_observability": {
+          "title": "P1 — Khả năng quan sát",
+          "content": "- [ ] Tất cả log bao gồm chuỗi `requestId`\n- [ ] Log thiết bị, log bridge, log nghiệp vụ được tách biệt\n- [ ] Hướng dẫn vận hành log nào cần kiểm tra ưu tiên khi có sự cố\n- [ ] Khóa theo dõi phản hồi thanh toán ngoài/VAN/MQTT đã được tài liệu hóa"
+        },
+        "p1_qa": {
+          "title": "P1 — Đảm bảo chất lượng",
+          "content": "- [ ] Bridge contract test đã được tự động hóa\n- [ ] Unit test cấp UseCase tồn tại\n- [ ] Test khôi phục sau buộc tắt tồn tại\n- [ ] Kịch bản so sánh tương đương kết quả MFC và UI mới tồn tại"
+        },
+        "p1_deployment": {
+          "title": "P1 — Triển khai / Build tĩnh",
+          "content": "- [ ] Next.js build theo tiêu chuẩn `output: 'export'`\n- [ ] Danh sách tính năng bị cấm trong static export đã được chia sẻ\n- [ ] Scheme handler `app://pos/` cung cấp quy tắc routing file tĩnh\n- [ ] Quy tắc đồng bộ phiên bản UI/CEF/tài nguyên tồn tại"
+        }
+      }
+    }
+  },
+  "az_flow": {
+    "a": {
+      "title": "Khoi dong quy trinh (Process Start)",
+      "summary": "BrandPosApp.exe khoi dong → Khoi tao CEF → Tao trinh duyet",
+      "detail": "1. Chay `BrandPosApp.exe` → Di vao `WinMain`\n2. `CefBootstrap.cpp` khoi tao CEF runtime (command line args, settings)\n3. `CefAppHandler.cpp` dang ky handler quy trinh trinh duyet\n4. `CefSchemeHandler.cpp` dang ky scheme tuy chinh `app://pos/`\n5. `CefBrowserDlg.cpp` tao **mot phien ban trinh duyet CEF duy nhat** (1024×768)\n6. `BrowserRecoveryManager.cpp` bat dau giam sat su co renderer\n\n### Lap rap phu thuoc Bootstrap\n\nHam `ComposeApp()` trong `AppCompositionRoot.cpp` dang ky toan bo dich vu:\n\n```\nServiceRegistry\n├── Register<TableManager>()\n├── Register<TransactionRunner>()\n├── Register<IdempotencyService>()\n├── Register<OperationLockService>()\n├── Register<RequestLedgerStore>()\n├── Register<OutboxStore>()\n├── Register<PosRealTimeSender>(browser_dlg)\n└── Register<SelectTableUseCase>(table_mgr, tx_runner, idempotency, realtime_sender)\n```\n\n`ServiceRegistry` la **DI container dua tren chi muc kieu**:\n- `Register<T>(shared_ptr<T>)` — dang ky theo kieu giao dien\n- `Resolve<T>()` — tra cuu theo kieu\n- `Has<T>()` — kiem tra dang ky\n\n**Nguyen tac cot loi**: Chi duy tri **mot** trinh duyet trong suot vong doi ung dung. Cam goi CloseBrowser khi chuyen man hinh."
+    },
+    "b": {
+      "title": "Tai PosUI (UI Loading)",
+      "summary": "CEF tai ban dung tinh Next.js → Hien thi man hinh ban dau",
+      "detail": "1. CEF tai ket qua ban dung tinh Next.js (thu muc `out/`) qua scheme `app://pos/`\n2. `layout.tsx` → `page.tsx` → hien thi route ban dau (`/pos/table`)\n\n### Khoi tao StoreProvider\n\n`StoreProvider.tsx` tao Redux Store duoi dang **singleton**:\n\n```\nStoreProvider\n├── Duy tri mot phien ban store duy nhat qua useRef\n├── makeStore() → configureStore({\n│   reducer: {\n│     [posApi.reducerPath]: posApi.reducer,  // RTK Query cache\n│     ui: uiReducer                          // Trang thai chi danh cho UI\n│   },\n│   middleware: getDefault().concat(posApi.middleware)\n│ })\n└── Boc children bang React-Redux Provider\n```\n\n### Dang ky PosRealTimeReceiver\n\n`PosRealTimeReceiver.tsx` dang ky listener su kien C++ → UI:\n\n```\nwindow.addEventListener('POS_NATIVE_EVENT', handler)\n\nDinh tuyen su kien:\n├── TABLE_REFRESH    → invalidateTags(['Table'])\n├── ORDER_NEW        → invalidateTags(['Order','Table']) + toast\n├── ORDER_UPDATED    → invalidateTags(['Order'])\n├── PAYMENT_COMPLETE → invalidateTags(['Payment','Order','Table']) + clear processing\n├── SYNC_STATUS_CHANGED → invalidateTags(['Sync'])\n└── DEVICE_ERROR     → pushDeviceError to uiSlice\n```\n\n**Nguyen tac cot loi**: Su dung ban dung tinh `next export`, khong phai `next dev`. Khong co Node.js server khi chay."
+    },
+    "c": {
+      "title": "Khoi tao RTK Query (State Setup)",
+      "summary": "posApi createApi goc → injectEndpoints theo domain → tao hook",
+      "detail": "### posApi.ts — createApi Goc\n\n```\nconst posApi = createApi({\n  reducerPath: 'posApi',\n  baseQuery: posBaseQuery,     // Chuyen tiep moi yeu cau qua PosRequestSender\n  tagTypes: ['Table', 'Order', 'Payment', 'Sync', 'System', 'Config'],\n  endpoints: () => ({})        // Trong — duoc inject theo domain qua injectEndpoints\n})\n```\n\n`posBaseQuery` nhan giao dien `BridgeArg` va goi `PosRequestSender.sendRequest()`:\n```\ninterface BridgeArg {\n  cmd: string            // 'TABLE:GET_ALL', 'ORDER:ADD_ITEM', v.v.\n  params: Record<string, unknown>\n  idempotencyKey?: string\n}\n```\n\n### tableApi.ts — Endpoint Domain Bang\n\n```\ntableApi.injectEndpoints({\n  endpoints: (build) => ({\n    getTables: build.query<TableData, void>({\n      query: () => ({ cmd: 'TABLE:GET_ALL', params: {} }),\n      providesTags: ['Table']\n    }),\n    selectTable: build.mutation<unknown, { id: number }>({\n      query: ({ id }) => ({ cmd: 'TABLE:SELECT', params: { id } }),\n      invalidatesTags: ['Table']\n    })\n  })\n})\n\ninterface TableData {\n  tables: Array<{\n    id: number\n    name: string\n    label: string\n    status: 'E' | 'U' | 'L'  // Empty, Used(Occupied), Locked\n    floor: number\n  }>\n}\n```\n\n### orderApi.ts — Domain Don hang/Thuc don\n\n```\ngetMenu: query<MenuData, void>\n  → cmd: 'MENU:GET_ALL'\n  → providesTags: ['Order']\n\ngetOrder: query<OrderData, { tableId }>\n  → cmd: 'ORDER:GET'\n  → providesTags: ['Order']\n\naddOrderItem: mutation<unknown, { tableId, menuId, quantity }>\n  → cmd: 'ORDER:ADD_ITEM'\n  → invalidatesTags: ['Order', 'Table']\n\ninterface MenuData {\n  categories: Array<{ id, name, sort }>\n  items: Array<{ id, name, price, categoryId, ... }>\n}\n```\n\n### Vi du su dung Hook\n\n```\n// Tu dong tai du lieu khi vao man hinh\nconst { data, isLoading } = useGetTablesQuery()\n\n// Thuc hien mutation khi nguoi dung thao tac\nconst [selectTable] = useSelectTableMutation()\nawait selectTable({ id: 5 })\n// → invalidatesTags: ['Table'] → useGetTablesQuery tu dong refetch\n```\n\n**Cam**: Sao chep ket qua RTK Query vao slice. Dua React Query vao song song. Goi `window.cefQuery` truc tiep tu component."
+    },
+    "d": {
+      "title": "Luong Yeu cau (Request Flow)",
+      "summary": "UI → PosRequestSender → cefQuery → C++ Responder → Actions → UseCases",
+      "detail": "### PosRequestSender.ts — Tao va Gui Phong bi\n\n```\ninterface Envelope {\n  v: number              // Phien ban giao thuc (hien tai la 1)\n  requestId: string      // Tu dong tao qua crypto.randomUUID()\n  timestamp: string      // ISO 8601\n  cmd: string            // 'TABLE:SELECT'\n  params: Record<string, unknown>\n  idempotencyKey?: string\n}\n\ninterface PosResponse {\n  v: number\n  requestId: string\n  timestamp: string\n  ok: boolean\n  code: string           // 'OK' | 'BUSY' | 'DUPLICATE' | ma loi\n  data?: unknown\n  error?: { message: string }\n}\n```\n\n### Lua chon Transport\n\n```\ngetTransport():\n├── window.cefQuery ton tai? → cefTransport (POS thuc te)\n└── Khong co              → mockTransport (che do dev)\n```\n\n### cefTransport.ts — Goi CEF Native\n\n```\nwindow.cefQuery({\n  request: JSON.stringify(envelope),\n  onSuccess: (response) => JSON.parse(response),\n  onFailure: (errorCode, errorMessage) => throw Error\n})\n```\n\n### mockTransport.ts — Phan hoi gia cho Phat trien\n\n```\nCac lenh ho tro:\n├── 'TABLE:GET_ALL'  → Tra ve fixture table.json\n├── 'TABLE:SELECT'   → Doi status bang thanh 'U'\n├── 'MENU:GET_ALL'   → Tra ve fixture menu.json\n├── 'ORDER:GET'      → Tra ve don hang trong\n├── 'ORDER:ADD_ITEM' → Xac nhan them mon\n└── 'PAYMENT:EXECUTE'→ Thanh cong thanh toan sau 1.5 giay\n\nDieu khien dev:\n- window.__MOCK_DELAY_MS = 200   // Mo phong do tre mang\n- window.__MOCK_OFFLINE = true   // Mo phong trang thai offline\n```\n\n### Phia C++ tiep nhan: PosRequestResponder.cpp\n\n```\nTiep nhan → Phan tich JSON → Xac minh phien ban giao thuc (v=1)\n→ Dinh tuyen theo tien to cmd den domain:\n  ├── 'TABLE:*'   → TableActions::Handle()\n  ├── 'ORDER:*'   → OrderActions::Handle()\n  ├── 'PAYMENT:*' → PaymentActions::Handle()\n  └── 'SYSTEM:*'  → SystemActions::Handle()\n→ Tao dinh dang phan hoi chuan → Serialize JSON → Tra ve qua callback cefQuery\n```\n\n### TableActions.cpp — Vi du Thin Router\n\n```\nTableActions::Handle(cmd, params_json, requestId, idempotencyKey)\n├── 'TABLE:GET_ALL'  → RefreshTablesUseCase.Execute(ctx)\n└── 'TABLE:SELECT'   → SelectTableUseCase.Execute(ctx, tableCode)\n\n// Khong co logic nghiep vu trong Actions — chi goi UseCase\n```\n\n**Cam**:\n- Thuc thi SQL truc tiep trong Actions\n- Ket hop nhieu Manager truc tiep trong Actions\n- Goi `window.cefQuery` truc tiep tu component"
+    },
+    "e": {
+      "title": "Luu tru Du lieu (Persistence)",
+      "summary": "UseCases → Kiem tra luy dang → Lay khoa → Giao dich → Domain → Commit DB",
+      "detail": "### SelectTableUseCase — Luong Thuc thi Thuc te\n\n```\nclass SelectTableUseCase {\n  // Phu thuoc (non-owning pointer)\n  TableManager* tableMgr_;\n  TransactionRunner* txRunner_;\n  IdempotencyService* idempotency_;\n  PosRealTimeSender* realtimeSender_;\n\n  UseCaseResult Execute(const RequestContext& ctx, int tableCode);\n}\n```\n\nThu tu thuc thi:\n1. **Kiem tra luy dang** — `IdempotencyService::Check(idempotencyKey, requestId)`\n\n```\nenum class CheckResult {\n  NEW_REQUEST,        // Yeu cau moi → tiep tuc thuc thi\n  DUPLICATE_SUCCESS,  // Da thanh cong → tra ve ket qua da luu\n  DUPLICATE_FAILED,   // Da that bai → cho phep thu lai\n  IN_PROGRESS         // Dang xu ly → tra ve BUSY\n}\n```\n\n2. **Lay khoa thao tac** — `OperationLockService::TryAcquire(\"TABLE\", entityId)`\n\n```\nclass OperationLockService {\n  bool TryAcquire(domain, entityId)  // That bai tra ve false → tra ve Busy\n  void Release(domain, entityId)\n\n  // Tach theo domain — cho phep xu ly song song:\n  ├── \"TABLE\"   — khoa thao tac bang\n  ├── \"ORDER\"   — khoa thao tac don hang\n  ├── \"PAYMENT\" — khoa thao tac thanh toan\n  └── \"PRINT\"   — khoa cong viec in\n\n  // RAII Guard: tu dong giai phong khi thoat scope\n  OperationLockService::Guard lock(\"TABLE\", \"5\");\n}\n```\n\n3. **Thuc thi giao dich** — `TransactionRunner::Run(work)`\n\n```\nGhi dong thoi trong mot giao dich duy nhat:\n├── TableManager::OccupyTable(tableCode)  // Du lieu nghiep vu\n├── RequestLedgerStore::Upsert(...)        // Ban ghi luy dang\n│   Trang thai: RECEIVED → PROCESSING → SUCCEEDED\n└── OutboxStore::Insert(...)               // Hang doi dong bo\n    Kenh: \"SALES_UPLOAD\" | \"ORDER_SYNC\" | \"CHANGE_LOG\"\n\nok=true  → COMMIT\nok=false → ROLLBACK\nNgoai le  → ROLLBACK\n```\n\n4. **Mo hinh ket qua**\n\n```\nstruct UseCaseResult {\n  bool ok;\n  string code;\n  string dataJson;      // Du lieu phan hoi khi thanh cong\n  string errorMessage;  // Thong bao loi khi that bai\n  bool isReplay;        // Luy dang: co tai su dung ket qua truoc khong\n\n  static Success(dataJson)\n  static Replay(dataJson)    // Yeu cau trung lap → tra ve cache\n  static Fail(code, message)\n  static Busy(message)        // Lay khoa that bai\n  static IdempotencyConflict()\n}\n```\n\n### RequestLedgerStore — So cai Luy dang\n\n```\nstruct LedgerEntry {\n  idempotencyKey, requestId\n  status: RECEIVED | PROCESSING | SUCCEEDED | FAILED | COMPENSATED\n  resultJson   // Cache phan hoi khi thanh cong\n  createdAt, updatedAt\n}\n\nFindStaleProcessing(timeout=300s)  // Tim kiem tac vu chua hoan thanh khi phuc hoi\n```\n\n### OutboxStore — Hang doi Dong bo\n\n```\nstruct OutboxEntry {\n  channel: \"SALES_UPLOAD\" | \"ORDER_SYNC\" | \"CHANGE_LOG\"\n  payloadJson\n  status: PENDING | DISPATCHING | ACKED | FAILED_RETRYABLE | FAILED_TERMINAL\n  retryCount\n}\n\nCam: Xac thuc the, thanh toan QR, cuoc goi thoi gian thuc ung dung giao hang KHONG phai doi tuong Outbox\n```\n\n### Dong bo vs Bat dong bo — Dam bao Toc do Thoi gian thuc POS\n\nTai sao nguyen tac \"DB truoc, UI sau\" khong lam giam toc do POS:\n**INSERT SQLite cuc bo = 1~5ms** — ghi dia tren cung thiet bi, khong phai server tu xa.\n\n| Loai thao tac | Phuong thuc xu ly | Thoi gian | Ly do |\n|---|---|---|---|\n| **Luu DB cuc bo** (don hang/thanh toan/bang) | **Dong bo** — DB truoc → UI sau | 1~5ms | Dam bao toan ven du lieu, cam nhan tuc thoi |\n| **Dong bo server trung tam** (Outbox → CentralApi) | **Bat dong bo** — hang doi nen sau commit | 100ms~∞ | Do tre mang, thu lai khi that bai |\n| **In hoa don / Xuat QR** | **Bat dong bo** — xu ly sau commit | 50~500ms | I/O thiet bi, khong can chan UI |\n| **API ben ngoai** (xac thuc the / thanh toan QR) | **Cho dong bo** — luu DB sau ket qua | 1~30 giay | Khong the xac nhan ma khong co uy quyen |"
+    },
+    "f": {
+      "title": "Cap nhat UI (Post-Save Update)",
+      "summary": "Tách 2 đường: ① mutation thành công → patch cache trực tiếp ② thay đổi bên ngoài → event realtime → vô hiệu hóa tag chi tiết",
+      "detail": "### Chiến lược cập nhật Cache (Nguyên tắc tách 2 đường)\n\n#### Đường 1: Kết quả mutation mình gửi (tức thời)\n\n```\nmutation thành công\n  → onQueryStarted + updateQueryData patch trực tiếp cache RTK Query\n  → KHÔNG dùng invalidatesTags (không refetch)\n  → Ví dụ: TABLE:SELECT thành công → chỉ đổi status bàn đó thành 'OCCUPIED'\n```\n\n#### Đường 2: Event realtime từ thay đổi bên ngoài (bất đồng bộ)\n\n```\nC++ PosRealTimeSender → CustomEvent('POS_NATIVE_EVENT')\n  → PosRealTimeReceiver nhận\n  → Kiểm tra isPendingRequest(requestId)\n    - Kết quả request mình → skip (đã xử lý ở đường 1)\n    - Thay đổi bên ngoài → chỉ vô hiệu hóa tag chi tiết\n```\n\n#### Quy tắc phân chia Tag\n\n```\nTrước (kém hiệu quả):\n  invalidateTags(['Table'])     ← reload toàn bộ danh sách\n\nSau (cải tiến):\n  invalidateTags([\n    { type: 'Table', id: 3 },  ← chỉ bàn đó\n    { type: 'Floor', id: 1 },  ← chỉ tầng đó\n  ])\n```\n\n#### Nguyên tắc cốt lõi\n\n- **Không refetch 2 lần cho cùng thay đổi**\n- **Không reload toàn bộ cho thay đổi một phần**\n- **Mutation thay đổi trạng thái phải có idempotencyKey**\n\n### PosRealTimeSender.cpp — Phát sóng sự kiện C++ → UI\n\n```\nclass PosRealTimeSender {\n  void SendToUI(type, payloadJson, requestId)\n  // requestId được bao gồm → UI có thể lọc event từ chính mình\n\n  void NotifyTableChanged(floorId = 0)\n  void NotifyNewOrder(orderId, tableId)\n  void NotifyPaymentComplete(paymentId, orderId)\n  void NotifySyncStatusChanged(backlogCount, lastErrorCode)\n  void NotifyDeviceError(type, device, code, msgKey, ...)\n}\n```\n\n### Thứ tự hậu xử lý (do UseCases điều khiển)\n\n```\nDB commit hoàn tất\n  ↓\n1. PosRealTimeSender → Sự kiện UI (kèm requestId)\n  ↓\n2. Xếp hàng công việc in (bất đồng bộ)\n  ↓\n3. Sync ACK server trung tâm (bất đồng bộ Outbox)\n```\n\n**Cấm**: Gọi PosRealTimeSender từ Manager. Gọi từ ExternalBridge. Refetch 2 lần từ mutation + event realtime."
+    },
+    "g": {
+      "title": "Cac Use Case Cot loi (Core Use Cases)",
+      "summary": "Chon bang → tao don hang → xu ly thanh toan: 3 luong cot loi",
+      "detail": "### Chon Bang (SelectTableUseCase)\n\n```\nExecute(ctx, tableCode):\n1. IdempotencyService.Check(ctx.idempotencyKey)\n2. OperationLockService.TryAcquire(\"TABLE\", tableCode)\n3. TransactionRunner.Run(() => {\n     TableManager.OccupyTable(tableCode)\n     // Trang thai bang: E(Empty) → U(Used/Occupied)\n     LedgerStore.Upsert(key, SUCCEEDED, result)\n   })\n4. PosRealTimeSender.NotifyTableChanged()\n→ Ket qua: UseCaseResult.Success({ tableCode, status: 'U' })\n```\n\n### Truy van Bang (RefreshTablesUseCase)\n\n```\nExecute(ctx, floorId):\n// Chi doc — khong can giao dich/luy dang/khoa\n1. TableManager.GetAllTables(floorId)\n→ Ket qua: UseCaseResult.Success({ tables: [...] })\n```\n\n### TableManager — Quy tac Nghiep vu\n\n```\nstruct TableResult {\n  bool success;\n  int tableCode;\n  string status;       // 'E' | 'U' | 'L'\n  string errorCode;\n  string error_detail;\n}\n\nOccupyTable(code):  Empty → Occupied (that bai neu da chiem/khoa)\nReleaseTable(code): Occupied → Empty (that bai neu da trong)\nChangeTable(from, to): Xac minh from=Occupied + to=Empty\n```\n\n### Tao Don hang (CreateOrderUseCase) — P1\n\n```\nExecute(ctx, tableCode, items[]):\n1. Luy dang + khoa(\"ORDER\")\n2. Giao dich: OrderManager.CreateOrder() + them mon + tinh tien\n3. Ban ghi Ledger + Outbox\n4. NotifyNewOrder() → in bep (bat dong bo)\n```\n\n### Xu ly Thanh toan (ExecutePaymentUseCase) — P1\n\n```\nExecute(ctx, order_id, payment_method, amount):\n1. Luy dang + khoa(\"PAYMENT\")\n2. Goi API thanh toan ben ngoai (the/QR → cho dong bo)\n3. Giao dich: SaleManager.ConfirmSale() + TableManager.ReleaseTable()\n4. Ledger(SUCCEEDED) + Outbox(SALES_UPLOAD)\n5. NotifyPaymentComplete() → hoa don (bat dong bo) → dong bo (bat dong bo)\n```"
+    },
+    "h": {
+      "title": "Che do Cai dat/Bao tri (Setup/Maintenance)",
+      "summary": "Che do cai dat khi lap dat tai cho → ket noi thiet bi/cai dat bang/dong bo thuc don",
+      "detail": "BrandPosApp hoat dong voi hai che do:\n\n### Operations Mode (Van hanh Hang ngay)\n- Bang → don hang → thanh toan luong cot loi\n- Uu tien offline, SQLite cuc bo la nguon du lieu goc\n\n### Setup/Maintenance Mode (Lap dat Tai cho)\n- Cai dat ket noi thiet bi (may in/dau doc the/can)\n- Cau hinh bo tri bang/tang\n- Dong bo thuc don/gia/chinh sach lan dau tu server trung tam\n- Cai dat tai khoan nhan vien va quyen\n- Cau hinh INI feature flag\n\n**Phuong thuc chuyen doi**: Cung file thuc thi, phan nhanh che do noi bo\n**Quyen truy cap**: Yeu cau xac thuc quan tri vien"
+    },
+    "i": {
+      "title": "Dong bo hoa (Synchronization)",
+      "summary": "Outbox → tai len server trung tam / tiep nhan ha nguon dua tren SyncCursor",
+      "detail": "### OutboxStore — Nguoc dong (Edge → Central)\n\n```\nstruct OutboxEntry {\n  channel: \"SALES_UPLOAD\" | \"ORDER_SYNC\" | \"CHANGE_LOG\"\n  payloadJson\n  status: PENDING → DISPATCHING → ACKED\n  retryCount\n  lastError\n}\n\nFindPending(limit=50)  // Truy van ban ghi chua xu ly\nGetBacklogCount()      // So luong chua xu ly → hien thi trang thai UI\n```\n\n### SyncStateStore — Theo doi Trang thai Kenh Dong bo\n\n```\nstruct SyncStateEntry {\n  channel\n  lastAttemptAt, lastSuccessAt\n  retryCount\n  lastError_code\n  backlogCount\n}\n\nTheo doi doc lap theo kenh:\n├── SALES_UPLOAD: Tai len tong hop doanh thu\n├── ORDER_SYNC: Dong bo lich su don hang\n└── CHANGE_LOG: Gui nhat ky thay doi\n```\n\n### Ha nguon (Central → Edge)\n- Thuc don/gia/khuyen mai → nhan thay doi dua tren `SyncCursor`\n- Thong bao thuong hieu, cap nhat quyen nhan vien\n- Xac minh toan ven dua tren `Checksum`\n\n**Cam**: Dua xac thuc/huy the vao Outbox. Dua yeu cau thanh toan QR vao Outbox. Dua chap nhan/tu choi thoi gian thuc ung dung giao hang vao Outbox."
+    },
+    "j": {
+      "title": "Phuc hoi (Recovery)",
+      "summary": "Khoi dong lai quy trinh → Phuc hoi trang thai dua tren DB + Ledger → Tiep tuc tac vu chua hoan thanh",
+      "detail": "### Nguon Phuc hoi: DB + Ledger (KHONG phai bo nho trinh duyet/Redux)\n\n### Khi Khoi dong lai Quy trinh\n\n```\n1. Bang RecoveryState → kiem tra trang thai cuoi cung\n2. RequestLedgerStore.FindStaleProcessing(timeout=300s)\n   → Tim kiem tac vu co status='PROCESSING' da qua 5 phut\n3. Voi moi tac vu chua hoan thanh:\n   ├── Co the bu tru → danh dau COMPENSATED\n   ├── Co the thu lai → thuc thi lai\n   └── Khong xac dinh → FAILED + thong bao quan tri vien\n4. SyncCursor → xac dinh diem tiep tuc dong bo\n5. OutboxStore.FindPending() → gui lai ban ghi chua gui\n6. Khoi phuc UI ve trang thai ban dau an toan (man hinh bang)\n```\n\n### Khi Renderer Gap su co\n\n```\nBrowserRecoveryManager:\n1. Nhan callback OnRenderProcessTerminated()\n2. crashCount++\n3. crashCount >= 3 ? safe_mode : tao lai trinh duyet\n4. Khi tao lai, khoi phuc tu du lieu bootstrap dua tren DB\n   (Cam su dung Redux snapshot)\n```\n\n**Cam**: Su dung bo nho trinh duyet/Redux snapshot lam nguon phuc hoi."
+    }
+  }
+}

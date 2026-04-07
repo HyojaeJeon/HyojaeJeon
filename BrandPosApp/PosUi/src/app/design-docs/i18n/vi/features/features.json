@@ -1,0 +1,234 @@
+{
+  "docs": {
+    "feature_coverage_matrix": {
+      "title": "Ma trận phủ danh sách chức năng",
+      "category": "Danh sách màn hình/chức năng theo nền tảng",
+      "description": "Bảng chuẩn xác nhận tất cả danh mục chức năng của HJ-POS cũ đã được phản ánh trong tài liệu nền tảng mới hay chưa.",
+      "sections": {
+        "purpose": {
+          "title": "Mục đích",
+          "content": "**Điểm kiểm tra phát hiện thiếu sót** xác nhận tất cả danh mục chức năng trong kiểm kê chức năng POS cũ (`FeatureInventory.md`) đã được ánh xạ vào tài liệu nền tảng mới hay chưa. Chi tiết chức năng tuân theo tài liệu từng nền tảng."
+        },
+        "coverage_table": {
+          "title": "Tóm tắt phủ",
+          "content": "| Phần Legacy | Danh mục đại diện | Tài liệu phụ trách chính | Trạng thái |\n|---|---|---|---|\n| 1 | Tóm tắt thống kê tổng thể | Toàn bộ tài liệu | Covered |\n| 2 | Table & Floor | 04-EdgePos-Danh sách chức năng | Covered |\n| 3 | Sales & Payment | 04-EdgePos-Danh sách chức năng | Covered |\n| 4 | Inventory & Menu | 04-EdgePos-Danh sách chức năng | Covered |\n| 5 | Customer | 04-EdgePos-Danh sách chức năng | Covered |\n| 6 | System & Admin | 01-SuperAdmin-Danh sách chức năng | Covered |\n| 7 | External Bridge | 04-EdgePos-Danh sách chức năng | Covered |\n| 8 | Kiosk | 04-EdgePos-Danh sách chức năng | Covered |\n| 9 | Dialog inventory | 04-EdgePos-Danh sách chức năng | Covered |"
+        },
+        "validation_results": {
+          "title": "Kết quả xác nhận",
+          "content": "**Phạm vi trách nhiệm theo nền tảng:**\n\n| Platform | Phạm vi trách nhiệm |\n|---|---|\n| **SuperAdmin** | Multi-tenancy, onboarding đại lý/thương hiệu, giấy phép, triển khai, kiểm toán, giám sát, hỗ trợ |\n| **RegionalDistributor** | Quyền phân phối khu vực/quốc gia, hợp đồng địa phương, kế hoạch rollout, hỗ trợ địa phương, theo dõi settlement |\n| **BrandHQ** | Thực đơn, giá, khuyến mãi, chính sách chi nhánh, báo cáo thương hiệu, phân phối catalog |\n| **EdgePos** | Đặt hàng, thanh toán, bàn, khách hàng, tồn kho, kiosk, kết nối thiết bị, khôi phục cục bộ |\n\n- Danh mục chức năng legacy 1~9 đã được ánh xạ hoàn tất vào tài liệu nền tảng mới\n- Chức năng chi tiết tập trung nhiều nhất ở 04(EdgePos), 01/02/03 phụ trách tầng vận hành/triển khai/chính sách\n- Ma trận này cần được cập nhật khi thêm chức năng mới"
+        }
+      }
+    },
+    "superadmin_features": {
+      "title": "Danh sách chức năng SuperAdmin",
+      "category": "Danh sách màn hình/chức năng theo nền tảng",
+      "description": "Danh sách các chức năng quản lý cấp cao cần thiết để nhà cung cấp vận hành tổng hợp nhiều thương hiệu và đại lý. Chỉ đề cập các chức năng kiểm soát toàn bộ nền tảng, không phải chức năng vận hành cửa hàng.",
+      "sections": {
+        "purpose": {
+          "title": "Mục đích",
+          "content": "Tổng hợp các chức năng cần thiết để nhà cung cấp vận hành tổng hợp nhiều thương hiệu và đại lý. Không phải chức năng vận hành cửa hàng, mà **chỉ các chức năng quản lý cấp cao kiểm soát toàn bộ nền tảng**."
+        },
+        "tenant_org_mgmt": {
+          "title": "Quản lý tenant/tổ chức",
+          "content": "- Tạo/phê duyệt/tạm ngừng đại lý (RegionalDistributor)\n- Onboarding trụ sở thương hiệu (BrandHQ)\n- Kết nối tầng chi nhánh và quản lý cấu trúc tổ chức\n- Chuyển giao quyền sở hữu tài khoản và quyền vận hành"
+        },
+        "license_deploy": {
+          "title": "Quản lý giấy phép/triển khai",
+          "content": "- Cấp giấy phép theo thương hiệu/khu vực\n- Quản lý chính sách triển khai phiên bản\n- Kiểm soát đối tượng rollout và triển khai theo giai đoạn\n- Theo dõi trạng thái triển khai thất bại/thử lại/phê duyệt"
+        },
+        "policy_audit": {
+          "title": "Chính sách/kiểm toán/bảo mật",
+          "content": "- Chính sách RBAC toàn cầu\n- Tra cứu nhật ký kiểm toán\n- Phân phối mẫu chính sách\n- Quản lý tiêu chuẩn bảo mật/kiểm soát truy cập"
+        },
+        "monitoring": {
+          "title": "Giám sát vận hành",
+          "content": "- Giám sát trạng thái thương hiệu/đại lý/chi nhánh\n- Cảnh báo sự cố và kiểm tra sức khỏe\n- Ghi chép hỗ trợ từ xa\n- Theo dõi trạng thái triển khai và đồng bộ"
+        },
+        "contract_mgmt": {
+          "title": "Quản lý hợp đồng trung tâm",
+          "content": "- Quản lý GraphQL contract của `SuperAdmin/CentralApi`\n- Quản lý phạm vi sử dụng endpoint ngoại lệ REST\n- Quản lý phiên bản `SharedContracts`"
+        },
+        "non_responsibility": {
+          "title": "Phạm vi không thuộc trách nhiệm",
+          "content": "- **Không sở hữu dữ liệu gốc cửa hàng** như đơn hàng, thanh toán, bàn, tồn kho\n- Không trực tiếp xử lý kết nối thiết bị cục bộ của Edge POS\n- Không triển khai trùng lặp màn hình vận hành của BrandHQ\n- Nâng cấp chức năng kiểm soát cấp cao của `System & Admin` lên SuperAdmin\n- Dữ liệu vận hành POS cũ thuộc về EdgePos"
+        }
+      }
+    },
+    "distributor_features": {
+      "title": "Danh sách chức năng RegionalDistributor",
+      "category": "Danh sách màn hình/chức năng theo nền tảng",
+      "description": "Xác định trách nhiệm của tầng đại lý có quyền phân phối độc quyền theo quốc gia/khu vực. Phân tách ranh giới hợp đồng, rollout, hỗ trợ giữa trụ sở thương hiệu và nhà cung cấp.",
+      "sections": {
+        "purpose": {
+          "title": "Mục đích",
+          "content": "Xác định trách nhiệm của tầng đại lý có quyền phân phối độc quyền theo quốc gia/khu vực. Phân tách ranh giới hợp đồng, rollout, hỗ trợ giữa trụ sở thương hiệu và nhà cung cấp."
+        },
+        "territory_mgmt": {
+          "title": "Quản lý quyền phân phối khu vực/quốc gia",
+          "content": "- Quản lý quyền độc quyền quốc gia/khu vực\n- Quản lý danh sách thương hiệu phụ trách\n- Quản lý phạm vi vận hành cho phép theo khu vực\n- Phản ánh chính sách/quy định/thuế theo khu vực"
+        },
+        "brand_onboarding": {
+          "title": "Onboarding thương hiệu",
+          "content": "- Hỗ trợ đăng ký BrandHQ mới\n- Điều phối phạm vi lắp đặt và lịch rollout\n- Chuyển giao gói triển khai ban đầu\n- Kết nối kênh hỗ trợ địa phương"
+        },
+        "contract_settlement": {
+          "title": "Hợp đồng/quyết toán",
+          "content": "- Quản lý trạng thái hợp đồng đại lý\n- Theo dõi gia hạn giấy phép/hợp đồng\n- Quản lý tiêu chuẩn quyết toán địa phương\n- Theo dõi hoa hồng/chi phí hỗ trợ"
+        },
+        "regional_dashboard": {
+          "title": "Dashboard vận hành khu vực",
+          "content": "- Tình hình lắp đặt theo khu vực\n- Tình hình kích hoạt chi nhánh\n- Xem lịch sử sự cố/triển khai/hỗ trợ\n- Tóm tắt trạng thái vận hành theo thương hiệu"
+        },
+        "non_responsibility": {
+          "title": "Phạm vi không thuộc trách nhiệm",
+          "content": "- Không xử lý dữ liệu đặt hàng/thanh toán thực tế của cửa hàng\n- Không trực tiếp kiểm soát driver thiết bị hoặc DB cục bộ của EdgePos\n- Không triển khai trùng lặp màn hình vận hành thực đơn/giá/nhân viên của BrandHQ\n- Hầu như không có chức năng tồn tại trực tiếp trong HJ-POS cũ, là tầng được xác định mới trong nền tảng mới\n- Trách nhiệm cấp cao về triển khai, hỗ trợ, kiểm toán, quyết toán hấp thụ phần ngoại vi của chức năng vận hành cũ"
+        }
+      }
+    },
+    "brandhq_features": {
+      "title": "Danh sách chức năng BrandHQ",
+      "category": "Danh sách màn hình/chức năng theo nền tảng",
+      "description": "Xác định các chức năng cần thiết khi một thương hiệu vận hành tổng hợp nhiều chi nhánh. Quản lý nguồn gốc chính sách vận hành và nguồn gốc catalog của cửa hàng.",
+      "sections": {
+        "purpose": {
+          "title": "Mục đích",
+          "content": "Xác định các chức năng cần thiết khi một thương hiệu vận hành tổng hợp nhiều chi nhánh. Quản lý **nguồn gốc chính sách vận hành và nguồn gốc catalog** của cửa hàng."
+        },
+        "menu_catalog": {
+          "title": "Quản lý thực đơn/catalog",
+          "content": "- Quản lý master sản phẩm/thực đơn\n- Quản lý chính sách giá và thuế\n- Quản lý sự kiện khuyến mãi/giảm giá\n- Phân phối catalog theo chi nhánh"
+        },
+        "branch_ops": {
+          "title": "Vận hành chi nhánh",
+          "content": "- Tạo/sửa/tạm ngừng chi nhánh\n- Quản lý override theo chi nhánh\n- Quản lý mẫu quyền chi nhánh\n- Tra cứu tình hình vận hành chi nhánh"
+        },
+        "org_employee": {
+          "title": "Quản lý tổ chức/nhân viên",
+          "content": "- Quản lý cấu trúc tổ chức thương hiệu\n- Quản lý mẫu quyền/vai trò nhân viên\n- Tách biệt tài khoản vận hành viên\n- Kiểm soát truy cập theo đơn vị chi nhánh"
+        },
+        "report_settlement": {
+          "title": "Báo cáo/quyết toán",
+          "content": "- Báo cáo doanh thu\n- So sánh thành tích theo chi nhánh\n- Theo dõi hiệu quả theo chính sách\n- Tra cứu/phân tích thông qua API trung tâm"
+        },
+        "edgepos_link": {
+          "title": "Liên kết EdgePos",
+          "content": "- Phân phối chính sách/catalog sẽ được đẩy xuống EdgePos\n- Áp dụng cài đặt hiện trường trong chế độ Setup/Maintenance\n- Quản lý mẫu thiết bị và thông tin commissioning cục bộ"
+        },
+        "non_responsibility": {
+          "title": "Phạm vi không thuộc trách nhiệm",
+          "content": "- **Không sở hữu nguồn gốc thời gian thực** của giao dịch đặt hàng/thanh toán\n- Quyền phân phối độc quyền khu vực và chính sách triển khai toàn bộ nhà cung cấp thuộc trách nhiệm SuperAdmin/RegionalDistributor\n- Kiểm soát thiết bị cục bộ được thực hiện trong chế độ nội bộ BrandPosApp\n- Hấp thụ phần cần thiết cho vận hành thương hiệu từ `Inventory & Menu`, `Customer`, `System & Admin`\n- Luồng quản lý sản phẩm/thực đơn/giá/khuyến mãi là trách nhiệm cốt lõi của BrandHQ"
+        }
+      }
+    },
+    "edgepos_features": {
+      "title": "Danh sách chức năng EdgePOS",
+      "category": "Danh sách màn hình/chức năng theo nền tảng",
+      "description": "Bản cuối cùng tái tổ chức toàn bộ chức năng của dự án legacy HJ-POS-TEST (MFC/C++ POS, ~550.000 dòng) theo góc nhìn trách nhiệm EdgePos. Bao gồm 22 lớp Manager, 610+ phương thức, 350 dialog.",
+      "sections": {
+        "purpose": {
+          "title": "Mục đích",
+          "content": "Phần lớn chức năng legacy nằm trong tài liệu này. Tài liệu SuperAdmin / RegionalDistributor / BrandHQ chỉ tách riêng trách nhiệm vận hành cấp cao.\n\n**Đối tượng phân tích**: HJ-POS-TEST (MFC/C++ POS, ~550.000 dòng)\n**Phương pháp phân tích**: 5 agent chuyên gia phân tích song song (khảo sát toàn bộ lớp Manager, khảo sát toàn bộ dialog IDD_, quét resource.h)"
+        },
+        "stats_summary": {
+          "title": "Tóm tắt thống kê tổng thể",
+          "content": "| Hạng mục | Số lượng |\n|---|---|\n| File nguồn C++ (.h/.cpp) | 941 |\n| Lớp Manager | 22 |\n| Phương thức công khai (trích xuất) | 610+ |\n| Định nghĩa dialog IDD_ | 350 (Main 243 + Set 107) |\n| Cổng thanh toán | 7 (BCCard, Infoplus, ZaloPay, HJVietPay, NAPAS, BIDV, WeTax) |\n| Ngôn ngữ hỗ trợ | 3 (Tiếng Hàn, Tiếng Anh, Tiếng Việt) |\n| Tích hợp đại lý giao hàng | 6 |\n\n**Tiêu chuẩn mức độ quan trọng**: P0=Luồng doanh thu cốt lõi (chuyển đổi đợt 1), P1=Vận hành thiết yếu (chuyển đổi đợt 2), P2=Hỗ trợ/quản lý (chuyển đổi đợt 3)\n\n| Domain | Manager | Phương thức | Dialog | P0 | P1 | P2 |\n|---|---|---|---|---|---|---|\n| Table & Floor | 1 | ~40 | 12 | 8 | 10 | 6 |\n| Sales & Payment | 2+6GW | ~150 | 30 | 22 | 18 | 12 |\n| Inventory & Menu | 2 | ~170 | 25 | 12 | 15 | 10 |\n| Customer | 1 | ~80 | 15 | 8 | 12 | 8 |\n| System & Admin | 6+Print | ~120 | 120 | 10 | 15 | 20 |\n| External Bridge | 4+MQTT+HTTP | ~50 | 6 | 8 | 6 | 4 |\n| Kiosk | - | - | 22 | 5 | 8 | 6 |\n| **Tổng** | **22** | **~610** | **~230** | **73** | **84** | **66** |"
+        },
+        "table_floor": {
+          "title": "Bàn/Tầng (Table & Floor)",
+          "content": "Manager: `CTableMgr` (DB/TableMgr.h, DB/TableMgr.cpp)\n\nChức năng chính:\n- **Khởi tạo/truy vấn bàn**: InitTable, GetTableFromTableCode, GetTableFromID (P0)\n- **Quản lý trạng thái bàn**: ClearTableAll, TableOrderClear, ClearOrderFromID (P0)\n- **Khóa/đồng bộ bàn**: UseSysnCheck, SetUseSysn, ChangeTableFromSock (P0)\n- **Di chuyển/gộp bàn**: ChangeTable (di chuyển bàn trống hoặc gộp đơn, cộng dồn số tiền/số lượng) (P0)\n- **Quản lý nhóm bàn**: SetGroupView, ChangeGroupAlphabetFromSock (P1)\n- **Ghi chú bàn**: UpdateTableMemo (P1)\n- **Quản lý đặt chỗ**: CAppointTableviewDlg (P1)\n- **Mã bàn mang đi/giao hàng**: Quản lý mã chuyên dụng mang đi/giao hàng (P1)"
+        },
+        "sales_payment": {
+          "title": "Doanh thu/Thanh toán (Sales & Payment)",
+          "content": "Manager: `COrderMgr` + `CSaleMgr` + 7 cổng thanh toán\n\nChức năng chính:\n- **Tạo/sửa/hủy đơn**: Chọn thực đơn, số lượng, tùy chọn, yêu cầu đặc biệt (P0)\n- **Xử lý thanh toán**: Tiền mặt/thẻ/QR/điểm/phiếu giảm giá/ghi nợ/chia thanh toán (P0)\n- **Chia hóa đơn**: Chia thanh toán theo số tiền/số người/mục (P0)\n- **In hóa đơn**: Phiếu bếp/khách hàng/giao hàng (P0)\n- **Cổng thanh toán**: BCCard, Infoplus, ZaloPay, HJVietPay, NAPAS, BIDV, WeTax (P0)\n- **Thanh toán bất đồng bộ**: Thông báo kết quả bất đồng bộ như thanh toán QR (P1)\n- **Hoàn tiền/hủy**: Hủy giao dịch/hoàn tiền một phần (P0)"
+        },
+        "inventory_menu": {
+          "title": "Sản phẩm/Thực đơn/Tồn kho (Inventory & Menu)",
+          "content": "Manager: `CItemMgr` + `CStockMgr`\n\nChức năng chính:\n- **Quản lý sản phẩm**: Đăng ký/sửa/xóa sản phẩm, danh mục, tùy chọn (P0)\n- **Quản lý tồn kho**: Nhập/xuất kho, tra cứu tình hình, lịch sử theo ngày (P1)\n- **Quản lý mua hàng**: Nhập hàng theo nhà cung cấp, sửa mua hàng, sổ mua hàng (P1)\n- **Quyết toán tồn kho**: Kiểm kê/quyết toán, điều chỉnh tồn kho (P1)\n- **Set menu**: Cấu hình set, quản lý mã PLU (P1)"
+        },
+        "customer": {
+          "title": "Quản lý khách hàng (Customer)",
+          "content": "Manager: `CCustMgr`\n\nChức năng chính:\n- **Đăng ký/tìm kiếm khách hàng**: Đăng ký mới, tìm kiếm/chọn, sửa thông tin (P0)\n- **Chi tiết khách hàng**: Thông tin mở rộng, lịch sử mua hàng (P1)\n- **Hàng bảo quản khách hàng**: Nhập/bán/sử dụng (P2)\n- **Quản lý công nợ**: Nạp tiền/quản lý công nợ khách hàng (P1)\n- **Khách hàng chuỗi**: Danh sách khách hàng chia sẻ chuỗi (P2)"
+        },
+        "system_admin": {
+          "title": "Hệ thống/Quản lý (System & Admin)",
+          "content": "Manager: `CConfigMgr` + `CPrinterMgr` + 5 manager khác\n\nChức năng chính:\n- **Cài đặt hệ thống**: Cài đặt tổng thể, cài đặt máy in, cài đặt mạng (P0)\n- **Quản lý nhân viên**: Chọn/gọi/thông báo nhân viên, quản lý chấm công, lương/phụ cấp (P1)\n- **Quyết toán hàng ngày**: Tổng hợp doanh thu, xử lý đóng sổ (P0)\n- **Điều khiển máy in**: Máy in bếp, máy in khách hàng, máy in nhãn (P0)\n- **Sao lưu/khôi phục**: Sao lưu DB, khôi phục, khởi tạo lại dữ liệu (P1)\n- **Hỗ trợ từ xa**: Truy cập từ xa, thu thập log sự cố (P2)"
+        },
+        "external_bridge": {
+          "title": "Tích hợp bên ngoài (External Bridge)",
+          "content": "Manager: `CFoodingMgr` + 4 đại lý giao hàng + MQTT + HTTP\n\nChức năng chính:\n- **Đại lý giao hàng**: Yogiyo, Coupang Eats, PAYCO vORDER, BM_NEW, MConnect, KakaoTalk (P0)\n- **Tích hợp Fooding**: Tiếp nhận/quản lý trạng thái đơn hàng (P0)\n- **MQTT**: Nhận/gửi tin nhắn thời gian thực (P1)\n- **HTTP**: Gọi API ngoài, nhận webhook (P1)\n- **Thanh toán QR**: VietQR, ZaloPay QR (P0)"
+        }
+      }
+    },
+    "screen_inventory": {
+      "title": "Kiểm kê toàn bộ màn hình EdgePOS",
+      "category": "Danh sách màn hình/chức năng theo nền tảng",
+      "description": "Kết quả khảo sát toàn bộ màn hình (Dialog) của dự án legacy HJ-POS-TEST. Sử dụng để xác định phạm vi màn hình khi chuyển đổi sang PosUi (Next.js), cấu hình sidebar hệ thống thiết kế, và quyết định thứ tự ưu tiên migration.",
+      "sections": {
+        "summary_table": {
+          "title": "Tóm tắt số lượng màn hình",
+          "content": "| Hạng mục | Số màn hình |\n|---|---|\n| Màn hình chính POS | 4 |\n| Thanh toán/Quyết toán | 12 |\n| Đặt hàng/Thực đơn | 8 |\n| Bàn/Đặt chỗ | 7 |\n| Giao hàng | 9 |\n| Khách hàng | 11 |\n| Nhân viên | 7 |\n| Kho/Mua hàng/Sổ sách | 15 |\n| Phiếu quà tặng/Điểm/Phiếu giảm giá | 6 |\n| Phương thức thanh toán (QR/Thẻ) | 10 |\n| Hóa đơn/In ấn | 5 |\n| Đặt hàng tại bàn | 5 |\n| Màn hình bếp | 5 |\n| Tiện ích/Chung | 16 |\n| **Tổng (không kể cài đặt)** | **~142** |"
+        },
+        "pos_main": {
+          "title": "Màn hình chính POS (Đối tượng chuyển đổi P0)",
+          "content": "| ID | Tên màn hình | Mô tả | Ưu tiên |\n|---|---|---|---|\n| M-01 | Menu chính | Điểm vào POS, các nút menu kinh doanh/cài đặt/phân tích/hội viên/tồn kho | P0 |\n| M-02 | Màn hình bàn | Grid bàn theo tầng, chọn bàn/hiển thị trạng thái | P0 |\n| M-03 | Màn hình đặt hàng | Nút thực đơn, danh sách đơn, nhập số lượng, thông tin khách hàng | P0 |\n| M-04 | Màn hình thanh toán | Tính tổng, áp dụng giảm giá, chọn phương thức thanh toán, quyết toán | P0 |"
+        },
+        "payment": {
+          "title": "Thanh toán/Quyết toán",
+          "content": "12 màn hình: Thanh toán chính, Thanh toán (Việt Nam), Chọn nhanh thanh toán, Thanh toán đơn hàng, Chia hóa đơn (chia theo số tiền/số người/mục), Cài đặt thanh toán khác, Ghi chú thanh toán, Thông báo thanh toán bất đồng bộ..."
+        },
+        "order": {
+          "title": "Đặt hàng/Thực đơn",
+          "content": "8 màn hình: Đặt hàng chính, Chọn nhanh đơn, Chi tiết mục đặt hàng, Danh sách mục đặt hàng, Tin nhắn/yêu cầu đặt hàng, PLU set, Cấu hình set menu..."
+        },
+        "table_reservation": {
+          "title": "Bàn/Đặt chỗ",
+          "content": "7 màn hình: Bàn chính, Chọn nhanh bàn, Chọn bàn (gộp/di chuyển), Tin nhắn bàn, Thanh toán nhóm, Quản lý đặt chỗ, Xem bàn đặt chỗ"
+        },
+        "delivery": {
+          "title": "Giao hàng",
+          "content": "9 màn hình: Quản lý giao hàng (MFC/Sciter v1/v2), Địa chỉ giao hàng, In giao hàng, Đại lý giao hàng, Nhập địa chỉ, Hiển thị số gọi đến"
+        },
+        "customer": {
+          "title": "Khách hàng",
+          "content": "11 màn hình: Đăng ký khách hàng, Tìm kiếm khách hàng, Nhập/tra cứu/chi tiết thông tin khách hàng, Đăng ký hàng loạt, Hàng bảo quản khách hàng (nhập/bán/sử dụng), Quản lý công nợ, Danh sách khách hàng chuỗi"
+        },
+        "employee": {
+          "title": "Nhân viên",
+          "content": "7 màn hình: Chọn nhân viên, Gọi nhân viên, Thông báo nhân viên, Quản lý chấm công, Lương chấm công, Sửa chấm công, Cài đặt chấm công"
+        },
+        "stock": {
+          "title": "Kho/Mua hàng/Sổ sách",
+          "content": "15 màn hình: Quản lý kho, Nhập/tra cứu/tra cứu theo ngày/quyết toán/nhập hàng kho, Quản lý/sửa mua hàng, Sổ sách hàng ngày, Sổ sách hàng tháng, Quản lý giá vốn..."
+        },
+        "gift_point": {
+          "title": "Phiếu quà tặng/Điểm",
+          "content": "6 màn hình: Đăng ký/phát hành/sử dụng/tra cứu phiếu quà tặng, Quản lý điểm, Quản lý phiếu giảm giá"
+        },
+        "payment_methods": {
+          "title": "Phương thức thanh toán (QR/Thẻ)",
+          "content": "10 màn hình: Phê duyệt thẻ, VietQR, ZaloPay, NAPAS, BIDV, Tiền mặt, Ghi nợ, Thanh toán điểm, Thanh toán phiếu giảm giá, Thanh toán hỗn hợp"
+        },
+        "receipt": {
+          "title": "Hóa đơn/In ấn",
+          "content": "5 màn hình: Xem trước hóa đơn, In hóa đơn, In phiếu bếp, In phiếu giao hàng, In nhãn"
+        },
+        "table_order": {
+          "title": "Đặt hàng tại bàn",
+          "content": "5 màn hình: Đặt hàng tại bàn chính, Trình duyệt thực đơn, Xác nhận đơn, Thanh toán, Màn hình hoàn thành"
+        },
+        "kitchen": {
+          "title": "Màn hình bếp",
+          "content": "5 màn hình: Bếp chính, Hàng đợi đơn, Nấu xong, Thông báo, Cài đặt"
+        },
+        "utility": {
+          "title": "Tiện ích/Chung",
+          "content": "16 màn hình: Nhập bàn phím, Nhập số, Chọn ngày, Popup thông báo, Hiển thị tiến trình, Nhập mật khẩu, Dialog xác nhận, Chọn danh sách, Xem ảnh, Quét mã vạch, Xem trước in, Trợ giúp, Hiển thị thông tin, Hiển thị lỗi, Màn hình chờ, Màn hình tải"
+        },
+        "flow_diagram": {
+          "title": "Luồng chuyển đổi màn hình",
+          "content": "```\nMenu chính (M-01)\n  ├── Màn hình bàn (M-02) → Màn hình đặt hàng (M-03) → Màn hình thanh toán (M-04)\n  ├── Quản lý giao hàng (DEL-01~04)\n  ├── Quản lý khách hàng (CUS-01~11)\n  ├── Quản lý kho (STK-01~15)\n  ├── Quản lý nhân viên (EMP-01~07)\n  └── Cài đặt hệ thống\n\nLuồng doanh thu cốt lõi (P0):\n  Chọn bàn → Nhập đơn hàng → Xử lý thanh toán → In hóa đơn\n```"
+        }
+      }
+    }
+  }
+}

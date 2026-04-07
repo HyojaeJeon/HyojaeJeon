@@ -1,0 +1,25 @@
+// =============================================================================
+// 한국어: SuperAdmin CentralApi의 중앙 PostgreSQL 데이터베이스 스키마 정의 파일.
+//   플랫폼 전체의 거버넌스, 채널 관리, 브랜드 마스터 데이터, 공유 참조 데이터,
+//   Edge POS 단말기 등록 정보를 정의한다.
+//   이 스키마는 중앙 서버 전용이며, Edge POS 로컬 DB(SQLite)와는 별도이다.
+//
+// Tiếng Việt: File định nghĩa schema cơ sở dữ liệu PostgreSQL trung tâm của SuperAdmin CentralApi.
+//   Định nghĩa quản trị nền tảng, quản lý kênh, dữ liệu chủ thương hiệu, dữ liệu tham chiếu dùng chung,
+//   và thông tin đăng ký thiết bị đầu cuối Edge POS.
+//   Schema này chỉ dành cho máy chủ trung tâm, tách biệt với DB cục bộ Edge POS (SQLite).
+// =============================================================================
+
+// 한국어: Prisma Client 생성기 설정. prisma generate 실행 시 TypeScript용 클라이언트 코드를 생성한다.
+// Tiếng Việt: Cấu hình generator Prisma Client. Sinh mã client TypeScript khi chạy prisma generate.
+generator client {
+  provider = "prisma-client-js"
+}
+
+// 한국어: 데이터 소스 설정. PostgreSQL을 사용하며, DATABASE_URL 환경변수에서 연결 문자열을 읽는다.
+// Tiếng Việt: Cấu hình nguồn dữ liệu. Sử dụng PostgreSQL, đọc chuỗi kết nối từ biến môi trường DATABASE_URL.
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+

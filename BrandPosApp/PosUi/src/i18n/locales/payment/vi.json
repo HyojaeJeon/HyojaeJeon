@@ -1,0 +1,11 @@
+{
+  "cash": "Tiền mặt",
+  "card": "Thẻ",
+  "point": "Điểm",
+  "coupon": "Coupon",
+  "discount": "Giảm giá",
+  "combined": "Kết hợp",
+  "serviceCharge": "Phí dịch vụ",
+  "nocash": "Không tiền mặt",
+  "cashbill": "Hóa đơn tiền mặt"
+}

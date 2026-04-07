@@ -1,0 +1,317 @@
+{
+  "docs": {
+    "platform_architecture": {
+      "title": "Platform 최종 아키텍처 기준서",
+      "category": "프로젝트 통합설계",
+      "description": "EdgePos / RegionalDistributorPortal / BrandHQPortal / SuperAdmin / CentralApi / SyncWorkers를 포함한 전체 플랫폼의 기술 스택을 하나의 기준으로 고정하는 최상위 설계 문서다.",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "이 문서가 해결하려는 문제:\n\n- 프로젝트마다 다른 기술 선택\n- UI / API / Worker / DB 경계의 혼선\n- GraphQL / REST / Queue / Sync 계약의 중복\n- Edge와 Central의 저장소 전략 불일치\n\n**핵심 한 줄**: `Edge는 C++ + CEF + Next.js + SQLite`, `중앙은 Next.js + NestJS + Fastify + GraphQL + PostgreSQL`, `공유는 TypeScript 계약`이다."
+        },
+        "platform_principles": {
+          "title": "플랫폼 전체 원칙",
+          "content": "- **TypeScript**는 웹/서버의 기본 언어\n- **C++**는 Native Host와 공용 로우레벨 계층에만 사용\n- **GraphQL**은 중앙 계약의 기본값\n- **REST**는 `SuperAdmin/CentralApi`에서만 Fastify로 사용 (webhook, file upload, health check, auth callback 예외)\n- **Edge는 Offline-First**\n- **중앙은 Multi-Tenant**\n- **Edge 로컬 저장소는 SQLite**\n- **중앙 운영 저장소는 PostgreSQL**\n- **공통 계약은 `SharedContracts`가 단일 원본**"
+        },
+        "standard_layers": {
+          "title": "표준 사업 계층",
+          "content": "| 계층 | 역할 |\n|---|---|\n| **SuperAdmin** | 플랫폼 공급사 운영 주체 |\n| **RegionalDistributor** | 국가/지역 독점 유통권을 가진 대리점/채널 파트너 |\n| **BrandHQ** | 브랜드 본사 운영 주체 |\n| **Branch** | 브랜드 산하의 개별 매장/지점 |\n| **EdgePos** | 지점에 설치된 POS 실행 단말 |\n| **Device** | EdgePos에 연결된 주변기기 |"
+        },
+        "db_identifiers": {
+          "title": "DB 식별자 표준",
+          "content": "모든 중앙 플랫폼 데이터와 Edge POS 데이터가 공유하는 공통 식별자:\n\n| 식별자 | 의미 |\n|---|---|\n| `SuperAdminId` | 플랫폼 운영자 계정 식별자 |\n| `RegionalDistributorId` | 지역/국가 유통 파트너 식별자 |\n| `BrandHQId` | 브랜드 본사 식별자 |\n| `BranchId` | 지점/매장 식별자 |\n| `EdgePosId` | Edge POS 단말 식별자 |\n| `DeviceId` | 주변기기 식별자 |\n| `OperatorId` | 운영자/직원 계정 식별자 |\n| `PolicyVersion` | 정책 버전 식별자 |\n| `CatalogVersion` | 메뉴/카탈로그 버전 식별자 |\n| `SyncCursor` | 동기화 위치 식별자 |"
+        },
+        "project_specs": {
+          "title": "프로젝트별 확정 SPEC 요약",
+          "content": "| Project | 확정 SPEC | DB / Storage | 계약 / 통신 |\n|---|---|---|---|\n| **BrandPosApp** | C++ + CEF + Next.js(TS) | SQLite local DB | cefQuery + realtime event |\n| **RegionalDistributorPortal** | Next.js(TS) + App Router | Direct DB access 없음 | Apollo Client + GraphQL-first |\n| **BrandHQPortal** | Next.js(TS) + App Router | Direct DB access 없음 | Apollo Client + GraphQL-first |\n| **SuperAdmin/Portal** | Next.js(TS) + App Router | Direct DB access 없음 | Apollo Client + GraphQL-first |\n| **SuperAdmin/CentralApi** | NestJS + Fastify + Apollo Server | Prisma + PostgreSQL + raw SQL | GraphQL-first, REST only via Fastify |\n| **SuperAdmin/SyncWorkers** | Node.js(TS) + BullMQ | Redis + Central DB | Queue-driven |\n| **SharedKernel** | C++ shared kernel | - | native helper / protocol |\n| **SharedContracts** | TypeScript contract package | - | DTO / enum / schema |\n| **SharedAssets** | versioned runtime assets | - | i18n / static assets |"
+        },
+        "shared_assets": {
+          "title": "다국어/SharedAssets 배포 원칙",
+          "content": "- `SharedAssets`는 공용 런타임 서버가 아니라 **버전 관리된 원본 패키지**\n- `SharedAssets/i18n/locales/`가 모든 플랫폼의 유일한 번역 원본\n- 각 플랫폼은 자기 빌드 파이프라인에서 필요한 locale 자산을 복사/패키징\n- 지원 언어 기본 세트: `ko`, `vi`, `en`\n- 사용자/브랜드/지점별 언어 선호도는 DB 설정으로 관리, 실제 표시 문자열은 locale key로 해석"
+        },
+        "full_stack_overview": {
+          "title": "전체 스택 한눈에 보기",
+          "content": "```\nBrandPosApp (C++ + CEF + Next.js + SQLite)\n  └── Local Bridge / Device Control\n\nRegionalDistributorPortal (Next.js + GraphQL Client)\n  └── SuperAdmin/CentralApi\n\nBrandHQPortal (Next.js + GraphQL Client)\n  └── SuperAdmin/CentralApi\n\nSuperAdmin/Portal (Next.js + GraphQL Client)\n  └── SuperAdmin/CentralApi (NestJS + Fastify + Apollo)\n        ├── PostgreSQL + Prisma + Raw SQL\n        └── Redis / Cache / Queue\n              └── SyncWorkers (Node.js + BullMQ)\n```\n\nEdge POS는 로컬 SQLite에 우선 기록하고, Outbox/Sync를 통해 중앙 API와 동기화한다."
+        }
+      }
+    },
+    "superadmin_design": {
+      "title": "SuperAdmin 통합 플랫폼 설계서",
+      "category": "프로젝트 통합설계",
+      "description": "POS 공급사가 여러 브랜드를 운영/감시/배포/지원하는 최상위 SuperAdmin 플랫폼 설계서. 단일 매장 POS 클라이언트 문서가 아니라, 공급사가 여러 브랜드를 계약·배포·모니터링·지원하는 통합 플랫폼이다.",
+      "sections": {
+        "goal": {
+          "title": "목표 재정의",
+          "content": "최종 제품은 3개의 층으로 나뉜다:\n\n1. **Edge POS** — 각 매장 단말에 설치되는 `.exe`, 오프라인 우선, 주문/결제/테이블/주방/장치 제어\n2. **Brand HQ Platform** — 하나의 브랜드가 여러 지점을 통합 운영하는 관리 플랫폼, 메뉴/가격/프로모션/직원/지점 설정/리포트\n3. **Super Admin Platform** — POS 공급사가 여러 브랜드를 운영/감시/배포/지원하는 플랫폼, 라이선스/버전 배포/장애 모니터링/원격지원/감사로그"
+        },
+        "confirmed_spec": {
+          "title": "확정 스펙",
+          "content": "| 구성 | 확정 SPEC | 비고 |\n|---|---|---|\n| SuperAdmin/Portal | Next.js(TS) + App Router + Apollo Client | 공급사 운영 포털 |\n| SuperAdmin/CentralApi | NestJS + Fastify + Apollo Server 5 | 멀티테넌시, RBAC, audit |\n| SuperAdmin/SyncWorkers | Node.js(TS) + BullMQ + Redis | outbox, retry, reconciliation |\n| SharedContracts | TypeScript contract package | 공통 계약 단일 원본 |\n| SharedAssets | runtime assets | i18n / static assets |"
+        },
+        "platform_overview": {
+          "title": "전체 플랫폼 한눈에 보기",
+          "content": "핵심 2문장:\n\n- 매장 운영의 실시간 원본은 **Edge POS + Edge Local DB**\n- 브랜드/공급사 운영의 통합 원본은 **중앙 플랫폼**\n\n```\nSuper Admin Platform (공급사 운영)\n  → Brand HQ Platform (브랜드 본사 운영)\n    → Branch (지점 운영)\n      → EdgePos (매장 실행 단말)\n        → Edge Local DB (로컬 업무 원본)\n```"
+        },
+        "multitenancy_model": {
+          "title": "멀티테넌시 계층 모델",
+          "content": "```\nSuperAdmin\n  └── RegionalDistributor\n        └── BrandHQ\n              └── Branch\n                    └── EdgePos\n                          └── Device\n```\n\n핵심 원칙:\n- `SuperAdmin`은 플랫폼 운영 주체\n- `RegionalDistributor`는 채널/계약/지원 계층\n- `BrandHQ`는 브랜드의 운영 원본\n- `Branch`는 독립 운영 단위\n- `EdgePos`는 거래 실행 단위\n- `Device`는 `EdgePos`에 귀속\n- 하나의 `EdgePos`는 하나의 `BrandHQ`와 하나의 `Branch`에만 귀속"
+        },
+        "core_identifiers": {
+          "title": "핵심 식별자",
+          "content": "모든 중앙 플랫폼 데이터와 Edge POS 데이터가 공유하는 식별자:\n\n`SuperAdminId`, `RegionalDistributorId`, `BrandHQId`, `BranchId`, `EdgePosId`, `OperatorId`, `DeviceId`, `PolicyVersion`, `CatalogVersion`, `SyncCursor`\n\n이 식별자가 없으면:\n- 어느 BrandHQ 데이터인지 구분 불가\n- 어느 지점 매출인지 집계 불가\n- 어떤 EdgePos가 장애를 일으켰는지 추적 불가\n- 어떤 메뉴 버전이 배포됐는지 검증 불가"
+        },
+        "data_ownership": {
+          "title": "데이터 소유권",
+          "content": "### 로컬 원본 (Edge POS + Edge Local DB)\n실시간 테이블 상태, 진행 중 주문, 결제 진행 상태, 영수증/주방 출력 상태, 장치 연결 상태, 오프라인 큐와 복구 상태\n\n### 브랜드 중앙 원본 (Brand HQ Platform)\n메뉴 마스터, 가격 정책, 프로모션 정책, 지점 운영 정책, 직원/권한 템플릿, 브랜드 공지, 리포트/정산 기준\n\n### 공급사 중앙 원본 (Super Admin Platform)\n브랜드 계약/라이선스, POS 버전 배포 정책, 기능 플래그, 원격 지원 권한, 전체 장애 현황, 글로벌 감사 로그"
+        }
+      }
+    },
+    "distributor_design": {
+      "title": "RegionalDistributor 통합유통 플랫폼 설계서",
+      "category": "프로젝트 통합설계",
+      "description": "국가/지역 단위 유통권과 배포 책임을 가진 채널 파트너 계층의 소유권과 관리 경계를 정의하는 설계서다. 브랜드 본사나 매장 POS가 아니라, 대리점/채널 파트너 관점의 문서다.",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "RegionalDistributor 계층의 5가지 목적:\n\n1. 국가/지역 단위의 독점 유통권을 모델링\n2. 공급사와 브랜드 본사 사이의 계약/라이선스/배포 경계를 분리\n3. 지역별 규제, 세금, 언어, 결제수단, 지원 정책을 지역 단위로 관리\n4. 브랜드 온보딩과 매장 롤아웃을 현지 파트너 관점에서 추적\n5. `SuperAdmin → RegionalDistributor → BrandHQ → Branch → EdgePos` 체계를 문서와 DB 식별자에 반영"
+        },
+        "confirmed_spec": {
+          "title": "확정 스펙",
+          "content": "| 구성 | 확정 SPEC | 비고 |\n|---|---|---|\n| RegionalDistributorPortal | Next.js(TS) + App Router + Apollo Client | 대리점/통합유통 전용 Web 프로젝트 |\n| 중앙 연결 | SuperAdmin/CentralApi (GraphQL API) | 계약/라이선스/배포/정산 데이터 조회 |\n| UI 상태 | Redux Toolkit 필요 시 사용 | 화면 상태, 폼, 필터 |\n| 직접 DB 접근 | 없음 | 모든 영속 데이터는 중앙 API 경유 |"
+        },
+        "responsibility_position": {
+          "title": "책임 위치",
+          "content": "```\nSuperAdmin — 플랫폼 공급사 전체 통제, 글로벌 라이선스/정책/감사\n  └── RegionalDistributor — 지역/국가 독점 유통권, 현지 계약·배포·지원 조율\n        └── BrandHQ — 브랜드 본사 운영, 메뉴/가격/프로모션/지점 정책\n              └── Branch — 실제 매장 운영 단위\n                    └── EdgePos — 매장 실시간 거래 실행 단위\n                          └── Device — 프린터, 카드리더기, 스캐너 등\n```"
+        },
+        "management_scope": {
+          "title": "관리 범위",
+          "content": "**직접 관리하는 범위:**\n- 지역/국가 독점 유통권\n- 브랜드 계약 상태\n- 라이선스 수량/만료/배포 가능 범위\n- 현지 지원 SLA\n- 지역별 공지/배포 정책\n- 지역별 규제 대응 설정\n- 브랜드 온보딩 진행 상태\n- 배포/지원/정산 추적\n\n**직접 소유하지 않는 범위:**\n- 브랜드 메뉴/가격 원본\n- 지점 주문/결제의 실시간 원본\n- EdgePos 로컬 DB의 거래 원본\n- 매장 운영자 출근/실명 관리 원본"
+        },
+        "data_ownership": {
+          "title": "데이터 소유권",
+          "content": "**RegionalDistributor 원본 데이터:**\n`RegionalDistributorId`, `TerritoryCode`, `CountryCode`, `ContractId`, `LicensePoolId`, `RolloutBatchId`, `SupportSlaId`, `DistributorUserId`, `SettlementBatchId`\n\n**BrandHQ 원본과의 경계:**\n메뉴 마스터, 가격 원본, 지점 실시간 주문 원본, 결제 승인 원본, 테이블 점유 상태 원본은 각각 `BrandHQ` 또는 `EdgePos`가 원본이다."
+        },
+        "settings_inheritance": {
+          "title": "설정 상속 모델",
+          "content": "설정 평가 우선순위:\n\n1. `Global Default`\n2. `RegionalDistributor Default`\n3. `BrandHQ Default`\n4. `Branch Override`\n5. `EdgePos Override`\n\n규칙:\n- 지역 규제나 결제사 제한은 `RegionalDistributor Default`에 둔다\n- 브랜드 고유 정책은 `BrandHQ Default`에 둔다\n- 지점/단말별 예외는 override로 제한\n- 어떤 값이 어느 계층에서 왔는지 추적 가능해야 한다"
+        },
+        "deployment": {
+          "title": "배포와 온보딩",
+          "content": "RegionalDistributor는 다음 3가지 흐름의 중간 허브다:\n\n**1. 브랜드 온보딩** — 계약 등록, 지역권 확인, 라이선스 할당\n\n**2. 하향 배포** — 정책, 카탈로그, 지역 규제, 지원 템플릿 전달\n\n**3. 상향 보고** — rollout 결과, 장애 요약, 정산/지원 상태\n\n흐름: `SuperAdmin → RegionalDistributor → BrandHQ → Branch → EdgePos`"
+        }
+      }
+    },
+    "brandhq_design": {
+      "title": "BrandHQ 브랜드·지점 운영 플랫폼 설계서",
+      "category": "프로젝트 통합설계",
+      "description": "브랜드 본사 운영 조직이 여러 지점을 통합 관리하기 위한 설계 기준서. BrandHQ는 정책과 마스터의 원본이고, Edge POS는 실시간 거래의 원본이다.",
+      "sections": {
+        "goal": {
+          "title": "목표",
+          "content": "BrandHQ 플랫폼의 4가지 목적:\n\n1. 하나의 브랜드가 여러 지점을 공통 정책으로 운영\n2. 메뉴, 가격, 프로모션, 직원 권한을 중앙에서 관리\n3. 지점별 override를 허용하되 브랜드 표준을 깨지 않도록 통제\n4. Edge POS로 내려갈 정책과 카탈로그의 배포 기준이 된다"
+        },
+        "confirmed_spec": {
+          "title": "확정 스펙",
+          "content": "| 구성 | 확정 SPEC | 비고 |\n|---|---|---|\n| BrandHQPortal | Next.js(TS) + App Router + Apollo Client | 브랜드 본사 운영 포털 |\n| 중앙 연결 | SuperAdmin/CentralApi (GraphQL API) | 메뉴/가격/프로모션/지점/리포트 |\n| 하향 배포 대상 | BrandPosApp / EdgePos | 정책/메뉴/가격 배포 |\n| 현장 설정 적용 | BrandPosApp Setup/Maintenance mode | 주변기기, 로컬 설정, 커미셔닝 |"
+        },
+        "responsibility_flow": {
+          "title": "한눈에 보는 책임",
+          "content": "```\nBrandHQ Portal (브랜드 본사 운영)\n  ├── BrandHQ Master (메뉴/가격/프로모션)\n  ├── BrandHQ Policy (운영 정책/권한 템플릿)\n  └── Branch Override (지점별 예외 설정)\n        └── Downstream Distribution (하향 배포)\n              └── EdgePos (매장 단말)\n                    └── Sales / Orders / Payments (매장 실시간 거래)\n                          └── Upstream Sync (상향 동기화) → BrandHQ\n```\n\n핵심: BrandHQ는 **정책과 마스터의 원본**, Edge POS는 **실시간 거래의 원본**"
+        },
+        "management_layers": {
+          "title": "관리 계층 모델",
+          "content": "BrandHQ가 직접 관리하는 기본 계층:\n\n| 계층 | 역할 |\n|---|---|\n| **BrandHQ** | 최상위 관리 단위 |\n| **Branch** | 독립 운영 단위 |\n| **EdgePos** | 배포 대상 단위 |\n| **OperatorTemplate** | 직원 역할 템플릿 |\n| **Catalog** | 메뉴/가격/카테고리 |\n| **Policy** | 운영 정책 |\n\n원칙: 운영자 실명/출근 데이터와 권한 템플릿은 분리할 수 있어야 한다."
+        },
+        "data_ownership": {
+          "title": "데이터 소유권",
+          "content": "### BrandHQ 원본\n메뉴 마스터, 가격 정책, 프로모션 정책, 세금/서비스 운영 정책, 브랜드 공지, 직원 역할 템플릿\n\n### Branch Override 허용 항목\n지점별 판매 여부, 지점별 가격 예외, 지점별 프로모션 적용 여부, 프린터/주방 라우팅, 영업 시간/휴무\n\n### Edge POS 경계\nBrandHQ는 다음을 직접 원본으로 가지지 **않는다**: 진행 중 주문 상태, 결제 진행 상태, 테이블 점유 상태, 장치 연결 상태. 이 데이터는 항상 Edge POS와 Edge Local DB가 원본이다."
+        },
+        "settings_inheritance": {
+          "title": "설정 상속 모델",
+          "content": "설정 평가 우선순위:\n\n1. `Global Default`\n2. `BrandHQ Default`\n3. `Branch Override`\n4. `EdgePos Override`\n\n규칙:\n- override는 최소화\n- 어떤 값이 어느 계층에서 왔는지 추적 가능해야 한다\n- 배포 시 `PolicyVersion`, `CatalogVersion`을 함께 관리"
+        },
+        "deployment_sync": {
+          "title": "배포와 동기화",
+          "content": "BrandHQ 관점 두 흐름:\n\n**Downstream Distribution** — 메뉴/가격/정책을 지점과 단말로 배포\n\n**Upstream Sync Consumption** — 매장에서 올라온 매출/상태/오류를 수신하여 운영 화면에 반영\n\n중요 원칙:\n- 배포는 정책 중심\n- 상향 동기화는 운영 가시성 중심\n- 실시간 거래 성공 여부는 **중앙 API 성공이 아니라 로컬 commit 기준**"
+        }
+      }
+    },
+    "edgepos_architecture": {
+      "title": "Edge POS 아키텍처 설계서",
+      "category": "프로젝트 통합설계",
+      "description": "각 지점에 설치되는 Edge POS의 UI를 CEF + Next.js(TypeScript) + Redux Toolkit + RTK Query로 전환하고, C++은 비즈니스 로직/SQLite 로컬 DB/서버통신/주변기기 전담으로 유지하는 설계 기준서다.",
+      "sections": {
+        "decisions": {
+          "title": "결정사항",
+          "content": "| 항목 | 결정 |\n|---|---|\n| **플랫폼** | x86/x64 듀얼 빌드, CEF 포함, 고객 환경별 배포 |\n| **전환 범위** | 핵심 3개 화면 우선 (테이블, 주문, 결제) |\n| **Next.js 서빙** | 정적 빌드 (`output: 'export'`) + CEF Custom Scheme (`app://pos/`) |\n| **주변기기** | C++ 유지 → cefQuery로 JS에서 호출 |\n| **운영 모델** | Offline-First, 로컬 DB가 업무 데이터 원본 |\n| **상태 관리** | RTK Query 단일화, Redux slice는 UI 상태만 |\n| **브라우저 생명주기** | 메인 CefBrowser 단일 인스턴스, React 라우팅으로 화면 전환 |\n| **계층 원칙** | UI/Bridge → UseCases → DB/Manager → Infra 단방향 |\n| **영속화** | Manager별 Repository 전면 도입 안 함, `*Store`만 분리 |\n| **중복 처리** | requestId + idempotencyKey 기준 멱등성 보장 |\n| **최종 UI 목표** | MFC UI 완전 제거, CEF + Next.js로 수렴 |\n| **개발 환경** | `app/design-system/` + Mock transport, C++ 없이 UI 개발 가능 |\n| **CEF 안정성** | CefLifeSpanHandler 크래시 감지 → 브라우저 자동 재생성 → 로컬 DB 기반 재수화 |"
+        },
+        "directory_structure": {
+          "title": "디렉토리 구조",
+          "content": "```\nBrandPosApp/\n├── AppHost/                  # 실행 진입점, 부트스트랩, 서비스 조립\n│   ├── Bootstrap/            # AppCompositionRoot, ServiceRegistry\n│   └── BrandPosHost/         # WinMain 진입, CEF 초기화\n├── Presentation/\n│   └── CEF/                  # CEF 호스팅, 브라우저 수명주기\n│       ├── Handlers/         # CefAppHandler, CefBrowserDlg, SchemeHandler, Recovery\n│       └── InternalBridge/   # PosRequestResponder, PosRequestActions, PosRealTimeSender\n├── UseCases/                 # 유스케이스 오케스트레이션\n│   ├── Shared/               # TransactionRunner, IdempotencyService, OperationLock\n│   ├── Table/                # SelectTableUseCase, RefreshTablesUseCase\n│   ├── Order/\n│   └── Payment/\n├── Domain/                   # 순수 업무 규칙과 Manager\n│   ├── Table/\n│   ├── Order/\n│   ├── Payment/\n│   └── ...\n├── Infrastructure/           # SQLite, Sync, Device, ExternalBridge\n│   ├── Persistence/SQLite/\n│   ├── Sync/\n│   ├── Device/\n│   └── ExternalBridge/\n└── PosUi/                    # Next.js(TypeScript) UI\n    └── src/\n        ├── app/              # Next.js 라우트\n        ├── screens/          # 실제 제품 화면\n        ├── design-system/    # 공용 UI 원본 라이브러리\n        ├── store/            # RTK Query + Redux slice\n        ├── bridge/           # C++ transport/command\n        └── shared/           # 공용 유틸/조합 컴포넌트\n```"
+        },
+        "layer_summary": {
+          "title": "계층별 역할 요약",
+          "content": "| 계층 | 책임 | 포함 대상 |\n|---|---|---|\n| **Presentation** | 화면, 브라우저 호스팅, CEF 단일 셸 UI 브릿지 | PosUi/, Presentation/CEF/, AppHost/ |\n| **InternalBridge** | 요청 라우팅, 파라미터 검증, 응답 포맷 | PosRequestResponder, PosRequestActions, PosRealTimeSender |\n| **UseCases** | 유스케이스 오케스트레이션, 트랜잭션, 멱등성, 락, 후처리 | SelectTableUseCase, TransactionRunner, IdempotencyService |\n| **Domain/Manager** | 비즈니스 규칙, 계산, 데이터 조작 | TableManager, OrderMgr, SaleMgr, CustMgr, ItemMgr |\n| **Infrastructure** | 로컬 DB 연결, 동기화, 외부 연동, 장치, 네트워크 | DBAccess, ExternalBridge, Device, Sync |"
+        },
+        "posui_rules": {
+          "title": "PosUi 개발 규칙",
+          "content": "- `design-system/`은 공용 UI의 **원본**, `app/design-system/`은 카탈로그/프리뷰 라우트\n- `screens/`는 실제 제품 화면, 카탈로그에서 보는 화면은 **screens/* 구현을 그대로 재사용**\n- `posApi.js`는 루트 createApi, 도메인별 `*Api.js`는 `injectEndpoints()`\n- 서버 상태는 RTK Query 캐시가 원본, Redux slice는 UI 상태만\n- `PosRequestSender.js`는 저수준 transport, 내부에서 `cefTransport` / `mockTransport` 선택\n- `next dev` + `app/design-system/` + `mockTransport` 조합으로 C++ 없이 UI 개발 가능"
+        },
+        "cef_usecases": {
+          "title": "CEF/브라우저 운영 규칙",
+          "content": "- 메인 CefBrowser는 **단일 인스턴스** 유지\n- 화면 전환 시 `CloseBrowser` 호출 **금지**\n- `1024x768` 고정 해상도와 터치 사용성 기준 준수\n- renderer crash 복구는 **DB/UseCase bootstrap 데이터 기준**으로 수행 (브라우저 메모리 X)\n- crash loop 기준과 CEF 재생성/복구 계약을 무시하고 구현하지 않는다"
+        },
+        "cross_layer_rules": {
+          "title": "계층 간 규칙",
+          "content": "**InternalBridge**: `PosRequestActions`는 thin router여야 한다. Actions에서 직접 SQL 실행, 여러 Manager 직접 조합, 트랜잭션/락/멱등성 처리 금지.\n\n**UseCases**: 여러 Manager 호출 순서 조정, requestId/idempotencyKey 검사, 작업 단위 락 획득, 트랜잭션 실행, Ledger/Outbox 갱신, 커밋 후 UI 이벤트/sync ACK/인쇄 순서 제어. **UI 이벤트 결정권과 PosRealTimeSender 호출 권한은 UseCases만 가진다.**\n\n**Domain/Manager**: 순수 업무 계산, DB row 생성/수정, 도메인 결과 반환. PosRealTimeSender 직접 호출 금지, 외부 ACK 발송 여부 결정 금지.\n\n**ExternalBridge**: 외부 payload 인증/검증, 외부 포맷 → 내부 DTO 변환, UseCases 호출. 직접 SQL 실행, 직접 UI 송신, 주문/결제 확정 상태 임의 결정 금지."
+        },
+        "mfc_migration": {
+          "title": "MFC 마이그레이션 규칙",
+          "content": "기존 Dialog 코드를 4곳으로 분리:\n\n1. **UI 레이아웃/버튼/Grid** → `PosUi/src/design-system/` + `PosUi/src/screens/`\n2. **버튼 클릭 분기** → `CEF/InternalBridge/PosRequestActions/`\n3. **유스케이스 조정/트랜잭션/멱등성/후처리** → `UseCases/`\n4. **실제 DB 쿼리/금액 계산/데이터 처리** → `Domain/Manager` + `Infrastructure/Persistence`\n\n마이그레이션 순서: UI 분리 → Actions 라우터 생성 → UseCases 추출 → DB/Manager 정리"
+        },
+        "mandatory_requirements": {
+          "title": "필수 준수 요건",
+          "content": "- **Golden Rule**: `ExternalBridge → UseCases → DB/Manager → PosRealTimeSender → UI`\n- DB에 저장되지 않은 정보는 UI에 띄우지 않는다\n- ExternalBridge는 PosRealTimeSender를 직접 호출할 수 없다\n- Manager도 PosRealTimeSender를 직접 호출할 수 없다\n- 결제/주문/배달 수신은 `requestId + idempotencyKey` 기준 멱등성 보장\n- Ledger 상태: `RECEIVED → PROCESSING → SUCCEEDED / FAILED / COMPENSATED`\n- Outbox 상태: `PENDING → DISPATCHING → ACKED / FAILED_RETRYABLE / FAILED_TERMINAL`"
+        },
+        "communication_design": {
+          "title": "통신 설계",
+          "content": "### PosRequest (UI → C++ 왕복)\n- 진입점: `PosUi/src/bridge/PosRequestSender.js`\n- C++ 측: `PosRequestResponder → PosRequestActions → UseCases`\n\n### PosRealTime (C++ → UI 단방향)\n- C++ 측: `UseCases → PosRealTimeSender`\n- UI 측: `PosRealTimeReceiver`\n\n### JSON 봉투 규칙\n모든 메시지에 공통 헤더: `v`, `requestId`, `timestamp`, `idempotencyKey`(조건부)\n\n### Device Error 규칙\n완성 문장 msg를 싣지 않는다. 코드 기반 필드로 전달: `type`, `device`, `code`, `msgKey`, `msgParams`, `severity`, `recoverable`, `retryable`, `action`"
+        },
+        "operational_gates": {
+          "title": "운영 게이트",
+          "content": "- 화면 전환과 롤백은 INI feature flag로 제어\n- 핵심 3개 화면부터 점진 전환: 테이블 → 주문 → 결제\n- Offline-First: 로컬 SQLite 커밋이 업무 성공의 기준\n- RTK Query 캐시는 복구 원본이 아니다\n- 복구 기준: `로컬 SQLite + Ledger + Outbox`"
+        },
+        "build_pipeline": {
+          "title": "빌드 파이프라인",
+          "content": "- x86/x64 듀얼 빌드 유지\n- Next.js는 `output: 'export'` 기준 정적 빌드\n- CEF Custom Scheme (`app://pos/`)로 정적 파일 서빙\n- `app://pos/` scheme handler가 정적 파일 라우팅 규칙 제공\n- UI/CEF/리소스 버전 동기화 규칙 필요"
+        }
+      }
+    },
+    "edgepos_az_guide": {
+      "title": "Edge POS 전체 흐름 A-Z 가이드",
+      "category": "프로젝트 통합설계",
+      "description": "최종 설계 기준으로 Edge POS가 어떻게 동작해야 하는지를 A부터 Z까지 순서대로 설명하는 문서. 실제 코드 완성도를 평가하는 문서가 아니라 동작 흐름의 설계 기준서다.",
+      "sections": {
+        "purpose": {
+          "title": "이 문서의 목적",
+          "content": "이 문서가 설명하는 것:\n\n- POS가 어디서 시작하는가\n- C++ / CEF / Next.js(TypeScript) / RTK Query가 어떻게 연결되는가\n- 화면에서 입력한 작업이 어떤 계층을 지나 SQLite까지 가는가\n- 저장 후 화면은 어떻게 갱신되는가\n- 오프라인, 동기화, 복구, 설정 모드는 어떻게 동작하는가\n- 각 파일이 어느 지점에서 책임을 가지는가"
+        },
+        "one_page_summary": {
+          "title": "한 장 요약",
+          "content": "| 관점 | 설명 |\n|---|---|\n| 실행 형태 | `BrandPosApp.exe`가 실행되는 네이티브 POS 프로그램 |\n| UI | CEF 안에서 Next.js(TypeScript)가 동작 |\n| 상태 관리 | 서버 상태는 RTK Query, 로컬 UI 상태는 Redux Toolkit slice |\n| 요청 진입점 | UI 요청은 PosRequestSender 하나로 들어간다 |\n| 업무 처리 | UseCases가 트랜잭션과 순서를 조정 |\n| 도메인 규칙 | Domain/*Manager가 업무 규칙을 가진다 |\n| 저장 | 최종 저장소는 SQLite |\n| 실시간 갱신 | C++는 PosRealTimeSender로 UI를 다시 깨운다 |\n| 복구 | 복구는 UI cache가 아니라 local store 기준 |"
+        },
+        "overall_flow": {
+          "title": "전체 흐름",
+          "content": "```\nBrandPosApp.exe\n  → AppHost / BrandPosHost\n    → Presentation/CEF\n      → PosUi / Next.js(TypeScript)\n        → RTK Query / Redux Toolkit\n        → PosRequestSender\n          → PosRequestResponder\n            → PosRequestActions\n              → UseCases\n                → Domain Managers\n                  → Infrastructure/Persistence/SQLite\n                    → SQLite local store\n              → PosRealTimeSender → PosRealTimeReceiver → UI\n              → Outbox / RequestLedger / RecoveryState\n                → Sync / Recovery\n```\n\n한 줄 요약: `exe 시작 → CEF 로드 → Next.js UI 표시 → RTK Query로 화면 준비 → 요청 전달 → UseCase → Domain → SQLite 저장 → 실시간 이벤트 → 화면 갱신`"
+        },
+        "points_a_to_j": {
+          "title": "시작점 A~J 상세 흐름",
+          "content": "### A. 실행 시작\n`BrandPosApp.cpp` → `CefBootstrap.cpp` (CEF 초기화) → `CefAppHandler.cpp` (핸들러 등록) → `CefSchemeHandler.cpp` (`app://pos/` 매핑) → `CefBrowserDlg.cpp` (브라우저 생성) → `BrowserRecoveryManager.cpp` (crash 회복 감시)\n\n### B. PosUi 로드\nCEF는 PosUi의 정적 빌드 결과를 읽는다: `layout.tsx` → `page.tsx` → `pos/table/page.tsx`, `pos/order/page.tsx`, `pos/payment/page.tsx`, Setup mode, Maintenance mode\n\n### C. 화면 초기화\nRTK Query가 초기 데이터를 읽는다: 테이블 목록, 현재 선택된 테이블, 주문 목록, 결제 대기 상태, 시스템 설정, 장치 연결 상태. 화면은 데이터를 직접 만들지 않고 이미 있는 상태를 읽어 렌더링.\n\n### D. UI → C++ 요청\n`screen → RTK Query mutation / bridge command → PosRequestSender → cefTransport → PosRequestResponder → PosRequestActions → UseCases`\n\n### E. 데이터 저장\nUseCases 시작 → Domain 검증 → SQLite `*Crud.cpp` 저장 → RequestLedger 기록 → Outbox 적재 → commit\n\n### F. 저장 후 UI 갱신\n`PosRealTimeSender` → `CefBrowserDlg` (JS event dispatch) → `PosRealTimeReceiver` → RTK Query cache 무효화/갱신 → Redux slice 정리\n\n### G. 대표 업무 흐름\n테이블 선택, 주문 생성, 결제 처리 — 각각 UseCase → Domain → SQLite → RealTimeSender → UI 갱신 순서\n\n### H. Setup/Maintenance 모드\nSetup: 최초 설치, 네트워크/장치 설정, 브랜치/터미널 바인딩, 초기 데이터\nMaintenance: 장치 점검, 설정 재적용, 로그 수집, 업데이트 실행\n\n### I. 동기화\nOutbox → SyncDispatcher → 중앙 API 전송 → ACK → Outbox 상태 갱신. 오프라인이면 큐에 보관, 온라인 복구 시 재전송.\n\n### J. 복구\n프로세스 재시작 시 미완료 PROCESSING 작업 재검사, DB 기반 재수화, Ledger 기반 중복 방지, Outbox 미전송 건 재전송."
+        }
+      }
+    },
+    "edgepos_checklist": {
+      "title": "Edge POS P0/P1 설계 보완 체크리스트",
+      "category": "프로젝트 통합설계",
+      "description": "04-Edge-POS-아키텍처-설계서의 운영 반영 전 필수 보완 항목을 우선순위 기준으로 점검하는 체크리스트. P0은 미완료 시 운영 반영 금지, P1은 파일럿 전까지 완료 권장.",
+      "sections": {
+        "p0_layer_boundaries": {
+          "title": "P0 — 계층 경계",
+          "content": "- [ ] `PosRequestActions`가 직접 SQL/Manager 조합 로직을 수행하지 않고 `UseCases`만 호출한다\n- [ ] `ExternalBridge`가 직접 SQL을 수행하지 않는다\n- [ ] `ExternalBridge`가 직접 `PosRealTimeSender`를 호출하지 않는다\n- [ ] UI 송신은 `PosRealTimeSender` 단일 경로만 사용한다"
+        },
+        "p0_idempotency": {
+          "title": "P0 — 멱등성 / 중복 처리",
+          "content": "- [ ] 결제 요청에 `requestId`, `idempotencyKey`가 필수 적용된다\n- [ ] 주문 생성/수정/취소에도 `requestId` 추적이 적용된다\n- [ ] 영속 Ledger 테이블에 `RECEIVED/PROCESSING/SUCCEEDED/FAILED/COMPENSATED` 상태가 기록된다\n- [ ] 동일 `idempotencyKey` 재수신 시 신규 실행이 아니라 기존 결과를 재반환한다"
+        },
+        "p0_transaction": {
+          "title": "P0 — 트랜잭션 / 정합성",
+          "content": "- [ ] DB 영속화 완료 전 외부 ACK를 보내지 않는다\n- [ ] DB 영속화 완료 전 UI 상태를 갱신하지 않는다\n- [ ] 인쇄/장치 실패와 DB 저장 실패를 구분하는 정책이 문서화되어 있다\n- [ ] 하나의 use case는 하나의 UseCase 단위에서 종료된다"
+        },
+        "p0_failure_recovery": {
+          "title": "P0 — 장애 복구",
+          "content": "- [ ] 프로세스 재시작 시 미완료 `PROCESSING` 작업 재검사 절차가 구현되어 있다\n- [ ] 미완료 결제 재조회 규칙이 문서화되어 있다\n- [ ] 테이블/주문/배달 데이터는 DB 기준으로 재수화 가능하다\n- [ ] 외부 ACK 미전송 건의 재전송 절차가 있다"
+        },
+        "p0_operational": {
+          "title": "P0 — 운영 안전장치",
+          "content": "- [ ] 화면 단위 feature flag가 존재한다\n- [ ] 핵심 3개 화면이 CEF 단일 셸 기준으로만 동작하도록 정리되어 있다\n- [ ] 운영 롤백 조건이 문서화되어 있다\n- [ ] 파일럿 매장 전개 순서가 정의되어 있다"
+        },
+        "p1_browser": {
+          "title": "P1 — 브라우저 / 런타임",
+          "content": "- [ ] `CefBrowser` 단일 인스턴스 전략이 구현 설계에 반영\n- [ ] `root_cache_path`, `cache_path`가 명시적으로 설정\n- [ ] 세션 쿠키 / localStorage 지속 정책이 문서화\n- [ ] remote debugging / devtools 정책이 운영/개발별로 구분"
+        },
+        "p1_performance": {
+          "title": "P1 — 성능 / 메모리",
+          "content": "- [ ] x86 메모리 한계치와 허용 RSS 기준이 정의\n- [ ] 장시간 soak test 시나리오가 존재\n- [ ] 화면 전환 시간, 첫 로딩 시간, 결제 완료 시간의 목표치\n- [ ] x86 기준 미달 시 x64 전환 게이트가 문서화"
+        },
+        "p1_contract": {
+          "title": "P1 — 계약 / 인터페이스",
+          "content": "- [ ] 메시지 Envelope 표준이 모든 채널에 공통 적용\n- [ ] `v`, `requestId`, `timestamp`, `idempotencyKey` 필드 사용 규칙 고정\n- [ ] Bridge 요청/응답 예제가 문서화\n- [ ] `VERSION_MISMATCH` 처리 UX가 정의"
+        },
+        "p1_observability": {
+          "title": "P1 — 관측성",
+          "content": "- [ ] 모든 로그에 `requestId` 체인이 포함\n- [ ] 장치 로그, 브릿지 로그, 업무 로그가 분리\n- [ ] 장애 시 어떤 로그를 우선 확인해야 하는지 운영 가이드\n- [ ] 외부 결제/VAN/MQTT 응답 추적 키가 문서화"
+        },
+        "p1_qa": {
+          "title": "P1 — 품질 보증",
+          "content": "- [ ] Bridge contract test가 자동화\n- [ ] UseCase 단위 테스트가 존재\n- [ ] 강제 종료 후 복구 테스트가 존재\n- [ ] MFC 결과와 신 UI 결과 동등성 비교 시나리오 존재"
+        },
+        "p1_deployment": {
+          "title": "P1 — 배포 / 정적 빌드",
+          "content": "- [ ] Next.js는 `output: 'export'` 기준으로 빌드\n- [ ] 정적 export에서 금지되는 기능 목록이 공유\n- [ ] `app://pos/` scheme handler가 정적 파일 라우팅 규칙 제공\n- [ ] UI/CEF/리소스 버전 동기화 규칙 존재"
+        }
+      }
+    }
+  },
+  "az_flow": {
+    "a": {
+      "title": "실행 시작 (Process Start)",
+      "summary": "BrandPosApp.exe 시작 → CEF 초기화 → 브라우저 생성",
+      "detail": "1. `BrandPosApp.exe` 실행 → `WinMain` 진입\n2. `CefBootstrap.cpp`에서 CEF 런타임 초기화 (command line args, settings)\n3. `CefAppHandler.cpp`에서 브라우저 프로세스 핸들러 등록\n4. `CefSchemeHandler.cpp`에서 `app://pos/` 커스텀 스킴 등록\n5. `CefBrowserDlg.cpp`에서 **단일 CEF 브라우저 인스턴스** 생성 (1024×768)\n6. `BrowserRecoveryManager.cpp`가 renderer crash 감시 시작\n\n### 부트스트랩 의존성 조립\n\n`AppCompositionRoot.cpp`의 `ComposeApp()` 함수가 전체 서비스 등록:\n\n```\nServiceRegistry\n├── Register<TableManager>()\n├── Register<TransactionRunner>()\n├── Register<IdempotencyService>()\n├── Register<OperationLockService>()\n├── Register<RequestLedgerStore>()\n├── Register<OutboxStore>()\n├── Register<PosRealTimeSender>(browser_dlg)\n└── Register<SelectTableUseCase>(table_mgr, tx_runner, idempotency, realtime_sender)\n```\n\n`ServiceRegistry`는 **타입 인덱스 기반 DI 컨테이너**:\n- `Register<T>(shared_ptr<T>)` — 인터페이스 타입으로 등록\n- `Resolve<T>()` — 타입으로 조회\n- `Has<T>()` — 등록 여부 확인\n\n**핵심 원칙**: 브라우저는 앱 수명 동안 **단 하나만** 유지. 화면 전환 시 CloseBrowser 호출 금지."
+    },
+    "b": {
+      "title": "PosUI 로드 (UI Loading)",
+      "summary": "CEF가 Next.js 정적 빌드를 로드 → 초기 화면 렌더링",
+      "detail": "1. CEF가 `app://pos/` 스킴으로 Next.js 정적 빌드 결과(`out/` 폴더)를 로드\n2. `layout.tsx` → `page.tsx` → 초기 라우트 (`/pos/table`) 렌더링\n\n### StoreProvider 초기화\n\n`StoreProvider.tsx`가 Redux Store를 **싱글턴**으로 생성:\n\n```\nStoreProvider\n├── useRef로 단일 store 인스턴스 유지\n├── makeStore() → configureStore({\n│   reducer: {\n│     [posApi.reducerPath]: posApi.reducer,  // RTK Query 캐시\n│     ui: uiReducer                          // UI 전용 상태\n│   },\n│   middleware: getDefault().concat(posApi.middleware)\n│ })\n└── React-Redux Provider로 children 래핑\n```\n\n### PosRealTimeReceiver 등록\n\n`PosRealTimeReceiver.tsx`가 C++ → UI 이벤트 리스너 등록:\n\n```\nwindow.addEventListener('POS_NATIVE_EVENT', handler)\n\n이벤트 라우팅:\n├── TABLE_REFRESH    → invalidateTags(['Table'])\n├── ORDER_NEW        → invalidateTags(['Order','Table']) + toast\n├── ORDER_UPDATED    → invalidateTags(['Order'])\n├── PAYMENT_COMPLETE → invalidateTags(['Payment','Order','Table']) + clear processing\n├── SYNC_STATUS_CHANGED → invalidateTags(['Sync'])\n└── DEVICE_ERROR     → pushDeviceError to uiSlice\n```\n\n**핵심 원칙**: `next dev`가 아닌 `next export` 정적 빌드. 실행 시점에 Node.js 서버 없음."
+    },
+    "c": {
+      "title": "RTK Query 초기화 (State Setup)",
+      "summary": "posApi createApi 루트 → 도메인별 injectEndpoints → hook 생성",
+      "detail": "### posApi.ts — createApi 루트\n\n```\nconst posApi = createApi({\n  reducerPath: 'posApi',\n  baseQuery: posBaseQuery,     // 모든 요청을 PosRequestSender로 중개\n  tagTypes: ['Table', 'Order', 'Payment', 'Sync', 'System', 'Config'],\n  endpoints: () => ({})        // 비어있음 — 도메인별 injectEndpoints로 주입\n})\n```\n\n`posBaseQuery`는 `BridgeArg` 인터페이스를 받아 `PosRequestSender.sendRequest()`를 호출:\n```\ninterface BridgeArg {\n  cmd: string            // 'TABLE:GET_ALL', 'ORDER:ADD_ITEM' 등\n  params: Record<string, unknown>\n  idempotencyKey?: string\n}\n```\n\n### tableApi.ts — 테이블 도메인 엔드포인트\n\n```\ntableApi.injectEndpoints({\n  endpoints: (build) => ({\n    getTables: build.query<TableData, void>({\n      query: () => ({ cmd: 'TABLE:GET_ALL', params: {} }),\n      providesTags: ['Table']\n    }),\n    selectTable: build.mutation<unknown, { id: number }>({\n      query: ({ id }) => ({ cmd: 'TABLE:SELECT', params: { id } }),\n      invalidatesTags: ['Table']\n    })\n  })\n})\n\ninterface TableData {\n  tables: Array<{\n    id: number\n    name: string\n    label: string\n    status: 'E' | 'U' | 'L'  // Empty, Used(Occupied), Locked\n    floor: number\n  }>\n}\n```\n\n### orderApi.ts — 주문/메뉴 도메인\n\n```\ngetMenu: query<MenuData, void>\n  → cmd: 'MENU:GET_ALL'\n  → providesTags: ['Order']\n\ngetOrder: query<OrderData, { tableId }>\n  → cmd: 'ORDER:GET'\n  → providesTags: ['Order']\n\naddOrderItem: mutation<unknown, { tableId, menuId, quantity }>\n  → cmd: 'ORDER:ADD_ITEM'\n  → invalidatesTags: ['Order', 'Table']\n\ninterface MenuData {\n  categories: Array<{ id, name, sort }>\n  items: Array<{ id, name, price, categoryId, ... }>\n}\n```\n\n### hook 사용 예시\n\n```\n// 화면 진입 시 자동 데이터 로드\nconst { data, isLoading } = useGetTablesQuery()\n\n// 사용자 액션 시 mutation 실행\nconst [selectTable] = useSelectTableMutation()\nawait selectTable({ id: 5 })\n// → invalidatesTags: ['Table'] → useGetTablesQuery 자동 리페치\n```\n\n**금지**: RTK Query 결과를 slice로 복사 저장. React Query 병행 도입. 컴포넌트에서 `window.cefQuery` 직접 호출."
+    },
+    "d": {
+      "title": "요청 흐름 (Request Flow)",
+      "summary": "UI → PosRequestSender → cefQuery → C++ Responder → Actions → UseCases",
+      "detail": "### PosRequestSender.ts — 봉투 생성 및 전송\n\n```\ninterface Envelope {\n  v: number              // 프로토콜 버전 (현재 1)\n  requestId: string      // crypto.randomUUID() 자동 생성\n  timestamp: string      // ISO 8601\n  cmd: string            // 'TABLE:SELECT'\n  params: Record<string, unknown>\n  idempotencyKey?: string\n}\n\ninterface PosResponse {\n  v: number\n  requestId: string\n  timestamp: string\n  ok: boolean\n  code: string           // 'OK' | 'BUSY' | 'DUPLICATE' | 에러코드\n  data?: unknown\n  error?: { message: string }\n}\n```\n\n### Transport 선택\n\n```\ngetTransport():\n├── window.cefQuery 존재? → cefTransport (실제 POS)\n└── 없으면              → mockTransport (개발 모드)\n```\n\n### cefTransport.ts — CEF 네이티브 호출\n\n```\nwindow.cefQuery({\n  request: JSON.stringify(envelope),\n  onSuccess: (response) => JSON.parse(response),\n  onFailure: (errorCode, errorMessage) => throw Error\n})\n```\n\n### mockTransport.ts — 개발용 가짜 응답\n\n```\n지원 명령어:\n├── 'TABLE:GET_ALL'  → table.json fixture 반환\n├── 'TABLE:SELECT'   → 해당 테이블 status='U' 로 변경\n├── 'MENU:GET_ALL'   → menu.json fixture 반환\n├── 'ORDER:GET'      → 빈 주문 반환\n├── 'ORDER:ADD_ITEM' → 항목 추가 확인\n└── 'PAYMENT:EXECUTE'→ 1.5초 지연 후 결제 성공\n\n개발 제어:\n- window.__MOCK_DELAY_MS = 200   // 네트워크 지연 시뮬레이션\n- window.__MOCK_OFFLINE = true   // 오프라인 상태 시뮬레이션\n```\n\n### C++ 측 수신: PosRequestResponder.cpp\n\n```\n수신 → JSON 파싱 → 프로토콜 버전 검증 (v=1)\n→ cmd 접두사로 도메인 라우팅:\n  ├── 'TABLE:*'   → TableActions::Handle()\n  ├── 'ORDER:*'   → OrderActions::Handle()\n  ├── 'PAYMENT:*' → PaymentActions::Handle()\n  └── 'SYSTEM:*'  → SystemActions::Handle()\n→ 표준 응답 포맷 생성 → JSON 직렬화 → cefQuery 콜백 반환\n```\n\n### TableActions.cpp — Thin Router 예시\n\n```\nTableActions::Handle(cmd, params_json, requestId, idempotencyKey)\n├── 'TABLE:GET_ALL'  → RefreshTablesUseCase.Execute(ctx)\n└── 'TABLE:SELECT'   → SelectTableUseCase.Execute(ctx, tableCode)\n\n// Actions 내부에 비즈니스 로직 없음 — UseCase 호출만 수행\n```\n\n**금지 사항**:\n- Actions에서 직접 SQL 실행\n- Actions에서 여러 Manager를 직접 조합\n- 컴포넌트에서 `window.cefQuery` 직접 호출"
+    },
+    "e": {
+      "title": "데이터 저장 (Persistence)",
+      "summary": "UseCases → 멱등성 검사 → 락 획득 → 트랜잭션 → Domain → DB 커밋",
+      "detail": "### SelectTableUseCase — 실제 실행 흐름\n\n```\nclass SelectTableUseCase {\n  // 의존성 (non-owning pointer)\n  TableManager* tableMgr_;\n  TransactionRunner* txRunner_;\n  IdempotencyService* idempotency_;\n  PosRealTimeSender* realtimeSender_;\n\n  UseCaseResult Execute(const RequestContext& ctx, int tableCode);\n}\n```\n\n실행 순서:\n1. **멱등성 검사** — `IdempotencyService::Check(idempotencyKey, requestId)`\n\n```\nenum class CheckResult {\n  NEW_REQUEST,        // 새 요청 → 실행 진행\n  DUPLICATE_SUCCESS,  // 이미 성공 → 캐시된 결과 반환\n  DUPLICATE_FAILED,   // 이미 실패 → 재시도 허용\n  IN_PROGRESS         // 처리 중 → BUSY 반환\n}\n```\n\n2. **작업 락 획득** — `OperationLockService::TryAcquire(\"TABLE\", entityId)`\n\n```\nclass OperationLockService {\n  bool TryAcquire(domain, entityId)  // 실패 시 false → Busy 반환\n  void Release(domain, entityId)\n\n  // 도메인별 분리 — 병렬 처리 가능:\n  ├── \"TABLE\"   — 테이블 조작 락\n  ├── \"ORDER\"   — 주문 조작 락\n  ├── \"PAYMENT\" — 결제 조작 락\n  └── \"PRINT\"   — 인쇄 작업 락\n\n  // RAII Guard: 스코프 종료 시 자동 해제\n  OperationLockService::Guard lock(\"TABLE\", \"5\");\n}\n```\n\n3. **트랜잭션 실행** — `TransactionRunner::Run(work)`\n\n```\n하나의 트랜잭션 안에서 동시 기록:\n├── TableManager::OccupyTable(tableCode)  // 업무 데이터\n├── RequestLedgerStore::Upsert(...)        // 멱등성 기록\n│   상태: RECEIVED → PROCESSING → SUCCEEDED\n└── OutboxStore::Insert(...)               // 동기화 큐\n    채널: \"SALES_UPLOAD\" | \"ORDER_SYNC\" | \"CHANGE_LOG\"\n\nok=true  → COMMIT\nok=false → ROLLBACK\n예외     → ROLLBACK\n```\n\n4. **결과 모델**\n\n```\nstruct UseCaseResult {\n  bool ok;\n  string code;\n  string dataJson;      // 성공 시 응답 데이터\n  string errorMessage;  // 실패 시 에러 메시지\n  bool isReplay;        // 멱등성: 이전 결과 재사용 여부\n\n  static Success(dataJson)\n  static Replay(dataJson)    // 중복 요청 → 캐시 반환\n  static Fail(code, message)\n  static Busy(message)        // 락 획득 실패\n  static IdempotencyConflict()\n}\n```\n\n### RequestLedgerStore — 멱등성 원장\n\n```\nstruct LedgerEntry {\n  idempotencyKey, requestId\n  status: RECEIVED | PROCESSING | SUCCEEDED | FAILED | COMPENSATED\n  resultJson   // 성공 시 응답 캐시\n  createdAt, updatedAt\n}\n\nFindStaleProcessing(timeout=300s)  // 복구 시 미완료 작업 검색\n```\n\n### OutboxStore — 동기화 큐\n\n```\nstruct OutboxEntry {\n  channel: \"SALES_UPLOAD\" | \"ORDER_SYNC\" | \"CHANGE_LOG\"\n  payloadJson\n  status: PENDING | DISPATCHING | ACKED | FAILED_RETRYABLE | FAILED_TERMINAL\n  retryCount\n}\n\n금지: 카드 승인, QR 결제, 배달앱 실시간 호출은 Outbox 대상 아님\n```\n\n### 동기/비동기 구분 — POS 실시간 속도 보장\n\n\"DB 먼저, UI 다음\" 원칙이 POS 속도를 저해하지 않는 이유:\n**로컬 SQLite INSERT = 1~5ms** — 원격 서버가 아닌 같은 기기 내부 디스크 쓰기.\n\n| 작업 유형 | 처리 방식 | 소요 시간 | 이유 |\n|---|---|---|---|\n| **로컬 DB 저장** (주문/결제/테이블) | **동기** — DB 먼저 → UI 다음 | 1~5ms | 데이터 무결성 보장, 체감 즉각적 |\n| **중앙 서버 동기화** (Outbox → CentralApi) | **비동기** — 커밋 후 백그라운드 큐 | 100ms~∞ | 네트워크 지연, 실패 시 재시도 |\n| **영수증 인쇄 / QR 출력** | **비동기** — 커밋 후 후처리 | 50~500ms | 장치 I/O, UI 블로킹 불필요 |\n| **외부 API** (카드 승인 / QR 결제) | **동기 대기** — 결과 후 DB 저장 | 1~30초 | 승인 없이 확정 불가 |"
+    },
+    "f": {
+      "title": "UI 갱신 (Post-Save Update)",
+      "summary": "두 경로 분리: ① mutation 성공 → 캐시 직접 패치 ② 외부 변경 → 실시간 이벤트 → 세분화된 태그 무효화",
+      "detail": "### 캐시 갱신 전략 (2경로 분리 원칙)\n\n#### 경로 1: 내가 보낸 mutation의 결과 (즉시)\n\n```\nmutation 성공\n  → onQueryStarted + updateQueryData로 캐시 직접 패치\n  → invalidatesTags 사용 안 함 (refetch 없음)\n  → 예: TABLE:SELECT 성공 → 해당 테이블 status만 'OCCUPIED'로 변경\n```\n\n#### 경로 2: 외부 변경의 실시간 이벤트 (비동기)\n\n```\nC++ PosRealTimeSender → CustomEvent('POS_NATIVE_EVENT')\n  → PosRealTimeReceiver 수신\n  → isPendingRequest(requestId) 확인\n    - 내 요청의 결과 → skip (이미 경로1에서 처리)\n    - 외부 변경 → 세분화된 태그만 무효화\n```\n\n#### 태그 세분화 규칙\n\n```\n이전 (비효율):\n  invalidateTags(['Table'])     ← 전체 목록 재조회\n\n이후 (개선):\n  invalidateTags([\n    { type: 'Table', id: 3 },  ← 해당 테이블만\n    { type: 'Floor', id: 1 },  ← 해당 층만\n  ])\n```\n\n#### 핵심 원칙\n\n- **같은 변경에 2번 refetch 금지**\n- **부분 변경에 전체 재조회 금지**\n- **상태 변경 mutation에 idempotencyKey 필수**\n\n### PosRealTimeSender.cpp — C++ → UI 이벤트 방송\n\n```\nclass PosRealTimeSender {\n  void SendToUI(type, payloadJson, requestId)\n  // requestId 포함 → UI에서 자기 요청 응답 이벤트 필터링 가능\n\n  void NotifyTableChanged(floorId = 0)\n  void NotifyNewOrder(orderId, tableId)\n  void NotifyPaymentComplete(paymentId, orderId)\n  void NotifySyncStatusChanged(backlogCount, lastErrorCode)\n  void NotifyDeviceError(type, device, code, msgKey, ...)\n}\n```\n\n### PosRealTimeReceiver.tsx — 이벤트 수신 (개선)\n\n```\n이벤트 수신 → isPendingRequest 확인 → 외부 변경만 처리:\n\nTABLE_REFRESH:\n  → payload.tableId 있으면 { type: 'Table', id } 만 무효화\n  → payload.floorId 있으면 { type: 'Floor', id } 만 무효화\n  → 둘 다 없으면 'TableList' 무효화 (fallback)\n\nORDER_NEW:\n  → invalidateTags(['Order'])\n  → payload.tableId 있으면 해당 테이블만 무효화\n  → addToast\n\nDEVICE_ERROR:\n  → pushDeviceError (코드 기반 필드)\n```\n\n### 후처리 순서 (UseCases가 제어)\n\n```\nDB 커밋 완료\n  ↓\n1. PosRealTimeSender → UI 이벤트 (requestId 포함)\n  ↓\n2. 인쇄 작업 큐잉 (비동기)\n  ↓\n3. 중앙 서버 sync ACK (비동기 Outbox)\n```\n\n**금지**: Manager에서 PosRealTimeSender 직접 호출. ExternalBridge에서 직접 호출. mutation 성공 + 실시간 이벤트로 같은 데이터 2번 refetch."
+    },
+    "g": {
+      "title": "핵심 유스케이스 (Core Use Cases)",
+      "summary": "테이블 선택 → 주문 생성 → 결제 처리의 3대 핵심 흐름",
+      "detail": "### 테이블 선택 (SelectTableUseCase)\n\n```\nExecute(ctx, tableCode):\n1. IdempotencyService.Check(ctx.idempotencyKey)\n2. OperationLockService.TryAcquire(\"TABLE\", tableCode)\n3. TransactionRunner.Run(() => {\n     TableManager.OccupyTable(tableCode)\n     // 테이블 상태: E(Empty) → U(Used/Occupied)\n     LedgerStore.Upsert(key, SUCCEEDED, result)\n   })\n4. PosRealTimeSender.NotifyTableChanged()\n→ 결과: UseCaseResult.Success({ tableCode, status: 'U' })\n```\n\n### 테이블 조회 (RefreshTablesUseCase)\n\n```\nExecute(ctx, floorId):\n// 읽기 전용 — 트랜잭션/멱등성/락 불필요\n1. TableManager.GetAllTables(floorId)\n→ 결과: UseCaseResult.Success({ tables: [...] })\n```\n\n### TableManager — 비즈니스 규칙\n\n```\nstruct TableResult {\n  bool success;\n  int tableCode;\n  string status;       // 'E' | 'U' | 'L'\n  string errorCode;\n  string error_detail;\n}\n\nOccupyTable(code):  Empty → Occupied (이미 점유/잠금 시 실패)\nReleaseTable(code): Occupied → Empty (이미 비었으면 실패)\nChangeTable(from, to): from=Occupied + to=Empty 검증\n```\n\n### 주문 생성 (CreateOrderUseCase) — P1\n\n```\nExecute(ctx, tableCode, items[]):\n1. 멱등성 + 락(\"ORDER\")\n2. 트랜잭션: OrderManager.CreateOrder() + 항목 추가 + 금액 계산\n3. Ledger + Outbox 기록\n4. NotifyNewOrder() → 주방 출력(비동기)\n```\n\n### 결제 처리 (ExecutePaymentUseCase) — P1\n\n```\nExecute(ctx, order_id, payment_method, amount):\n1. 멱등성 + 락(\"PAYMENT\")\n2. 외부 결제 API 호출 (카드/QR → 동기 대기)\n3. 트랜잭션: SaleManager.ConfirmSale() + TableManager.ReleaseTable()\n4. Ledger(SUCCEEDED) + Outbox(SALES_UPLOAD)\n5. NotifyPaymentComplete() → 영수증(비동기) → sync(비동기)\n```"
+    },
+    "h": {
+      "title": "설정/유지보수 모드 (Setup/Maintenance)",
+      "summary": "현장 설치 시 Setup 모드 → 장치 연결/테이블 설정/메뉴 동기화",
+      "detail": "BrandPosApp은 두 가지 모드로 동작:\n\n### Operations Mode (일상 운영)\n- 테이블 → 주문 → 결제 핵심 흐름\n- 오프라인 우선, 로컬 SQLite가 원본\n\n### Setup/Maintenance Mode (현장 설치)\n- 장치(프린터/카드리더기/저울) 연결 설정\n- 테이블/층 배치 구성\n- 중앙 서버에서 메뉴/가격/정책 최초 동기화\n- 직원 계정 및 권한 설정\n- INI feature flag 설정\n\n**전환 방식**: 동일 실행 파일, 내부 모드 분기\n**접근 권한**: 관리자 인증 필요"
+    },
+    "i": {
+      "title": "동기화 (Synchronization)",
+      "summary": "Outbox → 중앙 서버 업로드 / SyncCursor 기반 다운스트림 수신",
+      "detail": "### OutboxStore — 업스트림 (Edge → Central)\n\n```\nstruct OutboxEntry {\n  channel: \"SALES_UPLOAD\" | \"ORDER_SYNC\" | \"CHANGE_LOG\"\n  payloadJson\n  status: PENDING → DISPATCHING → ACKED\n  retryCount\n  lastError\n}\n\nFindPending(limit=50)  // 미처리 레코드 조회\nGetBacklogCount()      // 미처리 건수 → UI 상태 표시\n```\n\n### SyncStateStore — 동기화 채널 상태 추적\n\n```\nstruct SyncStateEntry {\n  channel\n  lastAttemptAt, lastSuccessAt\n  retryCount\n  lastError_code\n  backlogCount\n}\n\n채널별 독립 추적:\n├── SALES_UPLOAD: 매출 집계 업로드\n├── ORDER_SYNC: 주문 내역 동기화\n└── CHANGE_LOG: 변경 로그 전송\n```\n\n### 다운스트림 (Central → Edge)\n- 메뉴/가격/프로모션 → `SyncCursor` 기준 변경분 수신\n- 브랜드 공지, 직원 권한 갱신\n- `Checksum` 기반 무결성 검증\n\n**금지**: 카드 승인/취소를 Outbox 대상으로 넣기. QR 결제 요청을 Outbox 대상으로 넣기. 배달앱 실시간 수락/거절을 Outbox 대상으로 넣기."
+    },
+    "j": {
+      "title": "복구 (Recovery)",
+      "summary": "프로세스 재시작 → DB + Ledger 기반 상태 복구 → 미완료 작업 재개",
+      "detail": "### 복구 원본: DB + Ledger (브라우저 메모리/Redux 아님)\n\n### 프로세스 재시작 시\n\n```\n1. RecoveryState 테이블 → 마지막 상태 확인\n2. RequestLedgerStore.FindStaleProcessing(timeout=300s)\n   → status='PROCESSING'이고 5분 이상 경과한 작업 검색\n3. 각 미완료 작업:\n   ├── 보상 가능 → COMPENSATED 처리\n   ├── 재시도 가능 → 재실행\n   └── 판단 불가 → FAILED + 관리자 알림\n4. SyncCursor → 동기화 재개 지점 확인\n5. OutboxStore.FindPending() → 미전송 레코드 재전송\n6. UI를 안전한 초기 상태(테이블 화면)로 복구\n```\n\n### Renderer Crash 시\n\n```\nBrowserRecoveryManager:\n1. OnRenderProcessTerminated() 콜백 수신\n2. crashCount++\n3. crashCount >= 3 ? safe_mode : 브라우저 재생성\n4. 재생성 시 DB 기반 bootstrap 데이터로 복원\n   (Redux 스냅샷 사용 금지)\n```\n\n**금지**: 브라우저 메모리/Redux snapshot을 복구 원본으로 사용."
+    }
+  }
+}

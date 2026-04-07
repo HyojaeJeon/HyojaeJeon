@@ -1,0 +1,13 @@
+{
+  "brandName": "Hyojeong POS",
+  "brandSubtitle": "Integrated POS Solution",
+  "version": "v2.5.1",
+  "businessDate": "Business Date",
+  "staffId": "Staff ID",
+  "password": "Password",
+  "openingAmount": "Opening Amount",
+  "changeAmount": "Change",
+  "loginFailed": "Login failed",
+  "login": "Login",
+  "orderLogin": "Order Login"
+}

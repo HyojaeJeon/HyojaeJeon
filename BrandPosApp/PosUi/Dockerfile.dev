@@ -1,0 +1,16 @@
+FROM node:22-alpine
+
+WORKDIR /app
+
+COPY package.json ./
+RUN npm install
+
+COPY . .
+
+# Build without static export (SSR mode for full interactivity)
+ENV NEXT_BUILD_MODE=server
+RUN npx next build
+
+EXPOSE 3001
+
+CMD ["npx", "next", "start", "-p", "3001", "-H", "0.0.0.0"]

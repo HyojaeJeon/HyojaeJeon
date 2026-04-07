@@ -1,0 +1,158 @@
+{
+  "docs": {
+    "db_table_master": {
+      "title": "Bảng tổng hợp toàn bộ bảng/cột DB",
+      "category": "Thiết kế DB",
+      "description": "Kiểm kê toàn diện tập hợp định nghĩa DB chuẩn hóa hiện tại của nền tảng và toàn bộ bảng/cột legacy HJ-POS. Đây là bản bao quát tối đa trước khi lọc, sau đó tiến hành chuẩn hóa/loại bỏ/phân tách tầng tương thích.",
+      "sections": {
+        "purpose": {
+          "title": "Mục đích",
+          "content": "File này là kiểm kê toàn diện tập hợp **định nghĩa DB chuẩn hóa hiện tại của nền tảng** và **toàn bộ bảng/cột legacy HJ-POS** trong một lần.\n\nTiêu chuẩn là bản bao quát tối đa trước khi lọc, sau đó tiến hành chuẩn hóa/loại bỏ/phân tách tầng tương thích trong tài liệu riêng."
+        },
+        "current_platform_count": {
+          "title": "Định nghĩa DB nền tảng hiện tại",
+          "content": "Các nhóm bảng thực tế được định nghĩa trong nền tảng hiện tại:\n\n- **Shared/ReferenceData**: Language, Region, Currency... Dữ liệu tham chiếu chung giữa Central và Edge\n- **SuperAdmin/Governance**: SuperAdminUser, PlatformLicense, PlatformPolicy, AuditLog...\n- **RegionalDistributor/Channel**: DistributorProfile, Territory, DistributorContract, BrandAssignment...\n- **BrandHQ/MasterData**: BrandProfile, Branch, BrandMenuCategory, BrandMenuItem...\n- **EdgePOS/OperationalCore**: EdgePosTerminal, Device, DeviceBinding, LocalSetting...\n\nVị trí lưu trữ: Central PostgreSQL (Prisma + raw SQL) + Edge SQLite (C++ native wrapper)"
+        },
+        "legacy_count": {
+          "title": "Quy mô DB legacy",
+          "content": "DB legacy HJ-POS-TEST:\n\n- Dựa trên MSSQL\n- Bao phủ toàn bộ domain: đơn hàng, thanh toán, bàn, khách hàng, tồn kho, nhân viên, thiết bị, cài đặt\n- Hiện đang tiến hành migration sang SQLite trong nền tảng mới\n- Schema legacy chỉ được sử dụng làm nguồn tham chiếu reverse engineering"
+        },
+        "structure": {
+          "title": "Cấu trúc",
+          "content": "Toàn bộ DB được phân loại thành 5 khu vực:\n\n| Khu vực | Vị trí lưu trữ | Nguồn gốc |\n|---|---|---|\n| **Shared Reference Data** | Central PostgreSQL + Edge SQLite cache | Central |\n| **SuperAdmin Governance** | Central PostgreSQL | Central |\n| **RegionalDistributor Channel** | Central PostgreSQL | Central |\n| **BrandHQ MasterData** | Central PostgreSQL | Central |\n| **EdgePOS OperationalCore** | Edge SQLite | Edge (cục bộ) |\n\nHướng đồng bộ: Shared/SuperAdmin/RegionalDistributor/BrandHQ → Downstream (đẩy xuống Edge), EdgePOS → Upstream (đẩy lên trung tâm)"
+        }
+      }
+    },
+    "db_shared_reference": {
+      "title": "Shared Reference Data",
+      "category": "Thiết kế DB",
+      "description": "Tài liệu định nghĩa thực tế dữ liệu tham chiếu chung giữa Central và Edge. Tài sản công dụng (SharedAssets) là file dịch/gói tài nguyên, tài liệu này chỉ đề cập dữ liệu tham chiếu DB.",
+      "sections": {
+        "purpose": {
+          "title": "Mục đích",
+          "content": "Tài liệu định nghĩa thực tế lần đầu về dữ liệu tham chiếu chung giữa Central và Edge.\n\n- Chủ sở hữu: `SuperAdmin/CentralApi`\n- Vị trí lưu trữ: Central PostgreSQL + Edge SQLite cache\n- Nguồn gốc: Central\n- Hướng đồng bộ: Downstream\n- Chính sách lưu giữ: Lưu giữ vĩnh viễn\n- Chính sách xóa: Soft delete"
+        },
+        "language_table": {
+          "title": "Bảng Language",
+          "content": "| Tên cột | Kiểu | Ý nghĩa |\n|---|---|---|\n| `Id` | uuid / TEXT | Định danh nội bộ |\n| `LanguageCode` | varchar(10) | `ko-KR`, `vi-VN`, `en-US` |\n| `NativeName` | varchar(100) | Tên hiển thị bằng ngôn ngữ gốc |\n| `DisplayName` | varchar(100) | Tên hiển thị trên UI |\n| `Direction` | varchar(5) | Hướng văn bản (LTR/RTL) |\n| `IsDefault` | boolean | Có phải ngôn ngữ mặc định |\n| `IsActive` | boolean | Có thể sử dụng |\n\nUnique: `LanguageCode`, Check: `Direction in ('LTR', 'RTL')`\n\nKịch bản sử dụng: Chọn ngôn ngữ ban đầu trên Portal/Edge, seed ban đầu nền tảng, thay đổi tên ngôn ngữ/trạng thái kích hoạt, Edge tải về và sử dụng giá trị chuẩn từ trung tâm"
+        },
+        "region_table": {
+          "title": "Bảng Region",
+          "content": "| Tên cột | Kiểu | Ý nghĩa |\n|---|---|---|\n| `Id` | uuid / TEXT | Định danh nội bộ |\n| `RegionCode` | varchar(20) | Mã khu vực |\n| `CountryCode` | varchar(10) | Mã quốc gia |\n| `RegionName` | varchar(120) | Tên khu vực |\n| `CurrencyCode` | char(3) | Mã tiền tệ mặc định |\n| `TimeZoneCode` | varchar(50) | Múi giờ mặc định |\n| `IsActive` | boolean | Có thể sử dụng |\n\nUnique: `RegionCode`\n\nKịch bản sử dụng: Ánh xạ khu vực quản lý đại lý, tự động áp dụng giá trị mặc định dựa trên khu vực khi cài đặt ban đầu Edge, xác định giá trị mặc định thuế/tiền tệ/múi giờ"
+        },
+        "currency_table": {
+          "title": "Bảng Currency",
+          "content": "| Tên cột | Kiểu | Ý nghĩa |\n|---|---|---|\n| `Id` | uuid / TEXT | Định danh nội bộ |\n| `CurrencyCode` | char(3) | Mã ISO 4217 (KRW, VND, USD) |\n| `CurrencyName` | varchar(100) | Tên tiền tệ |\n| `Symbol` | varchar(10) | Ký hiệu hiển thị |\n| `DecimalPlaces` | integer | Số chữ số thập phân |\n| `IsActive` | boolean | Có thể sử dụng |\n\nUnique: `CurrencyCode`\n\nKịch bản sử dụng: Hiển thị số tiền thanh toán, đơn vị tiền tệ quyết toán/báo cáo, cơ sở chuyển đổi tiền tệ khi hỗ trợ đa quốc gia"
+        }
+      }
+    },
+    "db_superadmin_governance": {
+      "title": "SuperAdmin Governance",
+      "category": "Thiết kế DB",
+      "description": "Dữ liệu quản trị của nền tảng SuperAdmin — Định nghĩa bảng tài khoản vận hành, giấy phép, chính sách, nhật ký kiểm toán.",
+      "sections": {
+        "purpose": {
+          "title": "Mục đích",
+          "content": "Định nghĩa các bảng quản trị cốt lõi của nền tảng SuperAdmin.\n\n- Chủ sở hữu: `SuperAdmin/CentralApi`\n- Vị trí lưu trữ: Central PostgreSQL\n- Hướng đồng bộ: Downstream (chính sách/giấy phép → Edge)\n- Đối tượng đọc: Toàn bộ Portal, CentralApi, SyncWorkers"
+        },
+        "superadmin_user": {
+          "title": "Bảng SuperAdminUser",
+          "content": "Bảng tài khoản vận hành viên nền tảng.\n\nCột chính: `Id`, `Email`, `DisplayName`, `Role` (PlatformSuperAdmin / PlatformSupportEngineer), `IsActive`, `LastLoginAt`, `CreatedAt`, `UpdatedAt`\n\nVai trò:\n- **PlatformSuperAdmin**: Tạo, tạm ngừng, triển khai, hỗ trợ nhiều thương hiệu\n- **PlatformSupportEngineer**: Phân tích sự cố, hỗ trợ từ xa, xem log"
+        },
+        "platform_license": {
+          "title": "Bảng PlatformLicense",
+          "content": "Quản lý giấy phép theo thương hiệu/khu vực.\n\nCột chính: `Id`, `RegionalDistributorId`, `BrandHQId`, `LicenseType`, `MaxEdgePos`, `ExpiresAt`, `IsActive`, `CreatedAt`, `UpdatedAt`\n\nKịch bản sử dụng:\n- Phân bổ pool giấy phép theo đại lý\n- Kiểm soát số lượng EdgePos tối đa theo thương hiệu\n- Thông báo hết hạn và theo dõi gia hạn"
+        },
+        "platform_policy": {
+          "title": "Bảng PlatformPolicy",
+          "content": "Quản lý chính sách toàn cầu/khu vực/thương hiệu.\n\nCột chính: `Id`, `PolicyType`, `Scope` (Global / RegionalDistributor / BrandHQ / Branch), `ScopeId`, `PolicyVersion`, `PolicyData` (JSONB), `IsActive`, `CreatedAt`\n\nKịch bản sử dụng:\n- Phân phối chính sách RBAC toàn cầu\n- Phản ánh quy định thuế/thanh toán theo khu vực\n- Quản lý feature flag theo thương hiệu"
+        },
+        "audit_log": {
+          "title": "Bảng AuditLog",
+          "content": "Nhật ký kiểm toán toàn bộ nền tảng.\n\nCột chính: `Id`, `ActorId`, `ActorRole`, `Action`, `TargetType`, `TargetId`, `Detail` (JSONB), `IpAddress`, `CreatedAt`\n\nKịch bản sử dụng:\n- Theo dõi truy cập dữ liệu nhạy cảm\n- Lưu giữ lịch sử thay đổi chính sách\n- Tái tạo timeline hành động khi phân tích nguyên nhân sự cố"
+        }
+      }
+    },
+    "db_distributor_channel": {
+      "title": "RegionalDistributor Channel",
+      "category": "Thiết kế DB",
+      "description": "Định nghĩa bảng hồ sơ, khu vực quản lý, hợp đồng, phân bổ thương hiệu của đối tác phân phối khu vực/quốc gia.",
+      "sections": {
+        "purpose": {
+          "title": "Mục đích",
+          "content": "Định nghĩa các bảng dữ liệu cốt lõi của tầng RegionalDistributor.\n\n- Chủ sở hữu: `SuperAdmin/CentralApi`\n- Vị trí lưu trữ: Central PostgreSQL\n- Đối tượng đọc: RegionalDistributorPortal, SuperAdmin/Portal\n- Hướng đồng bộ: Downstream (chỉ thông tin cần thiết đến Edge)"
+        },
+        "distributor_profile": {
+          "title": "Bảng DistributorProfile",
+          "content": "Hồ sơ đại lý/đối tác phân phối.\n\nCột chính: `Id` (= `RegionalDistributorId`), `CompanyName`, `CountryCode`, `ContactEmail`, `ContactPhone`, `Status` (Active / Suspended / Terminated), `CreatedAt`, `UpdatedAt`\n\nKịch bản sử dụng:\n- Tạo/phê duyệt/tạm ngừng đại lý\n- Tra cứu danh sách đại lý theo khu vực"
+        },
+        "territory": {
+          "title": "Bảng Territory",
+          "content": "Ánh xạ khu vực quản lý đại lý.\n\nCột chính: `Id`, `RegionalDistributorId`, `RegionId`, `TerritoryCode`, `IsExclusive`, `EffectiveFrom`, `EffectiveTo`, `IsActive`\n\nKịch bản sử dụng:\n- Quản lý thời hạn quyền phân phối độc quyền\n- Ngăn phân bổ trùng khu vực\n- Tính toán đối tượng triển khai theo khu vực"
+        },
+        "distributor_contract": {
+          "title": "Bảng DistributorContract",
+          "content": "Quản lý hợp đồng đại lý.\n\nCột chính: `Id`, `RegionalDistributorId`, `ContractType`, `StartDate`, `EndDate`, `CommissionRate`, `Status` (Draft / Active / Expired / Terminated), `CreatedAt`\n\nKịch bản sử dụng:\n- Theo dõi trạng thái hợp đồng\n- Quản lý tỷ lệ hoa hồng\n- Thông báo gia hạn"
+        },
+        "brand_assignment": {
+          "title": "Bảng BrandAssignment",
+          "content": "Phân bổ đại lý → thương hiệu.\n\nCột chính: `Id`, `RegionalDistributorId`, `BrandHQId`, `AssignedAt`, `RevokedAt`, `IsActive`\n\nKịch bản sử dụng:\n- Danh sách thương hiệu do đại lý quản lý\n- Tự động kết nối đại lý khi onboarding thương hiệu\n- Quản lý lịch sử hủy phân bổ"
+        }
+      }
+    },
+    "db_brandhq_master": {
+      "title": "BrandHQ MasterData",
+      "category": "Thiết kế DB",
+      "description": "Dữ liệu master của trụ sở thương hiệu — Định nghĩa bảng hồ sơ thương hiệu, chi nhánh, danh mục thực đơn, mục thực đơn.",
+      "sections": {
+        "purpose": {
+          "title": "Mục đích",
+          "content": "Định nghĩa các bảng dữ liệu master của tầng BrandHQ.\n\n- Chủ sở hữu: `BrandHQ` (thông qua CentralApi)\n- Vị trí lưu trữ: Central PostgreSQL\n- Hướng đồng bộ: Downstream (thực đơn/giá/chính sách → Edge)\n- Đối tượng đọc: BrandHQPortal, EdgePos (cache cục bộ sau đồng bộ)"
+        },
+        "brand_profile": {
+          "title": "Bảng BrandProfile",
+          "content": "Hồ sơ trụ sở thương hiệu.\n\nCột chính: `Id` (= `BrandHQId`), `BrandName`, `RegionalDistributorId`, `BusinessCategory`, `DefaultLanguageCode`, `DefaultCurrencyCode`, `LogoUrl`, `Status`, `CreatedAt`, `UpdatedAt`\n\nKịch bản sử dụng:\n- Onboarding thương hiệu\n- Kết nối đại lý → thương hiệu\n- Quản lý cài đặt mặc định theo thương hiệu"
+        },
+        "branch": {
+          "title": "Bảng Branch",
+          "content": "Chi nhánh/cửa hàng trực thuộc thương hiệu.\n\nCột chính: `Id` (= `BranchId`), `BrandHQId`, `BranchName`, `BranchCode`, `Address`, `RegionId`, `TimeZoneCode`, `Status` (Active / Closed / Suspended), `CreatedAt`, `UpdatedAt`\n\nKịch bản sử dụng:\n- Tạo/sửa/tạm ngừng chi nhánh\n- Quản lý override theo chi nhánh\n- Tính toán đối tượng triển khai"
+        },
+        "brand_menu_category": {
+          "title": "Bảng BrandMenuCategory",
+          "content": "Danh mục thực đơn thương hiệu.\n\nCột chính: `Id`, `BrandHQId`, `CategoryName`, `ParentCategoryId`, `SortOrder`, `IsActive`, `CatalogVersion`, `CreatedAt`, `UpdatedAt`\n\nKịch bản sử dụng:\n- Quản lý cấu trúc phân cấp danh mục thực đơn\n- Phân phối theo phiên bản catalog\n- Hiển thị cây danh mục trên Edge"
+        },
+        "brand_menu_item": {
+          "title": "Bảng BrandMenuItem",
+          "content": "Mục thực đơn (sản phẩm) thương hiệu.\n\nCột chính: `Id`, `BrandHQId`, `CategoryId`, `ItemName`, `ItemCode`, `BasePrice`, `TaxRate`, `Description`, `ImageUrl`, `IsActive`, `CatalogVersion`, `CreatedAt`, `UpdatedAt`\n\nKịch bản sử dụng:\n- Đăng ký/sửa sản phẩm\n- Áp dụng chính sách giá\n- Truyền dữ liệu thực đơn khi đồng bộ Edge"
+        }
+      }
+    },
+    "db_edgepos_core": {
+      "title": "EdgePOS OperationalCore",
+      "category": "Thiết kế DB",
+      "description": "Bảng vận hành cốt lõi của thiết bị đầu cuối Edge POS — Định nghĩa thông tin đầu cuối, quản lý thiết bị, ràng buộc thiết bị, cài đặt cục bộ.",
+      "sections": {
+        "purpose": {
+          "title": "Mục đích",
+          "content": "Định nghĩa các bảng vận hành cốt lõi của thiết bị đầu cuối Edge POS.\n\n- Chủ sở hữu: `EdgePos` (cục bộ)\n- Vị trí lưu trữ: Edge SQLite\n- Nguồn gốc: Edge (DB cục bộ là nguồn gốc dữ liệu nghiệp vụ)\n- Hướng đồng bộ: Upstream (đẩy dữ liệu vận hành lên trung tâm)\n- Mô hình vận hành: **Offline-First**, commit cục bộ là tiêu chuẩn thành công nghiệp vụ"
+        },
+        "edge_pos_terminal": {
+          "title": "Bảng EdgePosTerminal",
+          "content": "Thông tin đầu cuối Edge POS.\n\nCột chính: `Id` (= `EdgePosId`), `BrandHQId`, `BranchId`, `RegionalDistributorId`, `TerminalCode`, `TerminalName`, `InstalledVersion`, `LastSyncAt`, `Status` (Active / Offline / Maintenance), `CreatedAt`, `UpdatedAt`\n\nKịch bản sử dụng:\n- Tải thông tin nhận dạng bản thân khi khởi động POS\n- Giám sát trạng thái đầu cuối từ nền tảng trung tâm\n- Tính toán đối tượng triển khai phiên bản"
+        },
+        "device": {
+          "title": "Bảng Device",
+          "content": "Danh sách thiết bị ngoại vi kết nối với EdgePos.\n\nCột chính: `Id` (= `DeviceId`), `EdgePosId`, `DeviceType` (Printer / CardReader / Scanner / Scale / CashDrawer), `DeviceName`, `ConnectionType` (USB / Network / Serial / Bluetooth), `ConnectionAddress`, `Status`, `LastCheckedAt`\n\nKịch bản sử dụng:\n- Đăng ký/tìm kiếm thiết bị\n- Kiểm tra trạng thái kết nối thời gian thực\n- Tra cứu lịch sử thiết bị khi chẩn đoán sự cố"
+        },
+        "device_binding": {
+          "title": "Bảng DeviceBinding",
+          "content": "Ràng buộc thiết bị (thiết bị nào được ràng buộc với vai trò nào).\n\nCột chính: `Id`, `EdgePosId`, `DeviceId`, `BindingRole` (KitchenPrinter / CustomerPrinter / LabelPrinter / MainCardReader...), `Priority`, `IsActive`, `CreatedAt`\n\nKịch bản sử dụng:\n- Định tuyến máy in bếp\n- Chỉ định ưu tiên máy đọc thẻ\n- Cấu hình ràng buộc trong chế độ Setup/Maintenance"
+        },
+        "local_setting": {
+          "title": "Bảng LocalSetting",
+          "content": "Cài đặt cục bộ Edge POS (EdgePos Override).\n\nCột chính: `Id`, `EdgePosId`, `SettingKey`, `SettingValue`, `SourceLayer` (Global / RegionalDistributor / BrandHQ / Branch / EdgePos), `PolicyVersion`, `AppliedAt`, `CreatedAt`\n\nKịch bản sử dụng:\n- Lưu giá trị áp dụng cuối cùng của mô hình kế thừa cài đặt\n- Theo dõi giá trị đến từ tầng nào\n- Phân biệt chính sách triển khai từ trung tâm và override cục bộ"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,36 @@
+// ─────────────────────────────────────────────
+// EdgePos Central Registration
+// 한국어: Edge POS 중앙 등록 영역 - 매장에 설치된 POS 단말기의 중앙 등록/관리 정보
+// Tiếng Việt: Khu vực đăng ký trung tâm Edge POS - thông tin đăng ký/quản lý trung tâm của thiết bị đầu cuối POS được cài đặt tại cửa hàng
+// ─────────────────────────────────────────────
+
+// 한국어: Edge POS 단말기 테이블.
+//   매장에 설치된 POS 기기의 등록 정보를 중앙에서 관리한다.
+//   단말기 역할(Main/Sub), 앱/DB 버전, 마지막 동기화/하트비트 시각을 추적한다.
+//   지점(Branch)에 소속되며, 하나의 지점에 여러 단말기가 등록될 수 있다.
+//   Edge POS 앱은 Offline-First로 동작하므로, 이 테이블은 중앙에서의 모니터링/관리 용도이다.
+//
+// Tiếng Việt: Bảng thiết bị đầu cuối Edge POS.
+//   Quản lý tập trung thông tin đăng ký của thiết bị POS được cài đặt tại cửa hàng.
+//   Theo dõi vai trò thiết bị (Main/Sub), phiên bản app/DB, thời điểm đồng bộ/heartbeat cuối.
+//   Thuộc chi nhánh (Branch), một chi nhánh có thể đăng ký nhiều thiết bị đầu cuối.
+//   Vì ứng dụng Edge POS hoạt động theo mô hình Offline-First, bảng này dùng cho mục đích giám sát/quản lý từ trung tâm.
+model EdgePosTerminal {
+  id              String    @id @default(uuid()) @db.Uuid
+  branchId        String    @db.Uuid                         // 한국어: 소속 지점 FK / Tiếng Việt: FK chi nhánh sở hữu
+  terminalCode    String    @unique @db.VarChar(50)          // 한국어: 단말기 코드 (고유) / Tiếng Việt: Mã thiết bị đầu cuối (duy nhất)
+  terminalName    String    @db.VarChar(200)                 // 한국어: 단말기 이름 / Tiếng Việt: Tên thiết bị đầu cuối
+  terminalRole    String    @default("Main") @db.VarChar(30) // 한국어: 단말기 역할 (Main/Sub) / Tiếng Việt: Vai trò thiết bị (Main/Sub)
+  appVersion      String    @db.VarChar(50)                  // 한국어: Edge POS 앱 버전 / Tiếng Việt: Phiên bản ứng dụng Edge POS
+  dbVersion       String    @db.VarChar(50)                  // 한국어: 로컬 SQLite DB 스키마 버전 / Tiếng Việt: Phiên bản schema SQLite cục bộ
+  status          String    @default("Active") @db.VarChar(20)
+  lastSyncAt      DateTime? @db.Timestamptz()                // 한국어: 마지막 중앙 서버 동기화 시각 / Tiếng Việt: Thời điểm đồng bộ máy chủ trung tâm cuối
+  lastHeartbeatAt DateTime? @db.Timestamptz()                // 한국어: 마지막 하트비트 수신 시각 / Tiếng Việt: Thời điểm nhận heartbeat cuối
+  createdAt       DateTime  @default(now()) @db.Timestamptz()
+  updatedAt       DateTime  @updatedAt @db.Timestamptz()
+  deletedAt       DateTime? @db.Timestamptz()
+
+  branch Branch @relation(fields: [branchId], references: [id])
+
+  @@index([branchId, status], name: "idx_terminal_branch_status")
+}

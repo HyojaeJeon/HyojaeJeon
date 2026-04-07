@@ -1,0 +1,11 @@
+{
+  "cash": "Cash",
+  "card": "Card",
+  "point": "Point",
+  "coupon": "Coupon",
+  "discount": "Discount",
+  "combined": "Combined",
+  "serviceCharge": "Service Charge",
+  "nocash": "No Cash",
+  "cashbill": "Cash Receipt"
+}

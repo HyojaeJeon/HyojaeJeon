@@ -1,0 +1,979 @@
+{
+  "brand": {
+    "title": "Platform",
+    "subtitle": "Thiết kế tổng hợp"
+  },
+  "nav": {
+    "section_integrated_design": "Thiết kế tổng hợp",
+    "section_business": "Kế hoạch kinh doanh",
+    "section_innovation": "Đổi mới, Sáng tạo",
+    "section_project_design": "Thiết kế tổng hợp dự án",
+    "section_feature_list": "Tính năng & Màn hình theo nền tảng",
+    "section_db_design": "Thiết kế DB",
+    "section_design_tokens": "Token thiết kế",
+    "section_atoms": "Phần tử cơ bản",
+    "section_molecules": "Phần tử kết hợp",
+    "section_organisms": "Phần tử phức hợp",
+    "section_pos_specialized": "Chuyên dụng POS",
+    "section_templates": "Mẫu",
+    "section_screen_main": "Màn hình — Chính",
+    "section_screen_flow": "Màn hình — Luồng kết nối",
+    "section_screen_payment": "Màn hình — Thanh toán/Quyết toán",
+    "section_screen_order": "Màn hình — Đặt hàng/Menu",
+    "section_screen_table": "Màn hình — Bàn/Đặt chỗ",
+    "section_screen_delivery": "Màn hình — Giao hàng",
+    "section_screen_customer": "Màn hình — Khách hàng",
+    "section_screen_employee": "Màn hình — Nhân viên",
+    "section_screen_stock": "Màn hình — Kho/Mua hàng/Sổ cái",
+    "section_screen_gift": "Màn hình — Quà tặng/Điểm",
+    "section_screen_payment_method": "Màn hình — Phương thức thanh toán",
+    "section_screen_receipt": "Màn hình — Hóa đơn/In ấn",
+    "section_screen_table_order": "Màn hình — Đặt hàng tại bàn",
+    "section_screen_kitchen": "Màn hình — Hiển thị bếp",
+    "section_screen_utility": "Màn hình — Tiện ích",
+    "overview": "Tổng quan",
+    "business_overview": "Tổng quan kinh doanh",
+    "business_model": "Mô hình kinh doanh",
+    "target_market": "Thị trường mục tiêu",
+    "roadmap": "Lộ trình",
+    "innovation_framework": "Khung đổi mới & Tính năng AI cốt lõi",
+    "platform_architecture": "Tiêu chuẩn kiến trúc Platform",
+    "superadmin_design": "01 Thiết kế SuperAdmin",
+    "distributor_design": "02 Thiết kế RegionalDistributor",
+    "brandhq_design": "03 Thiết kế BrandHQ",
+    "edgepos_architecture": "04 Kiến trúc Edge POS",
+    "edgepos_az_guide": "05 Hướng dẫn A-Z Edge POS",
+    "edgepos_checklist": "06 Checklist thiết kế P0-P1",
+    "feature_coverage_matrix": "Ma trận tính năng",
+    "superadmin_features": "Tính năng SuperAdmin",
+    "distributor_features": "Tính năng RegionalDistributor",
+    "brandhq_features": "Tính năng BrandHQ",
+    "edgepos_features": "Tính năng EdgePOS",
+    "screen_inventory": "Danh sách màn hình EdgePOS",
+    "db_table_master": "Bảng/Cột tổng hợp",
+    "db_shared_reference": "Dữ liệu tham chiếu dùng chung",
+    "db_superadmin_governance": "Quản trị SuperAdmin",
+    "db_distributor_channel": "Kênh RegionalDistributor",
+    "db_brandhq_master": "Dữ liệu chủ BrandHQ",
+    "db_edgepos_core": "Lõi vận hành EdgePOS",
+    "colors": "Màu sắc",
+    "spacing": "Khoảng cách",
+    "typography": "Typography",
+    "shadows": "Bóng đổ",
+    "button": "Nút",
+    "icon": "Biểu tượng",
+    "text_input": "Nhập văn bản",
+    "number_input": "Nhập số",
+    "label": "Nhãn",
+    "badge": "Huy hiệu",
+    "checkbox": "Hộp kiểm",
+    "radio": "Radio",
+    "toggle": "Công tắc",
+    "spinner": "Spinner",
+    "skeleton": "Skeleton",
+    "divider": "Đường phân cách",
+    "numpad": "Bàn phím số",
+    "amount_input": "Nhập số tiền",
+    "stepper": "Điều chỉnh số lượng",
+    "search_bar": "Thanh tìm kiếm",
+    "form_field": "Trường nhập liệu",
+    "toast": "Thông báo Toast",
+    "alert": "Cảnh báo",
+    "tabs": "Tab",
+    "dropdown": "Dropdown",
+    "chip": "Chip/Bộ lọc",
+    "date_picker": "Chọn ngày",
+    "progress_bar": "Thanh tiến trình",
+    "table_card": "Thẻ bàn",
+    "menu_card": "Thẻ menu",
+    "order_sidebar": "Thanh bên đơn hàng",
+    "takeout_bar": "Tab mang đi/Giao hàng",
+    "header": "Tiêu đề",
+    "navigation_bar": "Thanh điều hướng",
+    "category_bar": "Thanh danh mục",
+    "menu_grid": "Lưới menu",
+    "order_item_list": "Danh sách mặt hàng",
+    "table_grid": "Lưới bàn",
+    "floor_selector": "Chọn tầng",
+    "payment_method_selector": "Chọn phương thức thanh toán",
+    "keypad_panel": "Bảng phím",
+    "summary_panel": "Bảng tổng hợp",
+    "modal": "Modal",
+    "confirm_dialog": "Hộp thoại xác nhận",
+    "drawer": "Ngăn kéo",
+    "receipt_preview": "Xem trước hóa đơn",
+    "customer_info_panel": "Bảng thông tin khách hàng",
+    "employee_selector": "Chọn nhân viên",
+    "device_status": "Trạng thái thiết bị",
+    "kitchen_display": "Hiển thị bếp",
+    "option_selector": "Chọn tùy chọn",
+    "payment_status": "Trạng thái thanh toán",
+    "change_calculator": "Tính tiền thối",
+    "discount_calculator": "Tính giảm giá",
+    "qr_code_display": "Hiển thị mã QR",
+    "signature_pad": "Bảng ký tên",
+    "error_recovery": "Phục hồi lỗi",
+    "void_receipt": "Hủy giao dịch",
+    "pos_main_layout": "Bố cục chính POS",
+    "split_panel_layout": "Bố cục chia đôi",
+    "fullscreen_modal": "Modal toàn màn hình",
+    "main_menu": "Menu chính",
+    "table": "Bàn",
+    "order": "Đặt hàng",
+    "payment": "Thanh toán",
+    "connected_flow": "Luồng POS kết nối",
+    "payment_vn": "Thanh toán (Việt Nam)",
+    "payment_quick_select": "Thanh toán nhanh",
+    "payment_quick_select_vn": "Thanh toán nhanh (VN)",
+    "order_payment": "Thanh toán đơn hàng",
+    "order_payment_quick": "Thanh toán đơn hàng nhanh",
+    "dutch_pay": "Chia hóa đơn",
+    "dutch_pay_people": "Chia theo người",
+    "dutch_pay_item": "Chia theo món",
+    "payment_etc": "Cài đặt thanh toán khác",
+    "payment_memo": "Ghi chú thanh toán",
+    "async_payment_noti": "Thông báo thanh toán bất đồng bộ",
+    "order_quick_select": "Đặt hàng nhanh",
+    "order_item_detail": "Chi tiết mặt hàng",
+    "order_item_info": "Thông tin mặt hàng",
+    "order_item_list_screen": "Danh sách mặt hàng",
+    "order_message": "Tin nhắn đơn hàng",
+    "plu_set": "Bộ PLU",
+    "set_menu": "Menu combo",
+    "table_quick_select": "Chọn bàn nhanh",
+    "table_select": "Chọn bàn",
+    "table_message": "Tin nhắn bàn",
+    "table_group_checkout": "Thanh toán nhóm",
+    "appointment": "Đặt chỗ",
+    "appointment_table_view": "Xem bàn đặt chỗ",
+    "delivery": "Quản lý giao hàng",
+    "delivery_address": "Địa chỉ giao hàng",
+    "delivery_print": "In giao hàng",
+    "delivery_agency": "Đại lý giao hàng",
+    "delivery_address_input": "Nhập địa chỉ",
+    "delivery_cid": "Hiển thị số gọi đến",
+    "customer_register": "Đăng ký khách hàng",
+    "customer_search": "Tìm khách hàng",
+    "customer_input": "Nhập thông tin khách hàng",
+    "customer_info": "Thông tin khách hàng",
+    "customer_detail": "Chi tiết khách hàng",
+    "customer_all_register": "Đăng ký hàng loạt",
+    "customer_item_in": "Nhận hàng khách hàng",
+    "customer_item_sell": "Bán hàng khách hàng",
+    "customer_item_use": "Sử dụng hàng khách hàng",
+    "customer_keep": "Quản lý công nợ",
+    "chain_customer_list": "Danh sách khách chuỗi",
+    "employee_select": "Chọn nhân viên",
+    "employee_call": "Gọi nhân viên",
+    "employee_alert": "Cảnh báo nhân viên",
+    "attendance": "Quản lý chấm công",
+    "attendance_pay": "Lương chấm công",
+    "attendance_modify": "Sửa chấm công",
+    "attendance_settings": "Cài đặt chấm công",
+    "stock": "Quản lý kho",
+    "stock_input": "Nhập kho",
+    "stock_view": "Xem kho",
+    "stock_date_view": "Xem kho theo ngày",
+    "stock_account": "Quyết toán kho",
+    "stock_supply": "Nhập hàng",
+    "purchase": "Quản lý mua hàng",
+    "purchase_modify": "Sửa mua hàng",
+    "purchase_view": "Xem mua hàng",
+    "cash_inout": "Thu chi tiền mặt",
+    "cash_inout_input": "Nhập thu chi",
+    "ledger_register": "Đăng ký sổ cái",
+    "ledger_input": "Nhập sổ cái",
+    "ledger_view": "Xem sổ cái",
+    "item_register": "Đăng ký sản phẩm",
+    "gift_manage": "Quản lý phiếu quà tặng",
+    "gift_register": "Đăng ký phiếu quà tặng",
+    "gift_use": "Sử dụng phiếu quà tặng",
+    "coupon_use": "Sử dụng coupon",
+    "point_save": "Tích điểm",
+    "card_list": "Danh sách thẻ",
+    "kakaopay": "KakaoPay",
+    "zalopay": "ZaloPay",
+    "hjvietpay": "HJ VietPay",
+    "infoplus_bidv": "Infoplus BIDV",
+    "infoplus_shinhan": "Infoplus Shinhan",
+    "infoplus_woori": "Infoplus Woori",
+    "napas": "NAPAS",
+    "kakaotalk_alert": "Cảnh báo KakaoTalk",
+    "receipt_choice": "Chọn hóa đơn",
+    "simple_receipt": "Hóa đơn đơn giản",
+    "barcode_print": "In mã vạch",
+    "barcode_settings": "Cài đặt mã vạch",
+    "kdr_receipt": "Hóa đơn KDR",
+    "table_order_control": "Điều khiển đặt hàng bàn",
+    "table_order_manager": "Quản lý đặt hàng bàn",
+    "table_order_receive": "Nhận đơn hàng",
+    "table_order_state": "Trạng thái đơn hàng",
+    "table_order_soldout": "Quản lý hết hàng",
+    "kitchen": "Hiển thị bếp",
+    "kitchen_v2": "Hiển thị bếp v2",
+    "kitchen_settings": "Cài đặt bếp",
+    "call_number_display": "Hiển thị số gọi",
+    "call_number_settings": "Cài đặt tên",
+    "login": "Đăng nhập",
+    "auth": "Xác thực quyền",
+    "no_permission": "Không có quyền",
+    "numpad_screen": "Bàn phím số",
+    "phone_numpad": "Bàn phím điện thoại",
+    "keyboard": "Bàn phím",
+    "message_box": "Hộp tin nhắn",
+    "message_view": "Xem tin nhắn",
+    "text_search": "Tìm kiếm văn bản",
+    "checkout": "Thanh toán ra",
+    "resell": "Bán lại",
+    "sell_void": "Hủy bán",
+    "sell_view_select": "Chọn xem doanh số",
+    "sell_list_view": "Danh sách doanh số",
+    "auto_end_work": "Tự động kết ca",
+    "sign_touch": "Nhập chữ ký"
+  },
+  "status": {
+    "done": "Hoàn thành",
+    "wip": "Đang tiến hành",
+    "todo": "Dự kiến"
+  },
+  "ui": {
+    "preparing": "Đang chuẩn bị tài liệu",
+    "preparing_desc": "Nội dung sẽ được bổ sung sớm",
+    "not_found": "Không tìm thấy tài liệu"
+  },
+  "preview": {
+    "screen_preview": "Xem trước màn hình",
+    "fixed_size": "1024×768 cố định",
+    "free_size": "Kích thước tự do"
+  },
+  "docs": {
+    "innovation_framework": {
+      "title": "Khung đổi mới & Tính năng AI cốt lõi",
+      "category": "Đổi mới, Sáng tạo",
+      "description": "Khung đổi mới/sáng tạo và 13 tính năng AI cốt lõi",
+      "sections": {
+        "market_frame": {
+          "title": "시장을 다시 보는 프레임",
+          "content": "기존 POS는 **주문 입력, 결제 처리, 매출 리포트, 기본 재고/고객 관리, UI 디자인** 수준에 머문다. 이런 요소는 중요하지만, 시장에서 강력한 방어력을 만들지 못한다.\n\nAI 시대에 이 제품은 POS가 아니라 다음이어야 한다:\n\n- **매장 운영 신경망**\n- **본사와 대리점을 연결하는 관제 플랫폼**\n- **지점의 이상 징후를 먼저 발견하는 시스템**\n- **실행까지 이어지는 폐루프 운영 엔진**\n\n구조: `Signal 수집 → AI 분석 → 추천 또는 자동 조치 → 결과 피드백 → 학습`"
+        },
+        "differentiation_principles": {
+          "title": "차별화 원칙",
+          "content": "### 디자인보다 결과\n\n점주가 돈을 지불하는 이유는 화면이 예뻐서가 아니다. 다음 중 하나가 실제로 좋아져야 한다:\n\n- 매출이 올라간다\n- 손실이 줄어든다\n- 운영 시간이 줄어든다\n- 장애 복구가 빨라진다\n- 확장이 쉬워진다\n\n### AI는 채팅이 아니라 운영 엔진\n\nAI를 챗봇처럼 배치하면 차별화가 약하다. AI는 이상 징후를 찾고, 원인을 추정하고, 행동을 추천하고, 필요하면 자동 실행해야 한다.\n\n### 관제와 실행을 동시에\n\n`SuperAdmin → RegionalDistributor → BrandHQ → Branch → EdgePos → Device` 계층을 AI가 가로질러 작동해야 한다."
+        },
+        "ai_13_features": {
+          "title": "AI 핵심 기능 13선",
+          "content": "| 우선순위 | 기능 | 주 사용자 | 핵심 가치 |\n|---|---|---|---|\n| **P0** | 이상 거래/매출 누수 탐지 | BrandHQ, SuperAdmin, Branch | 손실을 먼저 잡는다 |\n| **P0** | 수요 예측 | Branch, BrandHQ | 재고/인력/준비량 최적화 |\n| **P0** | 발주/재고 추천 | Branch, BrandHQ | 품절·과잉재고 감소 |\n| **P0** | Edge POS 장애 진단/복구 추천 | Branch, EdgePos, RegionalDistributor | 현장 장애 감소 |\n| **P0** | 주문 인박스 통합 | Branch, BrandHQ | 외부 채널 주문을 내부 주문으로 흡수 |\n| **P0** | 요청사항 자동 구조화 | Branch, EdgePos | 자유문장 → 구조화, 입력 시간 단축 |\n| **P0** | 계산 엔진/결제 간소화 | Branch, EdgePos | 계산과 정산 자동화 |\n| **P0** | 운영 Copilot | Branch, BrandHQ | 다음 행동 빠른 결정 |\n| **P1** | 메뉴 엔지니어링/마진 최적화 | BrandHQ | 수익성 높은 메뉴 구조 |\n| **P1** | 직원 코칭/SOP 보조 | Branch | 교육 비용·실수 감소 |\n| **P1** | 지점 건강도 점수와 원인 설명 | BrandHQ, RegionalDistributor | 문제 지점 빠른 발견 |\n| **P2** | 대리점 롤아웃/운영 품질 분석 | RegionalDistributor, SuperAdmin | 설치/지원 품질 표준화 |\n| **P2** | 프로모션/실험 자동화 | BrandHQ, SuperAdmin | 실제 효과 학습 |"
+        },
+        "pos_value": {
+          "title": "POS가 점주에게 주는 실제 가치",
+          "content": "### 매출 증대\n메뉴 믹스 최적화, 시간대별 프로모션 추천, 재방문/재구매 타기팅, 고객 세그먼트별 쿠폰 추천, 지점별 반응 차이를 반영한 마케팅 추천\n\n### 비용 절감\n판매량 기반 발주 추천, 재고 과잉/부족 경고, 폐기율 분석, 피크타임 인력 추천, 장비 장애 조기 탐지, 취소/환불/할인 남용 탐지\n\n### 구매 인텔리전스\n메뉴 기반 원재료 구입처 제안, 공급처별 가격/리드타임/최소주문수량 비교, 대체 공급처 추천, 원재료 품질/클레임 이력 반영. POS를 **구매 코파일럿**으로 전환한다.\n\n### 시장/트렌드 인텔리전스\n카테고리별 판매량 추이, 지역별/지점별 판매 차이, 시즌/날씨/이벤트 영향 분석, 전국 단위 벤치마크, 프로모션 효과 추적"
+        },
+        "priority_interpretation": {
+          "title": "우선순위 해석",
+          "content": "### P0 — 반드시 먼저\n이상 거래/누수 탐지, 수요 예측, 재고/발주 추천, 장애 진단/복구 추천, 운영 Copilot, 주문 인박스 통합, 요청사항 자동 구조화, 계산 엔진/결제 간소화\n\n### P1 — 직접적 매출/비용 연결\n메뉴 기반 원재료 구입처 제안, 발주/재고 추천, 마케팅 추천, 카테고리별 판매 추이 분석, 지점별 매출 원인 설명\n\n### P2 — 브랜드/대리점 차별화\n직원 코칭/SOP 보조, 지점 건강도 점수와 원인 설명, 메뉴 엔지니어링, 대리점 롤아웃/운영 품질 분석, 프로모션/실험 자동화\n\n### P3 — 플랫폼 방어력\n자동 캠페인 최적화, 전국 단위 수익성 벤치마크, 다국가/다브랜드 트렌드 비교"
+        },
+        "what_not_to_build": {
+          "title": "무엇을 만들지 말아야 하는가",
+          "content": "이 시장에서 약한 선택:\n\n- **단순 챗봇** — AI를 대화창에 가두면 운영 차별화가 약하다\n- **예쁜 대시보드만 있는 시스템** — 보여주기만 하고 행동이 없으면 의미 없다\n- **데이터만 쌓고 행동이 없는 BI** — 실행으로 이어지지 않으면 가치가 없다\n- **운영 책임이 없는 AI 안내문** — 설명보다 실행으로 가야 한다"
+        },
+        "implementation_order": {
+          "title": "구현 순서",
+          "content": "### 1단계: 계측\n매장과 본사에서 발생하는 모든 행동을 신호로 쌓는다 — 주문, 결제, 취소, 환불, 재고 변동, 장치 오류, 직원 작업, 외부 주문 채널 유입, 요청사항 원문, 계산/정산 이벤트\n\n### 2단계: 탐지\n정상 패턴과 이상 패턴을 구분한다 — 취소율 이상, 환불 급증, 특정 단말 오류 반복, 매출 급락, 주문 입력 지연, 수기 입력 과다, 계산 오류/누락\n\n### 3단계: 추천\n문제를 발견하는 데서 끝나지 않고, 다음 행동을 제안한다 — 발주 추천, 인력 조정, 메뉴 조정, 장애 복구 순서, 주문 템플릿 추천\n\n### 4단계: 자동화\n승인 기반으로 반복 작업을 자동화한다 — 알림 자동화, 발주 초안 자동 생성, 장애 대응 플레이북 자동 실행, 외부 주문 자동 적재"
+        },
+        "innovation_paradigms": {
+          "title": "5대 혁신 패러다임",
+          "content": "### 1. Vision-AI POS — \"절대 삥땅 치지 않는 한국인 매니저\"\nCCTV 타임라인과 POS를 동기화하여, 직원이 결제 없이 돈통을 열거나 주문 취소/환불/임의 할인을 누르는 순간, 전후 15초 CCTV 영상을 자동 클리핑하여 사장님 앱으로 푸시한다.\n\n### 2. Cross-Lingual OS — \"바벨탑을 부수는 실시간 양방향 통역기\"\n한국 사장님이 한국어로 지시하면 매장 POS/KDS에 베트남어 팝업이 뜨고, 베트남 직원이 말하면 한국어 알림이 온다. 비대칭 언어 인터페이스.\n\n### 3. Point of Sourcing — \"B2B 식자재 공동구매 커머스\"\nPOS 데이터 기반 수요 예측으로 전체 매장 물량을 합산, 도매상과 단판으로 최저가를 받아 점주에게 원클릭 발주를 제공한다. POS를 무료에 가깝게 풀고 유통 마진으로 수익화.\n\n### 4. Micro-Financing Hub — \"매장 전용 핀테크 은행\"\nPOS 데이터로 매장 신용도를 산출하여, 현지 캐피탈과 연계한 선지급(Cash Advance)을 POS 화면에서 제공한다. 상환은 일일 카드/QR 결제 대금에서 자동 차감.\n\n### 5. Zero-UI & 자율주행 소셜 마케팅\nVoice POS(직원이 음성으로 주문), Zalo 미니앱 + VietQR 자동 단골화, 날씨/상황 인지형 자율주행 마케팅 — 폭우 시 배달앱 단가 인상 + Zalo 쿠폰 자동 발송 등."
+        }
+      }
+    },
+    "platform_architecture": {
+      "title": "Tiêu chuẩn kiến trúc Platform",
+      "category": "Thiết kế tổng hợp dự án",
+      "description": "Tài liệu tiêu chuẩn kiến trúc tổng thể nền tảng",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "이 문서가 해결하려는 문제:\n\n- 프로젝트마다 다른 기술 선택\n- UI / API / Worker / DB 경계의 혼선\n- GraphQL / REST / Queue / Sync 계약의 중복\n- Edge와 Central의 저장소 전략 불일치\n\n**핵심 한 줄**: `Edge는 C++ + CEF + Next.js + SQLite`, `중앙은 Next.js + NestJS + Fastify + GraphQL + PostgreSQL`, `공유는 TypeScript 계약`이다."
+        },
+        "platform_principles": {
+          "title": "플랫폼 전체 원칙",
+          "content": "- **TypeScript**는 웹/서버의 기본 언어\n- **C++**는 Native Host와 공용 로우레벨 계층에만 사용\n- **GraphQL**은 중앙 계약의 기본값\n- **REST**는 `SuperAdmin/CentralApi`에서만 Fastify로 사용 (webhook, file upload, health check, auth callback 예외)\n- **Edge는 Offline-First**\n- **중앙은 Multi-Tenant**\n- **Edge 로컬 저장소는 SQLite**\n- **중앙 운영 저장소는 PostgreSQL**\n- **공통 계약은 `SharedContracts`가 단일 원본**"
+        },
+        "standard_layers": {
+          "title": "표준 사업 계층",
+          "content": "| 계층 | 역할 |\n|---|---|\n| **SuperAdmin** | 플랫폼 공급사 운영 주체 |\n| **RegionalDistributor** | 국가/지역 독점 유통권을 가진 대리점/채널 파트너 |\n| **BrandHQ** | 브랜드 본사 운영 주체 |\n| **Branch** | 브랜드 산하의 개별 매장/지점 |\n| **EdgePos** | 지점에 설치된 POS 실행 단말 |\n| **Device** | EdgePos에 연결된 주변기기 |"
+        },
+        "db_identifiers": {
+          "title": "DB 식별자 표준",
+          "content": "모든 중앙 플랫폼 데이터와 Edge POS 데이터가 공유하는 공통 식별자:\n\n| 식별자 | 의미 |\n|---|---|\n| `SuperAdminId` | 플랫폼 운영자 계정 식별자 |\n| `RegionalDistributorId` | 지역/국가 유통 파트너 식별자 |\n| `BrandHQId` | 브랜드 본사 식별자 |\n| `BranchId` | 지점/매장 식별자 |\n| `EdgePosId` | Edge POS 단말 식별자 |\n| `DeviceId` | 주변기기 식별자 |\n| `OperatorId` | 운영자/직원 계정 식별자 |\n| `PolicyVersion` | 정책 버전 식별자 |\n| `CatalogVersion` | 메뉴/카탈로그 버전 식별자 |\n| `SyncCursor` | 동기화 위치 식별자 |"
+        },
+        "project_specs": {
+          "title": "프로젝트별 확정 SPEC 요약",
+          "content": "| Project | 확정 SPEC | DB / Storage | 계약 / 통신 |\n|---|---|---|---|\n| **BrandPosApp** | C++ + CEF + Next.js(TS) | SQLite local DB | cefQuery + realtime event |\n| **RegionalDistributorPortal** | Next.js(TS) + App Router | Direct DB access 없음 | Apollo Client + GraphQL-first |\n| **BrandHQPortal** | Next.js(TS) + App Router | Direct DB access 없음 | Apollo Client + GraphQL-first |\n| **SuperAdmin/Portal** | Next.js(TS) + App Router | Direct DB access 없음 | Apollo Client + GraphQL-first |\n| **SuperAdmin/CentralApi** | NestJS + Fastify + Apollo Server | Prisma + PostgreSQL + raw SQL | GraphQL-first, REST only via Fastify |\n| **SuperAdmin/SyncWorkers** | Node.js(TS) + BullMQ | Redis + Central DB | Queue-driven |\n| **SharedKernel** | C++ shared kernel | - | native helper / protocol |\n| **SharedContracts** | TypeScript contract package | - | DTO / enum / schema |\n| **SharedAssets** | versioned runtime assets | - | i18n / static assets |"
+        },
+        "centralapi_hardening": {
+          "title": "Tình Trạng Hardening Và Kiểm Chứng CentralApi",
+          "content": "`SuperAdmin/CentralApi` hiện không chỉ dừng ở mô tả stack tổng quát mà đã phản ánh các tiêu chuẩn hardening gần với production.\n\n- **Cô lập dữ liệu multi-tenant**: phạm vi `RegionalDistributor / BrandHQ / Branch / EdgePos` được ép ở **service layer**, không chỉ ở resolver.\n- **Bảo vệ GraphQL**: đã áp dụng `DataLoader` theo request, depth limit `10`, complexity limit `200`, và error masking ở production.\n- **Hardening Fastify**: `helmet`, `compress`, `bodyLimit`, `requestTimeout`, `keepAliveTimeout`, và graceful shutdown hook được cố định như mặc định nền tảng.\n- **Prisma production hardening**: bật slow query logging, kiểm tra pool parameter, và cho phép raw SQL có kiểm soát ở hot path.\n- **Redis dùng thực tế**: login rate limit, distributed lock, sync handoff stream, và cache dữ liệu tham chiếu đã được triển khai.\n- **Hạng mục đã hoàn thành thêm**: cursor pagination cho `auditLogConnection` và `syncEventConnection`, Apollo Persisted Queries, tự động hóa persisted-query allow-list, multi-file schema qua `prisma.config.ts`, SWC builder, và phạm vi SDK typed rộng hơn trong `SharedContracts/ApiSdk`.\n- **Kiểm chứng tự động**: `npm run build`, `npm test -- --runInBand`, `npx prisma validate --config prisma.config.ts`, và `npx prisma generate --config prisma.config.ts` đã chạy qua như baseline hồi quy hiện tại.\n\nBacklog còn lại là mở rộng mutation SDK, đưa portal sang dùng trực tiếp SDK wrapper, và kiểm tra drift của allow-list ở production."
+        },
+        "shared_assets": {
+          "title": "다국어/SharedAssets 배포 원칙",
+          "content": "- `SharedAssets`는 공용 런타임 서버가 아니라 **버전 관리된 원본 패키지**\n- `SharedAssets/i18n/locales/`가 모든 플랫폼의 유일한 번역 원본\n- 각 플랫폼은 자기 빌드 파이프라인에서 필요한 locale 자산을 복사/패키징\n- 지원 언어 기본 세트: `ko`, `vi`, `en`\n- 사용자/브랜드/지점별 언어 선호도는 DB 설정으로 관리, 실제 표시 문자열은 locale key로 해석"
+        },
+        "full_stack_overview": {
+          "title": "전체 스택 한눈에 보기",
+          "content": "```\nBrandPosApp (C++ + CEF + Next.js + SQLite)\n  └── Local Bridge / Device Control\n\nRegionalDistributorPortal (Next.js + GraphQL Client)\n  └── SuperAdmin/CentralApi\n\nBrandHQPortal (Next.js + GraphQL Client)\n  └── SuperAdmin/CentralApi\n\nSuperAdmin/Portal (Next.js + GraphQL Client)\n  └── SuperAdmin/CentralApi (NestJS + Fastify + Apollo)\n        ├── PostgreSQL + Prisma + Raw SQL\n        └── Redis / Cache / Queue\n              └── SyncWorkers (Node.js + BullMQ)\n```\n\nEdge POS는 로컬 SQLite에 우선 기록하고, Outbox/Sync를 통해 중앙 API와 동기화한다."
+        },
+        "platform_followups": {
+          "title": "Hạng Mục Gia Cố CentralApi Và Backlog Tiếp Theo",
+          "content": "- Đã triển khai\n  - `@platform/api-sdk`: đã thêm gói SDK nội bộ dưới `SharedContracts/ApiSdk` với fetch client hỗ trợ APQ và typed operation; hiện đã bao phủ các thao tác đọc cho `BrandHQ / RegionalDistributor / Branch / EdgePos / Policy / Deploy / SyncEvent`.\n  - `cursor pagination`: truy vấn lớn của `AuditLog` và `SyncEvent` đã được gia cố bằng keyset pagination qua `auditLogConnection` và `syncEventConnection`.\n  - `APQ`: CentralApi đã bật Apollo Persisted Queries; nếu có Redis thì dùng Redis-backed cache, nếu không thì dùng bounded in-memory cache.\n  - `persisted query allow-list`: build của SDK giờ tự tạo persisted-operation manifest, còn CentralApi đồng bộ JSON allow-list generated để chỉ cho phép hash đã được phê duyệt.\n  - `Prisma multi-file schema`: đã chuyển sang `prisma.config.ts` + `prisma/schema/*.prisma` và loại bỏ `schema.prisma` đơn khối.\n  - `SWC builder`: đã chuyển `nest-cli.json` sang SWC + typeCheck + `.swcrc` để build nhanh hơn.\n- Nguyên tắc\n  - Các thay đổi này gia cố modular monolith hiện tại; chúng không lật lại cấu trúc nền tảng.\n- Backlog còn lại\n  - mở rộng phạm vi mutation của `@platform/api-sdk` sang `Branch / EdgePos / DeployRelease` và các lệnh quản trị chính\n  - chuyển 3 portal sang dùng trực tiếp wrapper `@platform/api-sdk` thay cho tài liệu Apollo viết tay\n  - bổ sung kiểm tra drift và rollout production với `GRAPHQL_PERSISTED_QUERY_ALLOW_LIST_ENABLED=true`"
+        }
+      }
+    },
+    "superadmin_design": {
+      "title": "Thiết kế nền tảng tích hợp SuperAdmin",
+      "category": "Thiết kế tổng hợp dự án",
+      "description": "Thiết kế nền tảng vận hành cấp nhà cung cấp",
+      "sections": {
+        "goal": {
+          "title": "목표 재정의",
+          "content": "최종 제품은 3개의 층으로 나뉜다:\n\n1. **Edge POS** — 각 매장 단말에 설치되는 `.exe`, 오프라인 우선, 주문/결제/테이블/주방/장치 제어\n2. **Brand HQ Platform** — 하나의 브랜드가 여러 지점을 통합 운영하는 관리 플랫폼, 메뉴/가격/프로모션/직원/지점 설정/리포트\n3. **Super Admin Platform** — POS 공급사가 여러 브랜드를 운영/감시/배포/지원하는 플랫폼, 라이선스/버전 배포/장애 모니터링/원격지원/감사로그"
+        },
+        "confirmed_spec": {
+          "title": "확정 스펙",
+          "content": "| 구성 | 확정 SPEC | 비고 |\n|---|---|---|\n| SuperAdmin/Portal | Next.js(TS) + App Router + Apollo Client | 공급사 운영 포털 |\n| SuperAdmin/CentralApi | NestJS + Fastify + Apollo Server 5 | 멀티테넌시, RBAC, audit |\n| SuperAdmin/SyncWorkers | Node.js(TS) + BullMQ + Redis | outbox, retry, reconciliation |\n| SharedContracts | TypeScript contract package | 공통 계약 단일 원본 |\n| SharedAssets | runtime assets | i18n / static assets |"
+        },
+        "platform_overview": {
+          "title": "전체 플랫폼 한눈에 보기",
+          "content": "핵심 2문장:\n\n- 매장 운영의 실시간 원본은 **Edge POS + Edge Local DB**\n- 브랜드/공급사 운영의 통합 원본은 **중앙 플랫폼**\n\n```\nSuper Admin Platform (공급사 운영)\n  → Brand HQ Platform (브랜드 본사 운영)\n    → Branch (지점 운영)\n      → EdgePos (매장 실행 단말)\n        → Edge Local DB (로컬 업무 원본)\n```"
+        },
+        "multitenancy_model": {
+          "title": "멀티테넌시 계층 모델",
+          "content": "```\nSuperAdmin\n  └── RegionalDistributor\n        └── BrandHQ\n              └── Branch\n                    └── EdgePos\n                          └── Device\n```\n\n핵심 원칙:\n- `SuperAdmin`은 플랫폼 운영 주체\n- `RegionalDistributor`는 채널/계약/지원 계층\n- `BrandHQ`는 브랜드의 운영 원본\n- `Branch`는 독립 운영 단위\n- `EdgePos`는 거래 실행 단위\n- `Device`는 `EdgePos`에 귀속\n- 하나의 `EdgePos`는 하나의 `BrandHQ`와 하나의 `Branch`에만 귀속"
+        },
+        "core_identifiers": {
+          "title": "핵심 식별자",
+          "content": "모든 중앙 플랫폼 데이터와 Edge POS 데이터가 공유하는 식별자:\n\n`SuperAdminId`, `RegionalDistributorId`, `BrandHQId`, `BranchId`, `EdgePosId`, `OperatorId`, `DeviceId`, `PolicyVersion`, `CatalogVersion`, `SyncCursor`\n\n이 식별자가 없으면:\n- 어느 BrandHQ 데이터인지 구분 불가\n- 어느 지점 매출인지 집계 불가\n- 어떤 EdgePos가 장애를 일으켰는지 추적 불가\n- 어떤 메뉴 버전이 배포됐는지 검증 불가"
+        },
+        "data_ownership": {
+          "title": "데이터 소유권",
+          "content": "### 로컬 원본 (Edge POS + Edge Local DB)\n실시간 테이블 상태, 진행 중 주문, 결제 진행 상태, 영수증/주방 출력 상태, 장치 연결 상태, 오프라인 큐와 복구 상태\n\n### 브랜드 중앙 원본 (Brand HQ Platform)\n메뉴 마스터, 가격 정책, 프로모션 정책, 지점 운영 정책, 직원/권한 템플릿, 브랜드 공지, 리포트/정산 기준\n\n### 공급사 중앙 원본 (Super Admin Platform)\n브랜드 계약/라이선스, POS 버전 배포 정책, 기능 플래그, 원격 지원 권한, 전체 장애 현황, 글로벌 감사 로그"
+        },
+        "centralapi_implementation_status": {
+          "title": "Tình Trạng Triển Khai Và Kiểm Chứng CentralApi",
+          "content": "- Đã triển khai\n  - tenant-aware service layer filtering\n  - request-scoped DataLoader + tenant-bound batch loading\n  - GraphQL depth/complexity guard\n  - production error masking\n  - Fastify security/compression/timeout/graceful shutdown\n  - Prisma slow query logging / pool warning\n  - Redis rate limit / distributed lock / stream handoff / reference cache\n  - cursor pagination cho `auditLogConnection` và `syncEventConnection`\n  - Apollo Persisted Queries\n  - tự động tạo persisted-query allow-list manifest + cưỡng chế generated allow-list\n  - multi-file schema qua `prisma.config.ts` + `prisma/schema/*.prisma`\n  - SWC builder + typeCheck + `.swcrc`\n  - SDK typed Portal/Edge mở rộng dưới `SharedContracts/ApiSdk`\n- Đã kiểm chứng tự động\n  - `npm run build`\n  - `npm test -- --runInBand`\n  - `npx prisma validate --config prisma.config.ts`\n  - `npx prisma generate --config prisma.config.ts`\n- Nguyên tắc\n  - Việc gia cố giữ nguyên modular monolith hiện tại, nhưng cố định rõ hơn service boundary, GraphQL guard và runtime hardening trong mã nguồn thực tế."
+        },
+        "remaining_followups": {
+          "title": "Backlog Tiếp Theo",
+          "content": "- mở rộng phạm vi mutation của `@platform/api-sdk` sang `Branch / EdgePos / DeployRelease` và các lệnh quản trị chính\n- chuyển 3 portal sang dùng trực tiếp wrapper `@platform/api-sdk` thay cho tài liệu Apollo viết tay\n- bổ sung kiểm tra drift và rollout production với `GRAPHQL_PERSISTED_QUERY_ALLOW_LIST_ENABLED=true`\n\nNguyên tắc: phần việc còn lại là rollout vận hành trên nền tenant isolation, GraphQL guard, Redis usage và Fastify hardening đã triển khai xong."
+        }
+      }
+    },
+    "distributor_design": {
+      "title": "Thiết kế phân phối tích hợp RegionalDistributor",
+      "category": "Thiết kế tổng hợp dự án",
+      "description": "Thiết kế nền tảng nhà phân phối khu vực",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "RegionalDistributor 계층의 5가지 목적:\n\n1. 국가/지역 단위의 독점 유통권을 모델링\n2. 공급사와 브랜드 본사 사이의 계약/라이선스/배포 경계를 분리\n3. 지역별 규제, 세금, 언어, 결제수단, 지원 정책을 지역 단위로 관리\n4. 브랜드 온보딩과 매장 롤아웃을 현지 파트너 관점에서 추적\n5. `SuperAdmin → RegionalDistributor → BrandHQ → Branch → EdgePos` 체계를 문서와 DB 식별자에 반영"
+        },
+        "confirmed_spec": {
+          "title": "확정 스펙",
+          "content": "| 구성 | 확정 SPEC | 비고 |\n|---|---|---|\n| RegionalDistributorPortal | Next.js(TS) + App Router + Apollo Client | 대리점/통합유통 전용 Web 프로젝트 |\n| 중앙 연결 | SuperAdmin/CentralApi (GraphQL API) | 계약/라이선스/배포/정산 데이터 조회 |\n| UI 상태 | Redux Toolkit 필요 시 사용 | 화면 상태, 폼, 필터 |\n| 직접 DB 접근 | 없음 | 모든 영속 데이터는 중앙 API 경유 |"
+        },
+        "responsibility_position": {
+          "title": "책임 위치",
+          "content": "```\nSuperAdmin — 플랫폼 공급사 전체 통제, 글로벌 라이선스/정책/감사\n  └── RegionalDistributor — 지역/국가 독점 유통권, 현지 계약·배포·지원 조율\n        └── BrandHQ — 브랜드 본사 운영, 메뉴/가격/프로모션/지점 정책\n              └── Branch — 실제 매장 운영 단위\n                    └── EdgePos — 매장 실시간 거래 실행 단위\n                          └── Device — 프린터, 카드리더기, 스캐너 등\n```"
+        },
+        "management_scope": {
+          "title": "관리 범위",
+          "content": "**직접 관리하는 범위:**\n- 지역/국가 독점 유통권\n- 브랜드 계약 상태\n- 라이선스 수량/만료/배포 가능 범위\n- 현지 지원 SLA\n- 지역별 공지/배포 정책\n- 지역별 규제 대응 설정\n- 브랜드 온보딩 진행 상태\n- 배포/지원/정산 추적\n\n**직접 소유하지 않는 범위:**\n- 브랜드 메뉴/가격 원본\n- 지점 주문/결제의 실시간 원본\n- EdgePos 로컬 DB의 거래 원본\n- 매장 운영자 출근/실명 관리 원본"
+        },
+        "data_ownership": {
+          "title": "데이터 소유권",
+          "content": "**RegionalDistributor 원본 데이터:**\n`RegionalDistributorId`, `TerritoryCode`, `CountryCode`, `ContractId`, `LicensePoolId`, `RolloutBatchId`, `SupportSlaId`, `DistributorUserId`, `SettlementBatchId`\n\n**BrandHQ 원본과의 경계:**\n메뉴 마스터, 가격 원본, 지점 실시간 주문 원본, 결제 승인 원본, 테이블 점유 상태 원본은 각각 `BrandHQ` 또는 `EdgePos`가 원본이다."
+        },
+        "settings_inheritance": {
+          "title": "설정 상속 모델",
+          "content": "설정 평가 우선순위:\n\n1. `Global Default`\n2. `RegionalDistributor Default`\n3. `BrandHQ Default`\n4. `Branch Override`\n5. `EdgePos Override`\n\n규칙:\n- 지역 규제나 결제사 제한은 `RegionalDistributor Default`에 둔다\n- 브랜드 고유 정책은 `BrandHQ Default`에 둔다\n- 지점/단말별 예외는 override로 제한\n- 어떤 값이 어느 계층에서 왔는지 추적 가능해야 한다"
+        },
+        "deployment": {
+          "title": "배포와 온보딩",
+          "content": "RegionalDistributor는 다음 3가지 흐름의 중간 허브다:\n\n**1. 브랜드 온보딩** — 계약 등록, 지역권 확인, 라이선스 할당\n\n**2. 하향 배포** — 정책, 카탈로그, 지역 규제, 지원 템플릿 전달\n\n**3. 상향 보고** — rollout 결과, 장애 요약, 정산/지원 상태\n\n흐름: `SuperAdmin → RegionalDistributor → BrandHQ → Branch → EdgePos`"
+        }
+      }
+    },
+    "brandhq_design": {
+      "title": "Thiết kế vận hành BrandHQ thương hiệu/chi nhánh",
+      "category": "Thiết kế tổng hợp dự án",
+      "description": "Thiết kế nền tảng vận hành thương hiệu/chi nhánh",
+      "sections": {
+        "goal": {
+          "title": "목표",
+          "content": "BrandHQ 플랫폼의 4가지 목적:\n\n1. 하나의 브랜드가 여러 지점을 공통 정책으로 운영\n2. 메뉴, 가격, 프로모션, 직원 권한을 중앙에서 관리\n3. 지점별 override를 허용하되 브랜드 표준을 깨지 않도록 통제\n4. Edge POS로 내려갈 정책과 카탈로그의 배포 기준이 된다"
+        },
+        "confirmed_spec": {
+          "title": "확정 스펙",
+          "content": "| 구성 | 확정 SPEC | 비고 |\n|---|---|---|\n| BrandHQPortal | Next.js(TS) + App Router + Apollo Client | 브랜드 본사 운영 포털 |\n| 중앙 연결 | SuperAdmin/CentralApi (GraphQL API) | 메뉴/가격/프로모션/지점/리포트 |\n| 하향 배포 대상 | BrandPosApp / EdgePos | 정책/메뉴/가격 배포 |\n| 현장 설정 적용 | BrandPosApp Setup/Maintenance mode | 주변기기, 로컬 설정, 커미셔닝 |"
+        },
+        "responsibility_flow": {
+          "title": "한눈에 보는 책임",
+          "content": "```\nBrandHQ Portal (브랜드 본사 운영)\n  ├── BrandHQ Master (메뉴/가격/프로모션)\n  ├── BrandHQ Policy (운영 정책/권한 템플릿)\n  └── Branch Override (지점별 예외 설정)\n        └── Downstream Distribution (하향 배포)\n              └── EdgePos (매장 단말)\n                    └── Sales / Orders / Payments (매장 실시간 거래)\n                          └── Upstream Sync (상향 동기화) → BrandHQ\n```\n\n핵심: BrandHQ는 **정책과 마스터의 원본**, Edge POS는 **실시간 거래의 원본**"
+        },
+        "management_layers": {
+          "title": "관리 계층 모델",
+          "content": "BrandHQ가 직접 관리하는 기본 계층:\n\n| 계층 | 역할 |\n|---|---|\n| **BrandHQ** | 최상위 관리 단위 |\n| **Branch** | 독립 운영 단위 |\n| **EdgePos** | 배포 대상 단위 |\n| **OperatorTemplate** | 직원 역할 템플릿 |\n| **Catalog** | 메뉴/가격/카테고리 |\n| **Policy** | 운영 정책 |\n\n원칙: 운영자 실명/출근 데이터와 권한 템플릿은 분리할 수 있어야 한다."
+        },
+        "data_ownership": {
+          "title": "데이터 소유권",
+          "content": "### BrandHQ 원본\n메뉴 마스터, 가격 정책, 프로모션 정책, 세금/서비스 운영 정책, 브랜드 공지, 직원 역할 템플릿\n\n### Branch Override 허용 항목\n지점별 판매 여부, 지점별 가격 예외, 지점별 프로모션 적용 여부, 프린터/주방 라우팅, 영업 시간/휴무\n\n### Edge POS 경계\nBrandHQ는 다음을 직접 원본으로 가지지 **않는다**: 진행 중 주문 상태, 결제 진행 상태, 테이블 점유 상태, 장치 연결 상태. 이 데이터는 항상 Edge POS와 Edge Local DB가 원본이다."
+        },
+        "settings_inheritance": {
+          "title": "설정 상속 모델",
+          "content": "설정 평가 우선순위:\n\n1. `Global Default`\n2. `BrandHQ Default`\n3. `Branch Override`\n4. `EdgePos Override`\n\n규칙:\n- override는 최소화\n- 어떤 값이 어느 계층에서 왔는지 추적 가능해야 한다\n- 배포 시 `PolicyVersion`, `CatalogVersion`을 함께 관리"
+        },
+        "deployment_sync": {
+          "title": "배포와 동기화",
+          "content": "BrandHQ 관점 두 흐름:\n\n**Downstream Distribution** — 메뉴/가격/정책을 지점과 단말로 배포\n\n**Upstream Sync Consumption** — 매장에서 올라온 매출/상태/오류를 수신하여 운영 화면에 반영\n\n중요 원칙:\n- 배포는 정책 중심\n- 상향 동기화는 운영 가시성 중심\n- 실시간 거래 성공 여부는 **중앙 API 성공이 아니라 로컬 commit 기준**"
+        }
+      }
+    },
+    "edgepos_architecture": {
+      "title": "Thiết kế kiến trúc Edge POS",
+      "category": "Thiết kế tổng hợp dự án",
+      "description": "Thiết kế kiến trúc Edge POS C++/CEF/Next.js",
+      "sections": {
+        "decisions": {
+          "title": "결정사항",
+          "content": "| 항목 | 결정 |\n|---|---|\n| **플랫폼** | x86/x64 듀얼 빌드, CEF 포함, 고객 환경별 배포 |\n| **전환 범위** | 핵심 3개 화면 우선 (테이블, 주문, 결제) |\n| **Next.js 서빙** | 정적 빌드 (`output: 'export'`) + CEF Custom Scheme (`app://pos/`) |\n| **주변기기** | C++ 유지 → cefQuery로 JS에서 호출 |\n| **운영 모델** | Offline-First, 로컬 DB가 업무 데이터 원본 |\n| **상태 관리** | RTK Query 단일화, Redux slice는 UI 상태만 |\n| **브라우저 생명주기** | 메인 CefBrowser 단일 인스턴스, React 라우팅으로 화면 전환 |\n| **계층 원칙** | UI/Bridge → UseCases → DB/Manager → Infra 단방향 |\n| **영속화** | Manager별 Repository 전면 도입 안 함, `*Store`만 분리 |\n| **중복 처리** | requestId + idempotencyKey 기준 멱등성 보장 |\n| **최종 UI 목표** | MFC UI 완전 제거, CEF + Next.js로 수렴 |\n| **개발 환경** | `app/design-system/` + Mock transport, C++ 없이 UI 개발 가능 |\n| **CEF 안정성** | CefLifeSpanHandler 크래시 감지 → 브라우저 자동 재생성 → 로컬 DB 기반 재수화 |"
+        },
+        "directory_structure": {
+          "title": "디렉토리 구조",
+          "content": "```\nBrandPosApp/\n├── AppHost/                  # 실행 진입점, 부트스트랩, 서비스 조립\n│   ├── Bootstrap/            # AppCompositionRoot, ServiceRegistry\n│   └── BrandPosHost/         # WinMain 진입, CEF 초기화\n├── Presentation/\n│   └── CEF/                  # CEF 호스팅, 브라우저 수명주기\n│       ├── Handlers/         # CefAppHandler, CefBrowserDlg, SchemeHandler, Recovery\n│       └── InternalBridge/   # PosRequestResponder, PosRequestActions, PosRealTimeSender\n├── UseCases/                 # 유스케이스 오케스트레이션\n│   ├── Shared/               # TransactionRunner, IdempotencyService, OperationLock\n│   ├── Table/                # SelectTableUseCase, RefreshTablesUseCase\n│   ├── Order/\n│   └── Payment/\n├── Domain/                   # 순수 업무 규칙과 Manager\n│   ├── Table/\n│   ├── Order/\n│   ├── Payment/\n│   └── ...\n├── Infrastructure/           # SQLite, Sync, Device, ExternalBridge\n│   ├── Persistence/SQLite/\n│   ├── Sync/\n│   ├── Device/\n│   └── ExternalBridge/\n└── PosUi/                    # Next.js(TypeScript) UI\n    └── src/\n        ├── app/              # Next.js 라우트\n        ├── screens/          # 실제 제품 화면\n        ├── design-system/    # 공용 UI 원본 라이브러리\n        ├── store/            # RTK Query + Redux slice\n        ├── bridge/           # C++ transport/command\n        └── shared/           # 공용 유틸/조합 컴포넌트\n```"
+        },
+        "layer_summary": {
+          "title": "계층별 역할 요약",
+          "content": "| 계층 | 책임 | 포함 대상 |\n|---|---|---|\n| **Presentation** | 화면, 브라우저 호스팅, CEF 단일 셸 UI 브릿지 | PosUi/, Presentation/CEF/, AppHost/ |\n| **InternalBridge** | 요청 라우팅, 파라미터 검증, 응답 포맷 | PosRequestResponder, PosRequestActions, PosRealTimeSender |\n| **UseCases** | 유스케이스 오케스트레이션, 트랜잭션, 멱등성, 락, 후처리 | SelectTableUseCase, TransactionRunner, IdempotencyService |\n| **Domain/Manager** | 비즈니스 규칙, 계산, 데이터 조작 | TableManager, OrderMgr, SaleMgr, CustMgr, ItemMgr |\n| **Infrastructure** | 로컬 DB 연결, 동기화, 외부 연동, 장치, 네트워크 | DBAccess, ExternalBridge, Device, Sync |"
+        },
+        "posui_rules": {
+          "title": "PosUi 개발 규칙",
+          "content": "- `design-system/`은 공용 UI의 **원본**, `app/design-system/`은 카탈로그/프리뷰 라우트\n- `screens/`는 실제 제품 화면, 카탈로그에서 보는 화면은 **screens/* 구현을 그대로 재사용**\n- `posApi.js`는 루트 createApi, 도메인별 `*Api.js`는 `injectEndpoints()`\n- 서버 상태는 RTK Query 캐시가 원본, Redux slice는 UI 상태만\n- `PosRequestSender.js`는 저수준 transport, 내부에서 `cefTransport` / `mockTransport` 선택\n- `next dev` + `app/design-system/` + `mockTransport` 조합으로 C++ 없이 UI 개발 가능"
+        },
+        "cef_usecases": {
+          "title": "CEF/브라우저 운영 규칙",
+          "content": "- 메인 CefBrowser는 **단일 인스턴스** 유지\n- 화면 전환 시 `CloseBrowser` 호출 **금지**\n- `1024x768` 고정 해상도와 터치 사용성 기준 준수\n- renderer crash 복구는 **DB/UseCase bootstrap 데이터 기준**으로 수행 (브라우저 메모리 X)\n- crash loop 기준과 CEF 재생성/복구 계약을 무시하고 구현하지 않는다"
+        },
+        "cross_layer_rules": {
+          "title": "계층 간 규칙",
+          "content": "**InternalBridge**: `PosRequestActions`는 thin router여야 한다. Actions에서 직접 SQL 실행, 여러 Manager 직접 조합, 트랜잭션/락/멱등성 처리 금지.\n\n**UseCases**: 여러 Manager 호출 순서 조정, requestId/idempotencyKey 검사, 작업 단위 락 획득, 트랜잭션 실행, Ledger/Outbox 갱신, 커밋 후 UI 이벤트/sync ACK/인쇄 순서 제어. **UI 이벤트 결정권과 PosRealTimeSender 호출 권한은 UseCases만 가진다.**\n\n**Domain/Manager**: 순수 업무 계산, DB row 생성/수정, 도메인 결과 반환. PosRealTimeSender 직접 호출 금지, 외부 ACK 발송 여부 결정 금지.\n\n**ExternalBridge**: 외부 payload 인증/검증, 외부 포맷 → 내부 DTO 변환, UseCases 호출. 직접 SQL 실행, 직접 UI 송신, 주문/결제 확정 상태 임의 결정 금지."
+        },
+        "mfc_migration": {
+          "title": "MFC 마이그레이션 규칙",
+          "content": "기존 Dialog 코드를 4곳으로 분리:\n\n1. **UI 레이아웃/버튼/Grid** → `PosUi/src/design-system/` + `PosUi/src/screens/`\n2. **버튼 클릭 분기** → `CEF/InternalBridge/PosRequestActions/`\n3. **유스케이스 조정/트랜잭션/멱등성/후처리** → `UseCases/`\n4. **실제 DB 쿼리/금액 계산/데이터 처리** → `Domain/Manager` + `Infrastructure/Persistence`\n\n마이그레이션 순서: UI 분리 → Actions 라우터 생성 → UseCases 추출 → DB/Manager 정리"
+        },
+        "mandatory_requirements": {
+          "title": "필수 준수 요건",
+          "content": "- **Golden Rule**: `ExternalBridge → UseCases → DB/Manager → PosRealTimeSender → UI`\n- DB에 저장되지 않은 정보는 UI에 띄우지 않는다\n- ExternalBridge는 PosRealTimeSender를 직접 호출할 수 없다\n- Manager도 PosRealTimeSender를 직접 호출할 수 없다\n- 결제/주문/배달 수신은 `requestId + idempotencyKey` 기준 멱등성 보장\n- Ledger 상태: `RECEIVED → PROCESSING → SUCCEEDED / FAILED / COMPENSATED`\n- Outbox 상태: `PENDING → DISPATCHING → ACKED / FAILED_RETRYABLE / FAILED_TERMINAL`"
+        },
+        "communication_design": {
+          "title": "통신 설계",
+          "content": "### PosRequest (UI → C++ 왕복)\n- 진입점: `PosUi/src/bridge/PosRequestSender.js`\n- C++ 측: `PosRequestResponder → PosRequestActions → UseCases`\n\n### PosRealTime (C++ → UI 단방향)\n- C++ 측: `UseCases → PosRealTimeSender`\n- UI 측: `PosRealTimeReceiver`\n\n### JSON 봉투 규칙\n모든 메시지에 공통 헤더: `v`, `requestId`, `timestamp`, `idempotencyKey`(조건부)\n\n### Device Error 규칙\n완성 문장 msg를 싣지 않는다. 코드 기반 필드로 전달: `type`, `device`, `code`, `msgKey`, `msgParams`, `severity`, `recoverable`, `retryable`, `action`"
+        },
+        "operational_gates": {
+          "title": "운영 게이트",
+          "content": "- 화면 전환과 롤백은 INI feature flag로 제어\n- 핵심 3개 화면부터 점진 전환: 테이블 → 주문 → 결제\n- Offline-First: 로컬 SQLite 커밋이 업무 성공의 기준\n- RTK Query 캐시는 복구 원본이 아니다\n- 복구 기준: `로컬 SQLite + Ledger + Outbox`"
+        },
+        "build_pipeline": {
+          "title": "빌드 파이프라인",
+          "content": "- x86/x64 듀얼 빌드 유지\n- Next.js는 `output: 'export'` 기준 정적 빌드\n- CEF Custom Scheme (`app://pos/`)로 정적 파일 서빙\n- `app://pos/` scheme handler가 정적 파일 라우팅 규칙 제공\n- UI/CEF/리소스 버전 동기화 규칙 필요"
+        },
+        "platform_integration_followups": {
+          "title": "Trạng Thái Tích Hợp Nền Tảng Trung Tâm",
+          "content": "- Luồng runtime lõi của EdgePos vẫn là `C++ + CEF + Next.js(TypeScript) + RTK Query + SQLite`.\n- `@platform/api-sdk` hiện đã được triển khai trong `SharedContracts/ApiSdk`, giúp Setup/Maintenance mode và Portal/Edge tools có cùng nền contract CentralApi có type.\n- `cursor pagination` hiện đã áp dụng cho `auditLogConnection` và `syncEventConnection`; nó cải thiện truy vấn lịch sử upstream lớn nhưng không thay đổi đường commit local của Edge.\n- `APQ` đã hoạt động ở CentralApi; nó giảm payload giữa Portal và CentralApi nhưng không thay đổi đường `cefQuery`/bridge của Edge.\n- persisted query allow-list hiện đã được triển khai bằng cách tự tạo SDK manifest và cưỡng chế generated allow-list ở CentralApi; điều này không thay đổi đường `cefQuery`/bridge của Edge.\n- `Prisma multi-file schema` và `SWC builder` đã được bật ở phía trung tâm để cải thiện maintainability/build speed, không thay đổi mô hình SQLite local của Edge.\n- Tóm lại, các hạng mục này **không thay đổi tiêu chuẩn thành công của EdgePos**. Tiêu chuẩn vẫn là `local SQLite commit + Outbox/Recovery`."
+        }
+      }
+    },
+    "edgepos_az_guide": {
+      "title": "Hướng dẫn luồng A-Z Edge POS",
+      "category": "Thiết kế tổng hợp dự án",
+      "description": "Hướng dẫn toàn bộ luồng Edge POS từ A đến Z",
+      "sections": {
+        "purpose": {
+          "title": "이 문서의 목적",
+          "content": "이 문서가 설명하는 것:\n\n- POS가 어디서 시작하는가\n- C++ / CEF / Next.js(TypeScript) / RTK Query가 어떻게 연결되는가\n- 화면에서 입력한 작업이 어떤 계층을 지나 SQLite까지 가는가\n- 저장 후 화면은 어떻게 갱신되는가\n- 오프라인, 동기화, 복구, 설정 모드는 어떻게 동작하는가\n- 각 파일이 어느 지점에서 책임을 가지는가"
+        },
+        "one_page_summary": {
+          "title": "한 장 요약",
+          "content": "| 관점 | 설명 |\n|---|---|\n| 실행 형태 | `BrandPosApp.exe`가 실행되는 네이티브 POS 프로그램 |\n| UI | CEF 안에서 Next.js(TypeScript)가 동작 |\n| 상태 관리 | 서버 상태는 RTK Query, 로컬 UI 상태는 Redux Toolkit slice |\n| 요청 진입점 | UI 요청은 PosRequestSender 하나로 들어간다 |\n| 업무 처리 | UseCases가 트랜잭션과 순서를 조정 |\n| 도메인 규칙 | Domain/*Manager가 업무 규칙을 가진다 |\n| 저장 | 최종 저장소는 SQLite |\n| 실시간 갱신 | C++는 PosRealTimeSender로 UI를 다시 깨운다 |\n| 복구 | 복구는 UI cache가 아니라 local store 기준 |"
+        },
+        "overall_flow": {
+          "title": "전체 흐름",
+          "content": "```\nBrandPosApp.exe\n  → AppHost / BrandPosHost\n    → Presentation/CEF\n      → PosUi / Next.js(TypeScript)\n        → RTK Query / Redux Toolkit\n        → PosRequestSender\n          → PosRequestResponder\n            → PosRequestActions\n              → UseCases\n                → Domain Managers\n                  → Infrastructure/Persistence/SQLite\n                    → SQLite local store\n              → PosRealTimeSender → PosRealTimeReceiver → UI\n              → Outbox / RequestLedger / RecoveryState\n                → Sync / Recovery\n```\n\n한 줄 요약: `exe 시작 → CEF 로드 → Next.js UI 표시 → RTK Query로 화면 준비 → 요청 전달 → UseCase → Domain → SQLite 저장 → 실시간 이벤트 → 화면 갱신`"
+        },
+        "points_a_to_j": {
+          "title": "시작점 A~J 상세 흐름",
+          "content": "### A. 실행 시작\n`BrandPosApp.cpp` → `CefBootstrap.cpp` (CEF 초기화) → `CefAppHandler.cpp` (핸들러 등록) → `CefSchemeHandler.cpp` (`app://pos/` 매핑) → `CefBrowserDlg.cpp` (브라우저 생성) → `BrowserRecoveryManager.cpp` (crash 회복 감시)\n\n### B. PosUi 로드\nCEF는 PosUi의 정적 빌드 결과를 읽는다: `layout.tsx` → `page.tsx` → `pos/table/page.tsx`, `pos/order/page.tsx`, `pos/payment/page.tsx`, Setup mode, Maintenance mode\n\n### C. 화면 초기화\nRTK Query가 초기 데이터를 읽는다: 테이블 목록, 현재 선택된 테이블, 주문 목록, 결제 대기 상태, 시스템 설정, 장치 연결 상태. 화면은 데이터를 직접 만들지 않고 이미 있는 상태를 읽어 렌더링.\n\n### D. UI → C++ 요청\n`screen → RTK Query mutation / bridge command → PosRequestSender → cefTransport → PosRequestResponder → PosRequestActions → UseCases`\n\n### E. 데이터 저장\nUseCases 시작 → Domain 검증 → SQLite `*Crud.cpp` 저장 → RequestLedger 기록 → Outbox 적재 → commit\n\n### F. 저장 후 UI 갱신\n`PosRealTimeSender` → `CefBrowserDlg` (JS event dispatch) → `PosRealTimeReceiver` → RTK Query cache 무효화/갱신 → Redux slice 정리\n\n### G. 대표 업무 흐름\n테이블 선택, 주문 생성, 결제 처리 — 각각 UseCase → Domain → SQLite → RealTimeSender → UI 갱신 순서\n\n### H. Setup/Maintenance 모드\nSetup: 최초 설치, 네트워크/장치 설정, 브랜치/터미널 바인딩, 초기 데이터\nMaintenance: 장치 점검, 설정 재적용, 로그 수집, 업데이트 실행\n\n### I. 동기화\nOutbox → SyncDispatcher → 중앙 API 전송 → ACK → Outbox 상태 갱신. 오프라인이면 큐에 보관, 온라인 복구 시 재전송.\n\n### J. 복구\n프로세스 재시작 시 미완료 PROCESSING 작업 재검사, DB 기반 재수화, Ledger 기반 중복 방지, Outbox 미전송 건 재전송."
+        },
+        "platform_followups": {
+          "title": "Trạng Thái Liên Kết Platform Trung Tâm",
+          "content": "- Tiêu chuẩn thành công của luồng A~J vẫn là `local SQLite commit + Outbox/Recovery`.\n- `@platform/api-sdk` hiện đã được triển khai trong `SharedContracts/ApiSdk`, nên Setup/Maintenance mode và Portal/Edge tools đã có nền contract CentralApi dùng chung với cùng type.\n- `cursor pagination` hiện đã áp dụng cho `auditLogConnection` và `syncEventConnection`, nhưng không thay đổi đường commit local của Edge.\n- `APQ` đã bật ở CentralApi và không thay đổi tuyến `cefQuery`/bridge của Edge.\n- persisted query allow-list đã được triển khai bằng cách tự tạo SDK manifest và cưỡng chế generated allow-list ở CentralApi; điều này không thay đổi tuyến `cefQuery`/bridge của Edge.\n- `Prisma multi-file schema` và `SWC builder` đã được chuyển đổi ở phía trung tâm để cải thiện maintainability và tốc độ build.\n- Backlog còn lại là mở rộng áp dụng trực tiếp `@platform/api-sdk` trong portal, bổ sung mutation cho `Branch / EdgePos / DeployRelease`, và kiểm tra drift của allow-list ở production."
+        }
+      }
+    },
+    "edgepos_checklist": {
+      "title": "Checklist thiết kế P0-P1",
+      "category": "Thiết kế tổng hợp dự án",
+      "description": "Danh sách kiểm tra bổ sung thiết kế P0/P1",
+      "sections": {
+        "p0_layer_boundaries": {
+          "title": "P0 — 계층 경계",
+          "content": "- [ ] `PosRequestActions`가 직접 SQL/Manager 조합 로직을 수행하지 않고 `UseCases`만 호출한다\n- [ ] `ExternalBridge`가 직접 SQL을 수행하지 않는다\n- [ ] `ExternalBridge`가 직접 `PosRealTimeSender`를 호출하지 않는다\n- [ ] UI 송신은 `PosRealTimeSender` 단일 경로만 사용한다"
+        },
+        "p0_idempotency": {
+          "title": "P0 — 멱등성 / 중복 처리",
+          "content": "- [ ] 결제 요청에 `requestId`, `idempotencyKey`가 필수 적용된다\n- [ ] 주문 생성/수정/취소에도 `requestId` 추적이 적용된다\n- [ ] 영속 Ledger 테이블에 `RECEIVED/PROCESSING/SUCCEEDED/FAILED/COMPENSATED` 상태가 기록된다\n- [ ] 동일 `idempotencyKey` 재수신 시 신규 실행이 아니라 기존 결과를 재반환한다"
+        },
+        "p0_transaction": {
+          "title": "P0 — 트랜잭션 / 정합성",
+          "content": "- [ ] DB 영속화 완료 전 외부 ACK를 보내지 않는다\n- [ ] DB 영속화 완료 전 UI 상태를 갱신하지 않는다\n- [ ] 인쇄/장치 실패와 DB 저장 실패를 구분하는 정책이 문서화되어 있다\n- [ ] 하나의 use case는 하나의 UseCase 단위에서 종료된다"
+        },
+        "p0_failure_recovery": {
+          "title": "P0 — 장애 복구",
+          "content": "- [ ] 프로세스 재시작 시 미완료 `PROCESSING` 작업 재검사 절차가 구현되어 있다\n- [ ] 미완료 결제 재조회 규칙이 문서화되어 있다\n- [ ] 테이블/주문/배달 데이터는 DB 기준으로 재수화 가능하다\n- [ ] 외부 ACK 미전송 건의 재전송 절차가 있다"
+        },
+        "p0_operational": {
+          "title": "P0 — 운영 안전장치",
+          "content": "- [ ] 화면 단위 feature flag가 존재한다\n- [ ] 핵심 3개 화면이 CEF 단일 셸 기준으로만 동작하도록 정리되어 있다\n- [ ] 운영 롤백 조건이 문서화되어 있다\n- [ ] 파일럿 매장 전개 순서가 정의되어 있다"
+        },
+        "p1_browser": {
+          "title": "P1 — 브라우저 / 런타임",
+          "content": "- [ ] `CefBrowser` 단일 인스턴스 전략이 구현 설계에 반영\n- [ ] `root_cache_path`, `cache_path`가 명시적으로 설정\n- [ ] 세션 쿠키 / localStorage 지속 정책이 문서화\n- [ ] remote debugging / devtools 정책이 운영/개발별로 구분"
+        },
+        "p1_performance": {
+          "title": "P1 — 성능 / 메모리",
+          "content": "- [ ] x86 메모리 한계치와 허용 RSS 기준이 정의\n- [ ] 장시간 soak test 시나리오가 존재\n- [ ] 화면 전환 시간, 첫 로딩 시간, 결제 완료 시간의 목표치\n- [ ] x86 기준 미달 시 x64 전환 게이트가 문서화"
+        },
+        "p1_contract": {
+          "title": "P1 — 계약 / 인터페이스",
+          "content": "- [ ] 메시지 Envelope 표준이 모든 채널에 공통 적용\n- [ ] `v`, `requestId`, `timestamp`, `idempotencyKey` 필드 사용 규칙 고정\n- [ ] Bridge 요청/응답 예제가 문서화\n- [ ] `VERSION_MISMATCH` 처리 UX가 정의"
+        },
+        "p1_observability": {
+          "title": "P1 — 관측성",
+          "content": "- [ ] 모든 로그에 `requestId` 체인이 포함\n- [ ] 장치 로그, 브릿지 로그, 업무 로그가 분리\n- [ ] 장애 시 어떤 로그를 우선 확인해야 하는지 운영 가이드\n- [ ] 외부 결제/VAN/MQTT 응답 추적 키가 문서화"
+        },
+        "p1_qa": {
+          "title": "P1 — 품질 보증",
+          "content": "- [ ] Bridge contract test가 자동화\n- [ ] UseCase 단위 테스트가 존재\n- [ ] 강제 종료 후 복구 테스트가 존재\n- [ ] MFC 결과와 신 UI 결과 동등성 비교 시나리오 존재"
+        },
+        "p1_deployment": {
+          "title": "P1 — 배포 / 정적 빌드",
+          "content": "- [ ] Next.js는 `output: 'export'` 기준으로 빌드\n- [ ] 정적 export에서 금지되는 기능 목록이 공유\n- [ ] `app://pos/` scheme handler가 정적 파일 라우팅 규칙 제공\n- [ ] UI/CEF/리소스 버전 동기화 규칙 존재"
+        }
+      }
+    },
+    "feature_coverage_matrix": {
+      "title": "Ma trận tính năng",
+      "category": "Tính năng theo nền tảng",
+      "description": "Ma trận tính năng chéo giữa các nền tảng",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "레거시 POS 기능 인벤토리(`FeatureInventory.md`)의 모든 기능 범주가 신규 플랫폼 문서에 매핑되었는지 확인하는 **누락 여부 체크포인트**다. 기능 상세는 각 플랫폼 문서를 따른다."
+        },
+        "coverage_table": {
+          "title": "커버리지 요약",
+          "content": "| Legacy 섹션 | 대표 범주 | 주 담당 문서 | 상태 |\n|---|---|---|---|\n| 1 | 전체 통계 요약 | 전체 문서 | Covered |\n| 2 | Table & Floor | 04-EdgePos-기능리스트 | Covered |\n| 3 | Sales & Payment | 04-EdgePos-기능리스트 | Covered |\n| 4 | Inventory & Menu | 04-EdgePos-기능리스트 | Covered |\n| 5 | Customer | 04-EdgePos-기능리스트 | Covered |\n| 6 | System & Admin | 01-SuperAdmin-기능리스트 | Covered |\n| 7 | External Bridge | 04-EdgePos-기능리스트 | Covered |\n| 8 | Kiosk | 04-EdgePos-기능리스트 | Covered |\n| 9 | Dialog inventory | 04-EdgePos-기능리스트 | Covered |"
+        },
+        "validation_results": {
+          "title": "검증 결과",
+          "content": "**플랫폼별 책임:**\n\n| Platform | 책임 범위 |\n|---|---|\n| **SuperAdmin** | 멀티테넌시, 대리점/브랜드 온보딩, 라이선스, 배포, 감사, 모니터링, 지원 |\n| **RegionalDistributor** | 지역/국가 유통권, 현지 계약, rollout 계획, 현지 지원, settlement 추적 |\n| **BrandHQ** | 메뉴, 가격, 프로모션, 지점 정책, 브랜드 리포트, 카탈로그 배포 |\n| **EdgePos** | 주문, 결제, 테이블, 고객, 재고, 키오스크, 장치 연동, 로컬 복구 |\n\n- 레거시 기능 범주 1~9는 모두 신규 플랫폼 문서에 매핑 완료\n- 상세 기능은 04(EdgePos)에 가장 많이 집중, 01/02/03은 운영/배포/정책 계층 담당\n- 이 매트릭스는 신규 기능 추가 시 함께 갱신 필요"
+        }
+      }
+    },
+    "superadmin_features": {
+      "title": "Tính năng SuperAdmin",
+      "category": "Tính năng theo nền tảng",
+      "description": "Danh sách đầy đủ tính năng nền tảng SuperAdmin",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "공급사가 여러 브랜드와 대리점을 통합 운영하기 위해 필요한 기능을 정리한다. 매장 운영 기능이 아니라, **플랫폼 전체를 통제하는 상위 관리 기능만** 다룬다."
+        },
+        "tenant_org_mgmt": {
+          "title": "테넌트/조직 관리",
+          "content": "- 대리점(RegionalDistributor) 생성/승인/정지\n- 브랜드 본사(BrandHQ) 온보딩\n- 지점 계층 연결 및 조직 구조 관리\n- 계정 소유권과 운영 권한 이관"
+        },
+        "license_deploy": {
+          "title": "라이선스/배포 관리",
+          "content": "- 브랜드별/지역별 라이선스 발급\n- 버전 배포 정책 관리\n- 롤아웃 대상 및 단계적 배포 제어\n- 배포 실패/재시도/승인 상태 추적"
+        },
+        "policy_audit": {
+          "title": "정책/감사/보안",
+          "content": "- 글로벌 RBAC 정책\n- 감사 로그 조회\n- 정책 템플릿 배포\n- 보안/접근 제어 기준 관리"
+        },
+        "monitoring": {
+          "title": "운영 모니터링",
+          "content": "- 브랜드/대리점/지점 상태 모니터링\n- 장애 알림과 헬스체크\n- 원격 지원 기록\n- 배포 상태와 동기화 상태 추적"
+        },
+        "contract_mgmt": {
+          "title": "중앙 계약 관리",
+          "content": "- `SuperAdmin/CentralApi`의 GraphQL contract 관리\n- REST 예외 엔드포인트 사용 범위 관리\n- `SharedContracts` 버전 관리"
+        },
+        "non_responsibility": {
+          "title": "비책임 범위",
+          "content": "- 주문, 결제, 테이블, 재고 같은 **매장 원본 데이터는 소유하지 않는다**\n- Edge POS의 로컬 장치 연결을 직접 처리하지 않는다\n- BrandHQ의 운영 화면을 중복 구현하지 않는다\n- `System & Admin`의 상위 통제 기능을 SuperAdmin으로 승격\n- 레거시 POS의 운영 데이터는 EdgePos로 귀속"
+        }
+      }
+    },
+    "distributor_features": {
+      "title": "Tính năng RegionalDistributor",
+      "category": "Tính năng theo nền tảng",
+      "description": "Danh sách đầy đủ tính năng nền tảng RegionalDistributor",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "국가/지역 단위 독점 유통권을 가진 대리점 계층의 책임을 정의한다. 브랜드 본사와 공급사 사이의 계약, rollout, 지원 경계를 분리한다."
+        },
+        "territory_mgmt": {
+          "title": "지역/국가 유통권 관리",
+          "content": "- 국가/지역 독점 권리 관리\n- 담당 브랜드 목록 관리\n- 지역별 운영 허용 범위 관리\n- 지역별 정책/규제/세금 기준 반영"
+        },
+        "brand_onboarding": {
+          "title": "브랜드 온보딩",
+          "content": "- BrandHQ 신규 등록 지원\n- 설치 범위와 rollout 일정 조율\n- 초기 배포 패키지 전달\n- 현지 지원 채널 연결"
+        },
+        "contract_settlement": {
+          "title": "계약/정산",
+          "content": "- 대리점 계약 상태 관리\n- 라이선스/계약 갱신 추적\n- 현지 정산 기준 관리\n- 수수료/지원 비용 트래킹"
+        },
+        "regional_dashboard": {
+          "title": "지역 운영 대시보드",
+          "content": "- 지역별 설치 현황\n- 지점 활성화 현황\n- 장애/배포/지원 이력 확인\n- 브랜드별 운영 상태 요약"
+        },
+        "non_responsibility": {
+          "title": "비책임 범위",
+          "content": "- 실제 매장 주문/결제 데이터는 다루지 않는다\n- EdgePos 장치 드라이버나 로컬 DB를 직접 제어하지 않는다\n- BrandHQ의 메뉴/가격/직원 운영 화면을 중복 구현하지 않는다\n- 레거시 HJ-POS에 직접 존재하던 기능은 거의 없으며, 신규 플랫폼에서 추가 정의되는 계층\n- 배포, 지원, 감사, 정산의 상위 책임은 레거시 운영 기능의 외곽을 흡수"
+        }
+      }
+    },
+    "brandhq_features": {
+      "title": "Tính năng BrandHQ",
+      "category": "Tính năng theo nền tảng",
+      "description": "Danh sách đầy đủ tính năng nền tảng BrandHQ",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "하나의 브랜드가 여러 지점을 통합 운영할 때 필요한 기능을 정의한다. **매장 운영의 정책 원본과 카탈로그 원본**을 관리한다."
+        },
+        "menu_catalog": {
+          "title": "메뉴/카탈로그 관리",
+          "content": "- 상품/메뉴 마스터 관리\n- 가격 정책과 세금 정책 관리\n- 프로모션/할인 이벤트 관리\n- 지점별 카탈로그 배포"
+        },
+        "branch_ops": {
+          "title": "지점 운영",
+          "content": "- 지점 생성/수정/정지\n- 지점별 override 관리\n- 지점 권한 템플릿 관리\n- 지점 운영 현황 조회"
+        },
+        "org_employee": {
+          "title": "조직/직원 관리",
+          "content": "- 브랜드 조직 구조 관리\n- 직원 권한/역할 템플릿 관리\n- 운영자 계정 분리\n- 지점 단위 접근 제어"
+        },
+        "report_settlement": {
+          "title": "리포트/정산",
+          "content": "- 매출 리포트\n- 지점별 실적 비교\n- 정책별 효과 추적\n- 중앙 API를 통한 조회/분석"
+        },
+        "edgepos_link": {
+          "title": "EdgePos 연계",
+          "content": "- EdgePos로 내려갈 정책/카탈로그 배포\n- Setup/Maintenance 모드에서 현장 설정 적용\n- 장치 템플릿과 로컬 커미셔닝 정보 관리"
+        },
+        "non_responsibility": {
+          "title": "비책임 범위",
+          "content": "- 주문/결제 거래의 **실시간 원본은 소유하지 않는다**\n- 지역 독점 유통권과 공급사 전체 배포 정책은 SuperAdmin/RegionalDistributor 책임\n- 로컬 장치 제어는 BrandPosApp 내부 모드에서 수행\n- `Inventory & Menu`, `Customer`, `System & Admin` 중 브랜드 운영에 필요한 부분을 흡수\n- 상품/메뉴/가격/프로모션의 관리 흐름은 BrandHQ의 핵심 책임"
+        }
+      }
+    },
+    "edgepos_features": {
+      "title": "Tính năng EdgePOS",
+      "category": "Tính năng theo nền tảng",
+      "description": "Danh sách đầy đủ tính năng Edge POS",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "레거시 기능의 대부분은 이 문서에 들어간다. SuperAdmin / RegionalDistributor / BrandHQ 문서는 상위 운영 책임만 분리해서 다룬다.\n\n**분석 대상**: HJ-POS-TEST (MFC/C++ POS, ~55만 줄)\n**분석 방법**: 5개 전문 에이전트 병렬 분석 (Manager 클래스 전수 조사, IDD_ 다이얼로그 전수 조사, resource.h 스캔)"
+        },
+        "stats_summary": {
+          "title": "전체 통계 요약",
+          "content": "| 구분 | 수량 |\n|---|---|\n| C++ 소스 파일 (.h/.cpp) | 941개 |\n| Manager 클래스 | 22개 |\n| 공개 메서드 (추출) | 610개+ |\n| IDD_ 다이얼로그 정의 | 350개 (메인 243 + Set 107) |\n| 결제 게이트웨이 | 7개 (BCCard, Infoplus, ZaloPay, HJVietPay, NAPAS, BIDV, WeTax) |\n| 지원 언어 | 3개 (한국어, 영어, 베트남어) |\n| 배달 대행사 연동 | 6개 |\n\n**중요도 기준**: P0=핵심 매출 흐름(전환 1차), P1=운영 필수(전환 2차), P2=보조/관리(전환 3차)\n\n| Domain | Manager | 메서드 | 다이얼로그 | P0 | P1 | P2 |\n|---|---|---|---|---|---|---|\n| Table & Floor | 1 | ~40 | 12 | 8 | 10 | 6 |\n| Sales & Payment | 2+6GW | ~150 | 30 | 22 | 18 | 12 |\n| Inventory & Menu | 2 | ~170 | 25 | 12 | 15 | 10 |\n| Customer | 1 | ~80 | 15 | 8 | 12 | 8 |\n| System & Admin | 6+Print | ~120 | 120 | 10 | 15 | 20 |\n| External Bridge | 4+MQTT+HTTP | ~50 | 6 | 8 | 6 | 4 |\n| Kiosk | - | - | 22 | 5 | 8 | 6 |\n| **합계** | **22** | **~610** | **~230** | **73** | **84** | **66** |"
+        },
+        "table_floor": {
+          "title": "테이블/플로어 (Table & Floor)",
+          "content": "Manager: `CTableMgr` (DB/TableMgr.h, DB/TableMgr.cpp)\n\n주요 기능:\n- **테이블 초기화/조회**: InitTable, GetTableFromTableCode, GetTableFromID (P0)\n- **테이블 상태 관리**: ClearTableAll, TableOrderClear, ClearOrderFromID (P0)\n- **테이블 잠금/동기화**: UseSysnCheck, SetUseSysn, ChangeTableFromSock (P0)\n- **테이블 이동/합석**: ChangeTable (빈 테이블 이동 또는 주문 합석, 금액/수량 합산) (P0)\n- **테이블 그룹 관리**: SetGroupView, ChangeGroupAlphabetFromSock (P1)\n- **테이블 메모**: UpdateTableMemo (P1)\n- **예약 관리**: CAppointTableviewDlg (P1)\n- **포장/배달 테이블 코드**: 포장/배달 전용 코드 관리 (P1)"
+        },
+        "sales_payment": {
+          "title": "매출/결제 (Sales & Payment)",
+          "content": "Manager: `COrderMgr` + `CSaleMgr` + 7개 결제 게이트웨이\n\n주요 기능:\n- **주문 생성/수정/취소**: 메뉴 선택, 수량, 옵션, 요청사항 (P0)\n- **결제 처리**: 현금/카드/QR/포인트/쿠폰/외상/분할결제 (P0)\n- **더치페이**: 금액/인원/항목별 분할 결제 (P0)\n- **영수증 인쇄**: 주방/고객/배달 전표 (P0)\n- **결제 게이트웨이**: BCCard, Infoplus, ZaloPay, HJVietPay, NAPAS, BIDV, WeTax (P0)\n- **비동기 결제**: QR결제 등 비동기 결과 알림 (P1)\n- **환불/취소**: 결제 건 취소/부분 환불 (P0)"
+        },
+        "inventory_menu": {
+          "title": "상품/메뉴/재고 (Inventory & Menu)",
+          "content": "Manager: `CItemMgr` + `CStockMgr`\n\n주요 기능:\n- **상품 관리**: 상품 등록/수정/삭제, 카테고리, 옵션 (P0)\n- **재고 관리**: 입고/출고, 현황 조회, 날짜별 이력 (P1)\n- **매입 관리**: 공급자별 입고, 매입 수정, 매입 장부 (P1)\n- **재고 정산**: 실사/정산, 재고 조정 (P1)\n- **세트메뉴**: 세트 구성, PLU 코드 관리 (P1)"
+        },
+        "customer": {
+          "title": "고객 관리 (Customer)",
+          "content": "Manager: `CCustMgr`\n\n주요 기능:\n- **고객 등록/검색**: 신규 등록, 검색/선택, 정보 수정 (P0)\n- **고객 상세**: 확장 정보, 구매 이력 (P1)\n- **고객 보관 상품**: 입고/판매/사용 (P2)\n- **외상 관리**: 고객 외상 입금/관리 (P1)\n- **체인 고객**: 체인점 고객 공유 목록 (P2)"
+        },
+        "system_admin": {
+          "title": "시스템/관리 (System & Admin)",
+          "content": "Manager: `CConfigMgr` + `CPrinterMgr` + 기타 5개\n\n주요 기능:\n- **시스템 설정**: 전체 설정, 프린터 설정, 네트워크 설정 (P0)\n- **직원 관리**: 직원 선택/호출/알림, 근태 관리, 급여/수당 (P1)\n- **일일 정산**: 매출 집계, 마감 처리 (P0)\n- **프린터 제어**: 주방 프린터, 고객 프린터, 라벨 프린터 (P0)\n- **백업/복원**: DB 백업, 복원, 데이터 초기화 (P1)\n- **원격 지원**: 원격 접속, 장애 로그 수집 (P2)"
+        },
+        "external_bridge": {
+          "title": "외부 연동 (External Bridge)",
+          "content": "Manager: `CFoodingMgr` + 배달대행 4사 + MQTT + HTTP\n\n주요 기능:\n- **배달 대행**: 요기요, 쿠팡이츠, PAYCO vORDER, BM_NEW, MConnect, 카카오톡 (P0)\n- **Fooding 연동**: 주문 접수/상태 관리 (P0)\n- **MQTT**: 실시간 메시지 수신/발신 (P1)\n- **HTTP**: 외부 API 호출, webhook 수신 (P1)\n- **QR 결제**: VietQR, ZaloPay QR (P0)"
+        }
+      }
+    },
+    "screen_inventory": {
+      "title": "Danh sách màn hình EdgePOS",
+      "category": "Tính năng theo nền tảng",
+      "description": "Danh sách toàn bộ màn hình HJ-POS legacy (142 + 70 cài đặt)",
+      "sections": {
+        "summary_table": {
+          "title": "화면 수 요약",
+          "content": "| 구분 | 화면 수 |\n|---|---|\n| POS 메인 화면 | 4 |\n| 결제/정산 | 12 |\n| 주문/메뉴 | 8 |\n| 테이블/예약 | 7 |\n| 배달 | 9 |\n| 고객 | 11 |\n| 직원 | 7 |\n| 재고/매입/장부 | 15 |\n| 상품권/포인트/쿠폰 | 6 |\n| 결제수단(QR/카드) | 10 |\n| 영수증/출력 | 5 |\n| 테이블오더 | 5 |\n| 주방 디스플레이 | 5 |\n| 유틸리티/공통 | 16 |\n| **합계 (설정 제외)** | **~142** |"
+        },
+        "pos_main": {
+          "title": "POS 메인 화면 (P0 전환 대상)",
+          "content": "| ID | 화면명 | 설명 | 우선순위 |\n|---|---|---|---|\n| M-01 | 메인 메뉴 | POS 진입점, 영업/설정/분석/회원/재고 등 메뉴 버튼 | P0 |\n| M-02 | 테이블 화면 | 층별 테이블 그리드, 테이블 선택/상태 표시 | P0 |\n| M-03 | 주문 화면 | 메뉴 버튼, 주문 목록, 수량 입력, 고객 정보 | P0 |\n| M-04 | 결제 화면 | 총액 계산, 할인 적용, 결제수단 선택, 정산 | P0 |"
+        },
+        "payment": {
+          "title": "결제/정산",
+          "content": "12개 화면: 결제 메인, 결제(베트남), 결제 빠른선택, 주문결제, 더치페이(금액/인원/항목별 분할), 기타 결제 설정, 결제 메모, 비동기 결제 알림 등"
+        },
+        "order": {
+          "title": "주문/메뉴",
+          "content": "8개 화면: 주문 메인, 주문 빠른선택, 주문 상품 상세, 주문 항목 목록, 주문 메시지/요청사항, PLU 세트, 세트메뉴 구성 등"
+        },
+        "table_reservation": {
+          "title": "테이블/예약",
+          "content": "7개 화면: 테이블 메인, 테이블 빠른선택, 테이블 선택(합석/이동), 테이블 메시지, 그룹 체크아웃, 예약 관리, 예약 테이블 뷰"
+        },
+        "delivery": {
+          "title": "배달",
+          "content": "9개 화면: 배달 관리(MFC/Sciter v1/v2), 배달 주소, 배달 출력, 배달대행, 주소 입력, 발신번호 표시"
+        },
+        "customer": {
+          "title": "고객",
+          "content": "11개 화면: 고객 등록, 고객 검색, 고객 정보 입력/조회/상세, 고객 전체 등록, 고객 보관 상품(입고/판매/사용), 외상 관리, 체인 고객 목록"
+        },
+        "employee": {
+          "title": "직원",
+          "content": "7개 화면: 직원 선택, 직원 호출, 직원 알림, 근태 관리, 근태 지급, 근태 수정, 근태 설정"
+        },
+        "stock": {
+          "title": "재고/매입/장부",
+          "content": "15개 화면: 재고 관리, 재고 입력/조회/날짜 조회/정산/입고, 매입 관리/수정, 일일 장부, 월간 장부, 원가 관리 등"
+        },
+        "gift_point": {
+          "title": "상품권/포인트",
+          "content": "6개 화면: 상품권 등록/발행/사용/조회, 포인트 관리, 쿠폰 관리"
+        },
+        "payment_methods": {
+          "title": "결제수단(QR/카드)",
+          "content": "10개 화면: 카드 승인, VietQR, ZaloPay, NAPAS, BIDV, 현금, 외상, 포인트결제, 쿠폰결제, 혼합결제"
+        },
+        "receipt": {
+          "title": "영수증/출력",
+          "content": "5개 화면: 영수증 미리보기, 영수증 인쇄, 주방 전표 인쇄, 배달 전표 인쇄, 라벨 인쇄"
+        },
+        "table_order": {
+          "title": "테이블오더",
+          "content": "5개 화면: 테이블오더 메인, 메뉴 브라우저, 주문 확인, 결제, 완료 화면"
+        },
+        "kitchen": {
+          "title": "주방 디스플레이",
+          "content": "5개 화면: 주방 메인, 주문 대기열, 조리 완료, 알림, 설정"
+        },
+        "utility": {
+          "title": "유틸리티/공통",
+          "content": "16개 화면: 키보드 입력, 숫자 입력, 날짜 선택, 메시지 팝업, 진행 표시, 비밀번호 입력, 확인 다이얼로그, 목록 선택, 이미지 뷰어, 바코드 스캔, 인쇄 미리보기, 도움말, 정보 표시, 에러 표시, 대기 화면, 로딩 화면"
+        },
+        "flow_diagram": {
+          "title": "화면 전환 흐름",
+          "content": "```\n메인 메뉴 (M-01)\n  ├── 테이블 화면 (M-02) → 주문 화면 (M-03) → 결제 화면 (M-04)\n  ├── 배달 관리 (DEL-01~04)\n  ├── 고객 관리 (CUS-01~11)\n  ├── 재고 관리 (STK-01~15)\n  ├── 직원 관리 (EMP-01~07)\n  └── 시스템 설정\n\n핵심 매출 흐름 (P0):\n  테이블 선택 → 주문 입력 → 결제 처리 → 영수증 출력\n```"
+        }
+      }
+    },
+    "db_table_master": {
+      "title": "Bảng/Cột tổng hợp",
+      "category": "Thiết kế DB",
+      "description": "Danh mục toàn bộ bảng/cột DB nền tảng + legacy",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "이 파일은 **현재 플랫폼의 정규화된 DB 정의**와 **HJ-POS 레거시의 전체 테이블/컬럼**을 한 번에 모아둔 전수 인벤토리다.\n\n기준은 필터링 이전의 최대 포괄본이며, 이후 별도 문서에서 정규화/제거/호환 계층 분리를 진행한다."
+        },
+        "current_platform_count": {
+          "title": "현재 플랫폼 DB 정의",
+          "content": "현재 플랫폼에서 실제 정의된 테이블 그룹:\n\n- **Shared/ReferenceData**: Language, Region, Currency 등 Central과 Edge가 공통 참조하는 기준 데이터\n- **SuperAdmin/Governance**: SuperAdminUser, PlatformLicense, PlatformPolicy, AuditLog 등\n- **RegionalDistributor/Channel**: DistributorProfile, Territory, DistributorContract, BrandAssignment 등\n- **BrandHQ/MasterData**: BrandProfile, Branch, BrandMenuCategory, BrandMenuItem 등\n- **EdgePOS/OperationalCore**: EdgePosTerminal, Device, DeviceBinding, LocalSetting 등\n\n저장 위치: Central PostgreSQL (Prisma + raw SQL) + Edge SQLite (C++ native wrapper)"
+        },
+        "legacy_count": {
+          "title": "레거시 DB 규모",
+          "content": "HJ-POS-TEST 레거시 DB:\n\n- MSSQL 기반\n- 주문, 결제, 테이블, 고객, 재고, 직원, 장치, 설정 등 전 도메인 포괄\n- 현재 신규 플랫폼에서는 SQLite로 마이그레이션 진행 중\n- 레거시 스키마는 역엔지니어링 참조 원본으로만 사용"
+        },
+        "structure": {
+          "title": "구조",
+          "content": "전체 DB는 5개 영역으로 분류:\n\n| 영역 | 저장 위치 | 원본 |\n|---|---|---|\n| **Shared Reference Data** | Central PostgreSQL + Edge SQLite cache | Central |\n| **SuperAdmin Governance** | Central PostgreSQL | Central |\n| **RegionalDistributor Channel** | Central PostgreSQL | Central |\n| **BrandHQ MasterData** | Central PostgreSQL | Central |\n| **EdgePOS OperationalCore** | Edge SQLite | Edge (로컬) |\n\n동기화 방향: Shared/SuperAdmin/RegionalDistributor/BrandHQ → Downstream (Edge로 내려보냄), EdgePOS → Upstream (중앙으로 올림)"
+        }
+      }
+    },
+    "db_shared_reference": {
+      "title": "Dữ liệu tham chiếu dùng chung",
+      "category": "Thiết kế DB",
+      "description": "Dữ liệu tham chiếu dùng chung Language, Region, Currency",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "Central과 Edge가 공통으로 참조하는 기준 데이터의 1차 실제 정의서다.\n\n- 소유 주체: `SuperAdmin/CentralApi`\n- 저장 위치: Central PostgreSQL + Edge SQLite cache\n- 원본: Central\n- 동기화 방향: Downstream\n- 보존 정책: 영구 보존\n- 삭제 정책: Soft delete"
+        },
+        "language_table": {
+          "title": "Language 테이블",
+          "content": "| 컬럼명 | 타입 | 의미 |\n|---|---|---|\n| `Id` | uuid / TEXT | 내부 식별자 |\n| `LanguageCode` | varchar(10) | `ko-KR`, `vi-VN`, `en-US` |\n| `NativeName` | varchar(100) | 원어 표기명 |\n| `DisplayName` | varchar(100) | UI 표시명 |\n| `Direction` | varchar(5) | 텍스트 방향 (LTR/RTL) |\n| `IsDefault` | boolean | 기본 언어 여부 |\n| `IsActive` | boolean | 사용 가능 여부 |\n\nUnique: `LanguageCode`, Check: `Direction in ('LTR', 'RTL')`\n\n사용 시나리오: 포털/Edge 초기 언어 선택, 플랫폼 초기 seed, 언어명/활성화 상태 변경, Edge는 중앙 기준값을 내려받아 사용"
+        },
+        "region_table": {
+          "title": "Region 테이블",
+          "content": "| 컬럼명 | 타입 | 의미 |\n|---|---|---|\n| `Id` | uuid / TEXT | 내부 식별자 |\n| `RegionCode` | varchar(20) | 지역 코드 |\n| `CountryCode` | varchar(10) | 국가 코드 |\n| `RegionName` | varchar(120) | 지역명 |\n| `CurrencyCode` | char(3) | 기본 통화 코드 |\n| `TimeZoneCode` | varchar(50) | 기본 타임존 |\n| `IsActive` | boolean | 사용 가능 여부 |\n\nUnique: `RegionCode`\n\n사용 시나리오: 대리점 관할 지역 매핑, Edge 초기 설정 시 지역 기반 기본값 자동 적용, 세금/통화/타임존 기본값 결정"
+        },
+        "currency_table": {
+          "title": "Currency 테이블",
+          "content": "| 컬럼명 | 타입 | 의미 |\n|---|---|---|\n| `Id` | uuid / TEXT | 내부 식별자 |\n| `CurrencyCode` | char(3) | ISO 4217 코드 (KRW, VND, USD) |\n| `CurrencyName` | varchar(100) | 통화 이름 |\n| `Symbol` | varchar(10) | 표시 기호 |\n| `DecimalPlaces` | integer | 소수점 자릿수 |\n| `IsActive` | boolean | 사용 가능 여부 |\n\nUnique: `CurrencyCode`\n\n사용 시나리오: 결제 금액 표시, 정산/리포트 통화 단위, 다국가 지원 시 통화 변환 기준"
+        }
+      }
+    },
+    "db_superadmin_governance": {
+      "title": "Quản trị SuperAdmin",
+      "category": "Thiết kế DB",
+      "description": "SuperAdminUser, PlatformLicense, AuditLog, v.v.",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "SuperAdmin 플랫폼의 핵심 거버넌스 테이블을 정의한다.\n\n- 소유 주체: `SuperAdmin/CentralApi`\n- 저장 위치: Central PostgreSQL\n- 동기화 방향: Downstream (정책/라이선스 → Edge)\n- 읽는 주체: 전체 Portal, CentralApi, SyncWorkers"
+        },
+        "superadmin_user": {
+          "title": "SuperAdminUser 테이블",
+          "content": "플랫폼 운영자 계정 테이블.\n\n주요 컬럼: `Id`, `Email`, `DisplayName`, `Role` (PlatformSuperAdmin / PlatformSupportEngineer), `IsActive`, `LastLoginAt`, `CreatedAt`, `UpdatedAt`\n\n역할:\n- **PlatformSuperAdmin**: 여러 브랜드 생성, 정지, 배포, 지원\n- **PlatformSupportEngineer**: 장애 분석, 원격 지원, 로그 열람"
+        },
+        "platform_license": {
+          "title": "PlatformLicense 테이블",
+          "content": "브랜드별/지역별 라이선스 관리.\n\n주요 컬럼: `Id`, `RegionalDistributorId`, `BrandHQId`, `LicenseType`, `MaxEdgePos`, `ExpiresAt`, `IsActive`, `CreatedAt`, `UpdatedAt`\n\n사용 시나리오:\n- 대리점별 라이선스 풀 할당\n- 브랜드별 EdgePos 최대 수량 제어\n- 만료 알림 및 갱신 추적"
+        },
+        "platform_policy": {
+          "title": "PlatformPolicy 테이블",
+          "content": "글로벌/지역/브랜드 정책 관리.\n\n주요 컬럼: `Id`, `PolicyType`, `Scope` (Global / RegionalDistributor / BrandHQ / Branch), `ScopeId`, `PolicyVersion`, `PolicyData` (JSONB), `IsActive`, `CreatedAt`\n\n사용 시나리오:\n- 글로벌 RBAC 정책 배포\n- 지역별 세금/결제 규제 반영\n- 브랜드별 기능 플래그 관리"
+        },
+        "audit_log": {
+          "title": "AuditLog 테이블",
+          "content": "전체 플랫폼 감사 로그.\n\n주요 컬럼: `Id`, `ActorId`, `ActorRole`, `Action`, `TargetType`, `TargetId`, `Detail` (JSONB), `IpAddress`, `CreatedAt`\n\n사용 시나리오:\n- 민감 데이터 접근 추적\n- 정책 변경 이력 보존\n- 장애 원인 분석 시 행동 타임라인 재구성"
+        }
+      }
+    },
+    "db_distributor_channel": {
+      "title": "Kênh RegionalDistributor",
+      "category": "Thiết kế DB",
+      "description": "DistributorProfile, Territory, BrandAssignment, v.v.",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "RegionalDistributor 계층의 핵심 데이터 테이블을 정의한다.\n\n- 소유 주체: `SuperAdmin/CentralApi`\n- 저장 위치: Central PostgreSQL\n- 읽는 주체: RegionalDistributorPortal, SuperAdmin/Portal\n- 동기화 방향: Downstream (필요한 정보만 Edge로)"
+        },
+        "distributor_profile": {
+          "title": "DistributorProfile 테이블",
+          "content": "대리점/유통 파트너 프로필.\n\n주요 컬럼: `Id` (= `RegionalDistributorId`), `CompanyName`, `CountryCode`, `ContactEmail`, `ContactPhone`, `Status` (Active / Suspended / Terminated), `CreatedAt`, `UpdatedAt`\n\n사용 시나리오:\n- 대리점 생성/승인/정지\n- 지역별 대리점 목록 조회"
+        },
+        "territory": {
+          "title": "Territory 테이블",
+          "content": "대리점 관할 지역 매핑.\n\n주요 컬럼: `Id`, `RegionalDistributorId`, `RegionId`, `TerritoryCode`, `IsExclusive`, `EffectiveFrom`, `EffectiveTo`, `IsActive`\n\n사용 시나리오:\n- 독점 유통권 기간 관리\n- 지역 중복 배정 방지\n- 지역별 배포 대상 계산"
+        },
+        "distributor_contract": {
+          "title": "DistributorContract 테이블",
+          "content": "대리점 계약 관리.\n\n주요 컬럼: `Id`, `RegionalDistributorId`, `ContractType`, `StartDate`, `EndDate`, `CommissionRate`, `Status` (Draft / Active / Expired / Terminated), `CreatedAt`\n\n사용 시나리오:\n- 계약 상태 추적\n- 수수료율 관리\n- 갱신 알림"
+        },
+        "brand_assignment": {
+          "title": "BrandAssignment 테이블",
+          "content": "대리점 → 브랜드 할당.\n\n주요 컬럼: `Id`, `RegionalDistributorId`, `BrandHQId`, `AssignedAt`, `RevokedAt`, `IsActive`\n\n사용 시나리오:\n- 대리점이 관리하는 브랜드 목록\n- 브랜드 온보딩 시 대리점 자동 연결\n- 할당 해제 이력 관리"
+        }
+      }
+    },
+    "db_brandhq_master": {
+      "title": "Dữ liệu chủ BrandHQ",
+      "category": "Thiết kế DB",
+      "description": "BrandProfile, Branch, MenuItem, Promotion, v.v.",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "BrandHQ 계층의 마스터 데이터 테이블을 정의한다.\n\n- 소유 주체: `BrandHQ` (CentralApi를 경유)\n- 저장 위치: Central PostgreSQL\n- 동기화 방향: Downstream (메뉴/가격/정책 → Edge)\n- 읽는 주체: BrandHQPortal, EdgePos (동기화 후 로컬 캐시)"
+        },
+        "brand_profile": {
+          "title": "BrandProfile 테이블",
+          "content": "브랜드 본사 프로필.\n\n주요 컬럼: `Id` (= `BrandHQId`), `BrandName`, `RegionalDistributorId`, `BusinessCategory`, `DefaultLanguageCode`, `DefaultCurrencyCode`, `LogoUrl`, `Status`, `CreatedAt`, `UpdatedAt`\n\n사용 시나리오:\n- 브랜드 온보딩\n- 대리점 → 브랜드 연결\n- 브랜드별 기본 설정 관리"
+        },
+        "branch": {
+          "title": "Branch 테이블",
+          "content": "브랜드 산하 지점/매장.\n\n주요 컬럼: `Id` (= `BranchId`), `BrandHQId`, `BranchName`, `BranchCode`, `Address`, `RegionId`, `TimeZoneCode`, `Status` (Active / Closed / Suspended), `CreatedAt`, `UpdatedAt`\n\n사용 시나리오:\n- 지점 생성/수정/정지\n- 지점별 override 관리\n- 배포 대상 계산"
+        },
+        "brand_menu_category": {
+          "title": "BrandMenuCategory 테이블",
+          "content": "브랜드 메뉴 카테고리.\n\n주요 컬럼: `Id`, `BrandHQId`, `CategoryName`, `ParentCategoryId`, `SortOrder`, `IsActive`, `CatalogVersion`, `CreatedAt`, `UpdatedAt`\n\n사용 시나리오:\n- 메뉴 카테고리 계층 구조 관리\n- 카탈로그 버전별 배포\n- Edge에서 카테고리 트리 표시"
+        },
+        "brand_menu_item": {
+          "title": "BrandMenuItem 테이블",
+          "content": "브랜드 메뉴 아이템(상품).\n\n주요 컬럼: `Id`, `BrandHQId`, `CategoryId`, `ItemName`, `ItemCode`, `BasePrice`, `TaxRate`, `Description`, `ImageUrl`, `IsActive`, `CatalogVersion`, `CreatedAt`, `UpdatedAt`\n\n사용 시나리오:\n- 상품 등록/수정\n- 가격 정책 적용\n- Edge 동기화 시 메뉴 데이터 전달"
+        }
+      }
+    },
+    "db_edgepos_core": {
+      "title": "Lõi vận hành EdgePOS",
+      "category": "Thiết kế DB",
+      "description": "Table, OrderSlip, PaymentSlip, Outbox, SyncCursor, v.v.",
+      "sections": {
+        "purpose": {
+          "title": "목적",
+          "content": "Edge POS 단말의 운영 핵심 테이블을 정의한다.\n\n- 소유 주체: `EdgePos` (로컬)\n- 저장 위치: Edge SQLite\n- 원본: Edge (로컬 DB가 업무 데이터 원본)\n- 동기화 방향: Upstream (운영 데이터를 중앙으로 올림)\n- 운영 모델: **Offline-First**, 로컬 commit이 업무 성공의 기준"
+        },
+        "edge_pos_terminal": {
+          "title": "EdgePosTerminal 테이블",
+          "content": "Edge POS 단말 정보.\n\n주요 컬럼: `Id` (= `EdgePosId`), `BrandHQId`, `BranchId`, `RegionalDistributorId`, `TerminalCode`, `TerminalName`, `InstalledVersion`, `LastSyncAt`, `Status` (Active / Offline / Maintenance), `CreatedAt`, `UpdatedAt`\n\n사용 시나리오:\n- POS 기동 시 자기 식별 정보 로드\n- 중앙 플랫폼에서 단말 상태 모니터링\n- 버전 배포 대상 계산"
+        },
+        "device": {
+          "title": "Device 테이블",
+          "content": "EdgePos에 연결된 주변기기 목록.\n\n주요 컬럼: `Id` (= `DeviceId`), `EdgePosId`, `DeviceType` (Printer / CardReader / Scanner / Scale / CashDrawer), `DeviceName`, `ConnectionType` (USB / Network / Serial / Bluetooth), `ConnectionAddress`, `Status`, `LastCheckedAt`\n\n사용 시나리오:\n- 장치 등록/검색\n- 연결 상태 실시간 확인\n- 장애 진단 시 장치 이력 조회"
+        },
+        "device_binding": {
+          "title": "DeviceBinding 테이블",
+          "content": "장치 바인딩 (어떤 장치가 어떤 역할로 바인딩되었는지).\n\n주요 컬럼: `Id`, `EdgePosId`, `DeviceId`, `BindingRole` (KitchenPrinter / CustomerPrinter / LabelPrinter / MainCardReader 등), `Priority`, `IsActive`, `CreatedAt`\n\n사용 시나리오:\n- 주방 프린터 라우팅\n- 카드리더기 우선순위 지정\n- Setup/Maintenance 모드에서 바인딩 구성"
+        },
+        "local_setting": {
+          "title": "LocalSetting 테이블",
+          "content": "Edge POS 로컬 설정 (EdgePos Override).\n\n주요 컬럼: `Id`, `EdgePosId`, `SettingKey`, `SettingValue`, `SourceLayer` (Global / RegionalDistributor / BrandHQ / Branch / EdgePos), `PolicyVersion`, `AppliedAt`, `CreatedAt`\n\n사용 시나리오:\n- 설정 상속 모델의 최종 적용 값 저장\n- 어떤 값이 어느 계층에서 왔는지 추적\n- 중앙에서 배포된 정책과 로컬 override 구분"
+        }
+      }
+    },
+    "business_overview": {
+      "title": "Tổng quan kinh doanh",
+      "category": "Kế hoạch kinh doanh",
+      "description": "Tầm nhìn dự án, mục đích, đề xuất giá trị cốt lõi"
+    },
+    "business_model": {
+      "title": "Mô hình kinh doanh",
+      "category": "Kế hoạch kinh doanh",
+      "description": "Mô hình doanh thu, chiến lược giá, phân khúc khách hàng"
+    },
+    "target_market": {
+      "title": "Thị trường mục tiêu",
+      "category": "Kế hoạch kinh doanh",
+      "description": "Quy mô thị trường, khách hàng mục tiêu, chiến lược khu vực"
+    },
+    "roadmap": {
+      "title": "Lộ trình",
+      "category": "Kế hoạch kinh doanh",
+      "description": "Lịch phát triển/ra mắt, các mốc quan trọng"
+    }
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "docs": {
+    "business_overview": {
+      "title": "Tổng quan kinh doanh",
+      "category": "Kế hoạch kinh doanh",
+      "description": "Tài liệu tổng hợp nền tảng này là gì, dành cho ai và tại sao cần thiết ngay bây giờ — từ góc độ nhà vận hành.",
+      "sections": {
+        "vision": {
+          "title": "Tầm nhìn",
+          "content": "Nền tảng này **không chỉ là phần mềm POS.**\n\nĐây là **nền tảng vận hành ngành F&B** kết nối cấu trúc kinh doanh 4 tầng trong một hệ thống duy nhất: giao dịch tại cửa hàng → quản lý thương hiệu nhiều chi nhánh → phân phối độc quyền khu vực → quản trị nền tảng toàn cầu.\n\nGiá trị cốt lõi:\n- Chủ cửa hàng: Bảo vệ doanh thu không bị gian lận/thất thoát, vận hành không rào cản ngôn ngữ\n- Trụ sở thương hiệu: Kiểm soát hàng chục chi nhánh từ một màn hình\n- Đối tác phân phối: Thu nhập ổn định từ quyền phân phối độc quyền khu vực\n- Nhà vận hành nền tảng: Tạo doanh thu từ dữ liệu và luồng giao dịch của hàng trăm thương hiệu, quản trị toàn bộ hệ sinh thái"
+        },
+        "product_tiers": {
+          "title": "Cấu trúc sản phẩm 4 tầng",
+          "content": "| Tầng | Sản phẩm | Người dùng | Giá trị cốt lõi |\n|---|---|---|---|\n| **Tầng 1: POS cửa hàng** | Edge POS | Chủ cửa hàng, Quản lý, Thu ngân | Xử lý đơn hàng/thanh toán/kho nhanh chóng, chính xác |\n| **Tầng 2: Vận hành thương hiệu** | Cổng vận hành thương hiệu | Trụ sở thương hiệu, Quản lý khu vực | Quản lý menu/giá/nhân viên/doanh số tất cả chi nhánh từ một nơi |\n| **Tầng 3: Phân phối** | Cổng đối tác phân phối | Đối tác phân phối | Tuyển/bán/lắp đặt/hỗ trợ cửa hàng qua quyền phân phối độc quyền |\n| **Tầng 4: Quản trị nền tảng** | Hệ thống quản lý nền tảng | Nhà vận hành nền tảng | Hợp đồng/triển khai/giám sát tất cả đối tác; khai thác dữ liệu |\n\n**Đối tác phân phối vs Nhà vận hành nền tảng:**\n- **Đối tác phân phối**: Ký hợp đồng phân phối độc quyền khu vực với Nhà vận hành nền tảng. Trực tiếp tuyển dụng, bán, lắp đặt và hỗ trợ sản phẩm POS cho chủ cửa hàng tại khu vực của họ.\n- **Nhà vận hành nền tảng**: Tổ chức lập kế hoạch, phát triển và vận hành toàn bộ dự án. Quản lý phát triển công nghệ, hợp đồng đối tác, chính sách cấp phép, dịch vụ AI/dữ liệu và chiến lược mở rộng toàn cầu."
+        },
+        "why_now": {
+          "title": "Tại sao là bây giờ",
+          "content": "- Thị trường dịch vụ ăn uống Việt Nam tăng trưởng 15% hàng năm — các thương hiệu nhà hàng Hàn Quốc mở rộng nhanh chóng\n- Hệ thống POS hiện tại **chỉ dành cho một cửa hàng** — không thể vận hành đa chi nhánh/đa quốc gia\n- Mối lo lớn nhất của chủ cửa hàng Hàn Quốc: **Không thể tin tưởng nhân viên địa phương** → nhu cầu giám sát/kiểm soát từ xa bùng nổ\n- Công nghệ AI đã chín muồi — phát hiện giao dịch bất thường, dự báo nhu cầu và đặt hàng tự động đã sẵn sàng cho sản xuất\n- Nhu cầu ngày càng tăng về quản lý đơn hàng tích hợp trên các ứng dụng giao hàng (Fooding, GrabFood)"
+        },
+        "core_problem": {
+          "title": "Vấn đề cốt lõi chúng tôi giải quyết",
+          "content": "**Khi chủ cửa hàng không có mặt, tiền bị thất thoát.**\n\n- Lạm dụng giảm giá nhân viên, thiếu hụt tiền mặt, biển thủ hàng tồn — 2~5% doanh thu biến mất\n- Kiểm tra đơn hàng riêng lẻ trên từng ứng dụng giao hàng — bỏ lỡ đơn hàng, lỗi nhập liệu trùng\n- Thất bại giao tiếp Hàn-Việt — sai đơn hàng, khiếu nại khách hàng, nhân viên nghỉ việc\n- Trụ sở không thể xem hiệu suất chi nhánh trong nháy mắt — phát hiện cửa hàng có vấn đề quá muộn\n- Nhà cung cấp (đại lý) quản lý từng cửa hàng riêng lẻ — chi phí tăng khi mở rộng\n\nNền tảng này giải quyết cấu trúc các vấn đề trên bằng cách kết nối luồng thông tin xuyên suốt tất cả các tầng: **Cửa hàng → Thương hiệu → Phân phối → Nền tảng**."
+        }
+      }
+    },
+    "business_model": {
+      "title": "Mô hình kinh doanh",
+      "category": "Kế hoạch kinh doanh",
+      "description": "Tài liệu trình bày cấu trúc doanh thu, chính sách giá và mô hình doanh thu cho từng bên tham gia của nền tảng.",
+      "sections": {
+        "revenue_tiers": {
+          "title": "Cấu trúc doanh thu 3 tầng",
+          "content": "### Tầng 1: Doanh thu đăng ký (Bán hàng trực tiếp)\n\n| Hạng mục | Đơn giá | Mô tả |\n|---|---|---|\n| Giấy phép cửa hàng | $50~300/tháng/chi nhánh | Phí sử dụng POS cơ bản |\n| Phân tích cao cấp | $200~500/tháng/thương hiệu | Phân tích doanh thu AI, dự báo nhu cầu |\n| Hỗ trợ kỹ thuật | $100~1.000/tháng | Cấp độ hỗ trợ theo SLA |\n\n### Tầng 2: Doanh thu hệ sinh thái (Bán hàng gián tiếp)\n\n| Hạng mục | Biên lợi nhuận | Mô tả |\n|---|---|---|\n| Hoa hồng Mua hàng chung | 2~5% | Biên lợi nhuận môi giới mua sỉ nguyên liệu thực phẩm |\n| Hoa hồng tài chính vi mô | 1~3% | Môi giới thanh toán trước/cho vay dựa trên dữ liệu doanh thu |\n| Bản quyền dữ liệu | $10K~100K/tháng | Thông tin thị trường cho nhà cung cấp/đối thủ |\n| Hoa hồng thanh toán | 0,5~2% | Biên lợi nhuận cổng thanh toán |\n\n### Tầng 3: Doanh thu kênh phân phối (Bán hàng đối tác)\n\n| Hạng mục | Biên lợi nhuận | Mô tả |\n|---|---|---|\n| Biên lợi nhuận đối tác phân phối | 15~25% | Phần chia phí đăng ký khu vực |\n| Nhãn trắng | 10~20% | Triển khai tùy chỉnh thương hiệu địa phương |\n| Tư vấn triển khai | $5K~50K/hợp đồng | Dịch vụ onboarding thương hiệu lớn |"
+        },
+        "participants": {
+          "title": "Vai trò và doanh thu theo bên tham gia",
+          "content": "| Người tham gia | Vai trò | Nguồn doanh thu | Động lực |\n|---|---|---|---|\n| **Nhà vận hành nền tảng** | Phát triển công nghệ, quản trị hệ sinh thái | Phí đăng ký + Dữ liệu + Phí tài chính | Mở rộng hệ sinh thái → tối đa doanh thu |\n| **Đối tác phân phối** | Phân phối độc quyền khu vực, tuyển/bán/lắp đặt/hỗ trợ | Chia sẻ phí đăng ký + Hoa hồng mua hàng | Quyền kinh doanh độc quyền → thu nhập ổn định |\n| **Trụ sở thương hiệu** | Quản lý menu/giá/chính sách, vận hành nhiều chi nhánh | Tăng doanh thu + Giảm chi phí | Hiệu quả nhiều chi nhánh |\n| **Chủ cửa hàng** | Thực hiện giao dịch hàng ngày | Phòng chống gian lận + Tiết kiệm chi phí | Ổn định vận hành |\n| **Nhà cung cấp nguyên liệu** | Cung cấp nguyên liệu | Khách hàng ổn định | Đơn hàng lớn |\n| **Đối tác tài chính** | Cung cấp tài chính vi mô | Lãi suất cho vay | Dữ liệu doanh số đã xác minh |\n\n**Phân biệt chính**: Nhà vận hành nền tảng **xây dựng** sản phẩm; Đối tác phân phối **bán** sản phẩm tại khu vực của họ."
+        },
+        "lockin": {
+          "title": "Hiệu ứng giữ chân",
+          "content": "Chi phí chuyển đổi cao ở mọi tầng khiến khó chuyển sang đối thủ:\n\n- **Chủ cửa hàng**: Dữ liệu lịch sử giao dịch + Chi phí đào tạo nhân viên + Kết nối lại app giao hàng\n- **Thương hiệu**: Xây dựng lại chính sách/menu + Mất lịch sử báo cáo + Cài đặt lại tại nhiều chi nhánh\n- **Đối tác phân phối**: Hợp đồng độc quyền + Cơ sở khách hàng + Đầu tư hạ tầng lắp đặt/hỗ trợ\n- **Nền tảng**: Quy mô dữ liệu tổng hợp → Sức mua → Chiết khấu nhà cung cấp → Nhiều đăng ký hơn (hiệu ứng mạng)"
+        },
+        "pricing_strategy": {
+          "title": "Chiến lược giá",
+          "content": "**Thị trường Hàn Quốc (Cao cấp):**\n- 150K~300K KRW/tháng/chi nhánh (Phòng chống gian lận + dịch thuật thời gian thực biện minh cho giá cao cấp)\n- Giám sát AI tích hợp CCTV: +100K KRW/tháng\n- Bảng điều khiển phân tích trụ sở thương hiệu: +500K KRW/tháng\n\n**Thị trường Việt Nam (Giá thâm nhập):**\n- Tính năng POS cơ bản: Miễn phí hoặc phí tối thiểu\n- Doanh thu thu hồi qua hoa hồng Mua hàng chung nguyên liệu thực phẩm\n- Tính năng cao cấp (phân tích AI, tối ưu tồn kho): $30~100/tháng\n\n**Nguyên tắc cốt lõi**: Đảm bảo dòng tiền qua đăng ký tại thị trường Hàn Quốc → Mở rộng hệ sinh thái qua sức mua tại Việt Nam"
+        }
+      }
+    },
+    "target_market": {
+      "title": "Thị trường mục tiêu",
+      "category": "Kế hoạch kinh doanh",
+      "description": "Tài liệu trình bày quy mô thị trường, phân khúc khách hàng và chiến lược thâm nhập thị trường theo khu vực.",
+      "sections": {
+        "segments": {
+          "title": "Phân khúc khách hàng",
+          "content": "### Ưu tiên 1: Chủ nhà hàng Hàn Quốc tại Việt Nam\n\n- **Quy mô**: 3.000~5.000 nhà hàng do người Hàn Quốc sở hữu tại TP.HCM/Hà Nội\n- **Nỗi đau cốt lõi**: Vấn đề tin tưởng nhân viên địa phương, không thể quản lý từ xa, rào cản ngôn ngữ\n- **Sẵn sàng chi trả**: $150~300/tháng (Phòng chống gian lận + dịch thuật mang lại giá trị đủ lớn)\n- **Tính năng sát thủ**: Phát hiện bất thường CCTV-AI, dịch thuật thời gian thực hai chiều\n- **Cách tiếp cận**: Phòng Thương mại Hàn Quốc, cộng đồng nhà hàng Hàn Quốc, truyền miệng\n\n### Ưu tiên 2: Nhà hàng vừa và nhỏ Việt Nam\n\n- **Quy mô**: 500K+ nhà hàng trên toàn Việt Nam\n- **Nỗi đau cốt lõi**: Gánh nặng phí hàng tháng, khó chuyển đổi số, áp lực chi phí nguyên liệu\n- **Sẵn sàng chi trả**: $0~30/tháng (thay vào đó trả qua hoa hồng mua hàng)\n- **Tính năng sát thủ**: POS miễn phí + chiết khấu Mua hàng chung nguyên liệu\n- **Cách tiếp cận**: Cộng đồng Zalo, mạng lưới nhà phân phối khu vực\n\n### Ưu tiên 3: Thương hiệu nhượng quyền đa chi nhánh\n\n- **Quy mô**: 200+ nhượng quyền có 10+ chi nhánh tại Việt Nam\n- **Nỗi đau cốt lõi**: Bất nhất chính sách trụ sở-chi nhánh, không thể so sánh hiệu suất, chậm triển khai menu\n- **Sẵn sàng chi trả**: $500~3.000/tháng/thương hiệu\n- **Tính năng sát thủ**: Bảng điều khiển thống nhất, triển khai menu/giá một cú nhấp\n- **Cách tiếp cận**: Bán hàng B2B, chương trình thí điểm"
+        },
+        "market_size": {
+          "title": "Quy mô thị trường",
+          "content": "| Thị trường | TAM | SAM | SOM (3 năm) |\n|---|---|---|---|\n| POS F&B Việt Nam | $2B | $200M | $10M |\n| Cửa hàng do người Hàn vận hành | $50M | $30M | $5M |\n| Mở rộng Đông Nam Á | $10B | $500M | $20M |\n\n**TAM**: Tổng thị trường có thể tiếp cận / **SAM**: Thị trường có thể phục vụ / **SOM**: Mục tiêu 3 năm\n\nChỉ số chính:\n- CAGR ngành F&B Việt Nam: 15%\n- Thương hiệu F&B Hàn Quốc vào Việt Nam: 200+ mới mỗi năm\n- Tỷ lệ số hóa POS: Hiện tại 30% → Dự kiến 70% vào năm 2028"
+        },
+        "entry_strategy": {
+          "title": "Chiến lược thâm nhập thị trường",
+          "content": "### Giai đoạn 1: Thiết lập đầu cầu (0~6 tháng)\n- Mục tiêu: 50 nhà hàng do người Hàn sở hữu tại TP.HCM\n- Chiến lược: **Giải quyết vấn đề tin tưởng** bằng giám sát CCTV-AI + dịch thuật thời gian thực\n- Mục tiêu: Tỷ lệ chuyển đổi trả phí 60%+, doanh thu hàng tháng $15K\n\n### Giai đoạn 2: Mở rộng địa phương (6~18 tháng)\n- Mục tiêu: 500 nhà hàng vừa và nhỏ Việt Nam\n- Chiến lược: Mô hình **POS miễn phí + Mua hàng chung nguyên liệu**\n- Mục tiêu: Doanh thu hoa hồng mua hàng $50K/tháng\n\n### Giai đoạn 3: Chinh phục nhượng quyền (12~24 tháng)\n- Mục tiêu: 20 thương hiệu nhượng quyền có 10+ chi nhánh\n- Chiến lược: Cổng vận hành thương hiệu + phân tích AI **gói cao cấp**\n- Mục tiêu: $1K~3K/tháng mỗi thương hiệu, doanh thu hàng tháng $40K\n\n### Giai đoạn 4: Mở rộng hệ sinh thái (24+ tháng)\n- Mục tiêu: Mở rộng sang 2~3 quốc gia Đông Nam Á bổ sung\n- Chiến lược: Hợp đồng Đối tác phân phối khu vực + nhãn trắng\n- Mục tiêu: Chuyển đổi sang mô hình doanh thu dựa trên khối lượng giao dịch nền tảng"
+        },
+        "competitive_landscape": {
+          "title": "Bối cảnh cạnh tranh",
+          "content": "| Đối thủ | Điểm mạnh | Điểm yếu | Điểm khác biệt của chúng tôi |\n|---|---|---|---|\n| **KIS/KSNET** (Hàn Quốc) | Ổn định thanh toán thẻ | Không thể mở rộng ra nước ngoài, không có AI | Đa quốc gia + AI + Dịch thuật |\n| **Sapo POS** (Việt Nam) | Thị phần địa phương | Quản lý đa chi nhánh yếu, không có tiếng Hàn | Hai chiều Hàn-Việt |\n| **Lightspeed** (Toàn cầu) | Thương hiệu toàn cầu | Bản địa hóa yếu, giá cao | Chuyên biệt Việt Nam + Mua hàng chung |\n| **Grab POS** | Tích hợp giao hàng | Tính năng POS cơ bản | Nền tảng vận hành toàn diện |\n\n**Điểm khác biệt cốt lõi**: Không đối thủ nào cung cấp đồng thời **giám sát CCTV-AI + dịch thuật thời gian thực + Mua hàng chung nguyên liệu thực phẩm**."
+        }
+      }
+    },
+    "roadmap": {
+      "title": "Lộ trình",
+      "category": "Kế hoạch kinh doanh",
+      "description": "Tài liệu trình bày các mốc quan trọng và lịch trình từ phát triển sản phẩm đến thâm nhập thị trường.",
+      "sections": {
+        "milestones": {
+          "title": "Các mốc quan trọng",
+          "content": "| Thời điểm | Mốc quan trọng | Sản phẩm chính | Tiêu chí thành công |\n|---|---|---|---|\n| **Q2 2026** | Ra mắt MVP | 3 màn hình cốt lõi Bàn→Đơn hàng→Thanh toán | 5 cửa hàng thí điểm hoạt động |\n| **Q3 2026** | Tích hợp giao hàng | Tích hợp đơn hàng Fooding/GrabFood | Giảm 50% thời gian xử lý đơn giao hàng |\n| **Q4 2026** | Cổng thương hiệu | Bảng điều khiển quản lý đa chi nhánh | Ký hợp đồng 3 thương hiệu |\n| **Q1 2027** | AI Giai đoạn 1 | Phát hiện bất thường + Tích hợp CCTV | Độ chính xác phát hiện 90%+ |\n| **Q2 2027** | Mua hàng chung | Sàn giao dịch nguyên liệu thực phẩm | Khối lượng giao dịch hàng tháng $100K+ |\n| **Q3 2027** | Mở rộng khu vực | Thâm nhập Hà Nội + Đà Nẵng | Cột mốc 100 cửa hàng |\n| **Q4 2027** | Dịch vụ tài chính | Cho vay vi mô dựa trên doanh thu | Giải ngân cho vay hàng tháng $50K+ |"
+        },
+        "development_phases": {
+          "title": "Ưu tiên theo giai đoạn phát triển",
+          "content": "### P0 — Thiết yếu để ra mắt (Đang phát triển)\n- 3 màn hình cốt lõi Bàn/Đơn hàng/Thanh toán\n- Kiến trúc DB cục bộ ưu tiên ngoại tuyến\n- Chuyển đổi màn hình CEF + Next.js\n- Giao tiếp bridge cơ bản (POS ↔ UI)\n- Bảo vệ tính bất biến/giao dịch\n\n### P1 — Thiết yếu trước thí điểm\n- Tích hợp ứng dụng giao hàng (Fooding MQTT)\n- Màn hình bếp\n- In hóa đơn\n- Báo cáo doanh thu cơ bản\n- Quản lý quyền nhân viên\n\n### P2 — Giai đoạn tăng trưởng\n- Cổng vận hành thương hiệu\n- Phát hiện giao dịch bất thường AI\n- Tích hợp CCTV\n- Dịch thuật thời gian thực (Hàn ↔ Việt)\n- Dự báo nhu cầu + Đặt hàng tự động\n\n### P3 — Giai đoạn hệ sinh thái\n- Sàn Mua hàng chung nguyên liệu thực phẩm\n- Dịch vụ tài chính vi mô\n- Cổng Đối tác phân phối khu vực\n- Triển khai đa quốc gia Đông Nam Á"
+        },
+        "investment_timeline": {
+          "title": "Lịch trình đầu tư và lãi lỗ",
+          "content": "| Thời điểm | Đầu tư lũy kế | Doanh thu hàng tháng | Chi phí hàng tháng | Lãi lỗ |\n|---|---|---|---|---|\n| 2026 Q2 | $200K | $0 | $30K | Lỗ |\n| 2026 Q4 | $350K | $5K | $35K | Lỗ |\n| 2027 Q2 | $500K | $30K | $45K | Lỗ |\n| 2027 Q4 | $650K | $80K | $55K | **Hòa vốn** |\n| 2028 Q2 | $700K | $200K | $70K | Lãi |\n\n**Điểm hòa vốn**: Q4 2027 (150 cửa hàng + 10 thương hiệu + khởi động Mua hàng chung)\n**Hoàn vốn**: H1 2028 (Lợi nhuận lũy kế chuyển dương)"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "title": "서버 상품 가져오기",
+  "barcode": "바코드",
+  "itemName": "상품명",
+  "salePrice": "판매가",
+  "costPrice": "원가",
+  "bigCategory": "대분류",
+  "midCategory": "중분류",
+  "fetchCategories": "분류가져오기",
+  "search": "검색",
+  "save": "저장",
+  "searchPlaceholder": "상품명 / 바코드",
+  "searchPrompt": "검색어를 입력하고 조회를 눌러주세요",
+  "noResults": "검색 결과가 없습니다",
+  "noServerItems": "서버 상품이 없습니다"
+}

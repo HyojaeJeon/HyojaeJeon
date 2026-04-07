@@ -1,0 +1,234 @@
+{
+  "docs": {
+    "feature_coverage_matrix": {
+      "title": "Feature List Coverage Matrix",
+      "category": "Screens/Feature Lists by Platform",
+      "description": "A reference table to verify whether all feature categories from the HJ-POS legacy have been reflected in the new platform documents.",
+      "sections": {
+        "purpose": {
+          "title": "Purpose",
+          "content": "This is a **gap-check checkpoint** to verify that all feature categories from the legacy POS feature inventory (`FeatureInventory.md`) have been mapped to the new platform documents. Feature details follow each platform document."
+        },
+        "coverage_table": {
+          "title": "Coverage Summary",
+          "content": "| Legacy Section | Representative Category | Primary Document | Status |\n|---|---|---|---|\n| 1 | Overall Statistics Summary | All Documents | Covered |\n| 2 | Table & Floor | 04-EdgePos-FeatureList | Covered |\n| 3 | Sales & Payment | 04-EdgePos-FeatureList | Covered |\n| 4 | Inventory & Menu | 04-EdgePos-FeatureList | Covered |\n| 5 | Customer | 04-EdgePos-FeatureList | Covered |\n| 6 | System & Admin | 01-SuperAdmin-FeatureList | Covered |\n| 7 | External Bridge | 04-EdgePos-FeatureList | Covered |\n| 8 | Kiosk | 04-EdgePos-FeatureList | Covered |\n| 9 | Dialog inventory | 04-EdgePos-FeatureList | Covered |"
+        },
+        "validation_results": {
+          "title": "Validation Results",
+          "content": "**Responsibilities by Platform:**\n\n| Platform | Scope of Responsibility |\n|---|---|\n| **SuperAdmin** | Multi-tenancy, distributor/brand onboarding, licensing, deployment, audit, monitoring, support |\n| **RegionalDistributor** | Regional/country distribution rights, local contracts, rollout planning, local support, settlement tracking |\n| **BrandHQ** | Menu, pricing, promotions, branch policies, brand reports, catalog distribution |\n| **EdgePos** | Orders, payments, tables, customers, inventory, kiosk, device integration, local recovery |\n\n- Legacy feature categories 1-9 have all been mapped to new platform documents\n- Detailed features are most concentrated in 04 (EdgePos); 01/02/03 cover the operations/deployment/policy layers\n- This matrix should be updated whenever new features are added"
+        }
+      }
+    },
+    "superadmin_features": {
+      "title": "SuperAdmin Feature List",
+      "category": "Screens/Feature Lists by Platform",
+      "description": "A list of upper-level management features needed for the supplier to operate multiple brands and distributors in a unified manner. This covers only platform-wide control features, not store operation features.",
+      "sections": {
+        "purpose": {
+          "title": "Purpose",
+          "content": "Defines the features needed for the supplier to operate multiple brands and distributors in a unified manner. This covers **only platform-wide upper-level management features**, not store operation features."
+        },
+        "tenant_org_mgmt": {
+          "title": "Tenant/Organization Management",
+          "content": "- Create/approve/suspend RegionalDistributors\n- Onboard BrandHQ entities\n- Link branch hierarchies and manage organizational structures\n- Transfer account ownership and operational permissions"
+        },
+        "license_deploy": {
+          "title": "License/Deployment Management",
+          "content": "- Issue licenses per brand/region\n- Manage version deployment policies\n- Control rollout targets and staged deployments\n- Track deployment failure/retry/approval status"
+        },
+        "policy_audit": {
+          "title": "Policy/Audit/Security",
+          "content": "- Global RBAC policies\n- Audit log inquiry\n- Policy template distribution\n- Security/access control standards management"
+        },
+        "monitoring": {
+          "title": "Operations Monitoring",
+          "content": "- Monitor brand/distributor/branch status\n- Failure alerts and health checks\n- Remote support records\n- Deployment status and sync state tracking"
+        },
+        "contract_mgmt": {
+          "title": "Central Contract Management",
+          "content": "- Manage `SuperAdmin/CentralApi` GraphQL contracts\n- Manage REST exception endpoint usage scope\n- `SharedContracts` version management"
+        },
+        "non_responsibility": {
+          "title": "Out of Scope",
+          "content": "- **Does not own store-level source data** such as orders, payments, tables, or inventory\n- Does not directly handle Edge POS local device connections\n- Does not duplicate BrandHQ operational screens\n- Upper-level control features from `System & Admin` are promoted to SuperAdmin\n- Legacy POS operational data belongs to EdgePos"
+        }
+      }
+    },
+    "distributor_features": {
+      "title": "RegionalDistributor Feature List",
+      "category": "Screens/Feature Lists by Platform",
+      "description": "Defines the responsibilities of the distributor tier that holds exclusive distribution rights at the country/region level. Separates the contract, rollout, and support boundaries between brand headquarters and the supplier.",
+      "sections": {
+        "purpose": {
+          "title": "Purpose",
+          "content": "Defines the responsibilities of the distributor tier that holds exclusive distribution rights at the country/region level. Separates the contract, rollout, and support boundaries between brand headquarters and the supplier."
+        },
+        "territory_mgmt": {
+          "title": "Territory/Country Distribution Rights Management",
+          "content": "- Manage country/region exclusive rights\n- Manage assigned brand list\n- Manage operational scope per region\n- Reflect regional policies/regulations/tax standards"
+        },
+        "brand_onboarding": {
+          "title": "Brand Onboarding",
+          "content": "- Support new BrandHQ registration\n- Coordinate installation scope and rollout schedules\n- Deliver initial deployment packages\n- Connect local support channels"
+        },
+        "contract_settlement": {
+          "title": "Contract/Settlement",
+          "content": "- Manage distributor contract status\n- Track license/contract renewals\n- Manage local settlement standards\n- Track commissions/support costs"
+        },
+        "regional_dashboard": {
+          "title": "Regional Operations Dashboard",
+          "content": "- Regional installation status\n- Branch activation status\n- Review failure/deployment/support history\n- Operational status summary by brand"
+        },
+        "non_responsibility": {
+          "title": "Out of Scope",
+          "content": "- Does not handle actual store order/payment data\n- Does not directly control EdgePos device drivers or local DBs\n- Does not duplicate BrandHQ menu/pricing/employee operation screens\n- Very few features existed directly in legacy HJ-POS; this is a newly defined tier in the new platform\n- Upper-level responsibilities for deployment, support, audit, and settlement absorb the periphery of legacy operational features"
+        }
+      }
+    },
+    "brandhq_features": {
+      "title": "BrandHQ Feature List",
+      "category": "Screens/Feature Lists by Platform",
+      "description": "Defines the features needed when a single brand operates multiple branches in a unified manner. Manages the policy source and catalog source for store operations.",
+      "sections": {
+        "purpose": {
+          "title": "Purpose",
+          "content": "Defines the features needed when a single brand operates multiple branches in a unified manner. Manages the **policy source and catalog source** for store operations."
+        },
+        "menu_catalog": {
+          "title": "Menu/Catalog Management",
+          "content": "- Product/menu master management\n- Pricing policies and tax policies management\n- Promotion/discount event management\n- Catalog distribution per branch"
+        },
+        "branch_ops": {
+          "title": "Branch Operations",
+          "content": "- Create/edit/suspend branches\n- Manage per-branch overrides\n- Manage branch permission templates\n- View branch operational status"
+        },
+        "org_employee": {
+          "title": "Organization/Employee Management",
+          "content": "- Brand organizational structure management\n- Employee permission/role template management\n- Operator account separation\n- Branch-level access control"
+        },
+        "report_settlement": {
+          "title": "Reports/Settlement",
+          "content": "- Sales reports\n- Branch-by-branch performance comparison\n- Policy effectiveness tracking\n- Inquiry/analysis via central API"
+        },
+        "edgepos_link": {
+          "title": "EdgePos Integration",
+          "content": "- Distribute policies/catalogs to EdgePos\n- Apply on-site settings in Setup/Maintenance mode\n- Manage device templates and local commissioning information"
+        },
+        "non_responsibility": {
+          "title": "Out of Scope",
+          "content": "- **Does not own the real-time source of order/payment transactions**\n- Regional exclusive distribution rights and supplier-wide deployment policies are SuperAdmin/RegionalDistributor responsibilities\n- Local device control is performed within BrandPosApp internal modes\n- Absorbs the brand-operation-relevant portions of `Inventory & Menu`, `Customer`, `System & Admin`\n- The management flow for products/menus/pricing/promotions is BrandHQ's core responsibility"
+        }
+      }
+    },
+    "edgepos_features": {
+      "title": "EdgePOS Feature List",
+      "category": "Screens/Feature Lists by Platform",
+      "description": "The final reorganization of all features from the HJ-POS-TEST legacy project (MFC/C++ POS, ~550K lines) from the EdgePos responsibility perspective. Includes 22 Manager classes, 610+ methods, and 350 dialogs.",
+      "sections": {
+        "purpose": {
+          "title": "Purpose",
+          "content": "Most legacy features are contained in this document. The SuperAdmin / RegionalDistributor / BrandHQ documents only cover their respective upper-level operational responsibilities.\n\n**Analysis Target**: HJ-POS-TEST (MFC/C++ POS, ~550K lines)\n**Analysis Method**: 5 specialized agents in parallel analysis (full survey of Manager classes, full survey of IDD_ dialogs, resource.h scan)"
+        },
+        "stats_summary": {
+          "title": "Overall Statistics Summary",
+          "content": "| Category | Count |\n|---|---|\n| C++ source files (.h/.cpp) | 941 |\n| Manager classes | 22 |\n| Public methods (extracted) | 610+ |\n| IDD_ dialog definitions | 350 (Main 243 + Set 107) |\n| Payment gateways | 7 (BCCard, Infoplus, ZaloPay, HJVietPay, NAPAS, BIDV, WeTax) |\n| Supported languages | 3 (Korean, English, Vietnamese) |\n| Delivery service integrations | 6 |\n\n**Priority Criteria**: P0=Core revenue flow (Phase 1 migration), P1=Operations essential (Phase 2), P2=Auxiliary/admin (Phase 3)\n\n| Domain | Manager | Methods | Dialogs | P0 | P1 | P2 |\n|---|---|---|---|---|---|---|\n| Table & Floor | 1 | ~40 | 12 | 8 | 10 | 6 |\n| Sales & Payment | 2+6GW | ~150 | 30 | 22 | 18 | 12 |\n| Inventory & Menu | 2 | ~170 | 25 | 12 | 15 | 10 |\n| Customer | 1 | ~80 | 15 | 8 | 12 | 8 |\n| System & Admin | 6+Print | ~120 | 120 | 10 | 15 | 20 |\n| External Bridge | 4+MQTT+HTTP | ~50 | 6 | 8 | 6 | 4 |\n| Kiosk | - | - | 22 | 5 | 8 | 6 |\n| **Total** | **22** | **~610** | **~230** | **73** | **84** | **66** |"
+        },
+        "table_floor": {
+          "title": "Table & Floor",
+          "content": "Manager: `CTableMgr` (DB/TableMgr.h, DB/TableMgr.cpp)\n\nKey Features:\n- **Table initialization/query**: InitTable, GetTableFromTableCode, GetTableFromID (P0)\n- **Table status management**: ClearTableAll, TableOrderClear, ClearOrderFromID (P0)\n- **Table lock/sync**: UseSysnCheck, SetUseSysn, ChangeTableFromSock (P0)\n- **Table move/merge**: ChangeTable (move to empty table or merge orders, consolidate amounts/quantities) (P0)\n- **Table group management**: SetGroupView, ChangeGroupAlphabetFromSock (P1)\n- **Table memo**: UpdateTableMemo (P1)\n- **Reservation management**: CAppointTableviewDlg (P1)\n- **Takeout/delivery table codes**: Manage dedicated codes for takeout/delivery (P1)"
+        },
+        "sales_payment": {
+          "title": "Sales & Payment",
+          "content": "Manager: `COrderMgr` + `CSaleMgr` + 7 payment gateways\n\nKey Features:\n- **Order create/edit/cancel**: Menu selection, quantity, options, special requests (P0)\n- **Payment processing**: Cash/card/QR/points/coupons/credit/split payment (P0)\n- **Dutch pay**: Split payment by amount/number of people/items (P0)\n- **Receipt printing**: Kitchen/customer/delivery slips (P0)\n- **Payment gateways**: BCCard, Infoplus, ZaloPay, HJVietPay, NAPAS, BIDV, WeTax (P0)\n- **Async payment**: Async result notifications for QR payments, etc. (P1)\n- **Refund/cancel**: Payment cancellation/partial refund (P0)"
+        },
+        "inventory_menu": {
+          "title": "Inventory & Menu",
+          "content": "Manager: `CItemMgr` + `CStockMgr`\n\nKey Features:\n- **Product management**: Product registration/edit/delete, categories, options (P0)\n- **Inventory management**: Inbound/outbound, status inquiry, date-based history (P1)\n- **Purchasing management**: Supplier-based inbound, purchase edits, purchase ledger (P1)\n- **Inventory reconciliation**: Physical count/reconciliation, inventory adjustment (P1)\n- **Set menus**: Set composition, PLU code management (P1)"
+        },
+        "customer": {
+          "title": "Customer Management",
+          "content": "Manager: `CCustMgr`\n\nKey Features:\n- **Customer registration/search**: New registration, search/select, information edit (P0)\n- **Customer details**: Extended information, purchase history (P1)\n- **Customer stored items**: Inbound/sale/use (P2)\n- **Credit management**: Customer credit deposit/management (P1)\n- **Chain customers**: Chain store shared customer list (P2)"
+        },
+        "system_admin": {
+          "title": "System & Admin",
+          "content": "Manager: `CConfigMgr` + `CPrinterMgr` + 5 others\n\nKey Features:\n- **System settings**: General settings, printer settings, network settings (P0)\n- **Employee management**: Employee selection/call/notifications, attendance management, salary/allowances (P1)\n- **Daily settlement**: Sales aggregation, closing process (P0)\n- **Printer control**: Kitchen printer, customer printer, label printer (P0)\n- **Backup/restore**: DB backup, restore, data initialization (P1)\n- **Remote support**: Remote access, failure log collection (P2)"
+        },
+        "external_bridge": {
+          "title": "External Bridge",
+          "content": "Manager: `CFoodingMgr` + 4 delivery services + MQTT + HTTP\n\nKey Features:\n- **Delivery services**: Yogiyo, Coupang Eats, PAYCO vORDER, BM_NEW, MConnect, KakaoTalk (P0)\n- **Fooding integration**: Order acceptance/status management (P0)\n- **MQTT**: Real-time message send/receive (P1)\n- **HTTP**: External API calls, webhook reception (P1)\n- **QR payment**: VietQR, ZaloPay QR (P0)"
+        }
+      }
+    },
+    "screen_inventory": {
+      "title": "EdgePOS Full Screen Inventory",
+      "category": "Screens/Feature Lists by Platform",
+      "description": "Complete survey results of all screens (dialogs) from the HJ-POS-TEST legacy project. Used for screen scope finalization during PosUi (Next.js) migration, design system sidebar composition, and migration priority decisions.",
+      "sections": {
+        "summary_table": {
+          "title": "Screen Count Summary",
+          "content": "| Category | Screen Count |\n|---|---|\n| POS Main Screens | 4 |\n| Payment/Settlement | 12 |\n| Order/Menu | 8 |\n| Table/Reservation | 7 |\n| Delivery | 9 |\n| Customer | 11 |\n| Employee | 7 |\n| Inventory/Purchasing/Ledger | 15 |\n| Gift Cards/Points/Coupons | 6 |\n| Payment Methods (QR/Card) | 10 |\n| Receipts/Printing | 5 |\n| Table Order | 5 |\n| Kitchen Display | 5 |\n| Utility/Common | 16 |\n| **Total (excluding settings)** | **~142** |"
+        },
+        "pos_main": {
+          "title": "POS Main Screens (P0 Migration Targets)",
+          "content": "| ID | Screen Name | Description | Priority |\n|---|---|---|---|\n| M-01 | Main Menu | POS entry point, menu buttons for operations/settings/analytics/membership/inventory | P0 |\n| M-02 | Table Screen | Floor-by-floor table grid, table selection/status display | P0 |\n| M-03 | Order Screen | Menu buttons, order list, quantity input, customer info | P0 |\n| M-04 | Payment Screen | Total calculation, discount application, payment method selection, settlement | P0 |"
+        },
+        "payment": {
+          "title": "Payment/Settlement",
+          "content": "12 screens: Payment main, Payment (Vietnam), Payment quick select, Order payment, Dutch pay (split by amount/people/items), other payment settings, payment memo, async payment notification, etc."
+        },
+        "order": {
+          "title": "Order/Menu",
+          "content": "8 screens: Order main, Order quick select, Order item detail, Order item list, Order message/special requests, PLU set, Set menu composition, etc."
+        },
+        "table_reservation": {
+          "title": "Table/Reservation",
+          "content": "7 screens: Table main, Table quick select, Table selection (merge/move), Table message, Group checkout, Reservation management, Reservation table view"
+        },
+        "delivery": {
+          "title": "Delivery",
+          "content": "9 screens: Delivery management (MFC/Sciter v1/v2), Delivery address, Delivery printing, Delivery service, Address input, Caller ID display"
+        },
+        "customer": {
+          "title": "Customer",
+          "content": "11 screens: Customer registration, Customer search, Customer info input/view/detail, Customer bulk registration, Customer stored items (inbound/sale/use), Credit management, Chain customer list"
+        },
+        "employee": {
+          "title": "Employee",
+          "content": "7 screens: Employee selection, Employee call, Employee notification, Attendance management, Attendance payment, Attendance edit, Attendance settings"
+        },
+        "stock": {
+          "title": "Inventory/Purchasing/Ledger",
+          "content": "15 screens: Inventory management, Inventory input/view/date view/reconciliation/inbound, Purchasing management/edit, Daily ledger, Monthly ledger, Cost management, etc."
+        },
+        "gift_point": {
+          "title": "Gift Cards/Points",
+          "content": "6 screens: Gift card registration/issuance/use/inquiry, Points management, Coupon management"
+        },
+        "payment_methods": {
+          "title": "Payment Methods (QR/Card)",
+          "content": "10 screens: Card authorization, VietQR, ZaloPay, NAPAS, BIDV, Cash, Credit, Point payment, Coupon payment, Mixed payment"
+        },
+        "receipt": {
+          "title": "Receipts/Printing",
+          "content": "5 screens: Receipt preview, Receipt printing, Kitchen slip printing, Delivery slip printing, Label printing"
+        },
+        "table_order": {
+          "title": "Table Order",
+          "content": "5 screens: Table order main, Menu browser, Order confirmation, Payment, Completion screen"
+        },
+        "kitchen": {
+          "title": "Kitchen Display",
+          "content": "5 screens: Kitchen main, Order queue, Cooking complete, Notifications, Settings"
+        },
+        "utility": {
+          "title": "Utility/Common",
+          "content": "16 screens: Keyboard input, Numeric input, Date picker, Message popup, Progress indicator, Password input, Confirmation dialog, List selection, Image viewer, Barcode scan, Print preview, Help, Info display, Error display, Standby screen, Loading screen"
+        },
+        "flow_diagram": {
+          "title": "Screen Navigation Flow",
+          "content": "```\nMain Menu (M-01)\n  ├── Table Screen (M-02) → Order Screen (M-03) → Payment Screen (M-04)\n  ├── Delivery Management (DEL-01~04)\n  ├── Customer Management (CUS-01~11)\n  ├── Inventory Management (STK-01~15)\n  ├── Employee Management (EMP-01~07)\n  └── System Settings\n\nCore Revenue Flow (P0):\n  Table Selection → Order Entry → Payment Processing → Receipt Printing\n```"
+        }
+      }
+    }
+  }
+}

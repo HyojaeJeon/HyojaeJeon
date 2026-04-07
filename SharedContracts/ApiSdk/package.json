@@ -1,0 +1,23 @@
+{
+  "name": "@platform/api-sdk",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Platform GraphQL SDK for SuperAdmin / RegionalDistributor / BrandHQ portals",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./persisted-operation-manifest.json": "./dist/persisted-operation-manifest.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node ../../SuperAdmin/CentralApi/node_modules/typescript/bin/tsc -p tsconfig.json && npm run generate:persisted-manifest",
+    "generate:persisted-manifest": "node ./scripts/generate-persisted-manifest.mjs"
+  }
+}

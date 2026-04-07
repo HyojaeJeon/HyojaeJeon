@@ -1,0 +1,74 @@
+/**
+ * Concept: 다크 모드
+ *
+ * 어두운 배경에 밝은 텍스트. 밝기 차이로 계층 구분.
+ * 카드는 배경 밝기 차이로 구분. 그림자는 깊고 어둡게.
+ * 보더는 미세한 밝은 선. 브랜드색은 발광 느낌.
+ */
+[data-concept="glass"] {
+  /* 색상 — 밝은 블루 (어두운 배경에서 발광) */
+  --color-primary-50:  #1A1F2E;
+  --color-primary-100: #1E2538;
+  --color-primary-200: #2D3652;
+  --color-primary-300: #5B7AE5;
+  --color-primary-400: #7C9AFF;
+  --color-primary-500: #6C85F7;
+  --color-primary-600: #5A72E0;
+  --color-primary-700: #4B5FC4;
+
+  /* 배경/표면 — 진한 네이비 계층 */
+  --color-pos-bg:             #0D1017;
+  --color-pos-surface:        #151921;
+  --color-pos-text:           #E4E7EE;
+  --color-pos-text-secondary: #8B92A5;
+  --color-pos-text-muted:     #4D5568;
+  --color-pos-text-inverse:   #0D1017;
+  --color-pos-border:         #1E2330;
+  --color-pos-border-strong:   #2C3344;
+
+  /* 시맨틱 — 다크 배경에 맞게 채도 조정 */
+  --color-pos-success: #4ADE80;
+  --color-pos-error:   #FB7185;
+  --color-pos-warning: #FCD34D;
+  --color-pos-info:    #7C9AFF;
+
+  /* 테이블 상태 — 어두운 배경 위 미세 변화 */
+  --color-table-empty:    #1E2330;
+  --color-table-occupied: #2A2518;
+  --color-table-paying:   #2D1A20;
+  --color-table-dirty:    #222630;
+  --color-table-reserved: #231E35;
+
+  /* 둥글기 — 중간 */
+  --radius-pos-xs:    0.375rem;
+  --radius-pos-sm:    0.4375rem;
+  --radius-pos-md:    0.5rem;
+  --radius-pos-lg:    0.625rem;
+  --radius-pos-xl:    0.75rem;
+  --radius-pos-2xl:   1rem;
+  --radius-pos-btn:   0.5rem;
+  --radius-pos-card:  0.625rem;
+  --radius-pos-input: 0.4375rem;
+
+  /* 그림자 — 깊고 어두운 */
+  --shadow-pos-soft:  0 1px 4px rgba(0,0,0,0.4);
+  --shadow-pos-card:  0 2px 8px rgba(0,0,0,0.3);
+  --shadow-pos-hover: 0 4px 16px rgba(0,0,0,0.4);
+  --shadow-pos-modal: 0 16px 48px rgba(0,0,0,0.6);
+
+  /* 간격 — 기본 유지 */
+  --spacing-touch:      3rem;
+  --spacing-touch-lg:   3.5rem;
+  --spacing-touch-nav:  2.5rem;
+
+  /* 폰트 굵기 — 다크 배경에서는 약간 가볍게 (얇은 글자가 더 선명) */
+  --font-weight-regular:  300;
+  --font-weight-medium:   400;
+  --font-weight-semibold: 500;
+  --font-weight-bold:     600;
+
+  /* 보더 — 미세한 밝은 선 */
+  --border-pos-thin:    1px;
+  --border-pos-default: 1px;
+  --border-pos-thick:   1px;
+}
