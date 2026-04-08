@@ -15,5 +15,6 @@
 - `SharedKernel`은 C++ low-level 공용, `SharedContracts`는 TS 계약 원본이다.
 - UI 상태는 `Redux Toolkit + RTK Query`만 사용하고 `React Query`는 사용하지 않는다.
 - 번역 원본은 BrandPosApp 내부 i18n 이다.
+- BrandPosApp 은 `SharedUI` 를 소비하지 않는 예외다. UI 원본은 `PosUi/src/shared/ui` 로만 유지한다.
 - 상세 규칙은 각 하위 폴더의 `CLAUDE.md`를 따른다.
 - feature / resource / use case 는 한 폴더에 묶지 말고 분리한다. 여러 리소스를 모은 aggregate `index.ts`는 만들지 않는다.

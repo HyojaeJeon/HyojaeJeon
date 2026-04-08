@@ -8,7 +8,8 @@
 - 프로젝트 전체의 구조 기준과 하위 애플리케이션의 책임 경계를 설명하는 저장소 루트다.
 
 ### 담당 범위
-- `BrandPosApp`(Setup/Maintenance mode 포함), `BrandAdminPortal`, `SuperAdmin`, `SharedKernel`, `SharedContracts`, `SharedAssets`, `1.Docs` 전체 구조
+- `BrandPosApp`(Setup/Maintenance mode 포함), `BrandAdminPortal`, `SuperAdmin`, `SharedKernel`, `SharedContracts`, `SharedAssets`, `SharedUI`, `1.Docs` 전체 구조
+- `SharedUI` 는 `BrandPosApp` 을 제외한 모든 웹 기반 프로젝트가 소비하는 공용 UI 패턴 원본이다.
 - `SuperAdmin`은 서버 전용 디렉토리가 아니라 `Portal`, `CentralApi`, `SyncWorkers`를 묶는 상위 suite 경계다.
 - `SuperAdmin/Portal`은 독립 웹 앱, `SuperAdmin/CentralApi`는 백엔드, `SuperAdmin/SyncWorkers`는 워커다.
 - 공용 자산 원본과 공통 계약은 빌드 산출물과 분리해서 관리한다.

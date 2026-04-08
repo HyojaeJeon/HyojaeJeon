@@ -8,7 +8,7 @@
 - Next.js (TypeScript)
 - Apollo Client (GraphQL only)
 - 공통 계약은 `SharedContracts/ApiSdk` 단일 원본
-- 공용 UI 는 `SharedAssets` 디자인 시스템 또는 프로젝트 내 `src/shared/ui` 사용
+- 공용 UI 는 `SharedUI` 단일 원본
 - i18n 원본은 이 프로젝트 내부 `src/i18n`
 
 ## 책임 범위

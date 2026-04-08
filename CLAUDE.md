@@ -21,6 +21,7 @@
 - 새 디렉토리, 새 계층, 새 통신 방식은 설계 문서에 없는 한 임의로 추가하지 않는다.
 - 번역 원본은 각 프로젝트 내부 i18n 이다. `SharedAssets` 에 i18n 을 두지 않는다.
 - 공통 DTO / enum / event / GraphQL 계약의 원본은 `SharedContracts` 하나다.
+- 웹 기반 프로젝트의 공용 UI 패턴 원본은 `SharedUI` 하나다. `BrandPosApp` 만 예외로 자체 `PosUi/src/shared/ui` 를 유지한다.
 
 ## Naming
 

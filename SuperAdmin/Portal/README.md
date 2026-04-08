@@ -10,6 +10,7 @@
 ## 고정 스택
 
 - `Next.js(TypeScript) + App Router + Apollo Client`
+- 공용 UI 패턴 원본은 `SharedUI` 를 사용한다.
 
 ## 화면 구조 초안
 
@@ -49,6 +50,7 @@
 - 서버 로직은 여기 두지 않는다.
 - API는 `SuperAdmin/CentralApi`만 호출한다.
 - `CentralApi`와 `SyncWorkers`의 구현을 여기서 복제하지 않는다.
+- 공용 UI 컴포넌트는 `SharedUI` 에서만 가져오고, 포털 내부에 별도 공용 UI 원본을 만들지 않는다.
 
 ## 반드시 지킬 규칙
 

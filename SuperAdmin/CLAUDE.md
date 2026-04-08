@@ -11,5 +11,6 @@
 - UI, API, Worker 책임을 섞지 않는다.
 - 공통 계약은 `SharedContracts`만 사용한다.
 - 번역 원본은 각 하위 프로젝트 내부 i18n 이다. `SharedAssets` 는 사용하지 않는다.
+- Portal 같은 웹 UI 는 `SharedUI` 를 소비한다. `BrandPosApp` 만 예외로 자체 `PosUi/src/shared/ui` 를 유지한다.
 - 브랜드 운영과 EdgePos 로컬 업무를 여기서 직접 구현하지 않는다.
 - REST는 `CentralApi` 안에서만 허용한다.

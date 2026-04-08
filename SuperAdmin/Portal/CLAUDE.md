@@ -13,6 +13,7 @@
 - `Redis`와 `DataLoader`는 직접 사용하지 않는다.
 - 공통 계약은 `SharedContracts`를 사용한다.
 - 번역 원본은 이 포털 내부 i18n 이다.
+- 공용 UI 패턴은 `SharedUI` 를 사용하고, 포털 내부에 별도 공용 UI 원본을 만들지 않는다.
 - `CentralApi`, `SyncWorkers`의 구현을 가져와서 중복 구현하지 않는다.
 - CentralApi의 계정/RBAC/정책 화면만 소비하고, 로직을 중복 구현하지 않는다.
 - 화면/기능은 단일 책임 기준으로 분리하고, 여러 기능을 묶는 aggregate `index.ts`는 만들지 않는다.

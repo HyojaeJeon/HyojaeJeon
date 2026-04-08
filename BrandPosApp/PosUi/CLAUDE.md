@@ -10,6 +10,7 @@
 - 서버 상태는 `RTK Query` 만 사용. slice 는 UI 상태만.
 - 화면에서 `window.cefQuery` 직접 호출 금지. `src/bridge` 만 사용.
 - 재사용 UI 원본은 `src/shared/ui`. 카탈로그는 `src/shared/ui/INDEX.md`.
+- `SharedUI` 는 소비하지 않는다. 이 프로젝트의 공용 UI 원본은 `src/shared/ui` 뿐이다.
 - 계약 원본: 중앙 GraphQL 은 `SharedContracts/ApiSdk`, EdgePos bridge 는 `src/contracts/<domain>/*.types.ts`.
 - 번역 원본은 `src/i18n` (PosUi 내부).
 - mock transport 로 C++ 없이 UI 개발 가능해야 한다.

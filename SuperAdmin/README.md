@@ -20,6 +20,7 @@ SuperAdmin/
 ## 고정 스택
 
 - `Portal`: `Next.js(TypeScript) + Apollo Client`
+- `Portal` 의 공용 UI 는 `SharedUI` 를 소비한다.
 - `CentralApi`: `NestJS + Fastify + Apollo Server + Prisma + Redis`
 - `SyncWorkers`: `Node.js(TypeScript) + BullMQ + Redis`
 

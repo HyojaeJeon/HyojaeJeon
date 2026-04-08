@@ -11,6 +11,7 @@
 ### 기술 스택
 - `Next.js(TypeScript) + App Router + Apollo Client`
 - 서버 상태는 GraphQL-first로 가져오고, UI 상태는 `Redux Toolkit`으로 분리한다.
+- 공용 UI 패턴 원본은 `SharedUI` 이다.
 
 ### 담당 범위
 - 브랜드 사용자 관리, 지점 설정, 메뉴/가격/프로모션 배포, 리포트 조회
@@ -86,7 +87,8 @@ BrandHQ 는 **POS / MEAL_TICKET 두 가지 capability 를 독립적으로 구독
 
 ### 소비하는 공용 패키지
 - `SharedContracts` = GraphQL/DTO/type 계약
-- `SharedAssets` = locale/static asset 원본
+- `SharedAssets` = static asset 원본
+- `SharedUI` = 공용 웹 UI 패턴 원본
 
 ## Tiếng Việt
 
@@ -126,4 +128,5 @@ BrandHQ 는 **POS / MEAL_TICKET 두 가지 capability 를 독립적으로 구독
 
 ### Gói dùng chung mà app này tiêu thụ
 - `SharedContracts` = contract type/DTO/GraphQL
-- `SharedAssets` = nguồn locale/static asset
+- `SharedAssets` = static asset 원본
+- `SharedUI` = 공용 웹 UI 패턴 원본

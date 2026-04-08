@@ -12,5 +12,6 @@
 - 서버 상태는 GraphQL-first, UI 상태는 `Redux Toolkit`이다.
 - capability gating은 UX 목적이며 실제 enforcement는 CentralApi가 담당한다.
 - 공통 계약은 `SharedContracts`를 쓰고, 번역 원본은 이 프로젝트 내부 i18n 이다.
+- 공용 UI 패턴은 `SharedUI` 를 쓴다. 이 프로젝트 내부에 별도 공용 UI 원본을 만들지 않는다.
 - BrandHQ 운영과 식권 참여 화면만 다루고, SuperAdmin/Edge local 업무는 섞지 않는다.
 - 기능/화면은 route/resource 단위로 분리하고, 여러 기능을 묶는 aggregate `index.ts`는 만들지 않는다.
