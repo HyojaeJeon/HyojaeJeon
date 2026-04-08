@@ -1,9 +1,9 @@
 # Tiếng Việt: Ai sẽ tự động được yêu cầu review cho từng vùng code.
 #   Khi PR động đến đường dẫn match, GitHub tự thêm reviewer tương ứng.
-#   Với hai LTV A/B, hãy thay @AnhDuyN21 và @developer-B bằng GitHub username thật.
+#   Với hai LTV A/B, hãy thay @AnhDuyN21 và @Hades1803 bằng GitHub username thật.
 # 한국어: 코드 영역별 자동 리뷰어 지정.
 #   PR 이 해당 경로를 건드리면 GitHub 가 자동으로 reviewer 를 추가한다.
-#   @AnhDuyN21 / @developer-B 를 실제 GitHub 사용자명으로 교체하면 활성화.
+#   @AnhDuyN21 / @Hades1803 를 실제 GitHub 사용자명으로 교체하면 활성화.
 
 # ── 도메인 분담 (CLAUDE.md 와 동일) / Phân chia domain ───────────────────
 /BrandPosApp/PosUi/src/screens/OrderScreen/      @AnhDuyN21
@@ -11,18 +11,18 @@
 /BrandPosApp/PosUi/src/screens/TableScreen/      @AnhDuyN21
 /BrandPosApp/PosUi/src/screens/CustomerScreen/   @AnhDuyN21
 
-/BrandPosApp/PosUi/src/screens/SetupScreen/        @developer-B
-/BrandPosApp/PosUi/src/screens/SettingsScreen/     @developer-B
-/BrandPosApp/PosUi/src/screens/MaintenanceScreen/  @developer-B
-/BrandPosApp/PosUi/src/screens/StockScreen/        @developer-B
-/BrandPosApp/PosUi/src/screens/EmployeeScreen/     @developer-B
+/BrandPosApp/PosUi/src/screens/SetupScreen/        @Hades1803
+/BrandPosApp/PosUi/src/screens/SettingsScreen/     @Hades1803
+/BrandPosApp/PosUi/src/screens/MaintenanceScreen/  @Hades1803
+/BrandPosApp/PosUi/src/screens/StockScreen/        @Hades1803
+/BrandPosApp/PosUi/src/screens/EmployeeScreen/     @Hades1803
 
 # ── 공통 (둘 다 리뷰) / Vùng chung (cả hai cùng review) ──────────────────
-/BrandPosApp/PosUi/src/shared/ui/         @AnhDuyN21 @developer-B
-/BrandPosApp/PosUi/src/contracts/         @AnhDuyN21 @developer-B
-/BrandPosApp/PosUi/src/styles/tokens/     @AnhDuyN21 @developer-B
-/BrandPosApp/PosUi/src/i18n/              @AnhDuyN21 @developer-B
-/BrandPosApp/PosUi/CLAUDE.md              @AnhDuyN21 @developer-B
-/CLAUDE.md                                @AnhDuyN21 @developer-B
-/COLLABORATION.md                         @AnhDuyN21 @developer-B
-/.github/                                 @AnhDuyN21 @developer-B
+/BrandPosApp/PosUi/src/shared/ui/         @AnhDuyN21 @Hades1803
+/BrandPosApp/PosUi/src/contracts/         @AnhDuyN21 @Hades1803
+/BrandPosApp/PosUi/src/styles/tokens/     @AnhDuyN21 @Hades1803
+/BrandPosApp/PosUi/src/i18n/              @AnhDuyN21 @Hades1803
+/BrandPosApp/PosUi/CLAUDE.md              @AnhDuyN21 @Hades1803
+/CLAUDE.md                                @AnhDuyN21 @Hades1803
+/COLLABORATION.md                         @AnhDuyN21 @Hades1803
+/.github/                                 @AnhDuyN21 @Hades1803
