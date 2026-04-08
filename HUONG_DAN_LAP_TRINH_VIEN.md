@@ -1,132 +1,246 @@
 # Hướng dẫn cho lập trình viên (Anh Duy & Quốc)
 
-> Tài liệu này dành riêng cho hai lập trình viên triển khai 100+ màn hình EdgePos bằng Claude Code.
-> Đọc 1 lần là đủ. Mọi thứ về git / PR / CI đều đã được tự động hoá — bạn chỉ cần tập trung vào **thiết kế màn hình**.
+> Tài liệu duy nhất bạn cần đọc. Toàn bộ flow git / PR / CI / lint đã được tự động hoá.
+> Bạn chỉ cần tập trung vào **thiết kế màn hình** bằng Claude Code.
+> Trong tài liệu này có sẵn 3 PROMPT để dán vào Claude Code — không cần nghĩ thêm.
 
 ---
 
-## 1. Repo
+## 0. Bối cảnh
 
-**URL**: https://github.com/HyojaeJeon/HJ-POS-ReDesigned
-
-Bạn sẽ nhận được lời mời cộng tác qua email GitHub. Hãy chấp nhận trước khi clone.
+- Repo: `https://github.com/HyojaeJeon/HJ-POS-ReDesigned`
+- Hai LTV: **Anh Duy** + **Quốc**, mỗi người ~50 màn hình.
+- Mọi quy tắc nằm trong các file `CLAUDE.md` ở từng thư mục — bạn sẽ tự dịch sang tiếng Việt 1 lần đầu.
+- Branch protection đã bật: KHÔNG ai (kể cả admin) có thể push trực tiếp lên main. Mọi thay đổi phải qua PR + 1 approval + CI pass.
 
 ---
 
-## 2. Cài đặt 1 lần (chỉ làm 1 lần đầu)
+## 1. Cài đặt 1 lần đầu (làm theo thứ tự, không bỏ bước)
+
+### Bước 1.1 — Chấp nhận lời mời cộng tác
+
+Mở email GitHub hoặc vào: https://github.com/HyojaeJeon/HJ-POS-ReDesigned/invitations
+→ Accept invitation
+
+### Bước 1.2 — Clone repo
 
 ```bash
-# 1) Clone repo
 git clone https://github.com/HyojaeJeon/HJ-POS-ReDesigned.git Platform
 cd Platform
-
-# 2) Cấu hình git của bạn
-git config user.name "Tên của bạn"
-git config user.email "email GitHub của bạn"
-
-# 3) Cài dependency PosUi (sẽ tự bật Husky pre-commit hook)
-cd BrandPosApp/PosUi
-npm install
-
-# 4) Tạo file môi trường mock (làm việc UI không cần backend C++)
-echo "NEXT_PUBLIC_DATA_SOURCE=mock" > .env.local
-
-# 5) Kiểm tra local 1 lần để chắc chắn mọi thứ chạy được
-npm run check
-
-# 6) Mở dev server
-npm run dev
-# → mở http://localhost:3001
 ```
 
-Sau bước này bạn không cần cài lại gì nữa.
-
----
-
-## 3. Quy trình làm việc 1 màn hình (chỉ 3 bước)
-
-### Bước 1 — Bắt đầu công việc
+### Bước 1.3 — Cấu hình git của bạn
 
 ```bash
-cd ~/Platform        # vào thư mục gốc của repo
-bash scripts/screen-start.sh order-screen
+git config user.name "Tên của bạn"
+git config user.email "email GitHub của bạn"
 ```
 
-→ Script tự làm:
-- Đồng bộ branch `main` mới nhất
-- Tạo branch `feat/order-screen` cho bạn
-- In ra prompt chuẩn để bạn dán vào Claude Code
+### Bước 1.4 — Cài dependency PosUi (sẽ tự bật Husky pre-commit)
 
-**Bạn không cần gõ bất cứ lệnh git nào.**
+```bash
+cd BrandPosApp/PosUi
+npm install
+cd ../..
+```
 
-### Bước 2 — Thiết kế bằng Claude Code
+### Bước 1.5 — Tạo file môi trường mock
+
+```bash
+echo "NEXT_PUBLIC_DATA_SOURCE=mock" > BrandPosApp/PosUi/.env.local
+```
+
+### Bước 1.6 — Dịch toàn bộ CLAUDE.md sang tiếng Việt (CHỈ làm 1 lần)
+
+Repo có nhiều file `CLAUDE.ko.md` (bản gốc tiếng Hàn — KHÔNG được sửa). Bạn cần tạo bản tiếng Việt local cho riêng máy mình. File `CLAUDE.md` đã được `.gitignore` nên bản dịch của bạn sẽ KHÔNG bao giờ được commit lên repo.
+
+Chạy lệnh sau từ thư mục gốc của repo:
+
+```bash
+bash scripts/setup-vn.sh
+```
+
+Script sẽ sao chép tất cả `CLAUDE.ko.md` → `CLAUDE.md` và in ra một PROMPT. Sau đó:
 
 ```bash
 claude
 ```
 
-Sau khi Claude Code mở, dán nguyên prompt mà script đã in ra:
+→ Mở Claude Code, dán nguyên prompt mà script đã in ra (cũng có thể dùng prompt **#PROMPT-1** bên dưới). Claude sẽ dịch toàn bộ.
 
+---
+
+## 2. Quy trình làm việc 1 màn hình (chỉ 3 bước, mỗi ngày lặp lại)
+
+### Bước A — Bắt đầu công việc
+
+```bash
+cd ~/Platform
+bash scripts/screen-start.sh <screen-name>
 ```
-Hãy đọc trước BrandPosApp/PosUi/CLAUDE.md và src/shared/ui/INDEX.md,
-rồi triển khai order-screen theo đúng workflow 7 bước.
-Tất cả 12 mục checklist PR phải pass.
+
+Ví dụ: `bash scripts/screen-start.sh order-screen`
+
+→ Script tự:
+- Đồng bộ branch `main` mới nhất từ GitHub
+- Tạo branch `feat/order-screen`
+- In ra prompt chuẩn để dán vào Claude Code
+
+### Bước B — Thiết kế bằng Claude Code
+
+```bash
+claude
 ```
 
-Claude Code sẽ tự đọc các file hướng dẫn và làm việc theo đúng quy tắc:
-- Tự đọc tài liệu màn hình (`.md` của màn hình)
-- Tự thêm contract / fixture / endpoint
-- Tự dùng `shared/ui` thay vì viết UI inline
-- Tự tách `index.tsx` (orchestrator) + `components/` + `hooks/`
-- Tự viết comment song ngữ Hàn / Việt
-- Tự cập nhật mục "작업 진행 기록" của tài liệu màn hình
+Sau khi Claude Code mở, dán **#PROMPT-2** (xem mục 4 bên dưới). Thay `<screen-name>` bằng tên màn hình thật.
 
-**Bạn chỉ cần xem kết quả, chỉnh chi tiết khi cần, và yêu cầu Claude sửa nếu bạn thấy gì chưa đúng.** Không cần lo về git, lint, hay quy tắc — hệ thống sẽ tự chặn nếu sai.
+Sau đó bạn cùng Claude Code thiết kế màn hình. Claude sẽ tự đọc tài liệu, tự thêm contract / fixture / endpoint / component / hook, tự viết comment song ngữ, tự cập nhật tài liệu màn hình. Bạn chỉ cần xem kết quả và yêu cầu chỉnh nếu thấy chưa đúng.
 
-### Bước 3 — Hoàn tất
+### Bước C — Hoàn tất công việc
+
+Khi Claude Code làm xong và bạn đã hài lòng:
 
 ```bash
 bash scripts/screen-done.sh "feat: triển khai OrderScreen"
 ```
 
-→ Script tự làm:
+→ Script tự:
 - Chạy `npm run check` (TypeScript + ESLint + custom rules)
-- Nếu fail → in ra lỗi để bạn sửa, không commit
+- Nếu fail → in ra lỗi để bạn (hoặc Claude) sửa, KHÔNG commit
 - Nếu pass → `git add` + `git commit` + `git push`
-- Tự tạo Pull Request lên GitHub (template tự đính kèm)
+- Tạo Pull Request tự động (template tự đính kèm)
 
-Xong. Bạn chỉ cần đợi đồng nghiệp review và merge.
+Xong. Đợi đồng nghiệp review và merge. Sau đó quay lại Bước A cho màn hình tiếp theo.
 
 ---
 
-## 4. Khi CI báo đỏ
+## 3. Phân chia công việc
 
-Nếu PR bị đỏ (CI fail), mở tab `Checks` của PR trên GitHub để xem lỗi:
-
-| Loại lỗi | Cách xử lý |
+| LTV | Domain |
 |---|---|
-| **TypeScript** | Sửa lỗi kiểu |
-| **ESLint** | Đọc thông báo và sửa (ví dụ: dùng `useCallback` → bỏ; dùng `bg-red-500` → đổi sang `bg-pos-error`; gọi `window.cefQuery` → dùng RTK Query hook) |
-| **Custom rules** | Đọc log để biết file nào thiếu header song ngữ / fixture / cấu trúc thư mục |
+| **Anh Duy** | `OrderScreen`, `PaymentScreen`, `TableScreen`, `CustomerScreen` |
+| **Quốc** | `SetupScreen`, `SettingsScreen`, `MaintenanceScreen`, `StockScreen`, `EmployeeScreen` |
+| Chung (ai nhận trước) | `LoginScreen`, `MainMenuScreen` |
 
-Sửa xong, chỉ cần commit và push lại trên cùng branch:
+Khi PR động đến vùng phụ trách của người kia → GitHub tự đề xuất review (CODEOWNERS).
 
-```bash
-git add .
-git commit -m "fix: ..."
-git push
+**Vùng chung** — phải tách thành PR riêng và merge ngay để không chặn người kia:
+- `src/shared/ui/**`
+- `src/contracts/**`
+- `src/styles/tokens/**`
+- `src/i18n/**`
+- `CLAUDE.ko.md` (bản gốc tiếng Hàn — KHÔNG sửa nếu không có sự đồng ý của Hyojae)
+
+---
+
+## 4. CÁC PROMPT để dán vào Claude Code
+
+Chỉ dùng 3 prompt này, không cần nghĩ thêm.
+
+### #PROMPT-1 — Dịch CLAUDE.md sang tiếng Việt (chỉ làm 1 lần đầu)
+
+```
+Tôi là lập trình viên người Việt làm việc trên repo Platform này. Hãy giúp tôi
+chuẩn bị môi trường tiếng Việt cho các file hướng dẫn CLAUDE.md.
+
+NHIỆM VỤ:
+1. Tìm tất cả file có tên CLAUDE.md (KHÔNG phải CLAUDE.ko.md) trong repo,
+   loại trừ node_modules và .next.
+2. Đối với mỗi file CLAUDE.md tìm được, dịch TOÀN BỘ nội dung từ tiếng Hàn
+   sang tiếng Việt tự nhiên — KHÔNG để lại bất kỳ chữ Hàn nào.
+3. Yêu cầu chất lượng dịch:
+   - Dùng thuật ngữ POS / nhà hàng tiếng Việt phù hợp.
+   - Giữ nguyên cấu trúc Markdown (tiêu đề, bảng, code block, danh sách).
+   - Giữ nguyên các thuật ngữ kỹ thuật và tên file/tên biến (RTK Query,
+     ESLint, useCallback, shared/ui, cefQuery, contracts, fixtures, etc.).
+   - Giữ nguyên đường dẫn file và tên class/function.
+4. TUYỆT ĐỐI KHÔNG động đến file CLAUDE.ko.md — đó là bản gốc tiếng Hàn của
+   chủ repo.
+5. TUYỆT ĐỐI KHÔNG chạy git add / git commit / git push — CLAUDE.md đã được
+   thêm vào .gitignore nên sẽ không bao giờ được upload.
+
+Sau khi hoàn tất, in ra danh sách tất cả file CLAUDE.md đã được dịch.
 ```
 
-CI sẽ tự chạy lại.
+### #PROMPT-2 — Bắt đầu thiết kế 1 màn hình (mỗi màn hình 1 lần)
+
+```
+Hãy đọc kỹ các file sau TRƯỚC khi bắt đầu công việc:
+  1. BrandPosApp/PosUi/CLAUDE.md (quy tắc làm việc PosUi — bản tiếng Việt)
+  2. BrandPosApp/PosUi/src/shared/ui/INDEX.md (catalog component dùng chung)
+  3. Tài liệu màn hình: 1.Docs/기획 및 설계/프로젝트 통합설계/화면리스트/화면설계,구조,요소/<screen-name>.md
+
+Sau đó triển khai màn hình <screen-name> theo đúng workflow 7 bước trong CLAUDE.md:
+  Bước 0 — Học sẵn (đọc INDEX.md + reference screen cùng pattern)
+  Bước 1 — Đọc tài liệu màn hình, đảm bảo các mục 5.1 / 5.2 / 5.3 đã có
+  Bước 2 — Thêm contract types vào src/contracts/<domain>/<feature>.types.ts
+  Bước 3 — Tạo fixture 3 kịch bản (default / empty / error) trong src/mocks/fixtures
+  Bước 4 — Thêm endpoint theo pattern reference (switch DATA_SOURCE) trong store/api
+  Bước 5 — Tạo screens/<Screen>/index.tsx (thin orchestrator) + components/ + hooks/
+  Bước 6 — Cập nhật mục "작업 진행 기록" của tài liệu màn hình
+
+YÊU CẦU TUYỆT ĐỐI:
+  - KHÔNG dùng useCallback / useMemo / React.memo (React Compiler tự lo)
+  - KHÔNG dùng raw color (#ff0000, bg-red-500) — chỉ dùng design token
+    (bg-pos-error, text-pos-text, h-touch, rounded-pos-input...)
+  - KHÔNG gọi window.cefQuery — dùng RTK Query hook
+  - KHÔNG viết UI mới trong file màn hình — phải thêm vào shared/ui trước
+    rồi import (nếu shared/ui chưa có, hãy nói tôi biết)
+  - KHÔNG viết inline SVG — dùng shared/ui/atoms/Icon
+  - File index.tsx của màn hình PHẢI ≤ 200 dòng
+  - Mọi file phải có header comment SONG NGỮ Hàn / Việt
+    (`한국어:` / `Tiếng Việt:`)
+  - Mọi fixture phải có 3 kịch bản default / empty / error
+  - Light / dark theme đều phải hoạt động (chỉ dùng token, không viết logic theme)
+
+Tất cả 12 mục PR checklist trong CLAUDE.md phải pass — nếu không sẽ bị
+pre-commit hook và CI chặn.
+
+Tên màn hình cần triển khai: <screen-name>
+```
+
+### #PROMPT-3 — Khi CI báo đỏ trên PR
+
+```
+PR của tôi đang bị CI báo đỏ. Đây là log lỗi:
+
+<dán log lỗi từ tab Checks của PR>
+
+Hãy:
+1. Phân tích nguyên nhân lỗi.
+2. Sửa từng lỗi theo đúng quy tắc trong BrandPosApp/PosUi/CLAUDE.md.
+3. KHÔNG được tắt rule, KHÔNG được dùng eslint-disable trừ khi rơi vào
+   đúng 4 trường hợp ngoại lệ trong CLAUDE.md (và phải có comment lý do).
+4. Sau khi sửa xong, KHÔNG tự commit — để tôi chạy `bash scripts/screen-done.sh`.
+```
 
 ---
 
-## 5. Khi bị conflict với main
+## 5. Quy tắc tuyệt đối (hệ thống tự chặn)
+
+Bạn không cần nhớ — pre-commit hook và GitHub Actions sẽ tự chặn nếu vi phạm. Đây chỉ là tóm tắt:
+
+1. **`useCallback` / `useMemo` / `React.memo`** → KHÔNG dùng (React Compiler tự lo)
+2. **Raw color / arbitrary px** → KHÔNG dùng, chỉ dùng design token
+3. **`window.cefQuery`** → KHÔNG gọi trực tiếp, dùng RTK Query hook
+4. **Inline SVG / inline UI primitive** → KHÔNG viết trong file màn hình
+5. **`screens/<Screen>/index.tsx` ≤ 200 dòng** → tách `components/` + `hooks/`
+6. **Header comment song ngữ Hàn/Việt** → mọi `.ts`/`.tsx` đều cần
+7. **Fixture 3 kịch bản** → `default` / `empty` / `error`
+8. **Endpoint pattern** → `switch (DATA_SOURCE)`
+9. **Light/dark theme** → chỉ token, không viết logic theme
+10. **Branch ≠ main** → không bao giờ commit trực tiếp lên main
+
+Vi phạm bất kỳ điều nào → `bash scripts/screen-done.sh` sẽ fail và in ra lý do. Sửa rồi chạy lại.
+
+---
+
+## 6. Khi bị conflict với main
 
 ```bash
 git checkout main
 git pull origin main
-git checkout feat/<tên-branch-của-bạn>
+git checkout feat/<branch-của-bạn>
 git rebase main
 # Giải quyết conflict trong editor
 git add .
@@ -134,77 +248,39 @@ git rebase --continue
 git push --force-with-lease
 ```
 
-**Không bao giờ dùng `git push --force`** — chỉ dùng `--force-with-lease`.
+KHÔNG bao giờ dùng `git push --force` — chỉ dùng `--force-with-lease`.
 
 ---
 
-## 6. Phân chia công việc
+## 7. Khi cần thêm component mới vào `shared/ui`
 
-| Lập trình viên | Domain phụ trách |
+Nếu trong lúc làm màn hình bạn (hoặc Claude) phát hiện cần component mới chưa có trong `INDEX.md`:
+
+1. Tạm dừng PR màn hình hiện tại.
+2. Tạo branch riêng:
+   ```bash
+   bash scripts/screen-start.sh shared-ui-<component-name>
+   ```
+3. Bảo Claude Code thêm component vào `src/shared/ui/<atoms|molecules|organisms>/<PascalCase>.tsx` và cập nhật `INDEX.md`.
+4. Hoàn tất:
+   ```bash
+   bash scripts/screen-done.sh "feat(shared-ui): add <ComponentName>"
+   ```
+5. Đợi merge nhanh, sau đó `git pull origin main` về branch màn hình ban đầu để lấy component mới và tiếp tục.
+
+---
+
+## 8. Tóm tắt — chỉ cần nhớ
+
+| Khi nào | Lệnh |
 |---|---|
-| **Anh Duy** | `OrderScreen`, `PaymentScreen`, `TableScreen`, `CustomerScreen` |
-| **Quốc** | `SetupScreen`, `SettingsScreen`, `MaintenanceScreen`, `StockScreen`, `EmployeeScreen` |
-| Chung (ai nhận trước) | `LoginScreen`, `MainMenuScreen` |
+| Sau khi clone (1 lần đầu) | `bash scripts/setup-vn.sh` → dán **#PROMPT-1** |
+| Bắt đầu mỗi màn hình | `bash scripts/screen-start.sh <screen-name>` → dán **#PROMPT-2** |
+| Hoàn tất mỗi màn hình | `bash scripts/screen-done.sh "<commit message>"` |
+| Khi CI báo đỏ | Mở Claude Code → dán **#PROMPT-3** + log lỗi |
 
-Khi PR động đến vùng phụ trách của người kia → GitHub tự đề xuất review.
+Còn lại Claude Code + hệ thống tự lo. Tập trung vào **thiết kế đẹp, đúng tài liệu, hai theme hoạt động tốt**.
 
-**Vùng chung** (phải tách thành PR riêng và merge ngay để không chặn người kia):
-- `src/shared/ui/**` (component dùng chung)
-- `src/contracts/**` (TypeScript contract)
-- `src/styles/tokens/**` (design token)
-- `src/i18n/**` (bản dịch)
-- `CLAUDE.md`, `COLLABORATION.md`
-
-Không gộp các thay đổi này vào PR màn hình.
-
----
-
-## 7. Quy tắc tuyệt đối (hệ thống sẽ tự chặn nếu vi phạm)
-
-Bạn không cần nhớ — pre-commit hook và CI sẽ chặn tự động. Nhưng để hiểu tại sao:
-
-1. **Không dùng `useCallback` / `useMemo` / `React.memo`** → React Compiler tự lo. Code thường thôi.
-2. **Không dùng raw color (`#ff0000`, `bg-red-500`)** → chỉ dùng design token (`bg-pos-error`, `text-pos-text`).
-3. **Không gọi `window.cefQuery` trực tiếp** → dùng RTK Query hook.
-4. **Không viết UI mới trong file màn hình** → thêm vào `shared/ui` trước, rồi import.
-5. **Không viết inline SVG** → dùng `shared/ui/atoms/Icon`.
-6. **`index.tsx` của màn hình ≤ 200 dòng** → tách thành `components/` và `hooks/`.
-7. **Mọi file phải có comment song ngữ Hàn / Việt** ở header (`한국어:` / `Tiếng Việt:`).
-8. **Mọi fixture phải có 3 kịch bản** `default` / `empty` / `error`.
-9. **Mọi endpoint phải dùng pattern `switch (DATA_SOURCE)`**.
-10. **Light/dark theme đều phải hoạt động** → chỉ dùng design token, không viết logic theme thủ công.
-
----
-
-## 8. Khi cần thêm component mới vào `shared/ui`
-
-Nếu Claude Code phát hiện cần một component chưa có trong `src/shared/ui/INDEX.md`:
-
-1. Dừng công việc màn hình hiện tại.
-2. Tạo branch riêng: `bash scripts/screen-start.sh shared-ui-<component-name>`
-3. Để Claude Code thêm component vào `src/shared/ui/<atoms|molecules|organisms>/<PascalCase>.tsx`.
-4. Cập nhật `src/shared/ui/INDEX.md` (thêm 1 dòng).
-5. `bash scripts/screen-done.sh "feat(shared-ui): add <ComponentName>"`
-6. Đợi merge nhanh, sau đó quay lại branch màn hình ban đầu.
-
----
-
-## 9. Nếu bạn bị kẹt
-
-- **Claude Code lặp lại sai cùng một lỗi** → bảo Claude Code "hãy đọc lại BrandPosApp/PosUi/CLAUDE.md mục X" rồi yêu cầu sửa.
-- **CI fail mà không hiểu lý do** → copy thông báo lỗi và hỏi Claude Code "vì sao lỗi này, sửa thế nào?".
-- **Conflict không tự giải quyết được** → nhắn người còn lại trước khi `--force-with-lease`.
-- **Lỗi nghiêm trọng làm hỏng main** → KHÔNG được tự fix bằng force push. Báo ngay cho Hyojae.
-
----
-
-## 10. Tóm tắt: bạn chỉ cần nhớ 2 lệnh
-
-```bash
-bash scripts/screen-start.sh <tên-màn-hình>      # bắt đầu
-bash scripts/screen-done.sh "<commit message>"  # hoàn tất
-```
-
-Còn lại là Claude Code + hệ thống tự lo. Hãy tập trung vào **thiết kế màn hình đẹp, đúng tài liệu, hai theme hoạt động tốt**.
+Mọi câu hỏi nhắn cho Hyojae.
 
 Chúc may mắn 🚀

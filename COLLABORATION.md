@@ -51,6 +51,27 @@ Cài 1 lần thì **cả Admin cũng không thể push trực tiếp lên main h
 
 ---
 
+## 1.5 Cơ chế CLAUDE.md song ngữ / CLAUDE.md 다국어 메커니즘
+
+**Tiếng Việt**: Mỗi máy có bản `CLAUDE.md` riêng theo ngôn ngữ của người dùng.
+- `CLAUDE.ko.md` (commit vào git) — bản gốc tiếng Hàn của owner. Source of truth.
+- `CLAUDE.md` (`.gitignore`) — bản local của từng máy. Owner = tiếng Hàn (copy từ .ko.md). LTV = tiếng Việt (Claude Code dịch).
+- Khi rule thay đổi → owner sửa `CLAUDE.ko.md` → push → LTV pull → chạy lại `bash scripts/setup-vn.sh` để dịch lại.
+
+**한국어**: 머신마다 자기 언어의 `CLAUDE.md` 를 가진다.
+- `CLAUDE.ko.md` (git 에 commit) — 한국어 원본. Source of truth. Owner 가 편집하는 파일.
+- `CLAUDE.md` (`.gitignore`) — 머신 로컬 전용. Owner = 한국어 (`.ko.md` 복사). 베트남 LTV = 클로드코드 번역.
+- 규칙 변경 시 → owner 가 `CLAUDE.ko.md` 수정 + push → LTV pull → `bash scripts/setup-vn.sh` 재실행으로 재번역.
+
+Owner 도 클론 직후 `CLAUDE.md` 가 없으므로 다음 명령으로 한 번 셋업:
+```bash
+for ko in $(find . -name 'CLAUDE.ko.md' -not -path '*/node_modules/*'); do
+  cp "$ko" "${ko%.ko.md}.md"
+done
+```
+
+---
+
 ## 2. Cài đặt 1 lần cho mỗi lập trình viên / 각 개발자 1회 셋업
 
 ```bash

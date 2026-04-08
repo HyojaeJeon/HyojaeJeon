@@ -67,3 +67,9 @@ Log/
 # Claude Code
 .claude/
 .gstack/
+
+# 한국어: 각 개발자가 로컬에서 자신의 언어로 번역해 둔 CLAUDE.md.
+#   원본은 CLAUDE.ko.md (Korean source of truth) 를 git 에 둔다.
+# Tiếng Việt: CLAUDE.md là bản dịch local của từng máy (Hàn cho owner, Việt cho LTV).
+#   Bản gốc tiếng Hàn nằm trong CLAUDE.ko.md (commit vào git).
+CLAUDE.md
