@@ -100,11 +100,17 @@ export default [
       '@next/next/no-html-link-for-pages': 'off',
     },
   },
-  // ── store/api 와 hooks 는 bridge import 허용 ────────────────────────
+  // ── bridge / providers / store / hooks 는 bridge 사용 허용 ──────────
   {
-    files: ['src/store/**/*.{ts,tsx}', 'src/shared/hooks/**/*.{ts,tsx}'],
+    files: [
+      'src/bridge/**/*.{ts,tsx}',
+      'src/providers/**/*.{ts,tsx}',
+      'src/store/**/*.{ts,tsx}',
+      'src/shared/hooks/**/*.{ts,tsx}',
+    ],
     rules: {
       'no-restricted-imports': 'off',
+      'no-restricted-syntax': 'off',
     },
   },
   // ── design-docs / shared/ui 에서는 디자인 토큰 룰 완화 (preview/sandbox) ─

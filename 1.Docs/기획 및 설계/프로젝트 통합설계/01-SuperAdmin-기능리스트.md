@@ -32,7 +32,7 @@ SuperAdmin Portal 은 공급사가 **모든 brand / distributor / branch / corpo
 4. **라이선스·entitlement 거버넌스** — PlatformLicense 발급, BrandHqEntitlement (POS / MEAL_TICKET) grant·suspend·revoke
 5. **RBAC 거버넌스** — Role / Permission / UserRoleAssignment 의 4 축 scope-aware CRUD
 6. **PlatformPolicy 거버넌스** — runtime 운영 노브 (auth.max_login_attempts 등) 의 scope 상속 관리
-7. **식권 도메인 통제** — 7 leaf (corporate / wallet / policy / transaction / settlement / merchant / einvoice) 의 통합 운영
+7. **식권 도메인 통제** — 7 leaf (corporate / wallet(allowance ledger) / policy / transaction / settlement / merchant / einvoice) 의 통합 운영
 8. **운영 모니터링** — SyncOutbox / Realtime topic / EdgePos heartbeat / 인시던트 추적
 9. **감사** — AuditLog keyset/연결 페이지네이션 + 필터링
 10. **마스터 데이터** — Currency / Language / Region 의 단일 진실 관리
@@ -89,7 +89,7 @@ SuperAdmin Portal
     └── System Health       ── /system/health
 ```
 
-식권(Corporate) 도메인은 단일 영역으로 묶지 않고 **테넌트 트리의 별도 축** 으로 처리한다 (Corporate 자체는 BrandHQ 와 형제 계층). 단, 거래/지갑/정산 같은 **운영 데이터** 는 Corporate sub-route 에서 직접 다룬다 (`/tenants/corporates/:id/wallets`, `/tenants/corporates/:id/transactions` 등).
+식권(Corporate) 도메인은 단일 영역으로 묶지 않고 **테넌트 트리의 별도 축** 으로 처리한다 (Corporate 자체는 BrandHQ 와 형제 계층). 단, 거래/식권 계정(allowance ledger)/정산 같은 **운영 데이터** 는 Corporate sub-route 에서 직접 다룬다 (`/tenants/corporates/:id/wallets`, `/tenants/corporates/:id/transactions` 등).
 
 브랜드 Catalog 는 별도 1급 최상위 영역이 아니라 **Brands 상세 화면의 탭** 이다. 브랜드 canonical catalog 를 SuperAdmin 이 검수하고, branch 별 실효 메뉴 차이는 branch / edge-pos 쪽 effective view 로 소비한다.
 
@@ -254,7 +254,7 @@ SuperAdmin Portal
 | `SA-CORP-WALLET-003` | `/tenants/corporates/:id/wallets/new` | 식권 계정 발급 | `corporate.wallet.write` | `createMealWallet` |
 | `SA-CORP-WALLET-004` | (모달) | 회사지원금 적립 | `corporate.wallet.fund` | `fundMealWallet(input)` |
 | `SA-CORP-WALLET-005` | (모달) | 개인 충전 | `corporate.wallet.topup` | `mealWalletTopUp(input)` |
-| `SA-CORP-WALLET-006` | `/tenants/corporates/:id/wallets/:walletId/funding-entries` | 원장 내역 | `corporate.wallet.read` | `mealWalletFundingEntriesByWallet(walletId)` |
+| `SA-CORP-WALLET-006` | `/tenants/corporates/:id/wallets/:walletId/funding-entries` | 원장 내역 / Funding Entry History | `corporate.wallet.read` | `mealWalletFundingEntriesByWallet(walletId)` |
 | `SA-CORP-POL-001` | `/tenants/corporates/:id/policies` | 식대 정책 목록 | `corporate.policy.read` | `mealPoliciesByCorporate(corporateId)` |
 | `SA-CORP-POL-002` | `/tenants/corporates/:id/policies/new` | 신규 정책 | `corporate.policy.write` | `createMealPolicy` |
 | `SA-CORP-TX-001` | `/tenants/corporates/:id/transactions` | 거래 내역 | `corporate.transaction.read` | `mealTransactionsByCorporate(corporateId)` |
@@ -628,7 +628,7 @@ SuperAdmin Portal 이 호출하는 모든 operation 은 `SharedContracts/ApiSdk`
 4. /governance/entitlements 에서 grant MEAL_TICKET capability — 단,
    브랜드 entitlement 가 아니라 corporate 와는 별개. 현재는 brand 측만 grant
 5. /tenants/corporates/:id/departments + /employees 에서 사용자 등록
-6. /tenants/corporates/:id/wallets/new 로 임직원 식권 계정 발급
+6. /tenants/corporates/:id/wallets/new 로 임직원 식권 계정(Allowance Ledger) 발급
 7. /tenants/corporates/:id/policies/new 로 식대 정책 등록
 ```
 
@@ -1147,7 +1147,7 @@ DRAFT → BUILT → SUBMITTING → ACCEPTED   (성공)
 
 **SA-FRAUD-002 액션**:
 
-- `freezeWallet(walletId, reason)` — 즉시 동결
+- `freezeWallet(walletId, reason)` — 식권 계정 즉시 동결
 - `reverseMealTransaction(id)` — 거래 취소 (이미 존재)
 - `addToWhitelist(walletId/merchantId)` — 오탐 대응
 
@@ -1789,7 +1789,7 @@ DRAFT → DOCUMENTS_SUBMITTED → KYC_VERIFIED → BANK_VERIFIED → AGREEMENT_S
 2. /governance/billing/plans 에서 URBAN_OFFICE_SAAS plan 선택 → BillingSubscription 생성
 3. /tenants/corporates/:id/admins 에서 CORPORATE_ADMIN 1명 등록
 4. /tenants/corporates/:id/employees 에서 임직원 등록 (수동 또는 CSV)
-5. /tenants/corporates/:id/wallets/new 에서 지갑 일괄 발급
+5. /tenants/corporates/:id/wallets/new 에서 식권 계정(Allowance Ledger) 일괄 발급
 6. /tenants/corporates/:id/merchants/onboarding 에서 인근 가맹점 5~10곳 순차 등록
 7. /tenants/corporates/:id/policies/new?mode=visual 에서 SME 표준 정책 템플릿 적용
 8. /governance/payment-providers 에서 ZaloPay/MoMo 활성화 (Split Payment 지원)
