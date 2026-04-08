@@ -1,0 +1,28 @@
+# Tiếng Việt: Ai sẽ tự động được yêu cầu review cho từng vùng code.
+#   Khi PR động đến đường dẫn match, GitHub tự thêm reviewer tương ứng.
+#   Với hai LTV A/B, hãy thay @developer-A và @developer-B bằng GitHub username thật.
+# 한국어: 코드 영역별 자동 리뷰어 지정.
+#   PR 이 해당 경로를 건드리면 GitHub 가 자동으로 reviewer 를 추가한다.
+#   @developer-A / @developer-B 를 실제 GitHub 사용자명으로 교체하면 활성화.
+
+# ── 도메인 분담 (CLAUDE.md 와 동일) / Phân chia domain ───────────────────
+/BrandPosApp/PosUi/src/screens/OrderScreen/      @developer-A
+/BrandPosApp/PosUi/src/screens/PaymentScreen/    @developer-A
+/BrandPosApp/PosUi/src/screens/TableScreen/      @developer-A
+/BrandPosApp/PosUi/src/screens/CustomerScreen/   @developer-A
+
+/BrandPosApp/PosUi/src/screens/SetupScreen/        @developer-B
+/BrandPosApp/PosUi/src/screens/SettingsScreen/     @developer-B
+/BrandPosApp/PosUi/src/screens/MaintenanceScreen/  @developer-B
+/BrandPosApp/PosUi/src/screens/StockScreen/        @developer-B
+/BrandPosApp/PosUi/src/screens/EmployeeScreen/     @developer-B
+
+# ── 공통 (둘 다 리뷰) / Vùng chung (cả hai cùng review) ──────────────────
+/BrandPosApp/PosUi/src/shared/ui/         @developer-A @developer-B
+/BrandPosApp/PosUi/src/contracts/         @developer-A @developer-B
+/BrandPosApp/PosUi/src/styles/tokens/     @developer-A @developer-B
+/BrandPosApp/PosUi/src/i18n/              @developer-A @developer-B
+/BrandPosApp/PosUi/CLAUDE.md              @developer-A @developer-B
+/CLAUDE.md                                @developer-A @developer-B
+/COLLABORATION.md                         @developer-A @developer-B
+/.github/                                 @developer-A @developer-B
