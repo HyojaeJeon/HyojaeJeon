@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+# 한국어: 커밋 직전에 PosUi 규칙을 자동 검증한다.
+#   1) lint-staged 로 staged TS/TSX 에 대해 ESLint + tsc
+#   2) 저장소 루트의 check-posui-rules.sh 로 구조/주석/fixture 검사
+# Tiếng Việt: Kiểm tra quy tắc PosUi ngay trước khi commit.
+set -e
+cd "$(dirname "$0")/.."
+npx lint-staged
+cd ../..
+bash scripts/check-posui-rules.sh

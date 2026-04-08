@@ -9,6 +9,8 @@ import type {
   MealTicketLoopType,
   MealTicketSettlementStatus,
   MealTicketTxnStatus,
+  MealTicketWalletFundingSourceType,
+  MealTicketWalletFundingStatus,
   MealTicketWalletStatus,
 } from './enums.js';
 
@@ -60,14 +62,31 @@ export interface MealTicketMerchantSettlementAccount {
 
 export interface MealTicketWallet {
   walletId: string;
-  tenantId: string;
+  tenantId?: string | null;
   corporateId: string;
   employeeId: string;
   badgeRfid?: string | null;
   status: MealTicketWalletStatus;
   balanceVnd: number;
+  companyAllowanceVnd: number;
+  personalTopUpVnd: number;
   dailyLimitVnd: number;
+  createdAt: string;
   updatedAt: string;
+}
+
+export interface MealTicketWalletFundingEntry {
+  fundingEntryId: string;
+  walletId: string;
+  sourceType: MealTicketWalletFundingSourceType;
+  status: MealTicketWalletFundingStatus;
+  amountVnd: number;
+  sourceBatchId?: string | null;
+  sourceReferenceId?: string | null;
+  note?: string | null;
+  postedAt?: string | null;
+  reversedAt?: string | null;
+  createdAt: string;
 }
 
 export interface MealTicketPolicyWindow {
@@ -116,12 +135,14 @@ export interface MealTicketTransaction {
   authMethod: MealTicketAuthMethod;
   requestedAmountVnd: number;
   approvedAmountVnd: number;
+  companyShareVnd: number;
   employeeShareVnd: number;
   status: MealTicketTxnStatus;
   declineReason?: MealTicketDeclineReason | null;
   idempotencyKey: string;
   authorizedAt?: string | null;
   settledAt?: string | null;
+  createdAt: string;
 }
 
 export interface MealTicketSettlementBatch {

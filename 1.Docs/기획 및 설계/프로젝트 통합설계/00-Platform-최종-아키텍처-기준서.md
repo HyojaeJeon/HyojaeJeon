@@ -757,7 +757,7 @@ Stack cuối cùng của dự án được cố định như sau.
 
 ### 99.3 도메인 경계 (CentralApi 내부)
 
-- `platform/corporate/wallet` — 임직원 디지털 지갑, 조건부 토큰 (`Corporate` 스코프)
+- `platform/corporate/wallet` — 임직원 식권 allowance ledger (회사 지원금 / 개인 충전 버킷), 조건부 토큰 (`Corporate` 스코프)
 - `platform/corporate/policy` — 부서/직급/시간대 식대 정책 빌더 (`Corporate` 스코프)
 - `platform/corporate/transaction` — Open Loop(QR/바코드), Closed Loop(RFID/생체) 승인
 - `platform/corporate/settlement` — 3-Way Matching, 가맹점 정산 배치

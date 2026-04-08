@@ -142,6 +142,8 @@ describe('MealTransactionService', () => {
         corporateId: 'corp-1',
         employeeId: 'emp-1',
         balanceVnd: 100_000n,
+        companyAllowanceVnd: 100_000n,
+        personalTopUpVnd: 0n,
         status: 'ACTIVE',
       });
       prisma.mealMerchantEnrollment.findUnique.mockResolvedValue({ isActive: true });
@@ -189,6 +191,8 @@ describe('MealTransactionService', () => {
         corporateId: 'corp-1',
         employeeId: 'emp-1',
         balanceVnd: 100_000n,
+        companyAllowanceVnd: 100_000n,
+        personalTopUpVnd: 0n,
         status: 'SUSPENDED',
       });
       prisma.mealTransaction.create.mockResolvedValue({ id: 't-decline', status: 'DECLINED' });
@@ -209,6 +213,8 @@ describe('MealTransactionService', () => {
         corporateId: 'corp-1',
         employeeId: 'emp-1',
         balanceVnd: 100_000n,
+        companyAllowanceVnd: 100_000n,
+        personalTopUpVnd: 0n,
         status: 'ACTIVE',
       });
       prisma.mealMerchantEnrollment.findUnique.mockResolvedValue({ isActive: false });
@@ -233,6 +239,8 @@ describe('MealTransactionService', () => {
         corporateId: 'corp-1',
         employeeId: 'emp-1',
         balanceVnd: 100_000n,
+        companyAllowanceVnd: 100_000n,
+        personalTopUpVnd: 0n,
         status: 'ACTIVE',
       });
       prisma.mealMerchantEnrollment.findUnique.mockResolvedValue({ isActive: true });
@@ -292,6 +300,8 @@ describe('MealTransactionService', () => {
         corporateId: 'corp-1',
         employeeId: 'emp-1',
         balanceVnd: 5_000n,
+        companyAllowanceVnd: 5_000n,
+        personalTopUpVnd: 0n,
         status: 'ACTIVE',
       });
 
@@ -306,6 +316,8 @@ describe('MealTransactionService', () => {
         corporateId: 'corp-1',
         employeeId: 'emp-1',
         balanceVnd: 100_000n,
+        companyAllowanceVnd: 100_000n,
+        personalTopUpVnd: 0n,
         status: 'ACTIVE',
       });
       prisma.mealTransaction.create.mockResolvedValue({ id: 't-new', status: 'APPROVED' });
@@ -316,7 +328,11 @@ describe('MealTransactionService', () => {
       expect(prisma.mealWallet.update).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: 'wallet-1' },
-          data: { balanceVnd: 90_000n },
+          data: {
+            balanceVnd: 90_000n,
+            companyAllowanceVnd: 90_000n,
+            personalTopUpVnd: 0n,
+          },
         }),
       );
       expect(prisma.mealTransaction.create).toHaveBeenCalledWith(
@@ -324,6 +340,50 @@ describe('MealTransactionService', () => {
           data: expect.objectContaining({
             status: 'APPROVED',
             approvedAmountVnd: 10_000n,
+            companyShareVnd: 10_000n,
+            employeeShareVnd: 0n,
+          }),
+        }),
+      );
+    });
+
+    it('approves split payment using company allowance + personal top-up', async () => {
+      prisma.mealWallet.findUnique.mockResolvedValue({
+        id: 'wallet-1',
+        corporateId: 'corp-1',
+        employeeId: 'emp-1',
+        balanceVnd: 100_000n,
+        companyAllowanceVnd: 70_000n,
+        personalTopUpVnd: 30_000n,
+        status: 'ACTIVE',
+      });
+      (policy.evaluateForEmployee as jest.Mock).mockResolvedValue({
+        policyId: 'policy-split',
+        dailyLimitVnd: 0n,
+        maxPerTransactionVnd: 0n,
+        allowSplitPayment: true,
+      });
+      prisma.mealTransaction.create.mockResolvedValue({ id: 't-split', status: 'APPROVED' });
+
+      await service.authorize(makeCtx(), makeInput({ requestedAmountVnd: 100_000n }));
+
+      expect(prisma.mealWallet.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'wallet-1' },
+          data: {
+            balanceVnd: 0n,
+            companyAllowanceVnd: 0n,
+            personalTopUpVnd: 0n,
+          },
+        }),
+      );
+      expect(prisma.mealTransaction.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            status: 'APPROVED',
+            approvedAmountVnd: 100_000n,
+            companyShareVnd: 70_000n,
+            employeeShareVnd: 30_000n,
           }),
         }),
       );
@@ -337,6 +397,8 @@ describe('MealTransactionService', () => {
         brandHqId: 'brand-1',
         walletId: 'wallet-1',
         approvedAmountVnd: 10_000n,
+        companyShareVnd: 10_000n,
+        employeeShareVnd: 0n,
         status: 'DECLINED',
       });
 
@@ -349,6 +411,8 @@ describe('MealTransactionService', () => {
         brandHqId: 'brand-1',
         walletId: 'wallet-1',
         approvedAmountVnd: 10_000n,
+        companyShareVnd: 10_000n,
+        employeeShareVnd: 0n,
         status: 'APPROVED',
       });
       prisma.mealTransaction.update.mockResolvedValue({ id: 't1', status: 'REVERSED' });
@@ -359,7 +423,11 @@ describe('MealTransactionService', () => {
       expect(prisma.mealWallet.update).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: 'wallet-1' },
-          data: { balanceVnd: { increment: 10_000n } },
+          data: {
+            balanceVnd: { increment: 10_000n },
+            companyAllowanceVnd: { increment: 10_000n },
+            personalTopUpVnd: { increment: 0n },
+          },
         }),
       );
       expect(result.status).toBe('REVERSED');

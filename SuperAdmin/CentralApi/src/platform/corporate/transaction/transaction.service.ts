@@ -23,6 +23,10 @@ import {
 import { MealPolicyService } from '../policy/policy.service';
 import { AuthorizeMealTransactionInput } from './dto/authorize-meal-transaction.input';
 import { DomainError } from '@core/errors/domain-error';
+import {
+  allocateMealWalletSpend,
+  normalizeMealWalletFundingState,
+} from '../wallet/_internal/wallet-ledger';
 
 @Injectable()
 export class MealTransactionService {
@@ -148,13 +152,36 @@ export class MealTransactionService {
       const fresh = await tx.mealWallet.findUnique({
         where: { id: wallet.id },
       });
-      if (!fresh || fresh.balanceVnd < input.requestedAmountVnd) {
-        throw new DomainError({ code: 'INSUFFICIENT_BALANCE', params: { available: fresh?.balanceVnd.toString() ?? '0',
+      if (!fresh) {
+        throw new DomainError({ code: 'RESOURCE_NOT_FOUND', params: { resource: 'Wallet' }, details: { reason: 'Wallet not found' } });
+      }
+      const fundingState = normalizeMealWalletFundingState(fresh);
+
+      const allocation = allocateMealWalletSpend(
+        fresh,
+        input.requestedAmountVnd,
+        Boolean(evaluated?.allowSplitPayment),
+      );
+
+      if (!allocation) {
+        if (
+          evaluated &&
+          !evaluated.allowSplitPayment &&
+          input.requestedAmountVnd > fundingState.companyAllowanceVnd &&
+          input.requestedAmountVnd <= fundingState.balanceVnd
+        ) {
+          return this.recordDecline(input, wallet.corporateId, 'SPLIT_PAYMENT_DISABLED');
+        }
+        throw new DomainError({ code: 'INSUFFICIENT_BALANCE', params: { available: fundingState.balanceVnd.toString(),
           requested: input.requestedAmountVnd.toString() } });
       }
       await tx.mealWallet.update({
         where: { id: wallet.id },
-        data: { balanceVnd: fresh.balanceVnd - input.requestedAmountVnd },
+        data: {
+          balanceVnd: allocation.balanceVnd,
+          companyAllowanceVnd: allocation.companyAllowanceVnd,
+          personalTopUpVnd: allocation.personalTopUpVnd,
+        },
       });
       return tx.mealTransaction.create({
         data: {
@@ -167,7 +194,8 @@ export class MealTransactionService {
           authMethod: input.authMethod,
           requestedAmountVnd: input.requestedAmountVnd,
           approvedAmountVnd: input.requestedAmountVnd,
-          employeeShareVnd: 0n,
+          companyShareVnd: allocation.companyShareVnd,
+          employeeShareVnd: allocation.employeeShareVnd,
           status: 'APPROVED',
           idempotencyKey: input.idempotencyKey,
           authorizedAt: new Date(),
@@ -216,7 +244,11 @@ export class MealTransactionService {
     return this.prisma.$transaction(async (db) => {
       await db.mealWallet.update({
         where: { id: t.walletId },
-        data: { balanceVnd: { increment: t.approvedAmountVnd } },
+        data: {
+          balanceVnd: { increment: t.approvedAmountVnd },
+          companyAllowanceVnd: { increment: t.companyShareVnd },
+          personalTopUpVnd: { increment: t.employeeShareVnd },
+        },
       });
       return db.mealTransaction.update({
         where: { id: t.id },

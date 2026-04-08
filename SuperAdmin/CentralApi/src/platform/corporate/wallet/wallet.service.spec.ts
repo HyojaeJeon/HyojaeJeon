@@ -27,6 +27,10 @@ describe('MealWalletService', () => {
       create: jest.fn(),
       update: jest.fn(),
     },
+    mealWalletFundingEntry: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+    },
     mealEmployee: {
       findUnique: jest.fn(),
     },
@@ -183,13 +187,21 @@ describe('MealWalletService', () => {
         id: 'w1',
         corporateId: 'corp-1',
         balanceVnd: 100n,
+        companyAllowanceVnd: 100n,
+        personalTopUpVnd: 0n,
       });
       prisma.mealCorporate.findUnique.mockResolvedValue({
         id: 'corp-1',
         fundingModel: 'PREPAID_DEPOSIT',
         depositBalanceVnd: 5_000n,
       });
-      prisma.mealWallet.update.mockResolvedValue({ id: 'w1', balanceVnd: 1100n });
+      prisma.mealWallet.update.mockResolvedValue({
+        id: 'w1',
+        balanceVnd: 1100n,
+        companyAllowanceVnd: 1100n,
+        personalTopUpVnd: 0n,
+      });
+      prisma.mealWalletFundingEntry.create.mockResolvedValue({ id: 'entry-1' });
 
       const result = await service.fund(ctx(), { walletId: 'w1', amountVnd: 1000n });
 
@@ -200,7 +212,18 @@ describe('MealWalletService', () => {
       });
       expect(prisma.mealWallet.update).toHaveBeenCalledWith({
         where: { id: 'w1' },
-        data: { balanceVnd: 1100n },
+        data: {
+          balanceVnd: 1100n,
+          companyAllowanceVnd: 1100n,
+          personalTopUpVnd: 0n,
+        },
+      });
+      expect(prisma.mealWalletFundingEntry.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          walletId: 'w1',
+          sourceType: 'COMPANY_ALLOWANCE',
+          amountVnd: 1000n,
+        }),
       });
       expect(result.balanceVnd).toBe(1100n);
     });
@@ -210,18 +233,71 @@ describe('MealWalletService', () => {
         id: 'w1',
         corporateId: 'corp-1',
         balanceVnd: 0n,
+        companyAllowanceVnd: 0n,
+        personalTopUpVnd: 0n,
       });
       prisma.mealCorporate.findUnique.mockResolvedValue({
         id: 'corp-1',
         fundingModel: 'CREDIT_NET30',
         depositBalanceVnd: 0n,
       });
-      prisma.mealWallet.update.mockResolvedValue({ id: 'w1', balanceVnd: 1000n });
+      prisma.mealWallet.update.mockResolvedValue({
+        id: 'w1',
+        balanceVnd: 1000n,
+        companyAllowanceVnd: 1000n,
+        personalTopUpVnd: 0n,
+      });
+      prisma.mealWalletFundingEntry.create.mockResolvedValue({ id: 'entry-1' });
 
       await service.fund(ctx(), { walletId: 'w1', amountVnd: 1000n });
 
       expect(prisma.mealCorporate.update).not.toHaveBeenCalled();
       expect(prisma.mealWallet.update).toHaveBeenCalled();
+    });
+
+    it('records personal top-up in separate bucket', async () => {
+      prisma.mealWallet.findUnique.mockResolvedValue({
+        id: 'w1',
+        corporateId: 'corp-1',
+        balanceVnd: 500n,
+        companyAllowanceVnd: 500n,
+        personalTopUpVnd: 0n,
+      });
+      prisma.mealWallet.update.mockResolvedValue({
+        id: 'w1',
+        balanceVnd: 1_500n,
+        companyAllowanceVnd: 500n,
+        personalTopUpVnd: 1_000n,
+      });
+      prisma.mealWalletFundingEntry.create.mockResolvedValue({ id: 'entry-topup' });
+
+      const result = await service.topUp(ctx(), {
+        walletId: 'w1',
+        amountVnd: 1_000n,
+        paymentReferenceId: 'pay-1',
+      });
+
+      expect(permission.require).toHaveBeenCalledWith(
+        expect.objectContaining({ corporateId: 'corp-1' }),
+        'corporate.wallet.topup',
+      );
+      expect(prisma.mealWallet.update).toHaveBeenCalledWith({
+        where: { id: 'w1' },
+        data: {
+          balanceVnd: 1_500n,
+          companyAllowanceVnd: 500n,
+          personalTopUpVnd: 1_000n,
+        },
+      });
+      expect(prisma.mealWalletFundingEntry.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          walletId: 'w1',
+          sourceType: 'PERSONAL_TOP_UP',
+          sourceReferenceId: 'pay-1',
+          amountVnd: 1_000n,
+        }),
+      });
+      expect(result.personalTopUpVnd).toBe(1_000n);
     });
   });
 });

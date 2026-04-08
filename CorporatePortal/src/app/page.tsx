@@ -3,7 +3,8 @@
  *
  * 본 프로젝트는 기준서 `00-Platform-최종-아키텍처-기준서.md §2.1` 의 신규 `Corporate` 계층 전용 포털이다.
  * BrandHQPortal 과는 코드/엔티티/라우트를 공유하지 않는다.
- * 공유되는 것은 `SharedContracts/ApiSdk/src/mealticket` 뿐이고, 번역 원본은 이 프로젝트 내부 i18n 이다.
+ * 공유되는 것은 `SharedContracts/ApiSdk` 뿐이고, DTO / enum / event 는 `mealticket`,
+ * operation document 는 `operations` 에서 가져온다. 번역 원본은 이 프로젝트 내부 i18n 이다.
  */
 export default function HomePage() {
   return (

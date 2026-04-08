@@ -17,6 +17,7 @@
 - EdgePos 로컬 거래 원본을 대체하지 않는다.
 - 응답 표준화와 서버 로케일 처리는 `src/core/i18n`, `src/core/response`, `src/core/errors` 같은 서버 내부 계층에서 처리한다. public 응답은 `success / error` 네이밍만 사용하고, REST 예외 경로도 ad-hoc `{ ok, data }` 형태를 쓰지 않는다.
 - 서버 번역 원본은 CentralApi 내부 i18n에 둔다.
+- `platform/corporate/wallet` 은 현금 지갑이 아니라 allowance ledger 다. 회사 지원금 / 개인 충전 / split payment 를 구분 기록하고, funding entry 로 원장을 남긴다.
 
 ## 소스 구조 규칙
 

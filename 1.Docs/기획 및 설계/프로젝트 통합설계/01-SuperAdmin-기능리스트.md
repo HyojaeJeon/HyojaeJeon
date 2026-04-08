@@ -41,7 +41,7 @@ SuperAdmin Portal 은 공급사가 **모든 brand / distributor / branch / corpo
 
 - POS 매장 운영 화면 (주문/결제/테이블/주방) → `BrandPosApp`
 - 브랜드 단일 본사 운영 화면 (직원 출퇴근/지점 일일 마감) → `BrandHQPortal` (별도 앱)
-- 식권 사용자 화면 (지갑 충전 요청/식사 인증) → `CorporatePortal` (별도 앱)
+- 식권 사용자 화면 (개인 충전 요청/식사 인증) → `CorporatePortal` (별도 앱)
 - DB 직접 접근 (모든 mutation 은 GraphQL operation 경유)
 - 백엔드 비즈니스 로직 (resolver/service 가 단일 진실)
 
@@ -236,7 +236,7 @@ SuperAdmin Portal
 ```
 ├ 개요               ── tenantCode / companyName / taxCode / fundingModel / status
 ├ 부서 / 임직원      ── 합산 카운터, 빠른 진입
-├ 지갑(Wallets)     ── /tenants/corporates/:id/wallets (별도 화면)
+├ 식권 계정(Ledger) ── /tenants/corporates/:id/wallets (allowance ledger)
 ├ 정책(Policies)    ── /tenants/corporates/:id/policies
 ├ 거래(Transactions) ── /tenants/corporates/:id/transactions
 ├ 정산(Settlements)  ── /tenants/corporates/:id/settlements
@@ -245,14 +245,16 @@ SuperAdmin Portal
 └ 감사
 ```
 
-#### 2.2.6 Corporate sub-pages (식권 운영, 11 화면)
+#### 2.2.6 Corporate sub-pages (식권 운영, 13 화면)
 
 | ID | Route | Title | 권한 | Operations |
 |---|---|---|---|---|
-| `SA-CORP-WALLET-001` | `/tenants/corporates/:id/wallets` | 지갑 목록 | `corporate.wallet.read` | `mealWalletsByCorporate(corporateId)` |
-| `SA-CORP-WALLET-002` | `/tenants/corporates/:id/wallets/:walletId` | 지갑 상세 | `corporate.wallet.read` | `mealWallet(id)` |
-| `SA-CORP-WALLET-003` | `/tenants/corporates/:id/wallets/new` | 지갑 발급 | `corporate.wallet.write` | `createMealWallet` |
-| `SA-CORP-WALLET-004` | (모달) | 지갑 충전 | `corporate.wallet.fund` | `fundMealWallet(input)` |
+| `SA-CORP-WALLET-001` | `/tenants/corporates/:id/wallets` | 식권 계정 목록 | `corporate.wallet.read` | `mealWalletsByCorporate(corporateId)` |
+| `SA-CORP-WALLET-002` | `/tenants/corporates/:id/wallets/:walletId` | 식권 계정 상세 | `corporate.wallet.read` | `mealWallet(id)` |
+| `SA-CORP-WALLET-003` | `/tenants/corporates/:id/wallets/new` | 식권 계정 발급 | `corporate.wallet.write` | `createMealWallet` |
+| `SA-CORP-WALLET-004` | (모달) | 회사지원금 적립 | `corporate.wallet.fund` | `fundMealWallet(input)` |
+| `SA-CORP-WALLET-005` | (모달) | 개인 충전 | `corporate.wallet.topup` | `mealWalletTopUp(input)` |
+| `SA-CORP-WALLET-006` | `/tenants/corporates/:id/wallets/:walletId/funding-entries` | 원장 내역 | `corporate.wallet.read` | `mealWalletFundingEntriesByWallet(walletId)` |
 | `SA-CORP-POL-001` | `/tenants/corporates/:id/policies` | 식대 정책 목록 | `corporate.policy.read` | `mealPoliciesByCorporate(corporateId)` |
 | `SA-CORP-POL-002` | `/tenants/corporates/:id/policies/new` | 신규 정책 | `corporate.policy.write` | `createMealPolicy` |
 | `SA-CORP-TX-001` | `/tenants/corporates/:id/transactions` | 거래 내역 | `corporate.transaction.read` | `mealTransactionsByCorporate(corporateId)` |
@@ -626,7 +628,7 @@ SuperAdmin Portal 이 호출하는 모든 operation 은 `SharedContracts/ApiSdk`
 4. /governance/entitlements 에서 grant MEAL_TICKET capability — 단,
    브랜드 entitlement 가 아니라 corporate 와는 별개. 현재는 brand 측만 grant
 5. /tenants/corporates/:id/departments + /employees 에서 사용자 등록
-6. /tenants/corporates/:id/wallets/new 로 임직원 지갑 발급
+6. /tenants/corporates/:id/wallets/new 로 임직원 식권 계정 발급
 7. /tenants/corporates/:id/policies/new 로 식대 정책 등록
 ```
 
@@ -870,7 +872,7 @@ SuperAdmin Portal 이 호출하는 모든 operation 은 `SharedContracts/ApiSdk`
 
 - POS 매장 운영 화면 (주문/결제/테이블/주방/장치 제어) — `BrandPosApp` 의 책임
 - 브랜드 본사 일상 운영 (직원 출퇴근/지점 마감/리포트 다운로드) — `BrandHQPortal` 책임
-- 식권 사용자 화면 (개인 지갑 충전/식사 인증) — `CorporatePortal` 책임
+- 식권 사용자 화면 (개인 충전/식사 인증) — `CorporatePortal` 책임
 - DB 직접 조회 (모든 데이터 액세스는 GraphQL operation 경유)
 - 백엔드 비즈니스 로직 중복 (SuperAdmin Portal 은 thin client; 모든 검증은 서버 단)
 - EdgePos 로컬 거래 원본 보유 (CentralApi 도 보유하지 않으므로 동일)
@@ -909,7 +911,7 @@ SuperAdmin Portal 이 호출하는 모든 operation 은 `SharedContracts/ApiSdk`
 | `corporate.profile.read / write` | 식권 고객사 |
 | `corporate.department.read / write` | 부서 |
 | `corporate.employee.read / write` | 임직원 |
-| `corporate.wallet.read / write / fund` | 지갑 (fund 는 mutation 전용) |
+| `corporate.wallet.read / write / fund / topup` | 식권 계정/allowance ledger (fund 는 회사지원금, topup 은 개인충전) |
 | `corporate.policy.read / write` | 식대 정책 |
 | `corporate.transaction.read / authorize / reverse` | 거래 |
 | `corporate.settlement.read / run` | 정산 |

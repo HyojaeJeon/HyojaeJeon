@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-04-08T06:25:26.414Z",
-  "operationCount": 32,
+  "generatedAt": "2026-04-08T08:19:57.032Z",
+  "operationCount": 38,
   "operations": [
     {
       "operationName": "AuditLogConnection",
@@ -35,6 +35,10 @@
       "sha256Hash": "911a7ca6f79e5ce9a1c1b329df213c6ee68beae5dd550a2163c2cc3afab7ceac"
     },
     {
+      "operationName": "CreateMealWallet",
+      "sha256Hash": "c915a1b7b89976e12678d48df1367916d1937973f3c9c86a5e736cf049c71c12"
+    },
+    {
       "operationName": "DeleteAuthAccount",
       "sha256Hash": "9a3c85ce1b8eed27816c75f928ec58ec908a157c48fc8998b9442366637b1561"
     },
@@ -67,12 +71,28 @@
       "sha256Hash": "e5da7d2f10b21d82f81b034f3658a0f7d3d32e4131fb60dc0fc907e8e3f9a35b"
     },
     {
+      "operationName": "FundMealWallet",
+      "sha256Hash": "851c71f2db7990b174af896c0a18414c3ae8fa4b22b4bdb9dac30ac028e64cdb"
+    },
+    {
       "operationName": "Languages",
       "sha256Hash": "bea29fd80b8a455268790f6fdda3910b9ccbe1821c96a1a5add5bb8a279f2270"
     },
     {
       "operationName": "Login",
       "sha256Hash": "857b03e929ad39639e4020f535387461d6eed7e4a379d818c979e44e55dfc2f8"
+    },
+    {
+      "operationName": "MealWallet",
+      "sha256Hash": "257b8d62a194b5653342bf58397c100dafca59650e473774d7d6a045b2e8c5cd"
+    },
+    {
+      "operationName": "MealWalletFundingEntriesByWallet",
+      "sha256Hash": "37ba501a94db79f1c58f491e3426e4a1de424568857722f91a9cbc8b7db9ccf5"
+    },
+    {
+      "operationName": "MealWalletsByCorporate",
+      "sha256Hash": "6372f4ae5c335ca308b7b13ea17f266f9fc6b90371c6ca5237194d3f4be2726b"
     },
     {
       "operationName": "RbacAddPermissionToRole",
@@ -125,6 +145,10 @@
     {
       "operationName": "SyncEventConnection",
       "sha256Hash": "7aea3731f8cac5cfb886e98f158dcd0d0e8fb5140c239574651ba390a444f0d7"
+    },
+    {
+      "operationName": "TopUpMealWallet",
+      "sha256Hash": "8e8f16fedca2813b35276025b25365b37d501810e6f16158e887f4fa4c02e86b"
     },
     {
       "operationName": "UpdateAuthAccount",

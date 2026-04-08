@@ -4,6 +4,7 @@ export * from './operations/auth.js';
 export * from './operations/audit.js';
 export * from './operations/deploy.js';
 export * from './operations/policy.js';
+export * from './operations/wallet.js';
 export * from './operations/reference.js';
 export * from './operations/sync.js';
 export * from './operations/tenant.js';

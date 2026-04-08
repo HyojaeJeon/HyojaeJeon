@@ -1,0 +1,46 @@
+# 한국어: PosUi 화면 작업 규칙 자동 검증 워크플로우.
+#   PR 이 main 으로 머지되기 전에 ESLint / TypeScript / 커스텀 룰을 자동 검사한다.
+#   하나라도 실패하면 머지 버튼 비활성화 (branch protection 과 결합).
+# Tiếng Việt: Workflow CI tự động kiểm tra quy tắc PosUi trước khi merge vào main.
+name: PosUi Rules
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'BrandPosApp/PosUi/**'
+      - 'scripts/check-posui-rules.sh'
+      - '.github/workflows/posui-rules.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'BrandPosApp/PosUi/**'
+
+jobs:
+  rules:
+    name: Lint / Type / Custom rules
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: BrandPosApp/PosUi
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: BrandPosApp/PosUi/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript check
+        run: npx tsc --noEmit
+
+      - name: ESLint (max-warnings=0)
+        run: npx eslint src --max-warnings=0
+
+      - name: Custom PosUi rules
+        working-directory: ${{ github.workspace }}
+        run: bash scripts/check-posui-rules.sh

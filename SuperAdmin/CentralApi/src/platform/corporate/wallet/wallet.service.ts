@@ -25,7 +25,6 @@ import {
   COMPANY_ALLOWANCE_SOURCE_TYPE,
   PERSONAL_TOP_UP_SOURCE_TYPE,
   applyMealWalletFunding,
-  normalizeMealWalletFundingState,
 } from './_internal/wallet-ledger';
 
 @Injectable()
@@ -226,17 +225,12 @@ export class MealWalletService {
     skip: number,
     take: number,
   ) {
-    const wallet = await this.findById(ctx, walletId);
-    const normalized = normalizeMealWalletFundingState(wallet);
+    await this.findById(ctx, walletId);
     return this.prisma.mealWalletFundingEntry.findMany({
       where: { walletId },
       skip,
       take,
       orderBy: { createdAt: 'desc' },
-    }).then((rows) => rows.map((row) => ({
-      ...row,
-      // legacy compatibility: wallet rows without bucket columns still resolve via normalized state
-      balanceVnd: normalized.balanceVnd,
-    })));
+    });
   }
 }

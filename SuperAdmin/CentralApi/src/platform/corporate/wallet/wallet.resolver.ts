@@ -12,13 +12,16 @@ import { RequirePermission } from '@core/rbac/decorators/require-permission.deco
 import { PaginationArgs } from '@core/graphql/pagination/pagination.args';
 import { MealWalletService } from './wallet.service';
 import { MealWalletModel } from './models/meal-wallet.model';
+import { MealWalletFundingEntryModel } from './models/meal-wallet-funding-entry.model';
 import { CreateMealWalletInput } from './dto/create-meal-wallet.input';
 import { FundMealWalletInput } from './dto/fund-meal-wallet.input';
+import { TopUpMealWalletInput } from './dto/top-up-meal-wallet.input';
 import { mealCtxFromUser } from '../_internal/caller-ctx';
 import { createListResponse, createObjectResponse } from '@core/response/operation-response.factory';
 
 const MealWalletModel__ListResp = createListResponse(MealWalletModel, 'MealWalletModelListResponse');
 const MealWalletModel__Resp = createObjectResponse(MealWalletModel, 'MealWalletModelResponse');
+const MealWalletFundingEntryModel__ListResp = createListResponse(MealWalletFundingEntryModel, 'MealWalletFundingEntryModelListResponse');
 
 @Resolver(() => MealWalletModel)
 export class MealWalletResolver {
@@ -64,5 +67,29 @@ export class MealWalletResolver {
     @CurrentUser() user: JwtPayload,
   ) {
     return this.service.fund(mealCtxFromUser(user), input);
+  }
+
+  @RequirePermission('corporate.wallet.topup')
+  @Mutation(() => MealWalletModel__Resp)
+  mealWalletTopUp(
+    @Args('input') input: TopUpMealWalletInput,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.service.topUp(mealCtxFromUser(user), input);
+  }
+
+  @RequirePermission('corporate.wallet.read')
+  @Query(() => MealWalletFundingEntryModel__ListResp, { name: 'mealWalletFundingEntriesByWallet' })
+  listFundingEntriesByWallet(
+    @Args('walletId', { type: () => ID }) walletId: string,
+    @Args() pagination: PaginationArgs,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.service.listFundingEntriesByWallet(
+      mealCtxFromUser(user),
+      walletId,
+      pagination.skip,
+      pagination.take,
+    );
   }
 }

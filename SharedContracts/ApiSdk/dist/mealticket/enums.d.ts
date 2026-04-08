@@ -11,6 +11,17 @@ export declare const MEAL_TICKET_WALLET_STATUS: {
     readonly CLOSED: "CLOSED";
 };
 export type MealTicketWalletStatus = (typeof MEAL_TICKET_WALLET_STATUS)[keyof typeof MEAL_TICKET_WALLET_STATUS];
+export declare const MEAL_TICKET_WALLET_FUNDING_SOURCE_TYPE: {
+    readonly COMPANY_ALLOWANCE: "COMPANY_ALLOWANCE";
+    readonly PERSONAL_TOP_UP: "PERSONAL_TOP_UP";
+};
+export type MealTicketWalletFundingSourceType = (typeof MEAL_TICKET_WALLET_FUNDING_SOURCE_TYPE)[keyof typeof MEAL_TICKET_WALLET_FUNDING_SOURCE_TYPE];
+export declare const MEAL_TICKET_WALLET_FUNDING_STATUS: {
+    readonly PENDING: "PENDING";
+    readonly POSTED: "POSTED";
+    readonly REVERSED: "REVERSED";
+};
+export type MealTicketWalletFundingStatus = (typeof MEAL_TICKET_WALLET_FUNDING_STATUS)[keyof typeof MEAL_TICKET_WALLET_FUNDING_STATUS];
 export declare const MEAL_TICKET_FUNDING_MODEL: {
     readonly PREPAID_DEPOSIT: "PREPAID_DEPOSIT";
     readonly CREDIT_NET15: "CREDIT_NET15";

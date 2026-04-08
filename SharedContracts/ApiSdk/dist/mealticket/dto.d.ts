@@ -1,7 +1,7 @@
 /**
  * MealTicket DTOs (field naming: camelCase per platform rule).
  */
-import type { MealTicketAuthMethod, MealTicketDeclineReason, MealTicketEInvoiceStatus, MealTicketFundingModel, MealTicketLoopType, MealTicketSettlementStatus, MealTicketTxnStatus, MealTicketWalletStatus } from './enums.js';
+import type { MealTicketAuthMethod, MealTicketDeclineReason, MealTicketEInvoiceStatus, MealTicketFundingModel, MealTicketLoopType, MealTicketSettlementStatus, MealTicketTxnStatus, MealTicketWalletFundingSourceType, MealTicketWalletFundingStatus, MealTicketWalletStatus } from './enums.js';
 /**
  * Corporate = 식권 플랫폼 B2B 고객 기업. 기준서 §2.1 신규 계층.
  * BrandHQ 와 무관한 독립 엔티티다. Branch/Menu/Inventory 를 소유하지 않는다.
@@ -46,14 +46,30 @@ export interface MealTicketMerchantSettlementAccount {
 }
 export interface MealTicketWallet {
     walletId: string;
-    tenantId: string;
+    tenantId?: string | null;
     corporateId: string;
     employeeId: string;
     badgeRfid?: string | null;
     status: MealTicketWalletStatus;
     balanceVnd: number;
+    companyAllowanceVnd: number;
+    personalTopUpVnd: number;
     dailyLimitVnd: number;
+    createdAt: string;
     updatedAt: string;
+}
+export interface MealTicketWalletFundingEntry {
+    fundingEntryId: string;
+    walletId: string;
+    sourceType: MealTicketWalletFundingSourceType;
+    status: MealTicketWalletFundingStatus;
+    amountVnd: number;
+    sourceBatchId?: string | null;
+    sourceReferenceId?: string | null;
+    note?: string | null;
+    postedAt?: string | null;
+    reversedAt?: string | null;
+    createdAt: string;
 }
 export interface MealTicketPolicyWindow {
     daysOfWeek: number[];
@@ -98,12 +114,14 @@ export interface MealTicketTransaction {
     authMethod: MealTicketAuthMethod;
     requestedAmountVnd: number;
     approvedAmountVnd: number;
+    companyShareVnd: number;
     employeeShareVnd: number;
     status: MealTicketTxnStatus;
     declineReason?: MealTicketDeclineReason | null;
     idempotencyKey: string;
     authorizedAt?: string | null;
     settledAt?: string | null;
+    createdAt: string;
 }
 export interface MealTicketSettlementBatch {
     batchId: string;
