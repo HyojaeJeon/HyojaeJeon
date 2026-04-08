@@ -15,7 +15,7 @@
         },
         "standard_layers": {
           "title": "Standard Business Layers",
-          "content": "| Layer | Role |\n|---|---|\n| **SuperAdmin** | Platform provider operations entity |\n| **RegionalDistributor** | Channel partner with exclusive distribution rights for a country/region |\n| **BrandHQ** | Brand headquarters operations entity |\n| **Branch** | Individual store/location under a brand |\n| **EdgePos** | POS terminal installed at a branch |\n| **Device** | Peripheral connected to an EdgePos |"
+          "content": "| Layer | Role |\n|---|---|\n| **SuperAdmin** | Platform provider operations entity |\n| **RegionalDistributor** | Channel partner with exclusive distribution rights for a country/region |\n| **BrandHQ** | Brand headquarters (in the meal-ticket context, partner restaurants also belong here) |\n| **Corporate** | **MealTicket-only new layer.** B2B customer company. Does not own Branch — owns only employees, budget, policy, invoices |\n| **Branch** | Individual store/location under a brand |\n| **EdgePos** | POS terminal installed at a branch |\n| **Device** | Peripheral connected to an EdgePos (includes `MealTicketClosedLoopTerminal`) |"
         },
         "db_identifiers": {
           "title": "DB Identifier Standards",
@@ -23,11 +23,11 @@
         },
         "project_specs": {
           "title": "Confirmed SPEC Summary by Project",
-          "content": "| Project | Confirmed SPEC | DB / Storage | Contract / Communication |\n|---|---|---|---|\n| **BrandPosApp** | C++ + CEF + Next.js(TS) | SQLite local DB | cefQuery + realtime event |\n| **RegionalDistributorPortal** | Next.js(TS) + App Router | No direct DB access | Apollo Client + GraphQL-first |\n| **BrandHQPortal** | Next.js(TS) + App Router | No direct DB access | Apollo Client + GraphQL-first |\n| **SuperAdmin/Portal** | Next.js(TS) + App Router | No direct DB access | Apollo Client + GraphQL-first |\n| **SuperAdmin/CentralApi** | NestJS + Fastify + Apollo Server | Prisma + PostgreSQL + raw SQL | GraphQL-first, REST only via Fastify |\n| **SuperAdmin/SyncWorkers** | Node.js(TS) + BullMQ | Redis + Central DB | Queue-driven |\n| **SharedKernel** | C++ shared kernel | - | native helper / protocol |\n| **SharedContracts** | TypeScript contract package | - | DTO / enum / schema |\n| **SharedAssets** | versioned runtime assets | - | i18n / static assets |"
+          "content": "| Project | Confirmed SPEC | DB / Storage | Contract / Communication |\n|---|---|---|---|\n| **BrandPosApp** | C++ + CEF + Next.js(TS) | SQLite local DB | cefQuery + realtime event |\n| **RegionalDistributorPortal** | Next.js(TS) + App Router | No direct DB access | Apollo Client + GraphQL-first |\n| **BrandHQPortal** | Next.js(TS) + App Router | No direct DB access | Apollo Client + GraphQL-first |\n| **SuperAdmin/Portal** | Next.js(TS) + App Router | No direct DB access | Apollo Client + GraphQL-first |\n| **CorporatePortal** | Next.js(TS) + App Router | No direct DB access | Apollo Client + GraphQL-first (dedicated to MealTicket Corporate layer, dev port 3003) |\n| **SuperAdmin/CentralApi** | NestJS + Fastify + Apollo Server | Prisma + PostgreSQL + raw SQL | GraphQL-first, REST only via Fastify |\n| **SuperAdmin/SyncWorkers** | Node.js(TS) + BullMQ | Redis + Central DB | Queue-driven |\n| **SharedKernel** | C++ shared kernel | - | native helper / protocol |\n| **SharedContracts** | TypeScript contract package | - | DTO / enum / schema |\n| **SharedAssets** | versioned runtime assets | - | static assets |"
         },
         "shared_assets": {
-          "title": "Multilingual/SharedAssets Distribution Principles",
-          "content": "- `SharedAssets` is not a shared runtime server but a **version-controlled source package**\n- `SharedAssets/i18n/locales/` is the single translation source for all platforms\n- Each platform copies/packages the required locale assets in its own build pipeline\n- Default language set: `ko`, `vi`, `en`\n- User/brand/branch language preferences are managed via DB settings; actual display strings are resolved by locale key"
+          "title": "In-app i18n Distribution Principles",
+          "content": "- `SharedAssets` is static assets only and does not own translations\n- `BrandPosApp/PosUi/src/i18n/locales/` is the single translation source for all platforms\n- Each platform copies/packages the required locale assets in its own build pipeline\n- Default language set: `ko`, `vi`, `en`\n- User/brand/branch language preferences are managed via DB settings; actual display strings are resolved by locale key"
         },
         "full_stack_overview": {
           "title": "Full Stack at a Glance",
@@ -46,7 +46,7 @@
         },
         "confirmed_spec": {
           "title": "Confirmed Spec",
-          "content": "| Component | Confirmed SPEC | Notes |\n|---|---|---|\n| SuperAdmin/Portal | Next.js(TS) + App Router + Apollo Client | Provider operations portal |\n| SuperAdmin/CentralApi | NestJS + Fastify + Apollo Server 5 | Multi-tenancy, RBAC, audit |\n| SuperAdmin/SyncWorkers | Node.js(TS) + BullMQ + Redis | outbox, retry, reconciliation |\n| SharedContracts | TypeScript contract package | Single source of shared contracts |\n| SharedAssets | runtime assets | i18n / static assets |"
+          "content": "| Component | Confirmed SPEC | Notes |\n|---|---|---|\n| SuperAdmin/Portal | Next.js(TS) + App Router + Apollo Client | Provider operations portal |\n| SuperAdmin/CentralApi | NestJS + Fastify + Apollo Server 5 | Multi-tenancy, RBAC, audit |\n| SuperAdmin/SyncWorkers | Node.js(TS) + BullMQ + Redis | outbox, retry, reconciliation |\n| SharedContracts | TypeScript contract package | Single source of shared contracts |\n| SharedAssets | runtime assets | static assets |"
         },
         "platform_overview": {
           "title": "Full Platform at a Glance",
@@ -130,6 +130,34 @@
           "title": "Settings Inheritance Model",
           "content": "Settings evaluation priority:\n\n1. `Global Default`\n2. `BrandHQ Default`\n3. `Branch Override`\n4. `EdgePos Override`\n\nRules:\n- Overrides should be minimized\n- It must be traceable which layer a given value came from\n- `PolicyVersion` and `CatalogVersion` must be managed together during deployment"
         },
+        "capability_entitlement_principles": {
+          "title": "Capability Entitlement — Principles",
+          "content": "BrandHQ must support three concurrent business scenarios:\n\n1. **POS + MealTicket** — operates own stores and also accepts meal-ticket payments\n2. **MealTicket only** — does not use our POS, only accepts meal-ticket payments\n3. **POS only** — not enrolled in the meal-ticket platform\n\nTo enable this, BrandHQ adopts a **capability-based Entitlement** model.\n\n- A BrandHQ can **independently subscribe to `POS` and `MEAL_TICKET`** (extensible later with `DELIVERY_AGGREGATOR`, `KDS`, ...).\n- The **single source of truth is the `BrandHqEntitlement` table**.\n- UI toggling is not security. All real enforcement happens in the **CentralApi service layer**.\n- Modeled as **entitlements (product permissions)**, not feature flags. State transitions and contract tracking are required."
+        },
+        "capability_entitlement_data_model": {
+          "title": "Capability Entitlement — Data Model",
+          "content": "| Column | Type | Description |\n|---|---|---|\n| `id` | uuid | PK |\n| `brandHqId` | FK → BrandHQ | Owner |\n| `capability` | enum `BrandHqCapability` | `POS` / `MEAL_TICKET` / ... |\n| `status` | enum `BrandHqEntitlementStatus` | `ACTIVE` / `SUSPENDED` / `TRIAL` / `EXPIRED` / `REVOKED` |\n| `activatedAt` | timestamp | When granted |\n| `expiresAt` | timestamp? | Expiry (null if perpetual) |\n| `grantedBySuperAdminId` | FK | Granter |\n| `revokedAt` | timestamp? | Revoke time |\n| `revokeReason` | text? | Revoke reason |\n| `contractRef` | text? | Contract reference |\n\nSharedContracts source: `SharedContracts/ApiSdk/src/entitlement/{enums,dto}.ts`."
+        },
+        "capability_entitlement_server_rules": {
+          "title": "Capability Entitlement — CentralApi Server Rules",
+          "content": "- `modules/entitlement/EntitlementService` is the **single guard entry point**.\n- Other domain services call this on the first line of each method:\n\n```\nawait this.entitlement.requireCapability(ctx, 'MEAL_TICKET');\n```\n\n- Called at the **service layer, not the resolver** (CLAUDE.md rule).\n- `SuperAdmin` and `RegionalDistributor` roles **bypass** the guard for cross-tenant support.\n- Grant / Suspend / Resume / Revoke mutations must explicitly invalidate the Redis cache (TTL 30s) and emit `AuditLog` entries with `actionType=ENTITLEMENT_*`.\n- The `me` query returns `brandHq.activeCapabilities: BrandHqCapability[]`."
+        },
+        "capability_entitlement_portal_rules": {
+          "title": "Capability Entitlement — BrandHQPortal Rules",
+          "content": "- Right after login, fetch `me.brandHq.activeCapabilities` and inject into `<CapabilityProvider>`.\n- Children read via `useCapability('POS')` / `useCapability('MEAL_TICKET')` hooks.\n- Sidebar/menu items carry a `requires` meta and are **not rendered at all** when the capability is missing.\n- Next.js App Router `(pos)/`, `(mealticket)/` route groups guard via `layout.tsx`. Missing capability → redirect to `/upgrade`.\n- `/upgrade` shows an upgrade CTA (\"This feature requires a subscription — contact SuperAdmin\"). Not a 403 — a UX page.\n- On revoke, Redis pub/sub triggers session invalidate; the portal refetches `me` on the next request to refresh the UI."
+        },
+        "capability_entitlement_rbac": {
+          "title": "Capability Entitlement — Permission Formula (capability ∩ RBAC)",
+          "content": "```\nEffective permissions = BrandHq.activeCapabilities ∩ User.roles.permissions\n```\n\n- Capability is attached to the **BrandHQ** (subscription product)\n- RBAC is attached to the **User** (employee role)\n- Their intersection is what the user can actually do."
+        },
+        "capability_entitlement_superadmin_ui": {
+          "title": "Capability Entitlement — SuperAdmin Management UI",
+          "content": "Route: `SuperAdmin/Portal` → `/brands/:brandHqId/entitlements`\n\nFeatures:\n\n- List of active capabilities\n- `[Grant POS]` / `[Grant MEAL_TICKET]` buttons\n- Per-entitlement status / expiry / history\n- Suspend / Resume / Revoke actions\n- Contract reference (`contractRef`) linking\n\nMutations:\n\n```\ngrantBrandHqCapability(brandHqId, capability, expiresAt?, contractRef?)\nsuspendBrandHqCapability(entitlementId, reason)\nresumeBrandHqCapability(entitlementId)\nrevokeBrandHqCapability(entitlementId, reason)\n```\n\nAll changes are automatically recorded in `AuditLog`."
+        },
+        "capability_entitlement_mealticket": {
+          "title": "Capability Entitlement — Application to MealTicket Domain",
+          "content": "- All write services in `modules/mealticket/{wallet,policy,transaction,settlement,einvoice}` must call `requireCapability(ctx, 'MEAL_TICKET')`.\n- Exception: read-style APIs in `modules/mealticket/merchant` (landing info during enrollment review) are allowed without the capability. However, transitioning `enrollment.isActive=true` requires `MEAL_TICKET`.\n- POS-domain write services (`catalog`, `policy`, `deploy`, branch ops) must call `requireCapability(ctx, 'POS')`.\n\n**Security principle**: hiding menus in the portal does not prevent enumeration. Always guard at the service layer."
+        },
         "deployment_sync": {
           "title": "Deployment and Synchronization",
           "content": "Two flows from the BrandHQ perspective:\n\n**Downstream Distribution** -- Deploy menus/pricing/policies to branches and terminals\n\n**Upstream Sync Consumption** -- Receive sales/status/errors from stores and reflect them in the operations dashboard\n\nKey principles:\n- Deployment is policy-centric\n- Upstream sync is operational visibility-centric\n- Real-time transaction success is determined by **local commit, not central API success**"
@@ -175,7 +203,7 @@
         },
         "communication_design": {
           "title": "Communication Design",
-          "content": "### PosRequest (UI → C++ Round-Trip)\n- Entry point: `PosUi/src/bridge/PosRequestSender.js`\n- C++ side: `PosRequestResponder → PosRequestActions → UseCases`\n\n### PosRealTime (C++ → UI One-Way)\n- C++ side: `UseCases → PosRealTimeSender`\n- UI side: `PosRealTimeReceiver`\n\n### JSON Envelope Rules\nAll messages have common headers: `v`, `requestId`, `timestamp`, `idempotencyKey` (conditional)\n\n### Device Error Rules\nDo not include a complete sentence in msg. Deliver via code-based fields: `type`, `device`, `code`, `msgKey`, `msgParams`, `severity`, `recoverable`, `retryable`, `action`"
+          "content": "### PosRequest (UI → C++ Round-Trip)\n- Entry point: `PosUi/src/bridge/PosRequestSender.js`\n- C++ side: `PosRequestResponder → PosRequestActions → UseCases`\n\n### PosRealTime (C++ → UI One-Way)\n- C++ side: `UseCases → PosRealTimeSender`\n- UI side: `PosRealTimeReceiver`\n\n### JSON Message Frame Rules\nAll messages have common headers: `v`, `requestId`, `timestamp`, `idempotencyKey` (conditional)\n\n### Device Error Rules\nDo not include a complete sentence in msg. Deliver via code-based fields: `type`, `device`, `code`, `msgKey`, `msgParams`, `severity`, `recoverable`, `retryable`, `action`"
         },
         "operational_gates": {
           "title": "Operational Gates",
@@ -245,7 +273,7 @@
         },
         "p1_contract": {
           "title": "P1 -- Contract / Interface",
-          "content": "- [ ] Message Envelope standard is commonly applied across all channels\n- [ ] Usage rules for `v`, `requestId`, `timestamp`, `idempotencyKey` fields are finalized\n- [ ] Bridge request/response examples are documented\n- [ ] `VERSION_MISMATCH` handling UX is defined"
+          "content": "- [ ] Message frame standard is commonly applied across all channels\n- [ ] Usage rules for `v`, `requestId`, `timestamp`, `idempotencyKey` fields are finalized\n- [ ] Bridge request/response examples are documented\n- [ ] `VERSION_MISMATCH` handling UX is defined"
         },
         "p1_observability": {
           "title": "P1 -- Observability",
@@ -258,6 +286,91 @@
         "p1_deployment": {
           "title": "P1 -- Deployment / Static Build",
           "content": "- [ ] Next.js builds with `output: 'export'` as standard\n- [ ] List of features prohibited in static export is shared\n- [ ] `app://pos/` scheme handler provides static file routing rules\n- [ ] UI/CEF/resource version synchronization rules exist"
+        }
+      }
+    },
+    "mealticket_overview": {
+      "title": "MealTicket Platform Overview / Subject Mapping",
+      "category": "Project Integrated Design",
+      "description": "How the Vietnam B2B mobile meal-ticket platform is integrated into the existing Platform. Not a separate server — embedded as the mealticket domain module inside SuperAdmin/CentralApi.",
+      "sections": {
+        "purpose": {
+          "title": "Purpose & Decision",
+          "content": "The meal-ticket platform is **not split into a separate server**. It is embedded into `SuperAdmin/CentralApi` as the `mealticket` domain module, sharing tenancy, auth, RBAC, audit log and settlement pipeline with existing assets.\n\nOnly a **logical bounded context** is maintained until physical-split triggers (regulation / load / team split) are met."
+        },
+        "subject_mapping": {
+          "title": "Subject Mapping",
+          "content": "| MealTicket Subject | Platform Layer | Portal/App |\n|---|---|---|\n| Platform provider | `SuperAdmin` | `SuperAdmin/Portal` |\n| Partner restaurant (franchise or single-store) | `BrandHQ` (+ child `Branch`) | `BrandHQPortal` (reuse, add `/mealticket/*` routes) |\n| **B2B customer company** (HR/Finance) | **`Corporate`** (new layer) | **`CorporatePortal`** (new project) |\n| Employee | User under `Corporate` | `MealTicketEmployeeApp` (new mobile) |\n| Cafeteria RFID/biometric terminal | `EdgePos` / `Device` | `MealTicketClosedLoopTerminal` |\n\n**Important**: Partner restaurant maps to `BrandHQ`. Customer company is the new `Corporate` layer, NOT BrandHQ."
+        },
+        "domain_boundaries": {
+          "title": "CentralApi Domain Boundaries",
+          "content": "- `modules/mealticket/wallet` — employee digital wallet, condition-based tokens\n- `modules/mealticket/policy` — meal policy builder\n- `modules/mealticket/transaction` — Open Loop / Closed Loop real-time authorization\n- `modules/mealticket/settlement` — 3-Way Matching reconciliation, merchant payout batches\n- `modules/mealticket/einvoice` — Vietnam GDT consolidated e-invoice\n- `modules/mealticket/merchant` — BrandHQ enrollment, commission, settlement account"
+        },
+        "portal_matrix": {
+          "title": "Project Matrix",
+          "content": "| Project | Status | Role |\n|---|---|---|\n| `SuperAdmin/Portal` | existing | Merchant contracts / commission engine / fraud / GDT |\n| `BrandHQPortal` | reuse | For partner restaurants. Adds `/mealticket/*` |\n| `CorporatePortal` | **new** | For customer companies (dev port 3003) |\n| `MealTicketEmployeeApp` | new | Employee mobile app |"
+        },
+        "offline_rules": {
+          "title": "Offline / Sync Rules",
+          "content": "- Real-time authorization transactions are **not Outbox-retryable**. Offline means blocked entry.\n- Closed Loop terminals may cache locally during outages and batch-sync on recovery (0.8s SLA per terminal).\n- `idempotencyKey` is generated locally and preserved until success ACK."
+        },
+        "split_triggers": {
+          "title": "Physical Split Triggers",
+          "content": "Extract `MealTicketApi` as an independent service when:\n\n1. Meal-ticket transaction load threatens CentralApi SLA\n2. Meal-ticket and POS deployment cadences diverge\n3. Regulatory / PII / PCI isolation scopes diverge"
+        }
+      }
+    },
+    "mealticket_corporate": {
+      "title": "Corporate (B2B Customer Company)",
+      "category": "Project Integrated Design",
+      "description": "The Corporate layer of the meal-ticket platform and the scope of the CorporatePortal project.",
+      "sections": {
+        "purpose": {
+          "title": "Why a new Corporate layer",
+          "content": "Customer companies **do not own Branches**. They own employees, budgets, policies and invoices. `BrandHQ` owns menus, branches, inventory, staff and operating hours — the two domain models do not overlap. Therefore `Corporate` is introduced as a **sibling layer** to `BrandHQ`."
+        },
+        "scope": {
+          "title": "CorporatePortal Scope",
+          "content": "**Manages**: departments, employees, wallets, meal policies, budget, allowed merchant pool, consolidated e-invoices, HRIS integration.\n\n**Does not manage**:\n\n| Resource | Owner |\n|---|---|\n| Menu / branches / inventory / staff / hours | `BrandHQPortal` |\n| Merchant contracts · commission engine | `SuperAdmin/Portal` |\n| Real-time payment authorization | `CentralApi/modules/mealticket/transaction` |\n| Closed Loop terminals | `MealTicketClosedLoopTerminal` |"
+        },
+        "routes": {
+          "title": "Routes (draft)",
+          "content": "```\n/dashboard          Budget burn / departmental reports\n/departments        Department tree\n/employees          Employees / Wallet / RFID badges\n/policies           Policy builder\n/budget             Top-up / auto allocation / expiry\n/merchants          Allowed merchant whitelist\n/invoices           Monthly consolidated e-invoice\n/integrations       HRIS integrations\n/settings           Company info / tax code / admins\n```"
+        },
+        "domain_model": {
+          "title": "Domain Model",
+          "content": "```\nCorporate\n ├─ Department\n ├─ Employee → Wallet\n ├─ MealPolicy\n ├─ FundingAccount\n ├─ AllowedMerchantPool\n └─ ConsolidatedInvoice (GDT)\n```\n\nSharedContracts source: `MealTicketCorporate` in `SharedContracts/ApiSdk/src/mealticket/dto.ts`."
+        },
+        "rules": {
+          "title": "Rules",
+          "content": "1. GraphQL root uses only `Query.meal*` and `Mutation.meal*` namespaces.\n2. DTO / enum / event are imported only from `SharedContracts/ApiSdk/src/mealticket`.\n3. Multi-tenant scope enforced at CentralApi service layer.\n4. No code / entity / route sharing with `BrandHQPortal`."
+        }
+      }
+    },
+    "mealticket_merchant": {
+      "title": "Merchant (Partner Restaurant = BrandHQ)",
+      "category": "Project Integrated Design",
+      "description": "Partner restaurants reuse the BrandHQ layer as-is. BrandHQPortal only gains meal-ticket routes.",
+      "sections": {
+        "purpose": {
+          "title": "Why partner restaurant = BrandHQ",
+          "content": "`BrandHQ` is the headquarters of a brand that owns multiple branches. Partner restaurants are identical — franchises or single stores both map to BrandHQ + Branch. Menus, branches, staff and operating hours already exist in BrandHQPortal, so meal-ticket participation only needs an enrollment flag, commission rate, settlement account and real-time approval inbox."
+        },
+        "brandhq_reuse": {
+          "title": "How BrandHQPortal is reused",
+          "content": "- Existing BrandHQ entities kept as-is\n- Only auxiliary entities attached 1:1:\n  - `MealTicketMerchantEnrollment`\n  - `MealTicketMerchantCommissionRate`\n  - `MealTicketMerchantSettlementAccount`\n- Menu visible only when `MealTicketMerchantEnrollment.isActive === true`"
+        },
+        "routes": {
+          "title": "BrandHQPortal MealTicket Routes (Merchant view)",
+          "content": "```\n/mealticket/enrollment      Platform enrollment / contract status\n/mealticket/inbox           Real-time approval inbox (Open Loop QR)\n/mealticket/transactions    Approved / declined / refunded history\n/mealticket/settlement      Settlement schedule / commissions / payouts\n/mealticket/invoices        Commission e-invoices\n/mealticket/account         Bank account / tax code\n```"
+        },
+        "enrollment_flag": {
+          "title": "Exposure Toggle",
+          "content": "- Visible only when `MealTicketMerchantEnrollment.isActive === true`.\n- This portal does not manage the `Corporate` domain — that belongs to `CorporatePortal`.\n- Payment authorization logic lives in `CentralApi/modules/mealticket/transaction`."
+        },
+        "closed_loop_terminal": {
+          "title": "Closed Loop Terminal (Cafeteria)",
+          "content": "Industrial-park / factory cafeterias use the `MealTicketClosedLoopTerminal` Device type defined in **Appendix Z of the Edge POS Architecture document**.\n\n- Approval SLA: 0.8s per terminal\n- Auth methods: `RFID_BADGE`, `BIOMETRIC_FACE`, `BIOMETRIC_FINGERPRINT`\n- Local caching allowed during outages + batch sync on recovery"
         }
       }
     }
@@ -281,7 +394,7 @@
     "d": {
       "title": "Request Flow",
       "summary": "UI → PosRequestSender → cefQuery → C++ Responder → Actions → UseCases",
-      "detail": "### PosRequestSender.ts — Envelope Creation & Transmission\n\n```\ninterface Envelope {\n  v: number              // Protocol version (currently 1)\n  requestId: string      // Auto-generated via crypto.randomUUID()\n  timestamp: string      // ISO 8601\n  cmd: string            // 'TABLE:SELECT'\n  params: Record<string, unknown>\n  idempotencyKey?: string\n}\n\ninterface PosResponse {\n  v: number\n  requestId: string\n  timestamp: string\n  ok: boolean\n  code: string           // 'OK' | 'BUSY' | 'DUPLICATE' | error code\n  data?: unknown\n  error?: { message: string }\n}\n```\n\n### Transport Selection\n\n```\ngetTransport():\n├── window.cefQuery exists? → cefTransport (actual POS)\n└── Otherwise              → mockTransport (dev mode)\n```\n\n### cefTransport.ts — CEF Native Call\n\n```\nwindow.cefQuery({\n  request: JSON.stringify(envelope),\n  onSuccess: (response) => JSON.parse(response),\n  onFailure: (errorCode, errorMessage) => throw Error\n})\n```\n\n### mockTransport.ts — Fake Responses for Development\n\n```\nSupported commands:\n├── 'TABLE:GET_ALL'  → Returns table.json fixture\n├── 'TABLE:SELECT'   → Changes target table status to 'U'\n├── 'MENU:GET_ALL'   → Returns menu.json fixture\n├── 'ORDER:GET'      → Returns empty order\n├── 'ORDER:ADD_ITEM' → Confirms item addition\n└── 'PAYMENT:EXECUTE'→ Returns payment success after 1.5s delay\n\nDev controls:\n- window.__MOCK_DELAY_MS = 200   // Simulate network delay\n- window.__MOCK_OFFLINE = true   // Simulate offline state\n```\n\n### C++ Side Reception: PosRequestResponder.cpp\n\n```\nReceive → JSON parse → Protocol version validation (v=1)\n→ Route by cmd prefix to domain:\n  ├── 'TABLE:*'   → TableActions::Handle()\n  ├── 'ORDER:*'   → OrderActions::Handle()\n  ├── 'PAYMENT:*' → PaymentActions::Handle()\n  └── 'SYSTEM:*'  → SystemActions::Handle()\n→ Build standard response format → JSON serialize → Return via cefQuery callback\n```\n\n### TableActions.cpp — Thin Router Example\n\n```\nTableActions::Handle(cmd, params_json, requestId, idempotencyKey)\n├── 'TABLE:GET_ALL'  → RefreshTablesUseCase.Execute(ctx)\n└── 'TABLE:SELECT'   → SelectTableUseCase.Execute(ctx, tableCode)\n\n// No business logic inside Actions — only UseCase invocation\n```\n\n**Prohibited**:\n- Executing SQL directly in Actions\n- Combining multiple Managers directly in Actions\n- Calling `window.cefQuery` directly from components"
+      "detail": "### PosRequestSender.ts — Message Frame Creation & Transmission\n\n```\ninterface MessageFrame {\n  v: number              // Protocol version (currently 1)\n  requestId: string      // Auto-generated via crypto.randomUUID()\n  timestamp: string      // ISO 8601\n  cmd: string            // 'TABLE:SELECT'\n  params: Record<string, unknown>\n  idempotencyKey?: string\n}\n\ninterface PosResponse {\n  v: number\n  requestId: string\n  timestamp: string\n  ok: boolean\n  code: string           // 'OK' | 'BUSY' | 'DUPLICATE' | error code\n  data?: unknown\n  error?: { message: string }\n}\n```\n\n### Transport Selection\n\n```\ngetTransport():\n├── window.cefQuery exists? → cefTransport (actual POS)\n└── Otherwise              → mockTransport (dev mode)\n```\n\n### cefTransport.ts — CEF Native Call\n\n```\nwindow.cefQuery({\n  request: JSON.stringify(envelope),\n  onSuccess: (response) => JSON.parse(response),\n  onFailure: (errorCode, errorMessage) => throw Error\n})\n```\n\n### mockTransport.ts — Fake Responses for Development\n\n```\nSupported commands:\n├── 'TABLE:GET_ALL'  → Returns table.json fixture\n├── 'TABLE:SELECT'   → Changes target table status to 'U'\n├── 'MENU:GET_ALL'   → Returns menu.json fixture\n├── 'ORDER:GET'      → Returns empty order\n├── 'ORDER:ADD_ITEM' → Confirms item addition\n└── 'PAYMENT:EXECUTE'→ Returns payment success after 1.5s delay\n\nDev controls:\n- window.__MOCK_DELAY_MS = 200   // Simulate network delay\n- window.__MOCK_OFFLINE = true   // Simulate offline state\n```\n\n### C++ Side Reception: PosRequestResponder.cpp\n\n```\nReceive → JSON parse → Protocol version validation (v=1)\n→ Route by cmd prefix to domain:\n  ├── 'TABLE:*'   → TableActions::Handle()\n  ├── 'ORDER:*'   → OrderActions::Handle()\n  ├── 'PAYMENT:*' → PaymentActions::Handle()\n  └── 'SYSTEM:*'  → SystemActions::Handle()\n→ Build standard response format → JSON serialize → Return via cefQuery callback\n```\n\n### TableActions.cpp — Thin Router Example\n\n```\nTableActions::Handle(cmd, params_json, requestId, idempotencyKey)\n├── 'TABLE:GET_ALL'  → RefreshTablesUseCase.Execute(ctx)\n└── 'TABLE:SELECT'   → SelectTableUseCase.Execute(ctx, tableCode)\n\n// No business logic inside Actions — only UseCase invocation\n```\n\n**Prohibited**:\n- Executing SQL directly in Actions\n- Combining multiple Managers directly in Actions\n- Calling `window.cefQuery` directly from components"
     },
     "e": {
       "title": "Persistence (Data Storage)",

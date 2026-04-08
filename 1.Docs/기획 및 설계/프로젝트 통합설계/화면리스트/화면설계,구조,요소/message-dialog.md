@@ -135,9 +135,9 @@ MESSAGE_DIALOG는 범용 확인/예-아니오 다이얼로그이다. 앱 전반�
 | 작업 | 대상 파일 경로 | 상태 |
 |---|---|---|
 | Molecule 구현 | `BrandPosApp/PosUi/src/shared/ui/molecules/MessageDialog.tsx` | TODO |
-| i18n | `SharedAssets/i18n/locales/ko/common.json` | TODO |
-| i18n | `SharedAssets/i18n/locales/vi/common.json` | TODO |
-| i18n | `SharedAssets/i18n/locales/en/common.json` | TODO |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/ko/common.json` | TODO |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/vi/common.json` | TODO |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/en/common.json` | TODO |
 
 ---
 

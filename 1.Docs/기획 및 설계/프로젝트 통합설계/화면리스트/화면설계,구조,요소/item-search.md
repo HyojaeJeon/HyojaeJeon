@@ -89,7 +89,7 @@
 ### 5.6 i18n / Error / Permission
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/` 기반 msgKey | 검색 placeholder, 버튼 라벨 등 |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/` 기반 msgKey | 검색 placeholder, 버튼 라벨 등 |
 | Error | 코드 기반 (type, device, code, msgKey). 검색은 에러 없음 (빈 결과 반환). ORDER:ADD_ITEM 에러는 oracc-bselect.md 참조 | 완성 문장 금지 |
 | Permission | 로그인된 직원 전원: 상품 검색 및 주문 추가 가능 | |
 

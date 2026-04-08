@@ -89,6 +89,8 @@ function inferSection(sourceHeader: string): string {
   if (/RegionalDistributor\/ChannelGovernance/i.test(sourceHeader)) return 'Distributor/ChannelGovernance';
   if (/BrandHQ\/MasterData/i.test(sourceHeader)) return 'BrandHQ/MasterData';
   if (/EdgePos\/OperationalCore/i.test(sourceHeader)) return 'EdgePOS/OperationalCore';
+  if (/MealTicket\/Domain/i.test(sourceHeader)) return 'MealTicket/Domain';
+  if (/SuperAdmin\/Rbac/i.test(sourceHeader)) return 'SuperAdmin/Rbac';
   return 'Unknown';
 }
 

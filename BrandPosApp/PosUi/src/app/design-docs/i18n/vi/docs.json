@@ -9,6 +9,7 @@
     "section_innovation": "Đổi mới, Sáng tạo",
     "section_project_design": "Thiết kế tổng hợp dự án",
     "section_feature_list": "Tính năng & Màn hình theo nền tảng",
+    "section_mealticket": "Nền tảng Phiếu ăn",
     "section_db_design": "Thiết kế DB",
     "section_design_tokens": "Token thiết kế",
     "section_atoms": "Phần tử cơ bản",
@@ -44,6 +45,9 @@
     "edgepos_architecture": "04 Kiến trúc Edge POS",
     "edgepos_az_guide": "05 Hướng dẫn A-Z Edge POS",
     "edgepos_checklist": "06 Checklist thiết kế P0-P1",
+    "mealticket_overview": "Tổng quan phiếu ăn / Ánh xạ chủ thể",
+    "mealticket_corporate": "Corporate (Doanh nghiệp B2B)",
+    "mealticket_merchant": "Merchant (Nhà hàng đối tác = BrandHQ)",
     "feature_coverage_matrix": "Ma trận tính năng",
     "superadmin_features": "Tính năng SuperAdmin",
     "distributor_features": "Tính năng RegionalDistributor",
@@ -301,7 +305,7 @@
         },
         "standard_layers": {
           "title": "표준 사업 계층",
-          "content": "| 계층 | 역할 |\n|---|---|\n| **SuperAdmin** | 플랫폼 공급사 운영 주체 |\n| **RegionalDistributor** | 국가/지역 독점 유통권을 가진 대리점/채널 파트너 |\n| **BrandHQ** | 브랜드 본사 운영 주체 |\n| **Branch** | 브랜드 산하의 개별 매장/지점 |\n| **EdgePos** | 지점에 설치된 POS 실행 단말 |\n| **Device** | EdgePos에 연결된 주변기기 |"
+          "content": "| Tầng | Vai trò |\n|---|---|\n| **SuperAdmin** | Chủ thể vận hành của nhà cung cấp nền tảng |\n| **RegionalDistributor** | Đại lý/đối tác kênh có quyền phân phối độc quyền theo quốc gia/khu vực |\n| **BrandHQ** | Trụ sở thương hiệu (trong ngữ cảnh phiếu ăn: bao gồm cả nhà hàng đối tác) |\n| **Corporate** | **Tầng mới dành riêng cho nền tảng phiếu ăn.** Doanh nghiệp B2B. Không sở hữu Branch, chỉ sở hữu nhân viên / ngân sách / chính sách / hoá đơn |\n| **Branch** | Chi nhánh/cửa hàng trực thuộc thương hiệu |\n| **EdgePos** | Thiết bị POS cài tại chi nhánh |\n| **Device** | Thiết bị ngoại vi kết nối với EdgePos (bao gồm `MealTicketClosedLoopTerminal`) |"
         },
         "db_identifiers": {
           "title": "DB 식별자 표준",
@@ -309,15 +313,15 @@
         },
         "project_specs": {
           "title": "프로젝트별 확정 SPEC 요약",
-          "content": "| Project | 확정 SPEC | DB / Storage | 계약 / 통신 |\n|---|---|---|---|\n| **BrandPosApp** | C++ + CEF + Next.js(TS) | SQLite local DB | cefQuery + realtime event |\n| **RegionalDistributorPortal** | Next.js(TS) + App Router | Direct DB access 없음 | Apollo Client + GraphQL-first |\n| **BrandHQPortal** | Next.js(TS) + App Router | Direct DB access 없음 | Apollo Client + GraphQL-first |\n| **SuperAdmin/Portal** | Next.js(TS) + App Router | Direct DB access 없음 | Apollo Client + GraphQL-first |\n| **SuperAdmin/CentralApi** | NestJS + Fastify + Apollo Server | Prisma + PostgreSQL + raw SQL | GraphQL-first, REST only via Fastify |\n| **SuperAdmin/SyncWorkers** | Node.js(TS) + BullMQ | Redis + Central DB | Queue-driven |\n| **SharedKernel** | C++ shared kernel | - | native helper / protocol |\n| **SharedContracts** | TypeScript contract package | - | DTO / enum / schema |\n| **SharedAssets** | versioned runtime assets | - | i18n / static assets |"
+          "content": "| Project | 확정 SPEC | DB / Storage | 계약 / 통신 |\n|---|---|---|---|\n| **BrandPosApp** | C++ + CEF + Next.js(TS) | SQLite local DB | cefQuery + realtime event |\n| **RegionalDistributorPortal** | Next.js(TS) + App Router | Direct DB access 없음 | Apollo Client + GraphQL-first |\n| **BrandHQPortal** | Next.js(TS) + App Router | Direct DB access 없음 | Apollo Client + GraphQL-first |\n| **SuperAdmin/Portal** | Next.js(TS) + App Router | Direct DB access 없음 | Apollo Client + GraphQL-first |\n| **CorporatePortal** | Next.js(TS) + App Router | Không truy cập DB trực tiếp | Apollo Client + GraphQL-first (dành riêng cho tầng Corporate phiếu ăn) |\n| **SuperAdmin/CentralApi** | NestJS + Fastify + Apollo Server | Prisma + PostgreSQL + raw SQL | GraphQL-first, REST only via Fastify |\n| **SuperAdmin/SyncWorkers** | Node.js(TS) + BullMQ | Redis + Central DB | Queue-driven |\n| **SharedKernel** | C++ shared kernel | - | native helper / protocol |\n| **SharedContracts** | TypeScript contract package | - | DTO / enum / schema |\n| **SharedAssets** | versioned runtime assets | - | static assets |"
         },
         "centralapi_hardening": {
           "title": "Tình Trạng Hardening Và Kiểm Chứng CentralApi",
           "content": "`SuperAdmin/CentralApi` hiện không chỉ dừng ở mô tả stack tổng quát mà đã phản ánh các tiêu chuẩn hardening gần với production.\n\n- **Cô lập dữ liệu multi-tenant**: phạm vi `RegionalDistributor / BrandHQ / Branch / EdgePos` được ép ở **service layer**, không chỉ ở resolver.\n- **Bảo vệ GraphQL**: đã áp dụng `DataLoader` theo request, depth limit `10`, complexity limit `200`, và error masking ở production.\n- **Hardening Fastify**: `helmet`, `compress`, `bodyLimit`, `requestTimeout`, `keepAliveTimeout`, và graceful shutdown hook được cố định như mặc định nền tảng.\n- **Prisma production hardening**: bật slow query logging, kiểm tra pool parameter, và cho phép raw SQL có kiểm soát ở hot path.\n- **Redis dùng thực tế**: login rate limit, distributed lock, sync handoff stream, và cache dữ liệu tham chiếu đã được triển khai.\n- **Hạng mục đã hoàn thành thêm**: cursor pagination cho `auditLogConnection` và `syncEventConnection`, Apollo Persisted Queries, tự động hóa persisted-query allow-list, multi-file schema qua `prisma.config.ts`, SWC builder, và phạm vi SDK typed rộng hơn trong `SharedContracts/ApiSdk`.\n- **Kiểm chứng tự động**: `npm run build`, `npm test -- --runInBand`, `npx prisma validate --config prisma.config.ts`, và `npx prisma generate --config prisma.config.ts` đã chạy qua như baseline hồi quy hiện tại.\n\nBacklog còn lại là mở rộng mutation SDK, đưa portal sang dùng trực tiếp SDK wrapper, và kiểm tra drift của allow-list ở production."
         },
         "shared_assets": {
-          "title": "다국어/SharedAssets 배포 원칙",
-          "content": "- `SharedAssets`는 공용 런타임 서버가 아니라 **버전 관리된 원본 패키지**\n- `SharedAssets/i18n/locales/`가 모든 플랫폼의 유일한 번역 원본\n- 각 플랫폼은 자기 빌드 파이프라인에서 필요한 locale 자산을 복사/패키징\n- 지원 언어 기본 세트: `ko`, `vi`, `en`\n- 사용자/브랜드/지점별 언어 선호도는 DB 설정으로 관리, 실제 표시 문자열은 locale key로 해석"
+          "title": "앱 내부 i18n 배포 원칙",
+          "content": "- `SharedAssets`는 static assets만 담당하고 번역 원본이 아니다\n- `BrandPosApp/PosUi/src/i18n/locales/`가 모든 플랫폼의 유일한 번역 원본\n- 각 플랫폼은 자기 빌드 파이프라인에서 필요한 locale 자산을 복사/패키징\n- 지원 언어 기본 세트: `ko`, `vi`, `en`\n- 사용자/브랜드/지점별 언어 선호도는 DB 설정으로 관리, 실제 표시 문자열은 locale key로 해석"
         },
         "full_stack_overview": {
           "title": "전체 스택 한눈에 보기",
@@ -340,7 +344,7 @@
         },
         "confirmed_spec": {
           "title": "확정 스펙",
-          "content": "| 구성 | 확정 SPEC | 비고 |\n|---|---|---|\n| SuperAdmin/Portal | Next.js(TS) + App Router + Apollo Client | 공급사 운영 포털 |\n| SuperAdmin/CentralApi | NestJS + Fastify + Apollo Server 5 | 멀티테넌시, RBAC, audit |\n| SuperAdmin/SyncWorkers | Node.js(TS) + BullMQ + Redis | outbox, retry, reconciliation |\n| SharedContracts | TypeScript contract package | 공통 계약 단일 원본 |\n| SharedAssets | runtime assets | i18n / static assets |"
+          "content": "| 구성 | 확정 SPEC | 비고 |\n|---|---|---|\n| SuperAdmin/Portal | Next.js(TS) + App Router + Apollo Client | 공급사 운영 포털 |\n| SuperAdmin/CentralApi | NestJS + Fastify + Apollo Server 5 | 멀티테넌시, RBAC, audit |\n| SuperAdmin/SyncWorkers | Node.js(TS) + BullMQ + Redis | outbox, retry, reconciliation |\n| SharedContracts | TypeScript contract package | 공통 계약 단일 원본 |\n| SharedAssets | runtime assets | static assets |"
         },
         "platform_overview": {
           "title": "전체 플랫폼 한눈에 보기",
@@ -477,7 +481,7 @@
         },
         "communication_design": {
           "title": "통신 설계",
-          "content": "### PosRequest (UI → C++ 왕복)\n- 진입점: `PosUi/src/bridge/PosRequestSender.js`\n- C++ 측: `PosRequestResponder → PosRequestActions → UseCases`\n\n### PosRealTime (C++ → UI 단방향)\n- C++ 측: `UseCases → PosRealTimeSender`\n- UI 측: `PosRealTimeReceiver`\n\n### JSON 봉투 규칙\n모든 메시지에 공통 헤더: `v`, `requestId`, `timestamp`, `idempotencyKey`(조건부)\n\n### Device Error 규칙\n완성 문장 msg를 싣지 않는다. 코드 기반 필드로 전달: `type`, `device`, `code`, `msgKey`, `msgParams`, `severity`, `recoverable`, `retryable`, `action`"
+          "content": "### PosRequest (UI → C++ 왕복)\n- 진입점: `PosUi/src/bridge/PosRequestSender.js`\n- C++ 측: `PosRequestResponder → PosRequestActions → UseCases`\n\n### PosRealTime (C++ → UI 단방향)\n- C++ 측: `UseCases → PosRealTimeSender`\n- UI 측: `PosRealTimeReceiver`\n\n### JSON 메시지 프레임 규칙\n모든 메시지에 공통 헤더: `v`, `requestId`, `timestamp`, `idempotencyKey`(조건부)\n\n### Device Error 규칙\n완성 문장 msg를 싣지 않는다. 코드 기반 필드로 전달: `type`, `device`, `code`, `msgKey`, `msgParams`, `severity`, `recoverable`, `retryable`, `action`"
         },
         "operational_gates": {
           "title": "운영 게이트",
@@ -555,7 +559,7 @@
         },
         "p1_contract": {
           "title": "P1 — 계약 / 인터페이스",
-          "content": "- [ ] 메시지 Envelope 표준이 모든 채널에 공통 적용\n- [ ] `v`, `requestId`, `timestamp`, `idempotencyKey` 필드 사용 규칙 고정\n- [ ] Bridge 요청/응답 예제가 문서화\n- [ ] `VERSION_MISMATCH` 처리 UX가 정의"
+          "content": "- [ ] 메시지 프레임 표준이 모든 채널에 공통 적용\n- [ ] `v`, `requestId`, `timestamp`, `idempotencyKey` 필드 사용 규칙 고정\n- [ ] Bridge 요청/응답 예제가 문서화\n- [ ] `VERSION_MISMATCH` 처리 UX가 정의"
         },
         "p1_observability": {
           "title": "P1 — 관측성",
@@ -952,6 +956,91 @@
         "local_setting": {
           "title": "LocalSetting 테이블",
           "content": "Edge POS 로컬 설정 (EdgePos Override).\n\n주요 컬럼: `Id`, `EdgePosId`, `SettingKey`, `SettingValue`, `SourceLayer` (Global / RegionalDistributor / BrandHQ / Branch / EdgePos), `PolicyVersion`, `AppliedAt`, `CreatedAt`\n\n사용 시나리오:\n- 설정 상속 모델의 최종 적용 값 저장\n- 어떤 값이 어느 계층에서 왔는지 추적\n- 중앙에서 배포된 정책과 로컬 override 구분"
+        }
+      }
+    },
+    "mealticket_overview": {
+      "title": "Tổng quan nền tảng phiếu ăn / Ánh xạ chủ thể",
+      "category": "Nền tảng phiếu ăn",
+      "description": "Cấu trúc tổng thể tích hợp nền tảng phiếu ăn B2B vào Platform hiện có. Không tách server riêng — nhúng như module domain mealticket bên trong SuperAdmin/CentralApi.",
+      "sections": {
+        "purpose": {
+          "title": "Mục đích và quyết định",
+          "content": "Nền tảng phiếu ăn **không tách thành server riêng**. Nó được nhúng vào `SuperAdmin/CentralApi` như module domain `mealticket`, dùng chung tenancy · auth · RBAC · audit log · pipeline đối soát.\n\nChỉ duy trì **bounded context logic** cho tới khi điều kiện tách vật lý (quy định / tải / tách tổ chức) được đáp ứng."
+        },
+        "subject_mapping": {
+          "title": "Ánh xạ chủ thể",
+          "content": "| Chủ thể phiếu ăn | Tầng Platform | Portal/App |\n|---|---|---|\n| Nhà cung cấp nền tảng | `SuperAdmin` | `SuperAdmin/Portal` |\n| Nhà hàng đối tác (chuỗi / đơn lẻ) | `BrandHQ` (+ `Branch`) | `BrandHQPortal` (tái sử dụng, thêm `/mealticket/*`) |\n| **Doanh nghiệp B2B** (HR/Tài chính) | **`Corporate`** (tầng mới) | **`CorporatePortal`** (dự án mới) |\n| Nhân viên | Người dùng thuộc `Corporate` | `MealTicketEmployeeApp` (mobile mới) |\n| Thiết bị RFID/Sinh trắc căng-tin | `EdgePos` / `Device` | `MealTicketClosedLoopTerminal` |\n\n**Quan trọng**: nhà hàng đối tác ánh xạ về `BrandHQ`, còn doanh nghiệp khách hàng là tầng mới `Corporate` chứ không phải `BrandHQ`."
+        },
+        "domain_boundaries": {
+          "title": "Ranh giới domain trong CentralApi",
+          "content": "- `modules/mealticket/wallet` — ví nhân viên, token có điều kiện (scope Corporate)\n- `modules/mealticket/policy` — builder chính sách theo phòng ban / chức danh / khung giờ (scope Corporate)\n- `modules/mealticket/transaction` — phê duyệt Open Loop (QR/barcode) và Closed Loop (RFID/sinh trắc) theo thời gian thực\n- `modules/mealticket/settlement` — đối soát 3-Way Matching, batch thanh toán merchant\n- `modules/mealticket/einvoice` — hoá đơn điện tử hợp nhất GDT\n- `modules/mealticket/merchant` — enrollment / biểu phí / tài khoản thanh toán của BrandHQ tham gia nền tảng"
+        },
+        "portal_matrix": {
+          "title": "Ma trận dự án",
+          "content": "| Dự án | Trạng thái | Vai trò |\n|---|---|---|\n| `SuperAdmin/Portal` | hiện có | Hợp đồng đối tác / engine biểu phí / phát hiện gian lận / tích hợp GDT |\n| `BrandHQPortal` | tái sử dụng | Dành cho nhà hàng đối tác. Thêm `/mealticket/*` (enrollment · inbox · settlement · invoices · account) |\n| `CorporatePortal` | **mới** | Dành cho doanh nghiệp khách hàng. Phòng ban · nhân viên · chính sách · ngân sách · hoá đơn hợp nhất |\n| `MealTicketEmployeeApp` | mới | Ứng dụng mobile cho nhân viên. Stack chưa quyết (PWA vs RN) |"
+        },
+        "offline_rules": {
+          "title": "Quy tắc Offline / Sync",
+          "content": "- Giao dịch phê duyệt thời gian thực (Open Loop QR, thẻ, app giao hàng) **không nằm trong đối tượng gửi lại Outbox**. Offline thì chặn.\n- Thiết bị Closed Loop (RFID/sinh trắc) cho phép cache cục bộ khi mất mạng + đồng bộ batch khi phục hồi (SLA 0.8s / thiết bị).\n- `idempotencyKey` sinh tại thiết bị, giữ cho tới khi nhận ACK thành công."
+        },
+        "split_triggers": {
+          "title": "Điều kiện tách vật lý",
+          "content": "Tách `MealTicketApi` thành service độc lập khi một trong các điều kiện sau xảy ra:\n\n1. Tải giao dịch phiếu ăn trộn với POS đe doạ SLA CentralApi\n2. Chu kỳ deploy của phiếu ăn và POS tách khỏi nhau\n3. Phạm vi tuân thủ quy định / PII / PCI của phiếu ăn khác POS"
+        }
+      }
+    },
+    "mealticket_corporate": {
+      "title": "Corporate (Doanh nghiệp B2B)",
+      "category": "Nền tảng phiếu ăn",
+      "description": "Tầng Corporate của nền tảng phiếu ăn và phạm vi trách nhiệm của CorporatePortal.",
+      "sections": {
+        "purpose": {
+          "title": "Lý do thêm tầng Corporate",
+          "content": "Khách hàng doanh nghiệp **không sở hữu Branch**. Họ chỉ sở hữu nhân viên · ngân sách · chính sách · hoá đơn.\n\nTrong khi đó `BrandHQ` sở hữu menu · chi nhánh · kho · nhân viên · giờ hoạt động, nên mô hình domain hoàn toàn khác. Ép khách hàng doanh nghiệp vào BrandHQ sẽ tạo một domain ôm hai mô hình không tương thích.\n\nDo đó `Corporate` được thêm như tầng **anh em** với `BrandHQ`."
+        },
+        "scope": {
+          "title": "Phạm vi CorporatePortal",
+          "content": "**Quản lý**:\n- Phòng ban, nhân viên\n- Ví nhân viên (Wallet): phát hành / thu hồi / kiểm tra số dư\n- Chính sách phiếu ăn: phòng ban / chức danh / khung giờ / hạn mức / Split Payment\n- Ngân sách: Prepaid Deposit / Credit Net15·Net30\n- Danh sách merchant được phép\n- Hoá đơn điện tử hợp nhất hàng tháng\n- Tích hợp HRIS (Base.vn / SAP / Workday)\n\n**Không quản lý**:\n\n| Tài nguyên | Dự án sở hữu |\n|---|---|\n| Menu / chi nhánh / kho / nhân viên / giờ hoạt động | `BrandHQPortal` |\n| Hợp đồng đối tác · engine biểu phí | `SuperAdmin/Portal` |\n| Phê duyệt thanh toán real-time | `CentralApi/modules/mealticket/transaction` |\n| Thiết bị Closed Loop | `MealTicketClosedLoopTerminal` |"
+        },
+        "routes": {
+          "title": "Route (bản thảo)",
+          "content": "```\n/dashboard          Tiêu hao ngân sách / báo cáo theo phòng ban\n/departments        Cây phòng ban\n/employees          Nhân viên / Wallet / ánh xạ thẻ RFID\n/policies           Builder chính sách\n/budget             Nạp tiền / phân bổ / hết hạn\n/merchants          Whitelist merchant được phép\n/invoices           Hoá đơn điện tử hợp nhất\n/integrations       Tích hợp HRIS\n/settings           Thông tin công ty / mã số thuế / tài khoản quản trị\n```"
+        },
+        "domain_model": {
+          "title": "Mô hình domain",
+          "content": "```\nCorporate (= khách hàng doanh nghiệp)\n ├─ Department\n ├─ Employee → Wallet (token có điều kiện)\n ├─ MealPolicy\n ├─ FundingAccount\n ├─ AllowedMerchantPool\n └─ ConsolidatedInvoice (GDT)\n```\n\nKhông giao nhau với `BrandHQ`. Nguồn gốc SharedContracts là `MealTicketCorporate` trong `SharedContracts/ApiSdk/src/mealticket/dto.ts`."
+        },
+        "rules": {
+          "title": "Quy tắc",
+          "content": "1. Root GraphQL chỉ dùng namespace `Query.meal*`, `Mutation.meal*`.\n2. DTO / enum / event chỉ import từ `SharedContracts/ApiSdk/src/mealticket`.\n3. Scope multi-tenant do service layer của CentralApi cưỡng chế.\n4. Không import / chia sẻ code / entity / route với `BrandHQPortal`. Chỉ chia sẻ `shared/ui` và `SharedContracts`."
+        }
+      }
+    },
+    "mealticket_merchant": {
+      "title": "Merchant (Nhà hàng đối tác = BrandHQ)",
+      "category": "Nền tảng phiếu ăn",
+      "description": "Nhà hàng đối tác tái sử dụng tầng BrandHQ. Chuỗi hay đơn lẻ đều ánh xạ về cấu trúc BrandHQ + Branch, và BrandHQPortal chỉ thêm các route phiếu ăn.",
+      "sections": {
+        "purpose": {
+          "title": "Vì sao nhà hàng đối tác = BrandHQ",
+          "content": "`BrandHQ` là trụ sở của thương hiệu sở hữu nhiều chi nhánh. Nhà hàng đối tác cũng vậy:\n\n- Chuỗi nhà hàng = 1 trụ sở + N chi nhánh → đúng cấu trúc BrandHQ\n- Nhà hàng đơn lẻ = 1 BrandHQ + 1 Branch\n- Đơn vị vận hành căng-tin = 1 BrandHQ + N Branch theo nhà máy\n\nMenu / chi nhánh / nhân viên / giờ hoạt động đã có sẵn trong `BrandHQPortal`, nên tham gia nền tảng phiếu ăn chỉ cần thêm vài mục: cờ tham gia + biểu phí + tài khoản thanh toán + inbox phê duyệt real-time. Không cần MerchantApp riêng."
+        },
+        "brandhq_reuse": {
+          "title": "Cách tái sử dụng BrandHQPortal",
+          "content": "- Giữ nguyên entity BrandHQ hiện có\n- Chỉ thêm các entity phụ attach 1:1 với BrandHQ:\n  - `MealTicketMerchantEnrollment`\n  - `MealTicketMerchantCommissionRate`\n  - `MealTicketMerchantSettlementAccount`\n- Menu và route chỉ hiển thị khi `MealTicketMerchantEnrollment.isActive === true`"
+        },
+        "routes": {
+          "title": "Route phiếu ăn của BrandHQPortal (góc nhìn Merchant)",
+          "content": "```\n/mealticket/enrollment      Đăng ký tham gia / trạng thái hợp đồng\n/mealticket/inbox           Inbox phê duyệt real-time (Open Loop QR)\n/mealticket/transactions    Lịch sử duyệt / từ chối / hoàn\n/mealticket/settlement      Lịch đối soát, trừ phí, trạng thái chuyển khoản\n/mealticket/invoices        Hoá đơn điện tử phí nền tảng phát hành\n/mealticket/account         Tài khoản ngân hàng, mã số thuế\n```"
+        },
+        "enrollment_flag": {
+          "title": "Quy tắc hiển thị",
+          "content": "- Tính năng phiếu ăn chỉ xuất hiện trong menu BrandHQPortal khi `MealTicketMerchantEnrollment.isActive === true`.\n- Portal này không quản lý domain `Corporate` — phần đó thuộc `CorporatePortal`.\n- Không đặt logic phê duyệt thanh toán ở đây — thuộc `CentralApi/modules/mealticket/transaction`."
+        },
+        "closed_loop_terminal": {
+          "title": "Thiết bị Closed Loop (căng-tin)",
+          "content": "Thanh toán trực tiếp tại căng-tin khu công nghiệp / nhà máy không dùng `MerchantApp` mà dùng kiểu thiết bị `MealTicketClosedLoopTerminal` định nghĩa trong **Phụ lục Z của tài liệu kiến trúc Edge POS**.\n\n- SLA phê duyệt: 0.8 giây / thiết bị (đáp ứng Shift Rush)\n- Phương thức xác thực: `RFID_BADGE`, `BIOMETRIC_FACE`, `BIOMETRIC_FINGERPRINT`\n- Cho phép cache local khi mất mạng + đồng bộ batch khi phục hồi\n- Giao dịch Open Loop thời gian thực không nằm trong Outbox; ngoại lệ cache chỉ áp dụng cho bảng Closed Loop riêng."
         }
       }
     },

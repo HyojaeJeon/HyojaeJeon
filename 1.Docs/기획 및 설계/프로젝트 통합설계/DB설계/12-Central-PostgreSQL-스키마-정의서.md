@@ -20,11 +20,11 @@
 |---|---|---|
 | Shared Reference Data | Language, Region, Currency | Central PostgreSQL + Edge SQLite cache |
 | SuperAdmin Governance | SuperAdminUser, PlatformLicense, PlatformPolicy, AuditLog, DeployPackage, DeployRelease | Central PostgreSQL |
-| RegionalDistributor Channel Governance | DistributorProfile, Territory, DistributorContract, BrandAssignment, DeploymentScope, ChannelUser | Central PostgreSQL |
+| RegionalDistributor Channel Governance | DistributorProfile, Territory, DistributorContract, BrandAssignment, DeploymentScope, DistributorUser | Central PostgreSQL |
 | BrandHQ Master Data | BrandProfile, Branch, BrandMenuCategory, BrandMenuItem, PricePolicy, Promotion, BranchOverride, OperatorTemplate | Central PostgreSQL |
 
 ## Relationship Summary
-- `DistributorProfile` is the parent for `Territory`, `DistributorContract`, `BrandAssignment`, `DeploymentScope`, and `ChannelUser`.
+- `DistributorProfile` is the parent for `Territory`, `DistributorContract`, `BrandAssignment`, `DeploymentScope`, and `DistributorUser`.
 - `BrandProfile` is the parent for `Branch`, `BrandMenuCategory`, `BrandMenuItem`, `PricePolicy`, `Promotion`, `BranchOverride`, and `OperatorTemplate`.
 - `Branch` is the operational unit under `BrandProfile`, while `EdgePos` stays in the Edge SQLite schema.
 
@@ -686,11 +686,11 @@
 - 롤아웃 대상 범위 정의
 - 배포/다운로드 가능한 액션 통제
 
-### 1.6 ChannelUser
+### 1.6 DistributorUser
 
 | 항목 | 값 |
 |---|---|
-| 테이블명 | `ChannelUser` |
+| 테이블명 | `DistributorUser` |
 | 소유 주체 | `SuperAdmin/CentralApi` |
 | 저장 위치 | Central PostgreSQL |
 | 원본 | Central |

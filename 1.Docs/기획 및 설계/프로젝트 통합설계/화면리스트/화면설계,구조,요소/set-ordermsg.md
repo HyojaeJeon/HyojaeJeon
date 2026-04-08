@@ -119,7 +119,7 @@
 
 ### 5.6 i18n
 
-- 버튼 라벨, 그리드 컬럼 헤더: SharedAssets/i18n/locales/ 기반 msgKey
+- 버튼 라벨, 그리드 컬럼 헤더: BrandPosApp/PosUi/src/i18n/locales/ 기반 msgKey
 - 주문메시지 내용 자체는 사용자 입력 데이터 (i18n 대상 아님)
 
 ---

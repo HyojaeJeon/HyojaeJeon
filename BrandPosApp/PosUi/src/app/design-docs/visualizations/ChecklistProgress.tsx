@@ -11,7 +11,7 @@ const P0_ITEMS = [
 const P1_ITEMS = [
   { cat: 'Browser/Runtime', items: ['CEF single instance strategy', 'Renderer crash recovery contract', 'No CloseBrowser on screen switch'] },
   { cat: 'Performance', items: ['x86 RSS memory baseline', 'Startup time budget', 'Main thread blocking audit'] },
-  { cat: 'Contract', items: ['JSON Envelope standard on all messages', 'Device error code-based (no msg strings)', 'Bridge contract type safety'] },
+  { cat: 'Contract', items: ['JSON MessageFrame standard on all messages', 'Device error code-based (no msg strings)', 'Bridge contract type safety'] },
   { cat: 'Observability', items: ['requestId chain in all logs', 'Structured logging format', 'Error rate dashboards'] },
   { cat: 'QA', items: ['Bridge contract tests automated', 'Screen transition regression tests', 'Offline scenario test suite'] },
   { cat: 'Deployment', items: ['Next.js static export verified', 'CEF cache/session persistence', 'Gradual rollout via INI flags'] },

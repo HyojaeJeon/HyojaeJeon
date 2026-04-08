@@ -11,6 +11,9 @@
         "swcrcPath": ".swcrc"
       }
     },
-    "tsConfigPath": "tsconfig.build.json"
+    "tsConfigPath": "tsconfig.build.json",
+    "assets": [
+      { "include": "core/i18n/locales/**/*.json", "outDir": "dist", "watchAssets": true }
+    ]
   }
 }

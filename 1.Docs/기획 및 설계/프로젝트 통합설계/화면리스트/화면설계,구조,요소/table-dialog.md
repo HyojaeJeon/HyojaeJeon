@@ -151,7 +151,7 @@
 
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/{ko,vi,en}/table.json` | msgKey 기반 |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/{ko,vi,en}/table.json` | msgKey 기반 |
 | Error | 코드 기반 (type, device, code, msgKey) | 완성 문장 금지 |
 | Permission | 로그인된 직원 전원: 테이블 선택, 층 이동, 페이지 전환. 결제 버튼은 PaymentScreen으로 handoff되므로 이 화면에서는 권한 검사 불필요 | 배달/근태/직원설정은 각 소유 화면에서 권한 검사 | |
 

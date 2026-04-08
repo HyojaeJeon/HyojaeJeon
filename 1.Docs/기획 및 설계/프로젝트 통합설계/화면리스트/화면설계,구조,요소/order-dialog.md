@@ -145,7 +145,7 @@
 ### 5.6 i18n / Error / Permission
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/` 기반 msgKey | KR/EN/VN 3개 언어 |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/` 기반 msgKey | KR/EN/VN 3개 언어 |
 | Error | Device Error는 코드 기반 (type, device, code, msgKey, severity, recoverable, retryable, action) | 완성 문장 하드코딩 금지 |
 | Permission — 주문 추가/수정 | 로그인 직원 전원 | ORDER:ADD_ITEM, ORDER:MODIFY_QTY, ORDER:SET_KITCHEN_MEMO |
 | Permission — 주문 취소 | 관리자 또는 권한 직원. 미충족 시 PERMISSION_DENIED | ORDER:REMOVE_ITEM, ORDER:CANCEL |

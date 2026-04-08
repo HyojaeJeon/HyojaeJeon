@@ -148,7 +148,7 @@ POS 장비(프린터, 카드리더기, 바코드스캐너 등) 설정을 관리�
 
 ### 5.6 i18n
 
-- 섹션 타이틀, 필드 라벨, 버튼: SharedAssets/i18n/locales/ 기반 msgKey
+- 섹션 타이틀, 필드 라벨, 버튼: BrandPosApp/PosUi/src/i18n/locales/ 기반 msgKey
 - 재시작 안내 메시지: msgKey 기반 (하드코딩 금지)
 
 ---

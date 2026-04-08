@@ -169,8 +169,8 @@ size="full" (525x383)                    size="compact" (414x327)
 | Organism 구현 | `BrandPosApp/PosUi/src/shared/ui/organisms/ContentViewer.tsx` | TODO |
 | RTK Query | `BrandPosApp/PosUi/src/store/api/systemApi.ts` | TODO |
 | PosRealTime | `BrandPosApp/PosUi/src/providers/PosRealTimeReceiver.tsx` | TODO |
-| i18n (ko) | `SharedAssets/i18n/locales/ko/content.json` | TODO |
-| i18n (vi) | `SharedAssets/i18n/locales/vi/content.json` | TODO |
+| i18n (ko) | `BrandPosApp/PosUi/src/i18n/locales/ko/content.json` | TODO |
+| i18n (vi) | `BrandPosApp/PosUi/src/i18n/locales/vi/content.json` | TODO |
 
 ---
 

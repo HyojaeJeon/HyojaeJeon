@@ -14,8 +14,9 @@ const sourceManifestPath = path.join(
   'persisted-operation-manifest.json',
 );
 const targetRelativePath = path.join(
-  'common',
+  'core',
   'graphql',
+  'plugins',
   'persisted-query-allow-list.generated.json',
 );
 const sourceTargetPath = path.join(centralApiRoot, 'src', targetRelativePath);

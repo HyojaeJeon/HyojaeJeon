@@ -18,4 +18,4 @@
 - UI 상태 관리는 `RTK Query + Redux Toolkit`으로 고정한다.
 - `React Query`를 도입하지 않는다.
 - `MFC UI`를 다시 도입하지 않는다.
-- 번역 원본은 `SharedAssets/i18n/locales`만 사용한다.
+- 번역 원본은 `BrandPosApp/PosUi/src/i18n/locales` 같은 앱 내부 i18n이 소유한다. `SharedAssets`는 번역 원본을 두지 않는다.

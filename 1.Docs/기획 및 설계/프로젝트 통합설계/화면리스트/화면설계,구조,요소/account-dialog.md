@@ -17,7 +17,7 @@
 
 레스토랑 POS의 **핵심 결제 다이얼로그**. 테이블 선택 후 주문 내역 확인, 결제수단 선택, 금액 입력, 할인 적용, 회원 연동, 결제 완료까지의 전체 결제 플로우를 처리한다. P0 최우선 마이그레이션 대상이다.
 
-KR/VN 버전이 별도 다이얼로그(IDD_ACCOUNT_DIALOG, IDD_ACCOUNT_DIALOG_VN)로 존재하나, 신규 아키텍처에서는 **i18n 기반 단일 PaymentScreen**으로 통합한다. VN 로케일 차이는 `SharedAssets/i18n/locales/vi/`에서 관리한다.
+KR/VN 버전이 별도 다이얼로그(IDD_ACCOUNT_DIALOG, IDD_ACCOUNT_DIALOG_VN)로 존재하나, 신규 아키텍처에서는 **i18n 기반 단일 PaymentScreen**으로 통합한다. VN 로케일 차이는 `BrandPosApp/PosUi/src/i18n/locales/vi/`에서 관리한다.
 
 ---
 
@@ -310,7 +310,7 @@ screens/PaymentScreen/
 ### 5.6 i18n / Error / Permission
 
 **i18n**
-- 번역 원본: `SharedAssets/i18n/locales/{ko,en,vi}/`
+- 번역 원본: `BrandPosApp/PosUi/src/i18n/locales/{ko,en,vi}/`
 - KR/VN 별도 다이얼로그 -> 단일 PaymentScreen + i18n 키 기반 전환
 - VN 로케일 차이: 결제수단 라벨, 통화 포맷, 세금 표시 방식
 
@@ -394,9 +394,9 @@ screens/PaymentScreen/
 | C++ Infra | BrandPosApp/Infrastructure/Persistence/SQLite/Tables/Payment/SellSlipCrud.cpp | 매출전표 CRUD |
 | C++ Infra | BrandPosApp/Infrastructure/Persistence/SQLite/Tables/Payment/SellDetailCrud.cpp | 매출상세 CRUD |
 | C++ Infra | BrandPosApp/Infrastructure/Persistence/SQLite/Tables/Customer/CustomerCrud.cpp | 고객 CRUD |
-| i18n | SharedAssets/i18n/locales/ko/payment.json | 한국어 결제 번역 |
-| i18n | SharedAssets/i18n/locales/en/payment.json | 영어 결제 번역 |
-| i18n | SharedAssets/i18n/locales/vi/payment.json | 베트남어 결제 번역 |
+| i18n | BrandPosApp/PosUi/src/i18n/locales/ko/payment.json | 한국어 결제 번역 |
+| i18n | BrandPosApp/PosUi/src/i18n/locales/en/payment.json | 영어 결제 번역 |
+| i18n | BrandPosApp/PosUi/src/i18n/locales/vi/payment.json | 베트남어 결제 번역 |
 
 ---
 
@@ -478,7 +478,7 @@ screens/PaymentScreen/
 
 - KR/VN 컨트롤 ID, 레이아웃, 기능 동일
 - 신규 아키텍처에서는 i18n 기반 단일 PaymentScreen으로 통합
-- 번역 원본: `SharedAssets/i18n/locales/vi/`
+- 번역 원본: `BrandPosApp/PosUi/src/i18n/locales/vi/`
 - KR/EN/VN 언어 전환은 런타임 i18n 키 기반 처리
 
 ---

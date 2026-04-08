@@ -19,6 +19,9 @@ export function generateStaticParams() {
     { slug: 'edgepos-architecture' },
     { slug: 'edgepos-az-guide' },
     { slug: 'edgepos-checklist' },
+    { slug: 'mealticket-overview' },
+    { slug: 'mealticket-corporate' },
+    { slug: 'mealticket-merchant' },
     // 플랫폼 별 화면/기능리스트
     { slug: 'feature-coverage-matrix' },
     { slug: 'superadmin-features' },

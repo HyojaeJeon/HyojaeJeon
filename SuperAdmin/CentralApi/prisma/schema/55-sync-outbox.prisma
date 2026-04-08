@@ -1,0 +1,46 @@
+// ─────────────────────────────────────────────
+// Sync Outbox — durable handoff
+// 한국어: SyncService 가 변경을 enqueue 할 때 DB 트랜잭션 내에서 함께 기록하는 outbox.
+//   기존 Redis stream 은 캐시/handoff hint 로만 사용하고, 실제 reliability 는 본 테이블 기준이다.
+//
+//   상태 전이:
+//     PENDING  → 워커가 LOCK 으로 가져감
+//     PROCESSING → 워커가 Edge / 하위 플랫폼에 적용 시도
+//     ACKED      → 워커가 적용 성공 ACK
+//     FAILED     → retryCount 초과 시. 운영자가 수동 처리
+//
+// ── P1-2: 파티셔닝 · Retention 전략 ──
+//   특성: INSERT-heavy, 1 row per propagation. 브랜드/지점이 늘면 월 수백만 행 가능.
+//   권장 전략 (migration 으로 별도 구성 — Prisma 로는 표현 불가):
+//     1. PARTITION BY RANGE (createdAt) — 월 단위 파티션.
+//        CREATE TABLE "SyncOutbox_YYYYMM" PARTITION OF "SyncOutbox"
+//          FOR VALUES FROM ('YYYY-MM-01') TO ('(YYYY+Δ)-(MM+1)-01');
+//     2. Retention 기본 값:
+//        · ACKED:   30 일 후 archive / drop
+//        · FAILED:  90 일 후 수동 검토 후 manual archive (운영 책임)
+//        · PENDING/PROCESSING: 유지 (워커가 처리해야 함)
+//     3. Purge job 은 SyncWorkers 의 별도 cron 으로 실행.
+//        (참고) scripts/ops/purge-sync-outbox.mjs 또는 k8s CronJob.
+//     4. 월 파티션 사전 생성: N 개월 미리 만들어두기 (pg_partman 권장).
+//
+// Tiếng Việt: Outbox bền vững — phân vùng theo tháng, giữ ACKED 30 ngày.
+// ─────────────────────────────────────────────
+
+model SyncOutbox {
+  id          String    @id @default(uuid()) @db.Uuid
+  channel     String    @db.VarChar(60) // 'rbac.role_changed' / 'rbac.assignment_changed' / 'menu.published' ...
+  scopeType   String    @db.VarChar(30) // 'GLOBAL' / 'DISTRIBUTOR' / 'BRAND_HQ' / 'BRANCH' / 'EDGE_POS'
+  scopeId     String?   @db.Uuid
+  payloadJson Json      @default("{}")
+  status      String    @default("PENDING") @db.VarChar(20) // PENDING | PROCESSING | ACKED | FAILED
+  retryCount  Int       @default(0)
+  lastError   String?   @db.VarChar(2000)
+  createdAt   DateTime  @default(now()) @db.Timestamptz()
+  pickedAt    DateTime? @db.Timestamptz()
+  ackedAt     DateTime? @db.Timestamptz()
+  workerId    String?   @db.VarChar(120)
+
+  @@index([status, createdAt], name: "idx_sync_outbox_status_time")
+  @@index([channel, status], name: "idx_sync_outbox_channel_status")
+  @@index([scopeType, scopeId, status], name: "idx_sync_outbox_scope_status")
+}

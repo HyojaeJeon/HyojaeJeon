@@ -77,6 +77,10 @@ Những vấn đề mà tài liệu này giải quyết:
   - 국가/지역 독점 유통권을 가진 대리점/채널 파트너
 - `BrandHQ`
   - 브랜드 본사 운영 주체
+  - 식권 플랫폼 맥락에서는 **제휴식당(프랜차이즈 본사 또는 단일 매장 식당)** 도 이 계층에 해당한다.
+- `Corporate`
+  - **식권 플랫폼 전용 신규 계층.** B2B 식권 고객사(기업/회사) 운영 주체.
+  - `BrandHQ` 의 형제 계층이며, `Branch` 를 소유하지 않고 임직원·예산·정책·세금계산서만 소유한다.
 - `Branch`
   - 브랜드 산하의 개별 매장/지점
 - `EdgePos`
@@ -92,6 +96,10 @@ Những vấn đề mà tài liệu này giải quyết:
   - đại lý/đối tác kênh có quyền phân phối độc quyền theo quốc gia/khu vực
 - `BrandHQ`
   - chủ thể vận hành cấp trụ sở thương hiệu
+  - Trong ngữ cảnh nền tảng phiếu ăn, **nhà hàng đối tác (chuỗi hoặc đơn lẻ)** cũng thuộc tầng này.
+- `Corporate`
+  - **Tầng mới dành riêng cho nền tảng phiếu ăn.** Chủ thể vận hành doanh nghiệp khách hàng B2B.
+  - Là tầng anh em với `BrandHQ`, không sở hữu `Branch`, chỉ sở hữu nhân viên / ngân sách / chính sách / hoá đơn.
 - `Branch`
   - cửa hàng/chi nhánh trực thuộc thương hiệu
 - `EdgePos`
@@ -191,25 +199,25 @@ flowchart TD
 | `SuperAdmin/SyncWorkers` | `Node.js(TypeScript) + BullMQ` | `Redis` + Central DB | Queue-driven | outbox, retry, reconciliation |
 | `SharedKernel` | `C++ shared kernel` | - | native helper / protocol | low-level 공용 계층 |
 | `SharedContracts` | `TypeScript contract package` | - | DTO / enum / schema | 공통 계약 단일 원본 |
-| `SharedAssets` | versioned runtime assets package | - | i18n / static assets | 공용 자산 원본 (build-time copy, not shared runtime server) |
+| `SharedAssets` | versioned runtime assets package | - | static assets only | 공용 자산 원본 (i18n 제외, build-time copy 대상만 유지) |
 
 ### 2.4 다국어/SharedAssets 배포 원칙 / Nguyên tắc đa ngôn ngữ và triển khai SharedAssets
 
 #### 한국어
 
 - `SharedAssets`는 공용 런타임 서버가 아니라 버전 관리된 원본 패키지다.
-- `SharedAssets/i18n/locales/`가 모든 플랫폼의 유일한 번역 원본이다.
-- 각 플랫폼은 자기 빌드 파이프라인에서 필요한 locale 자산을 복사하거나 패키징해서 사용한다.
-- 프로덕션 서버가 서로 달라도, 같은 `SharedAssets` 버전만 배포물에 포함되면 된다.
+- 번역 원본은 각 프로젝트 내부 i18n 이다. `SharedAssets`에는 i18n 을 두지 않는다.
+- 각 플랫폼은 자기 빌드 파이프라인에서 필요한 locale 자산을 자체 패키징해서 사용한다.
+- 프로덕션 서버가 서로 달라도, 같은 `SharedAssets` 버전만 배포물에 포함되면 된다. 번역은 각 프로젝트 번들에 포함한다.
 - 사용자/브랜드/지점별 언어 선호도는 DB 설정으로 관리하고, 실제 표시 문자열은 locale key로 해석한다.
 - 지원 언어의 기본 세트는 `ko`, `vi`, `en`이다.
 
 #### Tiếng Việt
 
 - `SharedAssets` không phải là một shared runtime server, mà là một gói nguồn được version hóa.
-- `SharedAssets/i18n/locales/` là nguồn dịch duy nhất cho toàn bộ platform.
-- Mỗi platform sẽ copy hoặc đóng gói locale assets cần thiết trong pipeline build của chính nó.
-- Dù production server khác nhau, chỉ cần cùng một version `SharedAssets` nằm trong artifact là đủ.
+- Nguồn dịch nằm trong i18n nội bộ của từng project, `SharedAssets` không chứa i18n.
+- Mỗi platform sẽ tự đóng gói locale assets cần thiết trong pipeline build của chính nó.
+- Dù production server khác nhau, chỉ cần cùng một version `SharedAssets` nằm trong artifact là đủ. Phần dịch nằm trong artifact của từng project.
 - Preference ngôn ngữ theo user/brand/branch được quản lý trong DB; chuỗi hiển thị thực tế được resolve theo locale key.
 - Bộ ngôn ngữ mặc định là `ko`, `vi`, `en`.
 
@@ -481,14 +489,14 @@ flowchart TD
 #### 한국어
 
 - 역할: 버전 관리된 런타임 자산 원본
-- 포함: i18n JSON, fonts, icons, static assets
+- 포함: fonts, icons, static assets
 - 사용처: 각 플랫폼의 build artifact로 복사되어 사용됨
 - 금지: 공용 런타임 서버처럼 직접 마운트하여 여러 플랫폼이 같은 파일 시스템을 공유하는 방식, 업무 로직, API 코드, DB 코드
 
 #### Tiếng Việt
 
 - Vai trò: nguồn tài sản runtime được version hóa
-- Bao gồm: i18n JSON, fonts, icons, static assets
+- Bao gồm: fonts, icons, static assets
 - Nơi dùng: được copy vào build artifact của từng platform
 - Không được: mount trực tiếp như shared runtime server để nhiều platform cùng dùng chung filesystem, chứa logic nghiệp vụ, API code, DB code
 
@@ -505,7 +513,7 @@ flowchart TD
   - 포털은 DataLoader를 직접 구현하지 않는다.
 - 대량 목록은 pagination, lazy loading, fragment 분리, route-level code splitting으로 처리한다.
 - `SharedContracts`를 DTO/enum/event의 단일 원본으로 사용한다.
-- `SharedAssets/i18n/locales`를 번역 원본으로 사용한다.
+- 각 프로젝트 내부 i18n을 번역 원본으로 사용한다.
 - 유지보수 원칙:
   - 화면별 서버 상태를 Redux에 중복 저장하지 않는다.
   - feature domain 단위로 컴포넌트/쿼리/뮤테이션을 묶는다.
@@ -521,7 +529,7 @@ flowchart TD
   - Portal không tự triển khai DataLoader.
 - Danh sách lớn phải xử lý bằng pagination, lazy loading, tách fragment và route-level code splitting.
 - Dùng `SharedContracts` làm nguồn gốc duy nhất cho DTO/enum/event.
-- Dùng `SharedAssets/i18n/locales` làm nguồn dịch.
+- Dùng i18n nội bộ của từng project làm nguồn dịch.
 - Nguyên tắc maintainability:
   - Không lưu trùng server state vào Redux.
   - Gom component/query/mutation theo domain feature.
@@ -703,9 +711,10 @@ flowchart TD
 - `SuperAdmin/Portal` = `Next.js(TypeScript) + GraphQL Client`
 - `SuperAdmin/CentralApi` = `NestJS + Fastify + Apollo Server + Prisma + PostgreSQL` / REST only in CentralApi via Fastify
 - `SuperAdmin/SyncWorkers` = `Node.js(TypeScript) + BullMQ + Redis`
+- `SuperAdmin/CorporatePortal` = `Next.js(TypeScript) + GraphQL Client` *(식권 플랫폼 B2B 고객 기업 전용 포털, `Corporate` 계층 관리)*
 - `SharedKernel` = `C++ shared kernel`
 - `SharedContracts` = `TypeScript shared contract package`
-- `SharedAssets` = `runtime assets`
+- `SharedAssets` = `runtime static assets`
 
 ### Tiếng Việt
 
@@ -718,6 +727,127 @@ Stack cuối cùng của dự án được cố định như sau.
 - `SuperAdmin/Portal` = `Next.js(TypeScript) + GraphQL Client`
 - `SuperAdmin/CentralApi` = `NestJS + Fastify + Apollo Server + Prisma + PostgreSQL` / REST only in CentralApi via Fastify
 - `SuperAdmin/SyncWorkers` = `Node.js(TypeScript) + BullMQ + Redis`
+- `SuperAdmin/CorporatePortal` = `Next.js(TypeScript) + GraphQL Client` *(식권 플랫폼 B2B 고객 기업 전용 포털, `Corporate` 계층 관리)*
 - `SharedKernel` = `C++ shared kernel`
 - `SharedContracts` = `TypeScript shared contract package`
-- `SharedAssets` = `runtime assets`
+- `SharedAssets` = `runtime static assets`
+
+---
+
+## 99. MealTicket 도메인 편입 (B2B 모바일 식권 플랫폼)
+## 99. Tích hợp MealTicket domain (Nền tảng phiếu ăn B2B)
+
+### 99.1 원칙
+
+- 식권 플랫폼은 **별도 서버로 분리하지 않는다**. `SuperAdmin/CentralApi` 내부에 `mealticket` 도메인 모듈로 편입한다.
+- 물리 분리 트리거(규제/부하/조직 분리)가 충족되기 전까지 **논리적 경계(bounded context)** 만 유지한다.
+- 식권 도메인도 공통 계층(`SuperAdmin / RegionalDistributor / BrandHQ / Branch / EdgePos / Device`)을 그대로 따른다.
+
+### 99.2 주체 매핑 (정정본)
+
+| 식권 플랫폼 주체 | Platform 계층 매핑 | 사용 포털/앱 |
+|---|---|---|
+| 플랫폼 사업자 | `SuperAdmin` | `SuperAdmin/Portal` |
+| 제휴식당 (프랜차이즈 본사 또는 단일 매장 식당) | `BrandHQ` (+ 하위 `Branch`) | `BrandHQPortal` (기존 재사용, `/mealticket/*` 라우트 추가) |
+| B2B 고객 기업 (HR/재무) | **`Corporate`** (신규 계층) | **`CorporatePortal`** (신규 프로젝트) |
+| 임직원 | `Corporate` 산하 사용자 | `MealTicketEmployeeApp` (신규 모바일) |
+| 구내식당 RFID/생체인식 단말 | `EdgePos` / `Device` (타입 `MealTicketClosedLoopTerminal`) | Edge POS 설계서 부록 Z |
+
+**중요**: 제휴식당은 `BrandHQ` 로 매핑되며, 고객 기업은 `BrandHQ` 가 아니라 신규 `Corporate` 계층이다. 두 주체는 **도메인 모델이 0% 겹치지 않는다** — 제휴식당은 메뉴/지점/직원/영업시간을 소유하고, 고객 기업은 임직원/예산/정책/세금계산서만 소유한다.
+
+### 99.3 도메인 경계 (CentralApi 내부)
+
+- `platform/corporate/wallet` — 임직원 디지털 지갑, 조건부 토큰 (`Corporate` 스코프)
+- `platform/corporate/policy` — 부서/직급/시간대 식대 정책 빌더 (`Corporate` 스코프)
+- `platform/corporate/transaction` — Open Loop(QR/바코드), Closed Loop(RFID/생체) 승인
+- `platform/corporate/settlement` — 3-Way Matching, 가맹점 정산 배치
+- `platform/corporate/einvoice` — 베트남 통합 전자세금계산서(Consolidated E-Invoice). **통합 모드 단독** (월 1회 corporate × periodStart 단위, 단건/개인('Khách lẻ') 발급 모드 미사용). provider 추상화 (`EInvoiceProvider`) 위에 1차 구현 `WeTaxProvider`. 사양: `1.Docs/식권관리플랫폼/EInvoice-WeTax-사양.md`
+- `platform/corporate/merchant` — 제휴식당(`BrandHQ`)의 식권 참여(enrollment), 수수료율, 정산계좌 관리
+
+### 99.4 DB / GraphQL / 계약 규칙
+
+- DB 테이블은 `Meal*` 네임스페이스(`PascalCase`, 신규 컬럼 `camelCase`).
+- GraphQL 루트는 `Query.meal*`, `Mutation.meal*`, `Subscription.meal*` 네임스페이스 분리.
+- 공통 DTO / enum / event 원본은 `SharedContracts/ApiSdk/src/mealticket`.
+- 멀티테넌트 스코프 강제는 기존 CentralApi 서비스/쿼리 레이어 규칙 준용.
+
+### 99.5 Edge / Offline 규칙
+
+- Closed Loop(RFID, 생체인식) 단말은 `EdgePos/Device` 신규 타입 `MealTicketClosedLoopTerminal`.
+- 실시간 승인형 거래(Open Loop QR, 카드, 배달앱)는 **Outbox 재전송 대상이 아니다**. 오프라인이면 진입 차단.
+- Closed Loop 단말은 네트워크 단절 시 로컬 캐싱 + 복구 시 일괄 동기화 허용(단말당 0.8초 승인 SLA).
+
+### 99.6 물리 분리 트리거
+
+1. 식권 트랜잭션 부하가 POS와 섞여 CentralApi SLA를 위협할 때
+2. 식권 사업부와 POS 사업부의 배포 주기가 분리될 때
+3. 규제/개인정보/PCI 격리 범위가 POS와 달라질 때
+
+---
+
+## 100. BrandHQ Entitlement (Capability 기반 권한)
+## 100. BrandHQ Entitlement (Phân quyền theo capability)
+
+### 100.1 원칙
+
+- 한 BrandHQ 는 **`POS` / `MEAL_TICKET` 두 가지 capability 를 독립적으로 구독**할 수 있다. (향후 `DELIVERY_AGGREGATOR`, `KDS` 등 확장 가능)
+- Capability 상태의 **단일 원본은 DB 테이블 `BrandHqEntitlement`** 이다.
+- UI 토글은 보안이 아니다. 모든 실제 enforcement 는 **CentralApi service layer** 가 담당한다.
+- Feature flag 가 아니라 **entitlement(상품 권한)** 로 다룬다. 상태 전이와 계약 추적이 필요하다.
+
+### 100.2 데이터 모델 (`BrandHqEntitlement`)
+
+| 컬럼 | 타입 | 설명 |
+|---|---|---|
+| `id` | uuid | PK |
+| `brandHqId` | FK → BrandHQ | 소유자 |
+| `capability` | enum `BrandHqCapability` | `POS` / `MEAL_TICKET` / ... |
+| `status` | enum `BrandHqEntitlementStatus` | `ACTIVE` / `SUSPENDED` / `TRIAL` / `EXPIRED` / `REVOKED` |
+| `activatedAt` | timestamp | 발급 시각 |
+| `expiresAt` | timestamp? | 만료 시각 (무기한이면 null) |
+| `grantedBySuperAdminId` | FK | 발급자 |
+| `revokedAt` | timestamp? | 회수 시각 |
+| `revokeReason` | text? | 회수 사유 |
+| `contractRef` | text? | SuperAdmin 계약 참조 |
+
+### 100.3 SharedContracts 단일 원본
+
+- `SharedContracts/ApiSdk/src/entitlement/enums.ts` — `BRAND_HQ_CAPABILITY`, `BRAND_HQ_ENTITLEMENT_STATUS`, `ENTITLEMENT_ERROR_CODE`
+- `SharedContracts/ApiSdk/src/entitlement/dto.ts` — `BrandHqEntitlement`, `BrandHqActiveCapabilitiesSummary`, `Grant/Suspend/RevokeBrandHqCapabilityInput`
+
+### 100.4 CentralApi 서버측 규칙
+
+- `core/entitlement/EntitlementService` 가 **단일 가드 진입점**이다.
+- 다른 도메인 service 는 메서드 첫 줄에서 `await this.entitlement.requireCapability(ctx, 'POS' | 'MEAL_TICKET')` 를 호출한다.
+- **Resolver 가 아니라 service layer** 에서 호출한다. (CLAUDE.md 공통 규칙)
+- `SuperAdmin` / `RegionalDistributor` 역할은 cross-tenant 지원을 위해 가드를 **우회**한다.
+- Grant / Suspend / Resume / Revoke mutation 은 Redis 캐시를 명시적으로 무효화하고 AuditLog 에 `actionType=ENTITLEMENT_*` 로 기록한다.
+- `me` (또는 `currentSession`) 쿼리는 `brandHq.activeCapabilities: BrandHqCapability[]` 필드를 반환한다.
+
+### 100.5 MealTicket 도메인 적용
+
+- `platform/corporate/*` 의 모든 write service 는 `requireCapability(ctx, 'MEAL_TICKET')` 을 호출해야 한다.
+- 예외: `platform/corporate/merchant` 의 **조회 성격 API** (가입 검토 landing) 는 capability 없이도 허용한다. 단 enrollment 를 `isActive=true` 로 전이시킬 때는 `MEAL_TICKET` 필수.
+
+### 100.6 포털 적용 규칙
+
+- `BrandHQPortal` 은 로그인 직후 `me.brandHq.activeCapabilities` 를 받아 `<CapabilityProvider>` 에 주입한다.
+- `useCapability('POS')` / `useCapability('MEAL_TICKET')` 훅으로 UI 를 토글한다.
+- 사이드바 항목은 `requires` 메타를 보고 렌더 자체를 생략한다.
+- capability 없는 라우트 직접 접근은 **403 이 아니라 `/upgrade` 페이지** 로 유도한다.
+- Revoke 시 Redis pub/sub → 포털이 다음 request 에서 `me` 를 재조회.
+
+### 100.7 권한 계산 식
+
+```
+실제 가용 권한 = BrandHq.activeCapabilities ∩ User.roles.permissions
+```
+- Capability 는 BrandHQ 단위 (구독 상품)
+- RBAC 는 User 단위 (직원 개별)
+- 교집합이 실제 사용자가 수행 가능한 작업이다.
+
+### 100.8 SuperAdmin 관리 UI
+
+- 라우트: `SuperAdmin/Portal` 의 `/brands/:brandHqId/entitlements`
+- 기능: 활성 capability 목록, Grant / Suspend / Resume / Revoke, 상태/만료/히스토리, 계약 참조 연결
+- 모든 조작은 AuditLog 에 자동 기록된다.

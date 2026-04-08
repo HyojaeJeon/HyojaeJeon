@@ -8,7 +8,7 @@
 // 이 컴포넌트는 VN 로케일 전용 UI 차이를 캡슐화한다:
 // - VND 통화 포맷 (소수점 없음, 천 단위 구분자 '.')
 // - 베트남 VAT 규정 기반 세금 표시
-// - VN 로케일 라벨 (SharedAssets/i18n/locales/vi/payment.json)
+// - VN 로케일 라벨 (PosUi/src/i18n/locales/vi/payment.json)
 // -------------------------------------------------------------------
 
 interface PaymentVNExtensionProps {

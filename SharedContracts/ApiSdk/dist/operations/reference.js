@@ -3,7 +3,8 @@ export const languagesOperation = {
     document: `
     query Languages($skip: Int, $take: Int) {
       languages(skip: $skip, take: $take) {
-        id
+        success { code message requestId data {
+          id
         languageCode
         nativeName
         displayName
@@ -12,6 +13,8 @@ export const languagesOperation = {
         isActive
         createdAt
         updatedAt
+        } }
+        error { code message requestId details }
       }
     }
   `,

@@ -226,11 +226,11 @@ Nhiệm vụ của màn hình không phải tự tạo dữ liệu mà là **đ�
 
 이 계층의 책임은 다음과 같다.
 
-- 요청 envelope 생성
+- 표준 메시지 프레임 생성
 - idempotency key 부여
 - 파라미터 검증
 - 도메인별 라우팅
-- 실패 시 표준 error 반환
+- 실패 시 표준 error 응답 반환
 
 ### Tiếng Việt
 
@@ -245,7 +245,7 @@ Các file chính:
 
 Trách nhiệm của tầng này:
 
-- tạo request envelope
+- tạo message frame chuẩn
 - gắn idempotency key
 - kiểm tra tham số
 - routing theo domain

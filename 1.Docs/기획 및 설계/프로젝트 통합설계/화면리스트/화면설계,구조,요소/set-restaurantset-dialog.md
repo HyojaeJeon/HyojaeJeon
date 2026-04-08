@@ -28,7 +28,7 @@
 | 05-Edge-POS-전체-흐름-AZ-가이드 | INI feature flag 제어 | Setup 모드 진입 플래그 |
 | CLAUDE.md | PosUi 개발 규칙 / Screen 규칙 | shared/ui import, RTK Query 사용 |
 | CLAUDE.md | CEF / UI 운영 규칙 | 단일 CefBrowser 인스턴스 유지, 화면 전환 시 CloseBrowser 금지 |
-| CLAUDE.md | i18n 규칙 | 언어 전환은 SharedAssets/i18n/locales/ 기반 |
+| CLAUDE.md | i18n 규칙 | 언어 전환은 BrandPosApp/PosUi/src/i18n/locales/ 기반 |
 
 ---
 
@@ -173,7 +173,7 @@
 
 ### 5.6 i18n
 
-- 언어 전환은 SharedAssets/i18n/locales/ 기반으로 처리
+- 언어 전환은 BrandPosApp/PosUi/src/i18n/locales/ 기반으로 처리
 - 전환 시 Bridge를 통해 로컬 SQLite에 반영 후 UI 리렌더링
 
 ---
@@ -194,7 +194,7 @@
 
 - [ ] screens/SetupScreen/index.tsx 구현 완료
 - [ ] 사이드바 네비게이션에서 P0 화면(기초설정, 매장설정, 장비설정, 상품설정) 라우팅 동작
-- [ ] 언어 전환 기능 동작 (SharedAssets/i18n/locales/ 기반)
+- [ ] 언어 전환 기능 동작 (BrandPosApp/PosUi/src/i18n/locales/ 기반)
 - [ ] POS 번호 표시 동작
 - [ ] mockTransport로 C++ 없이 독립 개발 가능
 - [ ] 1024x768 해상도 + 터치 사용성 검증

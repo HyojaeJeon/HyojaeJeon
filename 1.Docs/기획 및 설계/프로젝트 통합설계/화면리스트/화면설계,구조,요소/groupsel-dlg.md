@@ -82,7 +82,7 @@
 ### 5.6 i18n / Error / Permission
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/` 기반 msgKey | 버튼 라벨, 분류명 표시 |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/` 기반 msgKey | 버튼 라벨, 분류명 표시 |
 | Error | 코드 기반 (type, device, code, msgKey). `DUPLICATE_GROUP_NAME`: 동일 이름 분류 존재. `GROUP_HAS_CHILDREN`: 하위 항목 존재 시 삭제 불가 | 완성 문장 금지 |
 | Permission | 분류 관리(저장/삭제)는 관리자 권한 | 선택은 일반 직원도 가능 |
 

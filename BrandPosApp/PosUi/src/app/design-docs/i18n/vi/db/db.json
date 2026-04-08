@@ -26,7 +26,7 @@
     "db_shared_reference": {
       "title": "Shared Reference Data",
       "category": "Thiết kế DB",
-      "description": "Tài liệu định nghĩa thực tế dữ liệu tham chiếu chung giữa Central và Edge. Tài sản công dụng (SharedAssets) là file dịch/gói tài nguyên, tài liệu này chỉ đề cập dữ liệu tham chiếu DB.",
+      "description": "Tài liệu định nghĩa thực tế dữ liệu tham chiếu chung giữa Central và Edge. Tài sản công dụng (SharedAssets) chỉ là static assets, tài liệu này chỉ đề cập dữ liệu tham chiếu DB.",
       "sections": {
         "purpose": {
           "title": "Mục đích",

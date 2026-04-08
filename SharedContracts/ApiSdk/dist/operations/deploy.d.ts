@@ -3,9 +3,7 @@ export interface DeployPackagesQueryVariables {
     skip?: number;
     take?: number;
 }
-export interface DeployPackagesQueryData {
-    deployPackages: DeployPackage[];
-}
+export type DeployPackagesQueryData = DeployPackage[];
 export declare const deployPackagesOperation: GraphQLOperation<DeployPackagesQueryData, DeployPackagesQueryVariables>;
 export interface DeployReleasesQueryVariables {
     scopeType: string;
@@ -13,14 +11,10 @@ export interface DeployReleasesQueryVariables {
     skip?: number;
     take?: number;
 }
-export interface DeployReleasesQueryData {
-    deployReleases: DeployRelease[];
-}
+export type DeployReleasesQueryData = DeployRelease[];
 export declare const deployReleasesOperation: GraphQLOperation<DeployReleasesQueryData, DeployReleasesQueryVariables>;
 export interface DeployReleaseQueryVariables {
     id: string;
 }
-export interface DeployReleaseQueryData {
-    deployRelease?: DeployRelease | null;
-}
+export type DeployReleaseQueryData = DeployRelease | null;
 export declare const deployReleaseOperation: GraphQLOperation<DeployReleaseQueryData, DeployReleaseQueryVariables>;

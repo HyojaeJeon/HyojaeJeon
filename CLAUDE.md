@@ -19,7 +19,7 @@
 - 신규 플랫폼은 `SuperAdmin / RegionalDistributor / BrandHQ / Branch / EdgePos / Device` 계층을 따른다.
 - `HJ-POS-TEST`는 기능 참고용이다. 구조, 코드, DB를 그대로 복제하지 않는다.
 - 새 디렉토리, 새 계층, 새 통신 방식은 설계 문서에 없는 한 임의로 추가하지 않는다.
-- i18n 원본은 `SharedAssets/i18n/locales` 하나다.
+- 번역 원본은 각 프로젝트 내부 i18n 이다. `SharedAssets` 에 i18n 을 두지 않는다.
 - 공통 DTO / enum / event / GraphQL 계약의 원본은 `SharedContracts` 하나다.
 
 ## Naming
@@ -27,12 +27,21 @@
 - DB table name: `PascalCase`
 - 신규 Platform DB column name: `camelCase`
 - 레거시 HJ-POS DB column name: 기존 그대로 유지
+- Directory / folder name: `kebab-case` only
+- Source file name: `kebab-case` only
+- `index.ts` 는 public export 용도로만 사용한다. feature 내부 barrel 은 최소화한다.
 - TypeScript / JavaScript / JSON / GraphQL field: `camelCase`
 - Type / Interface / Class / C++ method: `PascalCase`
 - constant / enum value: `UPPER_SNAKE_CASE`
+- 닫힌 도메인의 디스크리미네이터 문자열 (예: `actorType`, `scopeType`, `status`, `loopType`, `userType`, `policyType`) 은 TypeScript `enum` 으로 선언되어 있지 않더라도 enum value 로 취급하여 `UPPER_SNAKE_CASE` 로 작성한다. 코드/DB/JSON 어디에 있든 동일하다.
+  - 좋음: `'SYSTEM'`, `'EDGE_POS'`, `'BRAND_HQ'`, `'REGIONAL_DISTRIBUTOR'`, `'GLOBAL'`, `'PREPAID_DEPOSIT'`, `'OPEN_LOOP'`, `'ACTIVE'`
+  - 금지: `'System'`, `'EdgePos'`, `'BrandHQ'`, `'RegionalDistributor'`, `'Global'`, `'PrepaidDeposit'`
+- 단, **모델 클래스 식별자를 그대로 미러링하는 문자열 필드** (예: `AuditLog.targetType` 가 `'SuperAdminUser' | 'BrandHqEntitlement' | 'Role' ...` 처럼 Prisma 모델 명을 직렬화하는 경우) 는 모델 명과 1:1 매칭이 추적성에 더 중요하므로 `PascalCase` 를 유지한다. 이 예외는 "모델 → 식별자" 규칙이 명시적으로 문서화된 필드에만 적용한다.
+- Do not create mixed-resource aggregate files such as `models/index.ts` or `dto/index.ts` for unrelated features. Split by resource; `index.ts` is for minimal public export only.
 
 ## SuperAdmin 규칙
 
+- SuperAdmin 은 서버 전용 디렉토리가 아니라 `Portal / CentralApi / SyncWorkers` suite boundary 다.
 - 포털 서버 상태 관리는 `Apollo Client`만 사용한다.
 - 중앙 API는 `NestJS + Fastify + Apollo Server`다.
 - 기본 API 표면은 GraphQL이다.
@@ -96,5 +105,5 @@
 ## i18n / Error 규칙
 
 - 브릿지 payload에 완성 문장을 싣지 않는다.
-- 장치/도메인 오류는 `msgKey + msgParams` 또는 코드 기반 필드로 전달한다.
-- `PosUi/src/i18n` 또는 `Build/locales`를 번역 원본처럼 취급하지 않는다.
+- 장치/도메인 오류는 프로젝트 내부 code 기반 필드로 전달하고, 필요 시 해당 프로젝트 내부 i18n 키로 매핑한다.
+- 번역 원본은 각 프로젝트 내부 i18n 이다. 외부 공용 번역 원본은 두지 않는다.

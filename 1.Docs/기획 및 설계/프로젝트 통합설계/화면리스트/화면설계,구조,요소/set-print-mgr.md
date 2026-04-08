@@ -80,7 +80,7 @@ UseCase 없음. 하위 탭 화면에서 각자 UseCase 호출.
 
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/{ko,vi,en}/setup.json` | msgKey: setup.printMgr.* |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/{ko,vi,en}/setup.json` | msgKey: setup.printMgr.* |
 | Error | 해당 없음 | |
 | Permission | TODO: 관리자 권한 레벨 확인 필요 | |
 

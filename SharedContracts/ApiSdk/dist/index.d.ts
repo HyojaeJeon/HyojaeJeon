@@ -7,3 +7,6 @@ export * from './operations/policy.js';
 export * from './operations/reference.js';
 export * from './operations/sync.js';
 export * from './operations/tenant.js';
+export * from './operations/rbac.js';
+export * from './mealticket/index.js';
+export * from './entitlement/index.js';

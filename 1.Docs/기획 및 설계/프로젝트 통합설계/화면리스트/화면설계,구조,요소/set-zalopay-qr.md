@@ -106,7 +106,7 @@
 
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/{ko,vi,en}/payment.json` | msgKey: payment.zalopayQR.* |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/{ko,vi,en}/payment.json` | msgKey: payment.zalopayQR.* |
 | Error | 코드 기반 (type, device, code, msgKey) | NETWORK_OFFLINE, ZALOPAY_ERROR 등 |
 | Permission | TODO: 결제 실행 권한 레벨 확인 필요 | |
 

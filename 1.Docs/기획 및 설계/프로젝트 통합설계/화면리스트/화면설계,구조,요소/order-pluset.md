@@ -79,7 +79,7 @@
 ### 5.6 i18n / Error / Permission
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/` 기반 msgKey | 드롭다운 라벨 등 |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/` 기반 msgKey | 드롭다운 라벨 등 |
 | Error | `INVALID_SETTING_VALUE` (범위 초과 값 입력 시) | 코드 기반, msgKey로 UI 표시 |
 | Permission — PLU 설정 변경 | 관리자 권한 필요. 미충족 시 PERMISSION_DENIED | 설정 화면 자체가 관리자 전용 진입 |
 

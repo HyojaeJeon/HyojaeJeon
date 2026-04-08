@@ -153,7 +153,7 @@
 
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/{ko,vi,en}/table.json`, `payment.json`, `order.json` | msgKey 기반 |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/{ko,vi,en}/table.json`, `payment.json`, `order.json` | msgKey 기반 |
 | Error | 코드 기반 (type, device, code, msgKey) | 완성 문장 금지 |
 | Permission | 로그인된 직원 전원: 테이블 이동, 포장, 테이블 메시지, 주문서 재전송, 주문 처리 완료, 언어 전환. 관리자 또는 권한 보유 직원: 합석, 정산, 일표 초기화, 동적 버튼 바 삭제/저장, 외상매출. 결제/정산 관련 → handoff: account-dialog.md에서 권한 검사 | |
 

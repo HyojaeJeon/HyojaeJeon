@@ -22,9 +22,9 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "paths": {
-      "@modules/*": ["src/modules/*"],
-      "@common/*": ["src/common/*"],
-      "@prisma/*": ["src/prisma/*"]
+      "@core/*": ["src/core/*"],
+      "@platform/*": ["src/platform/*"],
+      "@shared/*": ["src/shared/*"]
     }
   },
   "include": ["src/**/*", "prisma/**/*", "test/**/*"],

@@ -137,7 +137,7 @@
 
 ### 5.6 i18n
 
-- 버튼 라벨, 그리드 컬럼 헤더: SharedAssets/i18n/locales/ 기반 msgKey
+- 버튼 라벨, 그리드 컬럼 헤더: BrandPosApp/PosUi/src/i18n/locales/ 기반 msgKey
 
 ---
 

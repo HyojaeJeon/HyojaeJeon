@@ -85,7 +85,7 @@ UseCase 없음. 값 확정 시 호출자에게 콜백으로 반환.
 
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/{ko,vi,en}/common.json` | msgKey: common.numpad.* |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/{ko,vi,en}/common.json` | msgKey: common.numpad.* |
 | Error | 해당 없음 | |
 | Permission | 해당 없음 | |
 

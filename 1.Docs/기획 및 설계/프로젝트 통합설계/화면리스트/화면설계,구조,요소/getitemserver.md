@@ -132,7 +132,7 @@ GETITEMSERVER는 중앙 서버에서 상품 데이터를 POS 로컬 DB로 동기
 
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/{ko,vi,en}/item.json` | msgKey 기반 |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/{ko,vi,en}/item.json` | msgKey 기반 |
 | Error | 코드 기반: `{ type, code, msgKey, severity, recoverable }` | `OFFLINE_BLOCKED`, `SYNC_FAILED` |
 | Permission | **관리자 전용**. 서버 상품 동기화는 관리자만 실행 가능. | |
 

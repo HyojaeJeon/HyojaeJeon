@@ -108,7 +108,7 @@
 
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/{ko,vi,en}/table.json`, `order.json` | msgKey 기반 |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/{ko,vi,en}/table.json`, `order.json` | msgKey 기반 |
 | Error | 코드 기반 (type, device, code, msgKey) | 완성 문장 금지 |
 | Permission | 로그인된 직원 전원: 테이블 간 주문 이동 가능. 테이블/주문 조작은 관리자 권한 불필요 | |
 

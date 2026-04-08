@@ -26,7 +26,8 @@ export const effectivePolicyOperation: GraphQLOperation<
         startScope: $startScope
         scopeChainJson: $scopeChainJson
       ) {
-        id
+        success { code message requestId data {
+          id
         policyKey
         scopeType
         scopeId
@@ -35,6 +36,8 @@ export const effectivePolicyOperation: GraphQLOperation<
         isActive
         createdAt
         updatedAt
+        } }
+        error { code message requestId details }
       }
     }
   `,

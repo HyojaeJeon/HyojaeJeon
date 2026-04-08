@@ -26,7 +26,7 @@
     "db_shared_reference": {
       "title": "Shared Reference Data",
       "category": "DB Design",
-      "description": "Actual definitions for reference data commonly used by both Central and Edge. Shared assets (SharedAssets) are translation files/resource packages; this document covers DB reference data only.",
+      "description": "Actual definitions for reference data commonly used by both Central and Edge. Shared assets (SharedAssets) are static assets only; this document covers DB reference data only.",
       "sections": {
         "purpose": {
           "title": "Purpose",

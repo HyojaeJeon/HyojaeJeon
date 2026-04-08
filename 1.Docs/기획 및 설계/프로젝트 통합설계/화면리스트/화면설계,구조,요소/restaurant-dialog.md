@@ -133,7 +133,7 @@
 
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/{ko,vi,en}/system.json` | msgKey 기반 |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/{ko,vi,en}/system.json` | msgKey 기반 |
 | Error | 코드 기반 (type, device, code, msgKey) | 완성 문장 금지 |
 | Permission | 로그인된 직원 전원: 영업 시작, 회원 검색, 언어 전환, 공지사항 조회. 관리자 전용: 영업 마감, 설정 진입, 인증 취소, POS 종료. TODO: 원격제어요청 권한 정책 미확정 — 확인 필요: 원격제어 허용 권한 레벨 | |
 

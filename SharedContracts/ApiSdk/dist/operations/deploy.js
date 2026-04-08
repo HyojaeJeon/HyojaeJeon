@@ -3,7 +3,8 @@ export const deployPackagesOperation = {
     document: `
     query DeployPackages($skip: Int, $take: Int) {
       deployPackages(skip: $skip, take: $take) {
-        id
+        success { code message requestId data {
+          id
         packageCode
         version
         platformTarget
@@ -12,6 +13,8 @@ export const deployPackagesOperation = {
         releasedAt
         createdAt
         updatedAt
+        } }
+        error { code message requestId details }
       }
     }
   `,
@@ -21,7 +24,8 @@ export const deployReleasesOperation = {
     document: `
     query DeployReleases($scopeType: String!, $scopeId: ID!, $skip: Int, $take: Int) {
       deployReleases(scopeType: $scopeType, scopeId: $scopeId, skip: $skip, take: $take) {
-        id
+        success { code message requestId data {
+          id
         packageId
         scopeType
         scopeId
@@ -32,6 +36,8 @@ export const deployReleasesOperation = {
         releaseNote
         createdAt
         updatedAt
+        } }
+        error { code message requestId details }
       }
     }
   `,
@@ -41,7 +47,8 @@ export const deployReleaseOperation = {
     document: `
     query DeployRelease($id: ID!) {
       deployRelease(id: $id) {
-        id
+        success { code message requestId data {
+          id
         packageId
         scopeType
         scopeId
@@ -52,6 +59,8 @@ export const deployReleaseOperation = {
         releaseNote
         createdAt
         updatedAt
+        } }
+        error { code message requestId details }
       }
     }
   `,

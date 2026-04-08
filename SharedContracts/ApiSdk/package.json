@@ -18,6 +18,7 @@
   ],
   "scripts": {
     "build": "node ../../SuperAdmin/CentralApi/node_modules/typescript/bin/tsc -p tsconfig.json && npm run generate:persisted-manifest",
-    "generate:persisted-manifest": "node ./scripts/generate-persisted-manifest.mjs"
+    "generate:persisted-manifest": "node ./scripts/generate-persisted-manifest.mjs",
+    "validate:operations": "node ./scripts/validate-operations-vs-schema.mjs"
   }
 }

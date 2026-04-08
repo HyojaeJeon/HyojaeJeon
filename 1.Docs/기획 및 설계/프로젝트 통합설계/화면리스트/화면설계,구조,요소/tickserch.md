@@ -125,7 +125,7 @@ TICKSERCH는 전표 검색 전용 모달이다. GETTICK_DIALOG에서 전표검�
 
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/{ko,vi,en}/ticket.json` | msgKey 기반 |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/{ko,vi,en}/ticket.json` | msgKey 기반 |
 | Error | 코드 기반: `{ type, code, msgKey, severity, recoverable }` | |
 | Permission | **로그인 직원 전원**. 전표 검색은 특별한 권한 제한 없음. | |
 

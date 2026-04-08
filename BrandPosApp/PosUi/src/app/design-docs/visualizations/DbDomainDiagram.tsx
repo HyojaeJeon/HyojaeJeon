@@ -17,7 +17,7 @@ const DOMAINS = [
     name: 'RegionalDistributor',
     color: '#475569',
     storage: 'Central PostgreSQL',
-    tables: ['DistributorProfile', 'Territory', 'DistributorContract', 'BrandAssignment', 'DeploymentScope', 'ChannelUser'],
+    tables: ['DistributorProfile', 'Territory', 'DistributorContract', 'BrandAssignment', 'DeploymentScope', 'DistributorUser'],
   },
   {
     name: 'BrandHQ MasterData',

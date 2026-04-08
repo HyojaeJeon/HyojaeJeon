@@ -928,6 +928,116 @@
       "deprecatedNote": ""
     },
     {
+      "id": "brand-hq-entitlement",
+      "name": "BrandHqEntitlement",
+      "section": "SuperAdmin/Governance",
+      "owner": "SuperAdmin/CentralApi",
+      "storage": "Central PostgreSQL",
+      "syncDirection": "Local-only",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "Entitlement 식별자"
+        },
+        {
+          "name": "brandHqId",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "소유 BrandHQ FK"
+        },
+        {
+          "name": "capability",
+          "type": "varchar(40)",
+          "nullable": "No",
+          "default": "-",
+          "description": "`POS`, `MEAL_TICKET`, ..."
+        },
+        {
+          "name": "status",
+          "type": "varchar(20)",
+          "nullable": "No",
+          "default": "'ACTIVE'",
+          "description": "`ACTIVE` / `SUSPENDED` / `TRIAL` / `EXPIRED` / `REVOKED`"
+        },
+        {
+          "name": "activatedAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "발급 시각"
+        },
+        {
+          "name": "expiresAt",
+          "type": "timestamptz",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "만료 시각 (무기한이면 null)"
+        },
+        {
+          "name": "grantedBySuperAdminId",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "발급한 SuperAdmin"
+        },
+        {
+          "name": "revokedAt",
+          "type": "timestamptz",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "회수 시각"
+        },
+        {
+          "name": "revokeReason",
+          "type": "varchar(500)",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "회수 사유"
+        },
+        {
+          "name": "contractRef",
+          "type": "varchar(200)",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "외부 계약 참조"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "생성 시각"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "수정 시각"
+        }
+      ],
+      "constraints": [
+        "Primary Key: `id`",
+        "Foreign Key: `brandHqId -> BrandProfile.id`"
+      ],
+      "indexes": [
+        "`idx_entitlement_brand_cap_status` on `(brandHqId, capability, status)`",
+        "`idx_entitlement_brand_status` on `(brandHqId, status)`"
+      ],
+      "scenarios": [
+        "BrandHQ 의 capability 기반 권한 grant/suspend/resume/revoke (기준서 §100)",
+        "`EntitlementService.requireCapability` 가드의 단일 원본",
+        "동일 BrandHQ + capability 조합에 대해 ACTIVE/TRIAL 레코드 1개만 허용",
+        "Redis TTL 30s 캐시. grant/revoke 시 명시적 무효화"
+      ],
+      "deprecated": false,
+      "deprecatedNote": ""
+    },
+    {
       "id": "distributor-profile",
       "name": "DistributorProfile",
       "section": "Distributor/ChannelGovernance",
@@ -1482,7 +1592,7 @@
     },
     {
       "id": "channel-user",
-      "name": "ChannelUser",
+      "name": "DistributorUser",
       "section": "Distributor/ChannelGovernance",
       "owner": "SuperAdmin/CentralApi",
       "storage": "Central PostgreSQL",
@@ -4603,6 +4713,1556 @@
       "scenarios": [
         "CEF/브라우저 crash 후 복구",
         "진행 중 주문/결제 화면 재수화"
+      ],
+      "deprecated": false,
+      "deprecatedNote": ""
+    },
+    {
+      "id": "permission",
+      "name": "Permission",
+      "section": "SuperAdmin/Rbac",
+      "owner": "SuperAdmin/CentralApi",
+      "storage": "Central PostgreSQL",
+      "syncDirection": "Local-only",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "Permission 식별자"
+        },
+        {
+          "name": "permissionKey",
+          "type": "varchar(120)",
+          "nullable": "No",
+          "default": "-",
+          "description": "`domain.subdomain.action` 형식 (unique)"
+        },
+        {
+          "name": "domain",
+          "type": "varchar(40)",
+          "nullable": "No",
+          "default": "-",
+          "description": "`platform` / `pos` / `mealticket`"
+        },
+        {
+          "name": "description",
+          "type": "varchar(500)",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "설명"
+        },
+        {
+          "name": "isSystem",
+          "type": "boolean",
+          "nullable": "No",
+          "default": "false",
+          "description": "시스템 미리 정의 여부"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "생성 시각"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "수정 시각"
+        }
+      ],
+      "constraints": [
+        "Primary Key: `id`",
+        "Unique: `permissionKey`"
+      ],
+      "indexes": [
+        "`idx_perm_domain` on `(domain)`"
+      ],
+      "scenarios": [
+        "미세 권한 가드 (`PermissionService.require(ctx, key)`)",
+        "권한 카탈로그 조회"
+      ],
+      "deprecated": false,
+      "deprecatedNote": ""
+    },
+    {
+      "id": "role",
+      "name": "Role",
+      "section": "SuperAdmin/Rbac",
+      "owner": "SuperAdmin/CentralApi",
+      "storage": "Central PostgreSQL",
+      "syncDirection": "Local-only",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "Role 식별자"
+        },
+        {
+          "name": "roleCode",
+          "type": "varchar(80)",
+          "nullable": "No",
+          "default": "-",
+          "description": "legacy enum 호환 코드 (unique)"
+        },
+        {
+          "name": "roleName",
+          "type": "varchar(200)",
+          "nullable": "No",
+          "default": "-",
+          "description": "표시명"
+        },
+        {
+          "name": "scope",
+          "type": "varchar(30)",
+          "nullable": "No",
+          "default": "'PLATFORM'",
+          "description": "`PLATFORM` / `BRAND_HQ` / `CORPORATE` / `BRANCH`"
+        },
+        {
+          "name": "hierarchyLevel",
+          "type": "int",
+          "nullable": "No",
+          "default": "0",
+          "description": "RolesGuard 호환용 등급"
+        },
+        {
+          "name": "isSystem",
+          "type": "boolean",
+          "nullable": "No",
+          "default": "false",
+          "description": "시스템 미리 정의 여부"
+        },
+        {
+          "name": "description",
+          "type": "varchar(500)",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "설명"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "생성 시각"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "수정 시각"
+        }
+      ],
+      "constraints": [
+        "Primary Key: `id`",
+        "Unique: `roleCode`"
+      ],
+      "indexes": [
+        "`idx_role_scope` on `(scope)`"
+      ],
+      "scenarios": [
+        "legacy 8개 역할의 DB seed (PLATFORM_SUPER_ADMIN ~ STORE_OPERATOR)",
+        "향후 SuperAdmin 분권 (sub-role) 추가 시 isSystem=false 로 등록"
+      ],
+      "deprecated": false,
+      "deprecatedNote": ""
+    },
+    {
+      "id": "role-permission",
+      "name": "RolePermission",
+      "section": "SuperAdmin/Rbac",
+      "owner": "SuperAdmin/CentralApi",
+      "storage": "Central PostgreSQL",
+      "syncDirection": "Local-only",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "식별자"
+        },
+        {
+          "name": "roleId",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "Role FK"
+        },
+        {
+          "name": "permissionId",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "Permission FK"
+        },
+        {
+          "name": "grantedAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "부여 시각"
+        },
+        {
+          "name": "grantedBy",
+          "type": "uuid",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "부여자 SuperAdmin"
+        }
+      ],
+      "constraints": [
+        "Primary Key: `id`",
+        "Foreign Key: `roleId -> Role.id`, `permissionId -> Permission.id`",
+        "Unique: `(roleId, permissionId)`"
+      ],
+      "indexes": [
+        "`idx_role_perm_role` on `(roleId)`",
+        "`idx_role_perm_perm` on `(permissionId)`"
+      ],
+      "scenarios": [
+        "Role ↔ Permission N:N 매핑",
+        "effective permission 계산의 join 키"
+      ],
+      "deprecated": false,
+      "deprecatedNote": ""
+    },
+    {
+      "id": "user-role-assignment",
+      "name": "UserRoleAssignment",
+      "section": "SuperAdmin/Rbac",
+      "owner": "SuperAdmin/CentralApi",
+      "storage": "Central PostgreSQL",
+      "syncDirection": "Local-only",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "식별자"
+        },
+        {
+          "name": "userType",
+          "type": "varchar(30)",
+          "nullable": "No",
+          "default": "-",
+          "description": "`SUPER_ADMIN` / `CHANNEL_USER` / `CORPORATE_ADMIN`"
+        },
+        {
+          "name": "userId",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "사용자 식별자"
+        },
+        {
+          "name": "roleId",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "Role FK"
+        },
+        {
+          "name": "status",
+          "type": "varchar(20)",
+          "nullable": "No",
+          "default": "'ACTIVE'",
+          "description": "`ACTIVE` / `EXPIRED` / `REVOKED`"
+        },
+        {
+          "name": "scopeBrandHqId",
+          "type": "uuid",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "BrandHQ 스코프"
+        },
+        {
+          "name": "scopeCorporateId",
+          "type": "uuid",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "Corporate 스코프"
+        },
+        {
+          "name": "scopeBranchId",
+          "type": "uuid",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "Branch 스코프"
+        },
+        {
+          "name": "grantedAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "부여 시각"
+        },
+        {
+          "name": "grantedBy",
+          "type": "uuid",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "부여자"
+        },
+        {
+          "name": "expiresAt",
+          "type": "timestamptz",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "만료 (임시 권한)"
+        },
+        {
+          "name": "revokedAt",
+          "type": "timestamptz",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "회수 시각"
+        },
+        {
+          "name": "revokeReason",
+          "type": "varchar(500)",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "회수 사유"
+        }
+      ],
+      "constraints": [
+        "Primary Key: `id`",
+        "Foreign Key: `roleId -> Role.id`"
+      ],
+      "indexes": [
+        "`idx_uraa_user_status` on `(userType, userId, status)`",
+        "`idx_uraa_role_status` on `(roleId, status)`"
+      ],
+      "scenarios": [
+        "사용자에게 다중 역할 부여",
+        "임시 권한 (`expiresAt`) / 휴가 대리",
+        "AuditLog 와 연계된 grant/revoke 추적"
+      ],
+      "deprecated": false,
+      "deprecatedNote": ""
+    },
+    {
+      "id": "meal-corporate",
+      "name": "MealCorporate",
+      "section": "MealTicket/Domain",
+      "owner": "SuperAdmin/CentralApi",
+      "storage": "Central PostgreSQL",
+      "syncDirection": "Local-only",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "Corporate 식별자"
+        },
+        {
+          "name": "tenantCode",
+          "type": "varchar(60)",
+          "nullable": "No",
+          "default": "-",
+          "description": "외부 노출 테넌트 코드 (unique)"
+        },
+        {
+          "name": "companyName",
+          "type": "varchar(200)",
+          "nullable": "No",
+          "default": "-",
+          "description": "회사명"
+        },
+        {
+          "name": "taxCode",
+          "type": "varchar(50)",
+          "nullable": "No",
+          "default": "-",
+          "description": "베트남 세무 코드"
+        },
+        {
+          "name": "fundingModel",
+          "type": "varchar(30)",
+          "nullable": "No",
+          "default": "'PREPAID_DEPOSIT'",
+          "description": "`PREPAID_DEPOSIT` / `CREDIT_NET15` / `CREDIT_NET30`"
+        },
+        {
+          "name": "monthlyBudgetVnd",
+          "type": "bigint",
+          "nullable": "No",
+          "default": "0",
+          "description": "월 예산 (VND)"
+        },
+        {
+          "name": "depositBalanceVnd",
+          "type": "bigint",
+          "nullable": "No",
+          "default": "0",
+          "description": "예치금 잔액 (VND)"
+        },
+        {
+          "name": "creditLimitVnd",
+          "type": "bigint",
+          "nullable": "No",
+          "default": "0",
+          "description": "신용 한도 (VND)"
+        },
+        {
+          "name": "contactName",
+          "type": "varchar(120)",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "담당자 이름"
+        },
+        {
+          "name": "contactEmail",
+          "type": "varchar(200)",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "담당자 이메일"
+        },
+        {
+          "name": "contactPhone",
+          "type": "varchar(30)",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "담당자 전화"
+        },
+        {
+          "name": "status",
+          "type": "varchar(20)",
+          "nullable": "No",
+          "default": "'ACTIVE'",
+          "description": "상태"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "생성 시각"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "수정 시각"
+        },
+        {
+          "name": "deletedAt",
+          "type": "timestamptz",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "삭제 시각"
+        }
+      ],
+      "constraints": [
+        "Primary Key: `id`",
+        "Unique: `tenantCode`"
+      ],
+      "indexes": [
+        "`idx_meal_corporate_status` on `(status)`"
+      ],
+      "scenarios": [
+        "신규 식권 고객 기업 온보딩 (CorporatePortal 발급)",
+        "월 예산/신용 한도 관리"
+      ],
+      "deprecated": false,
+      "deprecatedNote": ""
+    },
+    {
+      "id": "meal-corporate-department",
+      "name": "MealCorporateDepartment",
+      "section": "MealTicket/Domain",
+      "owner": "SuperAdmin/CentralApi",
+      "storage": "Central PostgreSQL",
+      "syncDirection": "Local-only",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "부서 식별자"
+        },
+        {
+          "name": "corporateId",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "소속 Corporate FK"
+        },
+        {
+          "name": "departmentCode",
+          "type": "varchar(60)",
+          "nullable": "No",
+          "default": "-",
+          "description": "부서 코드"
+        },
+        {
+          "name": "departmentName",
+          "type": "varchar(200)",
+          "nullable": "No",
+          "default": "-",
+          "description": "부서명"
+        },
+        {
+          "name": "parentDepartmentId",
+          "type": "uuid",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "상위 부서 (트리 구조)"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "생성 시각"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "수정 시각"
+        },
+        {
+          "name": "deletedAt",
+          "type": "timestamptz",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "삭제 시각"
+        }
+      ],
+      "constraints": [
+        "Primary Key: `id`",
+        "Foreign Key: `corporateId -> MealCorporate.id`",
+        "Unique: `(corporateId, departmentCode)`"
+      ],
+      "indexes": [
+        "`idx_meal_dept_corp` on `(corporateId)`"
+      ],
+      "scenarios": [
+        "HR 부서 트리 동기화",
+        "부서별 식대 정책 매칭의 키"
+      ],
+      "deprecated": false,
+      "deprecatedNote": ""
+    },
+    {
+      "id": "meal-employee",
+      "name": "MealEmployee",
+      "section": "MealTicket/Domain",
+      "owner": "SuperAdmin/CentralApi",
+      "storage": "Central PostgreSQL",
+      "syncDirection": "Local-only",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "임직원 식별자"
+        },
+        {
+          "name": "corporateId",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "소속 Corporate FK"
+        },
+        {
+          "name": "departmentId",
+          "type": "uuid",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "소속 부서 FK"
+        },
+        {
+          "name": "employeeCode",
+          "type": "varchar(60)",
+          "nullable": "No",
+          "default": "-",
+          "description": "사번"
+        },
+        {
+          "name": "fullName",
+          "type": "varchar(200)",
+          "nullable": "No",
+          "default": "-",
+          "description": "이름"
+        },
+        {
+          "name": "email",
+          "type": "varchar(200)",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "이메일"
+        },
+        {
+          "name": "phone",
+          "type": "varchar(30)",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "전화번호"
+        },
+        {
+          "name": "badgeRfid",
+          "type": "varchar(120)",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "RFID 사원증 매핑 (Closed Loop)"
+        },
+        {
+          "name": "status",
+          "type": "varchar(20)",
+          "nullable": "No",
+          "default": "'ACTIVE'",
+          "description": "상태"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "생성 시각"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "수정 시각"
+        },
+        {
+          "name": "deletedAt",
+          "type": "timestamptz",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "삭제 시각"
+        }
+      ],
+      "constraints": [
+        "Primary Key: `id`",
+        "Foreign Key: `corporateId -> MealCorporate.id`, `departmentId -> MealCorporateDepartment.id`",
+        "Unique: `(corporateId, employeeCode)`"
+      ],
+      "indexes": [
+        "`idx_meal_emp_corp_dept` on `(corporateId, departmentId)`",
+        "`idx_meal_emp_badge` on `(badgeRfid)`"
+      ],
+      "scenarios": [
+        "HRIS 연동 임직원 동기화",
+        "Closed Loop 단말 RFID 인증 lookup"
+      ],
+      "deprecated": false,
+      "deprecatedNote": ""
+    },
+    {
+      "id": "meal-wallet",
+      "name": "MealWallet",
+      "section": "MealTicket/Domain",
+      "owner": "SuperAdmin/CentralApi",
+      "storage": "Central PostgreSQL",
+      "syncDirection": "Local-only",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "지갑 식별자"
+        },
+        {
+          "name": "corporateId",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "Corporate FK"
+        },
+        {
+          "name": "employeeId",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "임직원 FK (1:1)"
+        },
+        {
+          "name": "status",
+          "type": "varchar(20)",
+          "nullable": "No",
+          "default": "'ACTIVE'",
+          "description": "`ACTIVE` / `SUSPENDED` / `FROZEN` / `CLOSED`"
+        },
+        {
+          "name": "balanceVnd",
+          "type": "bigint",
+          "nullable": "No",
+          "default": "0",
+          "description": "잔액 (VND)"
+        },
+        {
+          "name": "dailyLimitVnd",
+          "type": "bigint",
+          "nullable": "No",
+          "default": "0",
+          "description": "일일 한도 (VND)"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "생성 시각"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "수정 시각"
+        }
+      ],
+      "constraints": [
+        "Primary Key: `id`",
+        "Foreign Key: `employeeId -> MealEmployee.id`",
+        "Unique: `employeeId`"
+      ],
+      "indexes": [
+        "`idx_meal_wallet_corp_status` on `(corporateId, status)`"
+      ],
+      "scenarios": [
+        "임직원 디지털 지갑 발급",
+        "결제 트랜잭션 시 잔액 차감"
+      ],
+      "deprecated": false,
+      "deprecatedNote": ""
+    },
+    {
+      "id": "meal-policy",
+      "name": "MealPolicy",
+      "section": "MealTicket/Domain",
+      "owner": "SuperAdmin/CentralApi",
+      "storage": "Central PostgreSQL",
+      "syncDirection": "Local-only",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "정책 식별자"
+        },
+        {
+          "name": "corporateId",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "Corporate FK"
+        },
+        {
+          "name": "policyCode",
+          "type": "varchar(60)",
+          "nullable": "No",
+          "default": "-",
+          "description": "정책 코드"
+        },
+        {
+          "name": "policyName",
+          "type": "varchar(200)",
+          "nullable": "No",
+          "default": "-",
+          "description": "정책명"
+        },
+        {
+          "name": "appliesToDepartmentIds",
+          "type": "text[]",
+          "nullable": "No",
+          "default": "[]",
+          "description": "적용 부서 ID 배열"
+        },
+        {
+          "name": "appliesToRoleCodes",
+          "type": "text[]",
+          "nullable": "No",
+          "default": "[]",
+          "description": "적용 직급 코드 배열"
+        },
+        {
+          "name": "ruleJson",
+          "type": "jsonb",
+          "nullable": "No",
+          "default": "{}",
+          "description": "시간대/카테고리 등 규칙"
+        },
+        {
+          "name": "maxPerTransactionVnd",
+          "type": "bigint",
+          "nullable": "No",
+          "default": "0",
+          "description": "1회 최대 결제"
+        },
+        {
+          "name": "dailyLimitVnd",
+          "type": "bigint",
+          "nullable": "No",
+          "default": "0",
+          "description": "일일 한도"
+        },
+        {
+          "name": "allowSplitPayment",
+          "type": "boolean",
+          "nullable": "No",
+          "default": "true",
+          "description": "Split Payment 허용"
+        },
+        {
+          "name": "status",
+          "type": "varchar(20)",
+          "nullable": "No",
+          "default": "'ACTIVE'",
+          "description": "상태"
+        },
+        {
+          "name": "effectiveFrom",
+          "type": "date",
+          "nullable": "No",
+          "default": "-",
+          "description": "시작 일자"
+        },
+        {
+          "name": "effectiveTo",
+          "type": "date",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "종료 일자"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "생성 시각"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "수정 시각"
+        },
+        {
+          "name": "deletedAt",
+          "type": "timestamptz",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "삭제 시각"
+        }
+      ],
+      "constraints": [
+        "Primary Key: `id`",
+        "Foreign Key: `corporateId -> MealCorporate.id`",
+        "Unique: `(corporateId, policyCode)`"
+      ],
+      "indexes": [
+        "`idx_meal_policy_corp` on `(corporateId, status)`"
+      ],
+      "scenarios": [
+        "부서/직급/시간대별 식대 한도 정책 빌더",
+        "트랜잭션 승인 시 정책 평가"
+      ],
+      "deprecated": false,
+      "deprecatedNote": ""
+    },
+    {
+      "id": "meal-funding-account",
+      "name": "MealFundingAccount",
+      "section": "MealTicket/Domain",
+      "owner": "SuperAdmin/CentralApi",
+      "storage": "Central PostgreSQL",
+      "syncDirection": "Local-only",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "식별자"
+        },
+        {
+          "name": "corporateId",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "Corporate FK"
+        },
+        {
+          "name": "fundingModel",
+          "type": "varchar(30)",
+          "nullable": "No",
+          "default": "-",
+          "description": "`PREPAID_DEPOSIT` / `CREDIT_NET15` / `CREDIT_NET30`"
+        },
+        {
+          "name": "bankCode",
+          "type": "varchar(50)",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "은행 코드"
+        },
+        {
+          "name": "bankAccountNo",
+          "type": "varchar(50)",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "계좌번호"
+        },
+        {
+          "name": "balanceVnd",
+          "type": "bigint",
+          "nullable": "No",
+          "default": "0",
+          "description": "잔액 (VND)"
+        },
+        {
+          "name": "creditLimitVnd",
+          "type": "bigint",
+          "nullable": "No",
+          "default": "0",
+          "description": "신용 한도 (VND)"
+        },
+        {
+          "name": "status",
+          "type": "varchar(20)",
+          "nullable": "No",
+          "default": "'ACTIVE'",
+          "description": "상태"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "생성 시각"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "수정 시각"
+        }
+      ],
+      "constraints": [
+        "Primary Key: `id`",
+        "Foreign Key: `corporateId -> MealCorporate.id`"
+      ],
+      "indexes": [
+        "`idx_meal_funding_corp` on `(corporateId)`"
+      ],
+      "scenarios": [
+        "Prepaid 에스크로 잔액 추적",
+        "Credit 모델 사후 정산"
+      ],
+      "deprecated": false,
+      "deprecatedNote": ""
+    },
+    {
+      "id": "meal-merchant-enrollment",
+      "name": "MealMerchantEnrollment",
+      "section": "MealTicket/Domain",
+      "owner": "SuperAdmin/CentralApi",
+      "storage": "Central PostgreSQL",
+      "syncDirection": "Local-only",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "Enrollment 식별자"
+        },
+        {
+          "name": "brandHqId",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "BrandHQ FK (1:1)"
+        },
+        {
+          "name": "isActive",
+          "type": "boolean",
+          "nullable": "No",
+          "default": "false",
+          "description": "활성 여부"
+        },
+        {
+          "name": "loopType",
+          "type": "varchar(20)",
+          "nullable": "No",
+          "default": "'OPEN_LOOP'",
+          "description": "`OPEN_LOOP` / `CLOSED_LOOP`"
+        },
+        {
+          "name": "enrolledAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "가입 시각"
+        },
+        {
+          "name": "contractEndsAt",
+          "type": "timestamptz",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "계약 종료"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "생성 시각"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "수정 시각"
+        }
+      ],
+      "constraints": [
+        "Primary Key: `id`",
+        "Unique: `brandHqId`"
+      ],
+      "indexes": [
+        "`idx_meal_merchant_active` on `(isActive)`"
+      ],
+      "scenarios": [
+        "제휴식당(BrandHQ) 식권 플랫폼 가입/활성화",
+        "트랜잭션 승인 시 enrollment.isActive 검증"
+      ],
+      "deprecated": false,
+      "deprecatedNote": ""
+    },
+    {
+      "id": "meal-merchant-commission-rate",
+      "name": "MealMerchantCommissionRate",
+      "section": "MealTicket/Domain",
+      "owner": "SuperAdmin/CentralApi",
+      "storage": "Central PostgreSQL",
+      "syncDirection": "Local-only",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "식별자"
+        },
+        {
+          "name": "enrollmentId",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "Enrollment FK"
+        },
+        {
+          "name": "effectiveFrom",
+          "type": "date",
+          "nullable": "No",
+          "default": "-",
+          "description": "시작 일자"
+        },
+        {
+          "name": "effectiveTo",
+          "type": "date",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "종료 일자"
+        },
+        {
+          "name": "baseRatePct",
+          "type": "decimal(5,2)",
+          "nullable": "No",
+          "default": "0",
+          "description": "기본 수수료 %"
+        },
+        {
+          "name": "specialZoneRatePct",
+          "type": "decimal(5,2)",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "특별 상권 %"
+        },
+        {
+          "name": "franchiseFlatRatePct",
+          "type": "decimal(5,2)",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "프랜차이즈 일괄 %"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "생성 시각"
+        }
+      ],
+      "constraints": [
+        "Primary Key: `id`",
+        "Foreign Key: `enrollmentId -> MealMerchantEnrollment.id`"
+      ],
+      "indexes": [
+        "`idx_meal_commission_enrollment` on `(enrollmentId, effectiveFrom DESC)`"
+      ],
+      "scenarios": [
+        "Multi-Tier 수수료 정책",
+        "정산 배치 시 활성 rate 조회"
+      ],
+      "deprecated": false,
+      "deprecatedNote": ""
+    },
+    {
+      "id": "meal-merchant-settlement-account",
+      "name": "MealMerchantSettlementAccount",
+      "section": "MealTicket/Domain",
+      "owner": "SuperAdmin/CentralApi",
+      "storage": "Central PostgreSQL",
+      "syncDirection": "Local-only",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "식별자"
+        },
+        {
+          "name": "enrollmentId",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "Enrollment FK"
+        },
+        {
+          "name": "bankCode",
+          "type": "varchar(50)",
+          "nullable": "No",
+          "default": "-",
+          "description": "은행 코드"
+        },
+        {
+          "name": "bankAccountNumber",
+          "type": "varchar(50)",
+          "nullable": "No",
+          "default": "-",
+          "description": "계좌번호"
+        },
+        {
+          "name": "bankAccountHolder",
+          "type": "varchar(200)",
+          "nullable": "No",
+          "default": "-",
+          "description": "예금주"
+        },
+        {
+          "name": "taxCode",
+          "type": "varchar(50)",
+          "nullable": "No",
+          "default": "-",
+          "description": "세무 코드"
+        },
+        {
+          "name": "isPrimary",
+          "type": "boolean",
+          "nullable": "No",
+          "default": "true",
+          "description": "대표 계좌 여부"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "생성 시각"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "수정 시각"
+        }
+      ],
+      "constraints": [
+        "Primary Key: `id`",
+        "Foreign Key: `enrollmentId -> MealMerchantEnrollment.id`"
+      ],
+      "indexes": [
+        "`idx_meal_settlacc_enrollment` on `(enrollmentId, isPrimary)`"
+      ],
+      "scenarios": [
+        "정산 배치 결과 자금 이체 대상",
+        "식당측 정산 계좌 변경 이력"
+      ],
+      "deprecated": false,
+      "deprecatedNote": ""
+    },
+    {
+      "id": "meal-transaction",
+      "name": "MealTransaction",
+      "section": "MealTicket/Domain",
+      "owner": "SuperAdmin/CentralApi",
+      "storage": "Central PostgreSQL",
+      "syncDirection": "Local-only (Closed Loop 단말은 복구 시 일괄 동기화)",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "트랜잭션 식별자"
+        },
+        {
+          "name": "walletId",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "Wallet FK"
+        },
+        {
+          "name": "corporateId",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "Corporate FK (역정규화)"
+        },
+        {
+          "name": "brandHqId",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "BrandHQ FK (역정규화)"
+        },
+        {
+          "name": "branchId",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "Branch FK"
+        },
+        {
+          "name": "terminalId",
+          "type": "uuid",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "Closed Loop 단말 FK"
+        },
+        {
+          "name": "loopType",
+          "type": "varchar(20)",
+          "nullable": "No",
+          "default": "-",
+          "description": "`OPEN_LOOP` / `CLOSED_LOOP`"
+        },
+        {
+          "name": "authMethod",
+          "type": "varchar(30)",
+          "nullable": "No",
+          "default": "-",
+          "description": "`APP_QR` / `DYNAMIC_BARCODE` / `RFID_BADGE` / `BIOMETRIC_FACE` / `BIOMETRIC_FINGERPRINT`"
+        },
+        {
+          "name": "requestedAmountVnd",
+          "type": "bigint",
+          "nullable": "No",
+          "default": "-",
+          "description": "요청 금액"
+        },
+        {
+          "name": "approvedAmountVnd",
+          "type": "bigint",
+          "nullable": "No",
+          "default": "0",
+          "description": "승인 금액"
+        },
+        {
+          "name": "employeeShareVnd",
+          "type": "bigint",
+          "nullable": "No",
+          "default": "0",
+          "description": "임직원 자기부담 (Split)"
+        },
+        {
+          "name": "status",
+          "type": "varchar(20)",
+          "nullable": "No",
+          "default": "'PENDING'",
+          "description": "`PENDING` / `APPROVED` / `DECLINED` / `REVERSED` / `SETTLED`"
+        },
+        {
+          "name": "declineReason",
+          "type": "varchar(50)",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "거절 사유 코드"
+        },
+        {
+          "name": "idempotencyKey",
+          "type": "varchar(120)",
+          "nullable": "No",
+          "default": "-",
+          "description": "멱등 키"
+        },
+        {
+          "name": "authorizedAt",
+          "type": "timestamptz",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "승인 시각"
+        },
+        {
+          "name": "settledAt",
+          "type": "timestamptz",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "정산 시각"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "생성 시각"
+        }
+      ],
+      "constraints": [
+        "Primary Key: `id`",
+        "Unique: `idempotencyKey`"
+      ],
+      "indexes": [
+        "`idx_meal_tx_corp_status_time` on `(corporateId, status, createdAt DESC)`",
+        "`idx_meal_tx_brand_status_time` on `(brandHqId, status, createdAt DESC)`",
+        "`idx_meal_tx_wallet_time` on `(walletId, createdAt DESC)`"
+      ],
+      "scenarios": [
+        "Open Loop QR / Closed Loop RFID·생체 실시간 승인",
+        "3-Way Matching 정산 원장",
+        "idempotencyKey 로 중복 결제 방지"
+      ],
+      "deprecated": false,
+      "deprecatedNote": ""
+    },
+    {
+      "id": "meal-settlement-batch",
+      "name": "MealSettlementBatch",
+      "section": "MealTicket/Domain",
+      "owner": "SuperAdmin/CentralApi",
+      "storage": "Central PostgreSQL",
+      "syncDirection": "Local-only",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "배치 식별자"
+        },
+        {
+          "name": "brandHqId",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "BrandHQ FK"
+        },
+        {
+          "name": "periodStart",
+          "type": "date",
+          "nullable": "No",
+          "default": "-",
+          "description": "정산 시작"
+        },
+        {
+          "name": "periodEnd",
+          "type": "date",
+          "nullable": "No",
+          "default": "-",
+          "description": "정산 종료"
+        },
+        {
+          "name": "status",
+          "type": "varchar(20)",
+          "nullable": "No",
+          "default": "'OPEN'",
+          "description": "`OPEN` / `MATCHING` / `MATCHED` / `EXCEPTION` / `PAID`"
+        },
+        {
+          "name": "grossAmountVnd",
+          "type": "bigint",
+          "nullable": "No",
+          "default": "0",
+          "description": "총 매출"
+        },
+        {
+          "name": "commissionAmountVnd",
+          "type": "bigint",
+          "nullable": "No",
+          "default": "0",
+          "description": "수수료 차감액"
+        },
+        {
+          "name": "netPayableVnd",
+          "type": "bigint",
+          "nullable": "No",
+          "default": "0",
+          "description": "순지급액"
+        },
+        {
+          "name": "threeWayMismatchCount",
+          "type": "int",
+          "nullable": "No",
+          "default": "0",
+          "description": "불일치 건수"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "생성 시각"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "수정 시각"
+        }
+      ],
+      "constraints": [
+        "Primary Key: `id`",
+        "Unique: `(brandHqId, periodStart, periodEnd)`"
+      ],
+      "indexes": [
+        "`idx_meal_settlement_brand_status` on `(brandHqId, status)`"
+      ],
+      "scenarios": [
+        "월말/주간 정산 배치 결과 저장",
+        "3-Way Matching 불일치 추적"
+      ],
+      "deprecated": false,
+      "deprecatedNote": ""
+    },
+    {
+      "id": "meal-consolidated-einvoice",
+      "name": "MealConsolidatedEInvoice",
+      "section": "MealTicket/Domain",
+      "owner": "SuperAdmin/CentralApi",
+      "storage": "Central PostgreSQL",
+      "syncDirection": "Local-only",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "인보이스 식별자"
+        },
+        {
+          "name": "corporateId",
+          "type": "uuid",
+          "nullable": "No",
+          "default": "-",
+          "description": "Corporate FK"
+        },
+        {
+          "name": "periodStart",
+          "type": "date",
+          "nullable": "No",
+          "default": "-",
+          "description": "청구 시작"
+        },
+        {
+          "name": "periodEnd",
+          "type": "date",
+          "nullable": "No",
+          "default": "-",
+          "description": "청구 종료"
+        },
+        {
+          "name": "totalAmountVnd",
+          "type": "bigint",
+          "nullable": "No",
+          "default": "0",
+          "description": "총 금액"
+        },
+        {
+          "name": "vatAmountVnd",
+          "type": "bigint",
+          "nullable": "No",
+          "default": "0",
+          "description": "VAT 금액"
+        },
+        {
+          "name": "status",
+          "type": "varchar(20)",
+          "nullable": "No",
+          "default": "'DRAFT'",
+          "description": "`DRAFT` / `SIGNED` / `SUBMITTED_GDT` / `ACCEPTED_GDT` / `REJECTED_GDT` / `VOIDED`"
+        },
+        {
+          "name": "gdtReceiptNo",
+          "type": "varchar(120)",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "GDT 접수 번호"
+        },
+        {
+          "name": "xmlPayloadRef",
+          "type": "varchar(500)",
+          "nullable": "Yes",
+          "default": "null",
+          "description": "XML 페이로드 참조"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "생성 시각"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamptz",
+          "nullable": "No",
+          "default": "now()",
+          "description": "수정 시각"
+        }
+      ],
+      "constraints": [
+        "Primary Key: `id`",
+        "Foreign Key: `corporateId -> MealCorporate.id`",
+        "Unique: `(corporateId, periodStart, periodEnd)`"
+      ],
+      "indexes": [
+        "`idx_meal_invoice_corp_status` on `(corporateId, status)`"
+      ],
+      "scenarios": [
+        "베트남 GDT 통합 전자세금계산서 생성/서명/제출",
+        "Corporate 월간 청구"
       ],
       "deprecated": false,
       "deprecatedNote": ""
@@ -10033,6 +11693,13 @@
       "syncDirection": "-",
       "columns": [
         {
+          "name": "storeCode",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "매장 코드"
+        },
+        {
           "name": "sellDate",
           "type": "TEXT",
           "nullable": "Unknown",
@@ -10045,6 +11712,13 @@
           "nullable": "Unknown",
           "default": "-",
           "description": "POS 번호"
+        },
+        {
+          "name": "orderNo",
+          "type": "INT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "주문 번호"
         },
         {
           "name": "receiptNo",
@@ -10075,11 +11749,179 @@
           "description": "상품명"
         },
         {
+          "name": "saleAmt",
+          "type": "REAL",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "판매 단가"
+        },
+        {
+          "name": "qty",
+          "type": "INT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "수량"
+        },
+        {
+          "name": "totalAmt",
+          "type": "REAL",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "총액"
+        },
+        {
+          "name": "dcAmt",
+          "type": "REAL",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "할인액"
+        },
+        {
+          "name": "serviceAmt",
+          "type": "REAL",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "서비스 금액"
+        },
+        {
+          "name": "receiveAmt",
+          "type": "REAL",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "수납 금액"
+        },
+        {
+          "name": "vatAmt",
+          "type": "REAL",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "부가세"
+        },
+        {
+          "name": "workAmt",
+          "type": "REAL",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "작업 금액"
+        },
+        {
           "name": "sellState",
           "type": "TEXT",
           "nullable": "Unknown",
           "default": "-",
           "description": "판매 상태"
+        },
+        {
+          "name": "sellType",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "판매 유형"
+        },
+        {
+          "name": "grpCode",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "그룹 코드"
+        },
+        {
+          "name": "grpName",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "그룹명"
+        },
+        {
+          "name": "menuCode",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "메뉴 코드"
+        },
+        {
+          "name": "tableCode",
+          "type": "INT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "테이블 코드"
+        },
+        {
+          "name": "orderState",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "주문 상태"
+        },
+        {
+          "name": "orderDate",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "주문 일시"
+        },
+        {
+          "name": "orderType",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "주문 유형"
+        },
+        {
+          "name": "amtEmpCode",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "금액 수정 직원"
+        },
+        {
+          "name": "workType",
+          "type": "INT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "작업 유형"
+        },
+        {
+          "name": "dcEventCode",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "이벤트 할인 코드"
+        },
+        {
+          "name": "dcEventAmt",
+          "type": "REAL",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "이벤트 할인 금액"
+        },
+        {
+          "name": "menuDcAmt",
+          "type": "REAL",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "메뉴 할인 금액"
+        },
+        {
+          "name": "orderMsgCode",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "주문 메시지 코드"
+        },
+        {
+          "name": "adjustNo",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "정산 번호"
+        },
+        {
+          "name": "cancelDate",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "취소 일시"
         },
         {
           "name": "memo",
@@ -10094,12 +11936,26 @@
           "nullable": "Unknown",
           "default": "-",
           "description": "직원 코드"
+        },
+        {
+          "name": "endTimeDate",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "마감 일자"
+        },
+        {
+          "name": "endTime",
+          "type": "INT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "마감 시간"
         }
       ],
       "constraints": [],
       "indexes": [],
       "scenarios": [
-        "SellDetailLog는 SellDetail 본문 구조와 OrderDetailLog의 이력 패턴을 합쳐 재구성한 테이블이다. code/direct table reference는 없지만, 판매 상세/삭제 흐름을 기준으로 보완했다."
+        "`SellDetailLog`는 `SellDetail` 본문 구조와 `OrderDetailLog`의 취소/변경 이력 패턴을 합쳐 재구성한 테이블이다. `SelectSellDelDlg.cpp`, `DB/OrderMgr.cpp`, `DB/ItemMgr.cpp`의 판매 상세/삭제 흐름을 기준으로 보완했다."
       ],
       "deprecated": false,
       "deprecatedNote": ""
@@ -10226,6 +12082,20 @@
           "description": "할인명"
         },
         {
+          "name": "dcComment",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "할인 사유"
+        },
+        {
+          "name": "dcState",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "할인 상태"
+        },
+        {
           "name": "dcType",
           "type": "TEXT",
           "nullable": "Unknown",
@@ -10252,12 +12122,440 @@
           "nullable": "Unknown",
           "default": "-",
           "description": "삭제 플래그"
+        },
+        {
+          "name": "aDUFlag",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "ADU 플래그"
+        },
+        {
+          "name": "subCol1",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "확장 컬럼 1"
+        },
+        {
+          "name": "subCol2",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "확장 컬럼 2"
+        },
+        {
+          "name": "subCol3",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "확장 컬럼 3"
         }
       ],
       "constraints": [],
       "indexes": [],
       "scenarios": [
-        "SaleDC는 할인 마스터 테이블로 참조용으로 사용된다. 코드에서 INSERT 문이 확인되지 않아 컬럼이 불완전할 수 있다."
+        "`SaleDc.cpp`와 `WebAspMgr.cpp`가 모두 이 테이블을 참조한다. `storeCode`는 서버 동기화/삽입 경로에서 등장하며, 컬럼 세트는 할인 마스터 기준으로 확장되어 있다."
+      ],
+      "deprecated": false,
+      "deprecatedNote": ""
+    },
+    {
+      "id": "legacy-asp-server-info",
+      "name": "AspServerInfo",
+      "section": "Legacy",
+      "owner": "HJ-POS",
+      "storage": "Local MSSQL",
+      "syncDirection": "-",
+      "columns": [
+        {
+          "name": "subCol1",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "그룹 ID"
+        },
+        {
+          "name": "subCol2",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "그룹명"
+        },
+        {
+          "name": "exAspDbName",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "외부 ASP DB명 / PartnerCatalog"
+        },
+        {
+          "name": "exAspDbIp",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "외부 ASP DB IP / PartnerIP"
+        },
+        {
+          "name": "exAspStoreCode",
+          "type": "INT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "외부 ASP 매장 코드"
+        },
+        {
+          "name": "exAspBUse",
+          "type": "INT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "외부 ASP 사용 여부"
+        },
+        {
+          "name": "franItemDown",
+          "type": "INT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "가맹 아이템 다운로드 여부"
+        },
+        {
+          "name": "orderDomain",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "주문 도메인"
+        },
+        {
+          "name": "orderPort",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "주문 포트"
+        },
+        {
+          "name": "privateVanSel",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "Private VAN 선택값"
+        },
+        {
+          "name": "subCol3",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "확장 컬럼 3 / Hand string use 등 확장 플래그"
+        },
+        {
+          "name": "custMgr",
+          "type": "INT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "고객 관리 사용 여부"
+        }
+      ],
+      "constraints": [],
+      "indexes": [],
+      "scenarios": [
+        "외부 ASP/파트너 연동 설정을 담는 공유성 설정 테이블이다. `PosManiaAuthenticator.cpp`, `RestaurantSetDlg.cpp`, `SystemInfo.cpp` 경로에서 확인된다."
+      ],
+      "deprecated": false,
+      "deprecatedNote": ""
+    },
+    {
+      "id": "legacy-grp-big",
+      "name": "GrpBig",
+      "section": "Legacy",
+      "owner": "HJ-POS",
+      "storage": "Local MSSQL",
+      "syncDirection": "-",
+      "columns": [
+        {
+          "name": "bigCode",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "대분류 코드"
+        },
+        {
+          "name": "bigName",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "대분류명"
+        },
+        {
+          "name": "bigLineup",
+          "type": "INT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "정렬 순서"
+        },
+        {
+          "name": "delFlag",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "삭제 플래그"
+        }
+      ],
+      "constraints": [],
+      "indexes": [],
+      "scenarios": [
+        "`GrpBig`는 구형 대분류 테이블로 참조되며, 이후 구현에서는 `Grp`로 흡수/정리될 수 있다. 그러나 레거시 inventory에는 보존한다."
+      ],
+      "deprecated": false,
+      "deprecatedNote": ""
+    },
+    {
+      "id": "legacy-pur-csdetail",
+      "name": "PurCSDetail",
+      "section": "Legacy",
+      "owner": "HJ-POS",
+      "storage": "Local MSSQL",
+      "syncDirection": "-",
+      "columns": [
+        {
+          "name": "purchaseDate",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "매입 일자"
+        },
+        {
+          "name": "purchaseNo",
+          "type": "INT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "매입 번호"
+        },
+        {
+          "name": "serNo",
+          "type": "INT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "순번"
+        },
+        {
+          "name": "menuNo",
+          "type": "INT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "메뉴 번호"
+        },
+        {
+          "name": "menuType",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "메뉴 유형"
+        },
+        {
+          "name": "itemCode",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "상품 코드"
+        },
+        {
+          "name": "barCode",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "바코드"
+        },
+        {
+          "name": "qty",
+          "type": "REAL",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "수량"
+        },
+        {
+          "name": "price",
+          "type": "REAL",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "단가"
+        },
+        {
+          "name": "purType",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "매입 유형"
+        },
+        {
+          "name": "delFlag",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "삭제 플래그"
+        }
+      ],
+      "constraints": [],
+      "indexes": [],
+      "scenarios": [
+        "`WebAspMgr.cpp`의 `SetASPTable_Insert` / `GetASPTable_Insert` 경로와 `TRUNCATE TABLE PurCSDetail` 경로에서 확인된다."
+      ],
+      "deprecated": false,
+      "deprecatedNote": ""
+    },
+    {
+      "id": "legacy-pur-order-item",
+      "name": "PurOrderItem",
+      "section": "Legacy",
+      "owner": "HJ-POS",
+      "storage": "Local MSSQL",
+      "syncDirection": "-",
+      "columns": [
+        {
+          "name": "storeCode",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "매장 코드"
+        },
+        {
+          "name": "orderItemDate",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "주문 품목 일시"
+        },
+        {
+          "name": "itemCode",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "상품 코드"
+        },
+        {
+          "name": "itemName",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "상품명"
+        },
+        {
+          "name": "grpCode",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "그룹 코드"
+        },
+        {
+          "name": "grpName",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "그룹명"
+        },
+        {
+          "name": "qty",
+          "type": "REAL",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "수량"
+        },
+        {
+          "name": "amt",
+          "type": "REAL",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "금액"
+        },
+        {
+          "name": "totalAmt",
+          "type": "REAL",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "합계 금액"
+        },
+        {
+          "name": "dc",
+          "type": "REAL",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "할인액"
+        },
+        {
+          "name": "vat",
+          "type": "REAL",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "부가세"
+        },
+        {
+          "name": "purType",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "매입 유형"
+        }
+      ],
+      "constraints": [],
+      "indexes": [],
+      "scenarios": [
+        "`DB/ItemMgr.cpp`에서 직접 `INSERT INTO PurOrderItem(...)` 구문이 확인된다. 구매/발주 집계의 세부 라인 테이블로 보존한다."
+      ],
+      "deprecated": false,
+      "deprecatedNote": ""
+    },
+    {
+      "id": "legacy-store-etc-service",
+      "name": "StoreEtcService",
+      "section": "Legacy",
+      "owner": "HJ-POS",
+      "storage": "Local MSSQL",
+      "syncDirection": "-",
+      "columns": [
+        {
+          "name": "storeId",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "매장 식별자"
+        },
+        {
+          "name": "svcCd",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "서비스 코드"
+        },
+        {
+          "name": "enable",
+          "type": "INT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "사용 여부"
+        },
+        {
+          "name": "svcQty",
+          "type": "INT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "서비스 수량 / 옵션값"
+        },
+        {
+          "name": "orderDomain",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "주문 도메인"
+        },
+        {
+          "name": "orderPort",
+          "type": "TEXT",
+          "nullable": "Unknown",
+          "default": "-",
+          "description": "주문 포트"
+        }
+      ],
+      "constraints": [],
+      "indexes": [],
+      "scenarios": [
+        "매장별 서비스 설정 테이블이다. `PosManiaAuthenticator.cpp`에서 `LEFT OUTER JOIN` 및 주문 도메인/포트 조회에 활용된다."
       ],
       "deprecated": false,
       "deprecatedNote": ""
@@ -15840,6 +18138,6 @@
       "deprecatedNote": ""
     }
   ],
-  "totalPlatformCount": 42,
-  "totalLegacyCount": 118
+  "totalPlatformCount": 59,
+  "totalLegacyCount": 123
 }

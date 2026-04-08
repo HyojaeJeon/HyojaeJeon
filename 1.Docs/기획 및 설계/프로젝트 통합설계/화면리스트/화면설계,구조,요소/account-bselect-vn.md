@@ -73,7 +73,7 @@ KR 버전 기능(ABS-F01~F50)에 아래를 추가:
 
 ### 5.6 i18n / Error / Permission (VN 고유)
 
-- 번역 원본: `SharedAssets/i18n/locales/vi/`
+- 번역 원본: `BrandPosApp/PosUi/src/i18n/locales/vi/`
 - 언어 선택 버튼(KR/EN/VN)은 글로벌 i18n 전환으로 통합, 결제 화면 전용이 아닌 앱 전역 설정
 - UserPayment1~4는 사용자 정의 결제수단으로 라벨/기능 동적 설정
 
@@ -111,7 +111,7 @@ KR 버전 기능(ABS-F01~F50)에 아래를 추가:
 |---|---|---|
 | C++ Infra | BrandPosApp/Infrastructure/ExternalBridge/PaymentGateways/ZaloPay/ | ZALOPAY PG 연동 |
 | C++ Infra | BrandPosApp/Infrastructure/Persistence/SQLite/Tables/Payment/UserPaymentCrud.cpp | 사용자 정의 결제수단 CRUD |
-| i18n | SharedAssets/i18n/locales/vi/payment.json | 베트남어 결제 번역 |
+| i18n | BrandPosApp/PosUi/src/i18n/locales/vi/payment.json | 베트남어 결제 번역 |
 
 ---
 

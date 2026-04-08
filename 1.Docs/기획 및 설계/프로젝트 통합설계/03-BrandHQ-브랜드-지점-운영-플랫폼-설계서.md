@@ -38,7 +38,7 @@
   - DataLoader는 Apollo Server resolver의 서버 측 책임이다.
 - 대량 목록은 pagination, lazy loading, fragment 분리로 처리한다.
 - `SharedContracts`를 DTO/enum/event의 단일 원본으로 사용한다.
-- `SharedAssets/i18n/locales`를 번역 원본으로 사용한다.
+- 이 프로젝트 내부 i18n을 번역 원본으로 사용한다.
 - 유지보수 원칙:
   - master data / price policy / promotion / branch override / operator template 도메인별로 feature를 분리한다.
   - 화면별 서버 상태를 Redux에 중복 저장하지 않는다.
@@ -54,7 +54,7 @@
   - DataLoader là trách nhiệm phía server của Apollo Server resolver.
 - Danh sách lớn phải xử lý bằng pagination, lazy loading và tách fragment.
 - Dùng `SharedContracts` làm nguồn gốc duy nhất cho DTO/enum/event.
-- Dùng `SharedAssets/i18n/locales` làm nguồn dịch.
+- Dùng i18n nội bộ của project này làm nguồn dịch.
 - Nguyên tắc maintainability:
   - Tách feature theo domain master data / price policy / promotion / branch override / operator template.
   - Không lưu trùng server state vào Redux.
@@ -91,7 +91,7 @@ Mục tiêu của BrandHQ platform gồm 4 điểm sau.
 | `BrandHQPortal` | `Next.js(TypeScript) + App Router + Apollo Client` | GraphQL-first | 브랜드 본사 운영 포털 |
 | 중앙 연결 | `SuperAdmin/CentralApi` | GraphQL API | 메뉴/가격/프로모션/지점/리포트 |
 | UI 상태 | `Redux Toolkit` 필요 시 사용 | - | 화면 상태, 폼, 필터 |
-| 다국어 / i18n | `SharedAssets/i18n/locales` + `i18next` | build-time copy | `BrandHQPortal` UI 문자열/메시지의 공통 원본 |
+| 다국어 / i18n | `각 프로젝트 내부 i18n` + `i18next` | build-time copy | `BrandHQPortal` UI 문자열/메시지의 공통 원본 |
 | 직접 DB 접근 | 없음 | - | 모든 영속 데이터는 중앙 API 경유 |
 | 하향 배포 대상 | `BrandPosApp` / `EdgePos` | Catalog/Policy | 정책/메뉴/가격 배포 |
 | 현장 설정 적용 | `BrandPosApp` Setup/Maintenance mode | Local SQLite | 주변기기, 로컬 설정, 커미셔닝 |

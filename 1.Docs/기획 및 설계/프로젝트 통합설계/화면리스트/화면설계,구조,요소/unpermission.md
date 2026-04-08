@@ -133,7 +133,7 @@ UNPERMISSION은 단말기 미승인(수기) 결제 처리 모달이다. 카드 �
 
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/{ko,vi,en}/payment.json` | msgKey 기반 |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/{ko,vi,en}/payment.json` | msgKey 기반 |
 | Error | 코드 기반: `{ type, code, msgKey, severity, recoverable }` | `INVALID_PASSWORD` |
 | Permission | **권한 검증 모달**. 이 모달 자체가 권한 검증 UI이다. 호출자가 requiredPermission을 지정한다. | |
 

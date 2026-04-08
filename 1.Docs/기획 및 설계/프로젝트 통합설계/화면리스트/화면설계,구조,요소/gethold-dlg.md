@@ -127,7 +127,7 @@ GETHOLD_DLG는 보류(Hold) 주문 복원 모달이다. 보류된 주문을 선�
 
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/{ko,vi,en}/order.json` | msgKey 기반 |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/{ko,vi,en}/order.json` | msgKey 기반 |
 | Error | 코드 기반: `{ type, code, msgKey, severity, recoverable }` | `HOLD_NOT_FOUND`, `TABLE_OCCUPIED` |
 | Permission | **로그인 직원 전원**. 보류 주문 조회/복원은 특별한 권한 제한 없음. | |
 

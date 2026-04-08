@@ -73,7 +73,7 @@
 | Native Host | `C++` | local bridge / device control | Win32 실행, 장치 제어, CEF bootstrap |
 | UI Shell | `CEF` | `app://pos/` custom scheme | 단일 브라우저 셸 |
 | UI App | `Next.js(TypeScript)` | RTK Query + Redux Toolkit | 화면/라우팅/상태 |
-| 다국어 / i18n | `SharedAssets/i18n/locales` + `i18next` | build-time copy + local parse | UI/Bridge/C++ native string 공통 원본 |
+| 다국어 / i18n | `BrandPosApp/PosUi/src/i18n/locales` + `i18next` | build-time copy + local parse | UI/Bridge/C++ native string 공통 원본 |
 | Local DB | `SQLite` | offline-first local store | 주문/결제/테이블/복구 |
 | Legacy reference DB | `MSSQL` (`HJ-POS-TEST`) | reverse-engineering source only | legacy schema/field reference |
 | Bridge | `cefQuery` | request/response + realtime event | UI ↔ C++ 통신 |
@@ -146,8 +146,8 @@ Platform (Kho Git duy nhất / 단일 Git 저장소)
 ├── BrandPosApp/       Ứng dụng POS chính + Setup/Maintenance mode / POS chính + 설정/유지보수 모드
 ├── SharedKernel/             Module C++ dùng chung (Foundation, Contracts, Observability, BuildSupport)
 │                          └ 공유 C++ 기반 모듈
-└── SharedAssets/                Tài nguyên dùng chung (i18n JSON, v.v.)
-                           └ 공유 리소스 (i18n JSON 등)
+└── SharedAssets/                Tài nguyên dùng chung (static assets, JSON dùng chung)
+                           └ 공유 리소스 (정적 자산, 공용 JSON)
 ```
 
 Quan hệ kết nối / 연결 관계:
@@ -490,12 +490,9 @@ Platform/                                                  # Thư mục gốc kh
 │   └── BuildSupport/                                           # Hỗ trợ build/codegen / 빌드/codegen 지원
 │
 ├── SharedAssets/                                                     # Tài sản runtime dùng chung / 공용 런타임 자산
-│   └── i18n/                                                   # Tài sản đa ngôn ngữ gốc / 다국어 원본 자산
-│       └── locales/                                            # Gốc locale / locale 루트
-│           ├── ko/                                             # Locale tiếng Hàn / 한국어 locale
-│           │   ├── common.json                                 # Bản dịch chung / 공통 번역
-│           │   ├── table.json                                  # Bản dịch bàn / 테이블 번역
-│           │   ├── order.json                                  # Bản dịch 주문 / 주문 번역
+│   ├── fonts/                                                  # Tài nguyên font / 폰트 리소스
+│   ├── icons/                                                  # Tài nguyên icon / 아이콘 리소스
+│   └── static/                                                 # Tài nguyên tĩnh / 정적 리소스
 │           │   ├── payment.json                                # Bản dịch 결제 / 결제 번역
 │           │   └── system.json                                 # Bản dịch 시스템 / 시스템 번역
 │           ├── vi/                                             # Locale tiếng Việt / 베트남어 locale
@@ -597,7 +594,7 @@ Nếu cấu trúc repo thay đổi, tài liệu cũng phải được cập nh�
 ```text
 SharedKernel/
 ├── Foundation/          # CString util, đối tượng kết quả chung, thời gian/UUID / CString 유틸, 공통 결과 객체, 시간/UUID
-├── Contracts/           # Envelope, DTO, mã lỗi, hằng số chung / Envelope, DTO, 에러 코드, 공통 상수
+├── Contracts/           # Message frame, DTO, mã lỗi, hằng số chung / 메시지 프레임, DTO, 에러 코드, 공통 상수
 ├── Observability/       # Giao diện logging, correlation helpers / 로깅 인터페이스, correlation helpers
 ├── Testing/             # Dummy, sample payload, contract fixtures / 더미, 샘플 payload, contract fixtures
 └── BuildSupport/        # Script sao chép/đồng bộ, codegen, schema validator / 복사/동기화 스크립트, codegen, schema validator
@@ -611,8 +608,8 @@ Nguyên tắc:
 - └ `SharedContracts`는 UI 브릿지와 UseCases 계층의 공통 계약 원본
 - Không đặt triển khai theo domain của `DB/Manager`, `ExternalBridge` vào `SharedKernel/`
 - └ `DB/Manager`, `ExternalBridge`의 도메인별 구현은 `SharedKernel/`에 넣지 않는다
-- `SharedAssets/` chỉ lưu trữ tài sản runtime như i18n, tài nguyên tĩnh, JSON dùng chung
-- └ `SharedAssets/`는 i18n, 정적 리소스, 공용 JSON 같은 런타임 자산만 보관한다
+- `SharedAssets/` chỉ lưu trữ tài sản runtime như tài nguyên tĩnh, JSON dùng chung
+- └ `SharedAssets/`는 정적 리소스, 공용 JSON 같은 런타임 자산만 보관한다
 
 ### 3.5 Quy tắc file bên trong `Infrastructure/Persistence`
 └ `Infrastructure/Persistence` 하위 파일 규칙
@@ -1406,8 +1403,8 @@ TableDlg.cpp → Phát hiện click → Kết nối DB trực tiếp → Thay đ
 - └ `PosUi/src/bridge/PosRequestSender.ts`에 모든 Action 상수 + 파라미터/응답 스펙을 JSDoc으로 기술
 - Duy trì chú thích interface tương tự tại `PosRealTimeSender.h` phía C++ để đồng bộ spec hai bên
 - └ C++ 측 `PosRealTimeSender.h`에도 동일한 인터페이스 주석을 유지하여 양쪽 스펙 동기화
-- Định nghĩa Envelope và field chung quản lý bằng tài liệu `SharedContracts/` riêng, chú thích triển khai giữ bằng JSDoc
-- └ 봉투(Envelope)와 공통 필드 정의는 별도 `SharedContracts/` 문서로 관리하고, 구현 주석은 JSDoc으로 유지
+- Định nghĩa message frame và field chung quản lý bằng tài liệu `SharedContracts/` riêng, chú thích triển khai giữ bằng JSDoc
+- └ 공통 메시지 프레임과 공통 필드 정의는 별도 `SharedContracts/` 문서로 관리하고, 구현 주석은 JSDoc으로 유지
 
 ### 8.3 Đối ứng độ phân giải cố định 1024x768
 └ 1024x768 고정 해상도 대응
@@ -1440,14 +1437,14 @@ TableDlg.cpp → Phát hiện click → Kết nối DB trực tiếp → Thay đ
 
 **Sau chuyển đổi**:
 └ **전환 후**:
-- **Nguồn đơn nhất (Source of Truth)**: `SharedAssets/i18n/locales/` — Chỉ JSON tại đây là nguồn gốc duy nhất
-- └ **단일 소스 (Source of Truth)**: `SharedAssets/i18n/locales/` — 이곳의 JSON만이 유일한 원본
-- Phía Next.js: Build script sao chép `SharedAssets/i18n/locales/` sang `PosUi/src/i18n/locales/` → Load bằng `i18next`
-- └ Next.js 측: 빌드 스크립트가 `SharedAssets/i18n/locales/`를 `PosUi/src/i18n/locales/`로 복사 → `i18next`로 로드
-- Phía C++: Build script sao chép `SharedAssets/i18n/locales/` sang `Build/Build/locales/` → Parse bằng `nlohmann/json`
-- └ C++ 측: 빌드 스크립트가 `SharedAssets/i18n/locales/`를 `Build/Build/locales/`로 복사 → `nlohmann/json`으로 파싱
-- **Nguyên tắc**: Sửa dịch chỉ ở `SharedAssets/i18n/locales/`. locales của PosUi hay Build chỉ là sản phẩm (bản sao) chứ không phải nguồn gốc
-- └ **원칙**: 번역 수정은 반드시 `SharedAssets/i18n/locales/`에서만. PosUi나 Build의 locales는 산출물(복사본)일 뿐 원본이 아님
+- **Nguồn đơn nhất (Source of Truth)**: `BrandPosApp/PosUi/src/i18n/locales/` — Chỉ JSON tại đây là nguồn gốc duy nhất
+- └ **단일 소스 (Source of Truth)**: `BrandPosApp/PosUi/src/i18n/locales/` — 이곳의 JSON만이 유일한 원본
+- Phía Next.js: Build script sao chép `BrandPosApp/PosUi/src/i18n/locales/` sang `PosUi/src/i18n/locales/` → Load bằng `i18next`
+- └ Next.js 측: 빌드 스크립트가 `BrandPosApp/PosUi/src/i18n/locales/`를 `PosUi/src/i18n/locales/`로 복사 → `i18next`로 로드
+- Phía C++: Build script sao chép `BrandPosApp/PosUi/src/i18n/locales/` sang `Build/Build/locales/` → Parse bằng `nlohmann/json`
+- └ C++ 측: 빌드 스크립트가 `BrandPosApp/PosUi/src/i18n/locales/`를 `Build/Build/locales/`로 복사 → `nlohmann/json`으로 파싱
+- **Nguyên tắc**: Sửa dịch chỉ ở `BrandPosApp/PosUi/src/i18n/locales/`. locales của PosUi hay Build chỉ là sản phẩm (bản sao) chứ không phải nguồn gốc
+- └ **원칙**: 번역 수정은 반드시 `BrandPosApp/PosUi/src/i18n/locales/`에서만. PosUi나 Build의 locales는 산출물(복사본)일 뿐 원본이 아님
 
 ### 8.5 Bảo vệ giao tiếp bất đồng bộ thiết bị ngoại vi/dịch vụ bên ngoài (phòng thủ 2 lớp)
 └ 주변기기/외부서비스 비동기 통신 보호 (2중 방어)
@@ -1532,8 +1529,8 @@ TableDlg.cpp → Phát hiện click → Kết nối DB trực tiếp → Thay đ
 - API bên ngoài (duyệt thẻ) = **trường hợp đặc biệt**: chờ kết quả → rồi lưu DB → rồi hiển thị UI
 - └ 외부 API (카드 승인) = **예외 케이스**: 결과 대기 → DB 저장 → UI 표시 순서
 
-### 8.8 Tiêu chuẩn JSON Envelope và quản lý phiên bản
-└ JSON 봉투(Envelope) 표준 및 버전 관리
+### 8.8 Tiêu chuẩn JSON message frame và quản lý phiên bản
+└ JSON 메시지 프레임 표준 및 버전 관리
 
 Tất cả message PosRequest/PosRealTime bao gồm **header chung** sau:
 └ 모든 PosRequest/PosRealTime 메시지는 아래 **공통 헤더**를 포함한다:
@@ -1623,8 +1620,8 @@ Tất cả message PosRequest/PosRealTime bao gồm **header chung** sau:
 - └ `Device/` 폴더에서 발생하는 에러(용지 없음, 카드리더기 연결 끊김 등)를 UI에 전달하는 **공통 에러 규격** 정의
 - Payload lỗi truyền bằng **field dựa trên mã**, không sử dụng câu hoàn chỉnh (`msg`) làm field hợp đồng
 - └ 에러 payload는 **코드 기반 필드**로 전달하고, 완성 문장(`msg`)은 계약 필드로 사용하지 않는다
-- Nội dung hiển thị cho người dùng được giải thích từ nguồn dịch `SharedAssets/i18n/locales/` theo `msgKey`
-- └ 사용자에게 보이는 문구는 `SharedAssets/i18n/locales/`의 번역 원본에서 `msgKey` 기준으로 해석한다
+- Nội dung hiển thị cho người dùng được giải thích từ nguồn dịch `BrandPosApp/PosUi/src/i18n/locales/` theo `msgKey`
+- └ 사용자에게 보이는 문구는 `BrandPosApp/PosUi/src/i18n/locales/`의 번역 원본에서 `msgKey` 기준으로 해석한다
 - Quy cách JSON lỗi:
 - └ 에러 JSON 규격:
   ```json
@@ -1640,7 +1637,7 @@ Tất cả message PosRequest/PosRealTime bao gồm **header chung** sau:
     "action": "USER_CHECK_PAPER"
   }
   ```
-- `msgKey`: Khóa dịch theo chuẩn `SharedAssets/i18n/locales/` / `SharedAssets/i18n/locales/` 기준 번역 키
+- `msgKey`: Khóa dịch theo chuẩn `BrandPosApp/PosUi/src/i18n/locales/` / `BrandPosApp/PosUi/src/i18n/locales/` 기준 번역 키
 - `msgParams`: Tham số thay thế chuỗi dịch / 번역 문자열 치환용 파라미터
 - `severity`: INFO / WARNING / CRITICAL — Quyết định mức hiển thị UI / UI 표시 수준 결정
 - `recoverable`: Khả năng phục hồi tự động / 자동 복구 가능 여부
@@ -2113,12 +2110,12 @@ SharedContracts/
 └── PosBridge/
     ├── RequestTypes.ts
     ├── RealtimeTypes.ts
-    └── Envelope.ts
+    └── MessageFrame.ts
 
 PosUi/src/bridge/contracts/
 ├── requestTypes.ts
 ├── realtimeTypes.ts
-└── envelope.ts
+└── messageFrame.ts
 ```
 
 - `screens/*/constants.ts` chỉ chứa hằng số UI cục bộ như layout, timer, tab, style token theo màn hình
@@ -2324,7 +2321,7 @@ Thiết kế này chỉ được phản ánh vào vận hành khi đáp ứng c�
    VS2022 Post-Build Event hoặc build script / VS2022 Post-Build Event 또는 빌드 스크립트:
    - Build/PosUi/out/ ← Sao chép PosUi/out/ / PosUi/out/ 복사
    - Build/ ← Sao chép binary CEF SDK (libcef.dll, tài nguyên, v.v.) / CEF SDK 바이너리 (libcef.dll, 리소스 등) 복사
-   - Build/Build/locales/ ← Sao chép SharedAssets/i18n/locales/ / SharedAssets/i18n/locales/ 복사
+   - Build/Build/locales/ ← Sao chép BrandPosApp/PosUi/src/i18n/locales/ / BrandPosApp/PosUi/src/i18n/locales/ 복사
 ```
 
 ### 11.2 Dual build (x86/x64)
@@ -2629,3 +2626,43 @@ P0는 현재 프로젝트로 즉시 이식해야 하는 핵심 거래축, P1은 
 /Users/hyojae/projects/Platform/PosUi/src/screens/OrderScreen/index.tsx
 /Users/hyojae/projects/Platform/PosUi/src/screens/PaymentScreen/index.tsx
 ```
+
+---
+
+## 부록 Z. MealTicket Closed Loop 단말 타입
+## Phụ lục Z. Thiết bị Closed Loop của MealTicket
+
+본 부록은 `00-Platform-최종-아키텍처-기준서.md §99` MealTicket 도메인 편입 결정에 따라, 기업 구내식당/산업단지 배식대에서 사용하는 **Closed Loop 단말**을 `EdgePos/Device` 계층의 신규 타입으로 정의한다.
+
+### Z.1 Device 타입 정의
+
+- 신규 Device 타입 이름: `MealTicketClosedLoopTerminal`
+- 상위 계층: `EdgePos/Device`
+- 소속 주체 매핑: `BrandHQ`(고객사) → `Branch`(제휴 식당/구내식당) → `MealTicketClosedLoopTerminal`
+- 인증 수단(`authMethod`): `RFID_BADGE`, `BIOMETRIC_FACE`, `BIOMETRIC_FINGERPRINT`
+- 루프 타입(`loopType`): `CLOSED_LOOP`
+
+### Z.2 성능 / SLA
+
+- 단말당 승인 지연 상한: **0.8초** (사원 1인당 신원확인 + 잔액 차감 + UI ACK 포함)
+- 교대조 변경 시간대(Shift Rush) 동시 처리 대상: 단일 배식대 기준 초당 1.25건 이상
+- 실패 시 fallback: 로컬 캐시 기반 화이트리스트 승인 → 복구 시 일괄 동기화
+
+### Z.3 Offline / Sync 규칙
+
+- Closed Loop 단말은 로컬에 암호화된 사용자 잔액 스냅샷과 식수 데이터를 캐싱할 수 있다.
+- 네트워크 복구 시 중앙 CentralApi `modules/mealticket/transaction` 엔드포인트로 **일괄 동기화**한다.
+- 동일 거래 재전송 방지를 위해 `idempotencyKey` 는 단말 로컬에서 생성하고, 성공 ACK 수신 전까지 보존한다.
+- 실시간 외부 승인형 거래(Open Loop QR, 카드, 배달앱)는 Outbox 재전송 대상이 아니다. Closed Loop 단말의 오프라인 캐싱은 이 규칙의 예외이며, **오직 MealTicket Closed Loop 전용 테이블에만 적용**된다.
+
+### Z.4 관리/운영
+
+- 단말 등록 및 해지는 `SuperAdmin` 이 수행한다.
+- 고객사(`BrandHQ`) 관리자는 단말 배치(구내식당 위치, 배식대 번호)만 편집할 수 있다.
+- 사원증(`badgeRfid`) 매핑은 HRIS 연동 또는 고객사 관리자 업로드로 처리한다.
+- 이상 거래 탐지(Fraud Detection) 알고리즘은 CentralApi 쪽에서 수행하며, 단말은 결과만 반영한다.
+
+### Z.5 계약 원본
+
+- 본 단말이 주고받는 DTO / enum / event 의 **단일 원본**은 `SharedContracts/ApiSdk/src/mealticket` 이다.
+- 본 문서나 구현 파일 어디에서도 별도의 중복 정의를 두지 않는다.

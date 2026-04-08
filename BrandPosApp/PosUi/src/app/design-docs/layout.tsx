@@ -62,6 +62,9 @@ function buildNavSections(): NavSection[] {
         { href: `${P}/docs/edgepos-architecture`, labelKey: 'nav.edgepos_architecture', status: 'todo' },
         { href: `${P}/docs/edgepos-az-guide`, labelKey: 'nav.edgepos_az_guide', status: 'todo' },
         { href: `${P}/docs/edgepos-checklist`, labelKey: 'nav.edgepos_checklist', status: 'todo' },
+        { href: `${P}/docs/mealticket-overview`, labelKey: 'nav.mealticket_overview', status: 'wip' },
+        { href: `${P}/docs/mealticket-corporate`, labelKey: 'nav.mealticket_corporate', status: 'wip' },
+        { href: `${P}/docs/mealticket-merchant`, labelKey: 'nav.mealticket_merchant', status: 'wip' },
       ],
     },
 

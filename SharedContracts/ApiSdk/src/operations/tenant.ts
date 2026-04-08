@@ -11,9 +11,7 @@ export interface DistributorsQueryVariables {
   take?: number;
 }
 
-export interface DistributorsQueryData {
-  distributors: DistributorProfile[];
-}
+export type DistributorsQueryData = DistributorProfile[];
 
 export const distributorsOperation: GraphQLOperation<
   DistributorsQueryData,
@@ -23,7 +21,8 @@ export const distributorsOperation: GraphQLOperation<
   document: `
     query Distributors($skip: Int, $take: Int) {
       distributors(skip: $skip, take: $take) {
-        id
+        success { code message requestId data {
+          id
         distributorCode
         companyName
         legalName
@@ -37,6 +36,8 @@ export const distributorsOperation: GraphQLOperation<
         contactPhone
         createdAt
         updatedAt
+        } }
+        error { code message requestId details }
       }
     }
   `,
@@ -48,9 +49,7 @@ export interface BrandsQueryVariables {
   take?: number;
 }
 
-export interface BrandsQueryData {
-  brands: BrandProfile[];
-}
+export type BrandsQueryData = BrandProfile[];
 
 export const brandsOperation: GraphQLOperation<
   BrandsQueryData,
@@ -60,7 +59,8 @@ export const brandsOperation: GraphQLOperation<
   document: `
     query Brands($distributorId: ID, $skip: Int, $take: Int) {
       brands(distributorId: $distributorId, skip: $skip, take: $take) {
-        id
+        success { code message requestId data {
+          id
         distributorId
         brandCode
         brandName
@@ -73,6 +73,8 @@ export const brandsOperation: GraphQLOperation<
         status
         createdAt
         updatedAt
+        } }
+        error { code message requestId details }
       }
     }
   `,
@@ -84,9 +86,7 @@ export interface BranchesQueryVariables {
   take?: number;
 }
 
-export interface BranchesQueryData {
-  branches: Branch[];
-}
+export type BranchesQueryData = Branch[];
 
 export const branchesOperation: GraphQLOperation<
   BranchesQueryData,
@@ -96,7 +96,8 @@ export const branchesOperation: GraphQLOperation<
   document: `
     query Branches($brandHQId: ID!, $skip: Int, $take: Int) {
       branches(brandHQId: $brandHQId, skip: $skip, take: $take) {
-        id
+        success { code message requestId data {
+          id
         brandHQId
         distributorId
         branchCode
@@ -114,6 +115,8 @@ export const branchesOperation: GraphQLOperation<
         closingDate
         createdAt
         updatedAt
+        } }
+        error { code message requestId details }
       }
     }
   `,
@@ -123,16 +126,15 @@ export interface BranchQueryVariables {
   id: string;
 }
 
-export interface BranchQueryData {
-  branch?: Branch | null;
-}
+export type BranchQueryData = Branch | null;
 
 export const branchOperation: GraphQLOperation<BranchQueryData, BranchQueryVariables> = {
   operationName: 'Branch',
   document: `
     query Branch($id: ID!) {
       branch(id: $id) {
-        id
+        success { code message requestId data {
+          id
         brandHQId
         distributorId
         branchCode
@@ -164,6 +166,8 @@ export const branchOperation: GraphQLOperation<BranchQueryData, BranchQueryVaria
           createdAt
           updatedAt
         }
+        } }
+        error { code message requestId details }
       }
     }
   `,
@@ -175,9 +179,7 @@ export interface EdgePosTerminalsQueryVariables {
   take?: number;
 }
 
-export interface EdgePosTerminalsQueryData {
-  edgePosTerminals: EdgePosTerminal[];
-}
+export type EdgePosTerminalsQueryData = EdgePosTerminal[];
 
 export const edgePosTerminalsOperation: GraphQLOperation<
   EdgePosTerminalsQueryData,
@@ -187,7 +189,8 @@ export const edgePosTerminalsOperation: GraphQLOperation<
   document: `
     query EdgePosTerminals($branchId: ID!, $skip: Int, $take: Int) {
       edgePosTerminals(branchId: $branchId, skip: $skip, take: $take) {
-        id
+        success { code message requestId data {
+          id
         branchId
         terminalCode
         terminalName
@@ -199,6 +202,8 @@ export const edgePosTerminalsOperation: GraphQLOperation<
         lastHeartbeatAt
         createdAt
         updatedAt
+        } }
+        error { code message requestId details }
       }
     }
   `,
@@ -208,9 +213,7 @@ export interface EdgePosTerminalQueryVariables {
   id: string;
 }
 
-export interface EdgePosTerminalQueryData {
-  edgePosTerminal?: EdgePosTerminal | null;
-}
+export type EdgePosTerminalQueryData = EdgePosTerminal | null;
 
 export const edgePosTerminalOperation: GraphQLOperation<
   EdgePosTerminalQueryData,
@@ -220,7 +223,8 @@ export const edgePosTerminalOperation: GraphQLOperation<
   document: `
     query EdgePosTerminal($id: ID!) {
       edgePosTerminal(id: $id) {
-        id
+        success { code message requestId data {
+          id
         branchId
         terminalCode
         terminalName
@@ -232,6 +236,8 @@ export const edgePosTerminalOperation: GraphQLOperation<
         lastHeartbeatAt
         createdAt
         updatedAt
+        } }
+        error { code message requestId details }
       }
     }
   `,

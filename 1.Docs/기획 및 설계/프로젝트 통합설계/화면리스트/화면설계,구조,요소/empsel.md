@@ -131,7 +131,7 @@ EMPSEL은 직원 선택/관리 모달이다. 다른 화면(주문/결제/테이�
 
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/{ko,vi,en}/staff.json` | msgKey 기반 |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/{ko,vi,en}/staff.json` | msgKey 기반 |
 | Error | 코드 기반: `{ type, code, msgKey, severity, recoverable }` | `INVALID_PASSWORD` → msgKey: `staff.error.invalidPassword` |
 | Permission | **로그인 직원 전원** (목록 조회/선택). 직원 추가/삭제/저장/권한 변경은 TODO: 관리자 전용인지 확인 필요 | |
 

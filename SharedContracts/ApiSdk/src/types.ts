@@ -1,18 +1,50 @@
-export interface GraphQLErrorShape {
+/**
+ * 한국어: 표준 success / error 응답 shape — public contract.
+ *   서버 내부 i18n metadata (msgKey / params / locale) 는 절대 노출하지 않는다.
+ *   모든 GraphQL Query / Mutation 은 OperationResponse<T> 형태로 반환되며,
+ *   정확히 success 또는 error 중 하나만 set 된다.
+ *
+ * Tiếng Việt: Public contract chuẩn — không lộ msgKey / params / locale của server.
+ */
+export interface SuccessPayload<TData> {
+  code: string;
   message: string;
-  path?: Array<string | number>;
-  extensions?: Record<string, unknown>;
+  requestId?: string | null;
+  data: TData;
 }
 
-export interface GraphQLResponseEnvelope<TData> {
-  data?: TData;
-  errors?: GraphQLErrorShape[];
+export interface ErrorPayload {
+  code: string;
+  message: string;
+  requestId?: string | null;
+  details?: Record<string, unknown> | null;
+}
+
+export interface OperationResponse<TData> {
+  success?: SuccessPayload<TData> | null;
+  error?: ErrorPayload | null;
+}
+
+/**
+ * 한국어: GraphQL transport-level fault (parsing / auth / system) 만 errors 배열에 들어간다.
+ *   business success / failure 는 OperationResponse 로만 통신한다.
+ */
+export interface GraphQLTransportError {
+  message: string;
+  path?: Array<string | number>;
+  extensions?: { code?: string };
 }
 
 export interface GraphQLOperation<TData, TVariables> {
   operationName: string;
   document: string;
 }
+
+export type AuthUserType =
+  | 'SUPER_ADMIN'
+  | 'DISTRIBUTOR_USER'
+  | 'BRAND_ADMIN'
+  | 'CORPORATE_ADMIN';
 
 export type Maybe<T> = T | null;
 
@@ -71,15 +103,19 @@ export interface SyncEventConnection {
   totalCount: number;
 }
 
-export interface SuperAdminUser {
+export interface AuthAccount {
   id: string;
   loginId: string;
   displayName: string;
   email?: string | null;
   phone?: string | null;
-  roleCode: string;
+  userType: AuthUserType;
+  distributorId?: string | null;
+  brandHQId?: string | null;
+  corporateId?: string | null;
   status: string;
   lastLoginAt?: string | null;
+  passwordChangedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -87,8 +123,10 @@ export interface SuperAdminUser {
 export interface AuthPayload {
   accessToken: string;
   expiresIn: string;
-  user: SuperAdminUser;
+  user: AuthAccount;
 }
+
+export type SuperAdminUser = AuthAccount;
 
 export interface Language {
   id: string;

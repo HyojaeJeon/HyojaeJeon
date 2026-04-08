@@ -1,0 +1,40 @@
+// ─────────────────────────────────────────────
+// BrandHQ Entitlement (capability 기반 권한)
+// 한국어: 기준서 §100 BrandHQ Entitlement 규칙의 DB 원본.
+//   한 BrandHQ 가 POS / MEAL_TICKET 등 capability 를 독립 구독한다.
+//   상태 전이(trial → active → suspended → expired/revoked) 를 추적한다.
+// Tiếng Việt: Nguồn DB cho quy tắc Entitlement của BrandHQ.
+// ─────────────────────────────────────────────
+
+// 한국어: BrandHQ capability entitlement 테이블.
+//   - capability: 'POS' / 'MEAL_TICKET' / (향후 'DELIVERY_AGGREGATOR', 'KDS' ...)
+//   - status: 'ACTIVE' / 'SUSPENDED' / 'TRIAL' / 'EXPIRED' / 'REVOKED'
+//   하나의 BrandHQ + capability 조합에 대해 동시 ACTIVE/TRIAL 레코드는 1개만 허용한다.
+// Tiếng Việt: Bảng entitlement capability của BrandHQ.
+model BrandHqEntitlement {
+  id                    String    @id @default(uuid()) @db.Uuid
+  brandHqId             String    @db.Uuid // FK → BrandProfile.id
+  capability            String    @db.VarChar(40) // 'POS' | 'MEAL_TICKET' | ...
+  status                String    @default("ACTIVE") @db.VarChar(20)
+  activatedAt           DateTime  @default(now()) @db.Timestamptz()
+  expiresAt             DateTime? @db.Timestamptz()
+  grantedBySuperAdminId String    @db.Uuid
+  revokedAt             DateTime? @db.Timestamptz()
+  revokeReason          String?   @db.VarChar(500)
+  contractRef           String?   @db.VarChar(200)
+  // 한국어: 이 entitlement 가 어느 PlatformLicense 계약에서 파생되었는지 link.
+  //   1 PlatformLicense (계약/요금/만료 메타데이터) ↔ N BrandHqEntitlement (런타임 capability 게이팅)
+  //   nullable: 계약 없이 SuperAdmin 이 직접 grant 한 경우를 허용한다.
+  // Tiếng Việt: Liên kết tới PlatformLicense (hợp đồng) — 1 license : N entitlement.
+  licenseId             String?   @db.Uuid
+  createdAt             DateTime  @default(now()) @db.Timestamptz()
+  updatedAt             DateTime  @updatedAt @db.Timestamptz()
+
+  // P0-2: License 삭제 시 entitlement 의 licenseId 를 NULL 로 → entitlement 자체는 유지.
+  //   감사 추적을 위해 capability 기록은 남기고 계약 참조만 끊는다.
+  license PlatformLicense? @relation(fields: [licenseId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([brandHqId, capability, status], name: "idx_entitlement_brand_cap_status")
+  @@index([brandHqId, status], name: "idx_entitlement_brand_status")
+  @@index([licenseId], name: "idx_entitlement_license")
+}

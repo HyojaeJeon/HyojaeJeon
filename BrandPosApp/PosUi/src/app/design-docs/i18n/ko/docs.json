@@ -9,6 +9,7 @@
     "section_innovation": "차별화, 혁신",
     "section_project_design": "프로젝트 통합설계",
     "section_feature_list": "플랫폼 별 화면/기능리스트",
+    "section_mealticket": "식권 플랫폼",
     "section_db_design": "DB 설계",
     "section_design_tokens": "디자인 토큰",
     "section_atoms": "기본 요소",
@@ -44,6 +45,9 @@
     "edgepos_architecture": "04 Edge POS 아키텍처 설계서",
     "edgepos_az_guide": "05 Edge POS 전체 흐름 AZ 가이드",
     "edgepos_checklist": "06 P0-P1 설계 보완 체크리스트",
+    "mealticket_overview": "식권 플랫폼 개요 / 주체 매핑",
+    "mealticket_corporate": "Corporate (B2B 고객 기업)",
+    "mealticket_merchant": "Merchant (제휴식당 = BrandHQ)",
     "feature_coverage_matrix": "기능리스트 커버리지 매트릭스",
     "superadmin_features": "SuperAdmin 기능리스트",
     "distributor_features": "RegionalDistributor 기능리스트",
@@ -301,7 +305,7 @@
         },
         "standard_layers": {
           "title": "표준 사업 계층",
-          "content": "| 계층 | 역할 |\n|---|---|\n| **SuperAdmin** | 플랫폼 공급사 운영 주체 |\n| **RegionalDistributor** | 국가/지역 독점 유통권을 가진 대리점/채널 파트너 |\n| **BrandHQ** | 브랜드 본사 운영 주체 |\n| **Branch** | 브랜드 산하의 개별 매장/지점 |\n| **EdgePos** | 지점에 설치된 POS 실행 단말 |\n| **Device** | EdgePos에 연결된 주변기기 |"
+          "content": "| 계층 | 역할 |\n|---|---|\n| **SuperAdmin** | 플랫폼 공급사 운영 주체 |\n| **RegionalDistributor** | 국가/지역 독점 유통권을 가진 대리점/채널 파트너 |\n| **BrandHQ** | 브랜드 본사 운영 주체 (식권 플랫폼 맥락에서는 제휴식당도 이 계층) |\n| **Corporate** | **식권 플랫폼 전용 신규 계층.** B2B 고객 기업. Branch 를 소유하지 않고 임직원·예산·정책·세금계산서만 소유 |\n| **Branch** | 브랜드 산하의 개별 매장/지점 |\n| **EdgePos** | 지점에 설치된 POS 실행 단말 |\n| **Device** | EdgePos에 연결된 주변기기 (식권 Closed Loop RFID/생체 단말 포함) |"
         },
         "db_identifiers": {
           "title": "DB 식별자 표준",
@@ -309,15 +313,15 @@
         },
         "project_specs": {
           "title": "프로젝트별 확정 SPEC 요약",
-          "content": "| Project | 확정 SPEC | DB / Storage | 계약 / 통신 |\n|---|---|---|---|\n| **BrandPosApp** | C++ + CEF + Next.js(TS) | SQLite local DB | cefQuery + realtime event |\n| **RegionalDistributorPortal** | Next.js(TS) + App Router | Direct DB access 없음 | Apollo Client + GraphQL-first |\n| **BrandHQPortal** | Next.js(TS) + App Router | Direct DB access 없음 | Apollo Client + GraphQL-first |\n| **SuperAdmin/Portal** | Next.js(TS) + App Router | Direct DB access 없음 | Apollo Client + GraphQL-first |\n| **SuperAdmin/CentralApi** | NestJS + Fastify + Apollo Server | Prisma + PostgreSQL + raw SQL | GraphQL-first, REST only via Fastify |\n| **SuperAdmin/SyncWorkers** | Node.js(TS) + BullMQ | Redis + Central DB | Queue-driven |\n| **SharedKernel** | C++ shared kernel | - | native helper / protocol |\n| **SharedContracts** | TypeScript contract package | - | DTO / enum / schema |\n| **SharedAssets** | versioned runtime assets | - | i18n / static assets |"
+          "content": "| Project | 확정 SPEC | DB / Storage | 계약 / 통신 |\n|---|---|---|---|\n| **BrandPosApp** | C++ + CEF + Next.js(TS) | SQLite local DB | cefQuery + realtime event |\n| **RegionalDistributorPortal** | Next.js(TS) + App Router | Direct DB access 없음 | Apollo Client + GraphQL-first |\n| **BrandHQPortal** | Next.js(TS) + App Router | Direct DB access 없음 | Apollo Client + GraphQL-first |\n| **SuperAdmin/Portal** | Next.js(TS) + App Router | Direct DB access 없음 | Apollo Client + GraphQL-first |\n| **CorporatePortal** | Next.js(TS) + App Router | Direct DB access 없음 | Apollo Client + GraphQL-first (식권 Corporate 계층 전용) |\n| **SuperAdmin/CentralApi** | NestJS + Fastify + Apollo Server | Prisma + PostgreSQL + raw SQL | GraphQL-first, REST only via Fastify |\n| **SuperAdmin/SyncWorkers** | Node.js(TS) + BullMQ | Redis + Central DB | Queue-driven |\n| **SharedKernel** | C++ shared kernel | - | native helper / protocol |\n| **SharedContracts** | TypeScript contract package | - | DTO / enum / schema |\n| **SharedAssets** | versioned runtime assets | - | static assets |"
         },
         "centralapi_hardening": {
           "title": "CentralApi 구현 보강 및 검증 상태",
           "content": "현재 `SuperAdmin/CentralApi`는 설계 문서의 일반 스택 설명 수준을 넘어서, 실제 프로덕션 하드닝 기준까지 반영된 상태다.\n\n- **멀티테넌트 데이터 격리**: resolver가 아니라 **service layer**에서 `RegionalDistributor / BrandHQ / Branch / EdgePos` 범위를 강제한다.\n- **GraphQL 보안/성능 가드**: request-scoped `DataLoader`, query depth limit `10`, query complexity limit `200`, production error masking을 적용한다.\n- **Fastify 하드닝**: `helmet`, `compress`, `bodyLimit`, `requestTimeout`, `keepAliveTimeout`, graceful shutdown hook을 고정한다.\n- **Prisma 운영 하드닝**: slow query logging, pool parameter 점검, raw SQL hot path 허용 원칙을 유지한다.\n- **Redis 실제 사용처**: login rate limit, distributed lock, sync handoff stream, reference data cache에 사용한다.\n- **추가 완료 항목**: `auditLogConnection`, `syncEventConnection` cursor pagination, Apollo Persisted Queries, persisted query allow-list automation, `prisma.config.ts` 기반 multi-file schema, SWC builder, `SharedContracts/ApiSdk` 기반 typed SDK 확장.\n- **자동 검증 상태**: `npm run build`, `npm test -- --runInBand`, `npx prisma validate --config prisma.config.ts`, `npx prisma generate --config prisma.config.ts` 기준으로 기본 회귀 검증을 통과했다.\n\n현재 남은 백로그는 SDK mutation/추가 도메인 범위 확대, Portal의 직접 SDK 채택, production allow-list drift 검증이다."
         },
         "shared_assets": {
-          "title": "다국어/SharedAssets 배포 원칙",
-          "content": "- `SharedAssets`는 공용 런타임 서버가 아니라 **버전 관리된 원본 패키지**\n- `SharedAssets/i18n/locales/`가 모든 플랫폼의 유일한 번역 원본\n- 각 플랫폼은 자기 빌드 파이프라인에서 필요한 locale 자산을 복사/패키징\n- 지원 언어 기본 세트: `ko`, `vi`, `en`\n- 사용자/브랜드/지점별 언어 선호도는 DB 설정으로 관리, 실제 표시 문자열은 locale key로 해석"
+          "title": "앱 내부 i18n 배포 원칙",
+          "content": "- `SharedAssets`는 static assets만 담당하고 번역 원본이 아니다\n- `BrandPosApp/PosUi/src/i18n/locales/`가 모든 플랫폼의 유일한 번역 원본\n- 각 플랫폼은 자기 빌드 파이프라인에서 필요한 locale 자산을 복사/패키징\n- 지원 언어 기본 세트: `ko`, `vi`, `en`\n- 사용자/브랜드/지점별 언어 선호도는 DB 설정으로 관리, 실제 표시 문자열은 locale key로 해석"
         },
         "full_stack_overview": {
           "title": "전체 스택 한눈에 보기",
@@ -340,7 +344,7 @@
         },
         "confirmed_spec": {
           "title": "확정 스펙",
-          "content": "| 구성 | 확정 SPEC | 비고 |\n|---|---|---|\n| SuperAdmin/Portal | Next.js(TS) + App Router + Apollo Client | 공급사 운영 포털 |\n| SuperAdmin/CentralApi | NestJS + Fastify + Apollo Server 5 | 멀티테넌시, RBAC, audit |\n| SuperAdmin/SyncWorkers | Node.js(TS) + BullMQ + Redis | outbox, retry, reconciliation |\n| SharedContracts | TypeScript contract package | 공통 계약 단일 원본 |\n| SharedAssets | runtime assets | i18n / static assets |"
+          "content": "| 구성 | 확정 SPEC | 비고 |\n|---|---|---|\n| SuperAdmin/Portal | Next.js(TS) + App Router + Apollo Client | 공급사 운영 포털 |\n| SuperAdmin/CentralApi | NestJS + Fastify + Apollo Server 5 | 멀티테넌시, RBAC, audit |\n| SuperAdmin/SyncWorkers | Node.js(TS) + BullMQ + Redis | outbox, retry, reconciliation |\n| SharedContracts | TypeScript contract package | 공통 계약 단일 원본 |\n| SharedAssets | runtime assets | static assets |"
         },
         "platform_overview": {
           "title": "전체 플랫폼 한눈에 보기",
@@ -477,7 +481,7 @@
         },
         "communication_design": {
           "title": "통신 설계",
-          "content": "### PosRequest (UI → C++ 왕복)\n- 진입점: `PosUi/src/bridge/PosRequestSender.js`\n- C++ 측: `PosRequestResponder → PosRequestActions → UseCases`\n\n### PosRealTime (C++ → UI 단방향)\n- C++ 측: `UseCases → PosRealTimeSender`\n- UI 측: `PosRealTimeReceiver`\n\n### JSON 봉투 규칙\n모든 메시지에 공통 헤더: `v`, `requestId`, `timestamp`, `idempotencyKey`(조건부)\n\n### Device Error 규칙\n완성 문장 msg를 싣지 않는다. 코드 기반 필드로 전달: `type`, `device`, `code`, `msgKey`, `msgParams`, `severity`, `recoverable`, `retryable`, `action`"
+          "content": "### PosRequest (UI → C++ 왕복)\n- 진입점: `PosUi/src/bridge/PosRequestSender.js`\n- C++ 측: `PosRequestResponder → PosRequestActions → UseCases`\n\n### PosRealTime (C++ → UI 단방향)\n- C++ 측: `UseCases → PosRealTimeSender`\n- UI 측: `PosRealTimeReceiver`\n\n### JSON 메시지 프레임 규칙\n모든 메시지에 공통 헤더: `v`, `requestId`, `timestamp`, `idempotencyKey`(조건부)\n\n### Device Error 규칙\n완성 문장 msg를 싣지 않는다. 코드 기반 필드로 전달: `type`, `device`, `code`, `msgKey`, `msgParams`, `severity`, `recoverable`, `retryable`, `action`"
         },
         "operational_gates": {
           "title": "운영 게이트",
@@ -555,7 +559,7 @@
         },
         "p1_contract": {
           "title": "P1 — 계약 / 인터페이스",
-          "content": "- [ ] 메시지 Envelope 표준이 모든 채널에 공통 적용\n- [ ] `v`, `requestId`, `timestamp`, `idempotencyKey` 필드 사용 규칙 고정\n- [ ] Bridge 요청/응답 예제가 문서화\n- [ ] `VERSION_MISMATCH` 처리 UX가 정의"
+          "content": "- [ ] 메시지 프레임 표준이 모든 채널에 공통 적용\n- [ ] `v`, `requestId`, `timestamp`, `idempotencyKey` 필드 사용 규칙 고정\n- [ ] Bridge 요청/응답 예제가 문서화\n- [ ] `VERSION_MISMATCH` 처리 UX가 정의"
         },
         "p1_observability": {
           "title": "P1 — 관측성",
@@ -827,7 +831,7 @@
     "db_shared_reference": {
       "title": "Shared Reference Data",
       "category": "DB 설계",
-      "description": "Central과 Edge가 공통으로 참조하는 기준 데이터의 실제 정의서. 공용 자산(SharedAssets)은 번역 파일/리소스 패키지이고, 이 문서는 DB 참조 데이터만 다룬다.",
+      "description": "Central과 Edge가 공통으로 참조하는 기준 데이터의 실제 정의서. 공용 자산(SharedAssets)은 static assets만 담당하고, 이 문서는 DB 참조 데이터만 다룬다.",
       "sections": {
         "purpose": {
           "title": "목적",
@@ -952,6 +956,91 @@
         "local_setting": {
           "title": "LocalSetting 테이블",
           "content": "Edge POS 로컬 설정 (EdgePos Override).\n\n주요 컬럼: `Id`, `EdgePosId`, `SettingKey`, `SettingValue`, `SourceLayer` (Global / RegionalDistributor / BrandHQ / Branch / EdgePos), `PolicyVersion`, `AppliedAt`, `CreatedAt`\n\n사용 시나리오:\n- 설정 상속 모델의 최종 적용 값 저장\n- 어떤 값이 어느 계층에서 왔는지 추적\n- 중앙에서 배포된 정책과 로컬 override 구분"
+        }
+      }
+    },
+    "mealticket_overview": {
+      "title": "식권 플랫폼 개요 / 주체 매핑",
+      "category": "식권 플랫폼",
+      "description": "베트남 B2B 모바일 식권 플랫폼을 기존 Platform 에 편입하는 전체 구조. 별도 서버가 아니라 SuperAdmin/CentralApi 내부의 mealticket 도메인 모듈로 편입한다.",
+      "sections": {
+        "purpose": {
+          "title": "목적 및 결정",
+          "content": "식권 플랫폼은 **별도 서버로 분리하지 않는다**. `SuperAdmin/CentralApi` 내부에 `mealticket` 도메인 모듈로 편입하여, 테넌시·인증·RBAC·감사로그·정산 파이프라인을 기존 자산과 공유한다.\n\n물리 분리의 트리거 조건(규제/부하/조직 분리)이 충족되기 전까지 **논리적 경계(bounded context)** 만 유지한다."
+        },
+        "subject_mapping": {
+          "title": "주체 매핑",
+          "content": "| 식권 플랫폼 주체 | Platform 계층 | 사용 포털/앱 |\n|---|---|---|\n| 플랫폼 사업자 | `SuperAdmin` | `SuperAdmin/Portal` |\n| 제휴식당 (프랜차이즈 또는 단일 매장) | `BrandHQ` (+ 하위 `Branch`) | `BrandHQPortal` (기존 재사용, `/mealticket/*` 라우트 추가) |\n| **B2B 고객 기업** (HR/재무) | **`Corporate`** (신규 계층) | **`CorporatePortal`** (신규 프로젝트) |\n| 임직원 | `Corporate` 산하 사용자 | `MealTicketEmployeeApp` (신규 모바일) |\n| 구내식당 RFID/생체 단말 | `EdgePos` / `Device` | `MealTicketClosedLoopTerminal` |\n\n**중요**: 제휴식당은 `BrandHQ` 로 매핑되며, 고객 기업은 `BrandHQ` 가 아니라 신규 `Corporate` 계층이다. 두 주체의 도메인 모델은 0% 겹치지 않는다."
+        },
+        "domain_boundaries": {
+          "title": "CentralApi 도메인 경계",
+          "content": "- `modules/mealticket/wallet` — 임직원 디지털 지갑, 조건부 토큰 (Corporate 스코프)\n- `modules/mealticket/policy` — 부서/직급/시간대 식대 정책 빌더 (Corporate 스코프)\n- `modules/mealticket/transaction` — Open Loop(QR/바코드), Closed Loop(RFID/생체) 실시간 승인\n- `modules/mealticket/settlement` — 3-Way Matching 정산, 가맹점 대금 지급 배치\n- `modules/mealticket/einvoice` — 베트남 GDT 통합 전자세금계산서(Consolidated E-Invoice)\n- `modules/mealticket/merchant` — 제휴식당(BrandHQ) 의 식권 enrollment, 수수료율, 정산계좌"
+        },
+        "portal_matrix": {
+          "title": "프로젝트 매트릭스",
+          "content": "| 프로젝트 | 상태 | 역할 |\n|---|---|---|\n| `SuperAdmin/Portal` | 기존 | 가맹 계약 / 수수료 엔진 / 이상거래 / GDT 연동 관리 |\n| `BrandHQPortal` | 기존 재사용 | 제휴식당용. `/mealticket/*` 라우트 추가 (enrollment·inbox·settlement·invoices·account) |\n| `CorporatePortal` | **신규** | 고객 기업 전용. 부서·임직원·정책·예산·통합 세금계산서 |\n| `MealTicketEmployeeApp` | 신규 | 임직원 모바일. 스택 미정 (PWA vs RN 협의 필요) |"
+        },
+        "offline_rules": {
+          "title": "Offline / Sync 규칙",
+          "content": "- 실시간 승인형 거래(Open Loop QR, 카드, 배달앱)는 **Outbox 재전송 대상이 아니다**. 오프라인이면 진입 차단.\n- Closed Loop(RFID/생체) 단말은 네트워크 단절 시 로컬 캐싱 + 복구 시 일괄 동기화 허용 (단말당 0.8초 승인 SLA).\n- `idempotencyKey` 는 단말 로컬에서 생성, 성공 ACK 수신 전까지 보존."
+        },
+        "split_triggers": {
+          "title": "물리 분리 트리거",
+          "content": "다음 조건 중 하나라도 발생하면 `MealTicketApi` 를 독립 서비스로 추출한다.\n\n1. 식권 트랜잭션 부하가 POS 와 섞여 CentralApi SLA 를 위협할 때\n2. 식권 사업부와 POS 사업부의 배포 주기가 분리될 때\n3. 규제/개인정보/PCI 격리 범위가 POS 와 달라질 때"
+        }
+      }
+    },
+    "mealticket_corporate": {
+      "title": "Corporate (B2B 고객 기업)",
+      "category": "식권 플랫폼",
+      "description": "식권 플랫폼의 B2B 고객 기업(Corporate) 계층과 전용 포털 CorporatePortal 의 책임 범위.",
+      "sections": {
+        "purpose": {
+          "title": "Corporate 계층이 신설된 이유",
+          "content": "기업 고객은 **지점(Branch) 을 소유하지 않는다**. 소유하는 것은 임직원·예산·정책·세금계산서뿐이다.\n\n반면 `BrandHQ` 는 메뉴·지점·재고·직원·영업시간을 소유하는 계층이므로, 두 주체의 도메인 모델은 완전히 다르다. BrandHQ 에 억지로 기업 고객을 얹으면 한 도메인이 두 개의 이질적 모델을 떠안는 프랑켄슈타인이 된다.\n\n따라서 `Corporate` 를 `BrandHQ` 의 **형제 계층**으로 신설한다."
+        },
+        "scope": {
+          "title": "CorporatePortal 책임 범위",
+          "content": "**다루는 것**:\n- 부서(Department), 임직원(Employee)\n- 임직원 디지털 지갑(Wallet) 발급·회수·잔액 조회\n- 식대 정책(MealPolicy): 부서/직급/시간대/한도/Split Payment\n- 예산(FundingAccount): Prepaid Deposit / Credit Net15·Net30\n- 허용 머천트 풀(AllowedMerchantPool)\n- 월간 통합 전자세금계산서(ConsolidatedEInvoice)\n- HRIS 연동 (Base.vn / SAP / Workday)\n\n**다루지 않는 것**:\n\n| 리소스 | 소유 프로젝트 |\n|---|---|\n| 메뉴 / 지점 / 재고 / 직원 / 영업시간 | `BrandHQPortal` |\n| 가맹 계약 · 수수료 정책 엔진 | `SuperAdmin/Portal` |\n| 실시간 결제 승인 | `CentralApi/modules/mealticket/transaction` |\n| Closed Loop 단말 | `MealTicketClosedLoopTerminal` |"
+        },
+        "routes": {
+          "title": "라우트 초안",
+          "content": "```\n/dashboard          예산 소진 / 부서별 리포트\n/departments        부서 트리\n/employees          임직원 / Wallet / RFID 배지 매핑\n/policies           정책 빌더 (시간대·부서·한도·Split)\n/budget             충전 / 자동 할당 / 소멸 정책\n/merchants          허용 머천트 화이트리스트 편집\n/invoices           월간 통합 전자세금계산서\n/integrations       HRIS 연동\n/settings           회사 정보 / 세금코드 / 관리자 계정\n```"
+        },
+        "domain_model": {
+          "title": "도메인 모델",
+          "content": "```\nCorporate (= 고객사)\n ├─ Department\n ├─ Employee → Wallet (조건부 토큰)\n ├─ MealPolicy (부서·직급·시간대·한도·Split)\n ├─ FundingAccount (Prepaid / Credit Net15·Net30)\n ├─ AllowedMerchantPool (허용 머천트 화이트리스트)\n └─ ConsolidatedInvoice (GDT 통합 전자세금계산서)\n```\n\n`BrandHQ` 엔티티와 0% 교집합이다. SharedContracts 원본은 `SharedContracts/ApiSdk/src/mealticket/dto.ts` 의 `MealTicketCorporate`."
+        },
+        "rules": {
+          "title": "규칙",
+          "content": "1. GraphQL 루트는 `Query.meal*`, `Mutation.meal*` 네임스페이스만 사용한다.\n2. DTO / enum / event 는 `SharedContracts/ApiSdk/src/mealticket` 단일 원본에서만 import 한다.\n3. 멀티테넌트 스코프는 CentralApi 서비스 레이어가 강제한다.\n4. `BrandHQPortal` 의 코드/엔티티/라우트를 import 하거나 공유하지 않는다. 공유되는 것은 `shared/ui` 와 `SharedContracts` 뿐이다."
+        }
+      }
+    },
+    "mealticket_merchant": {
+      "title": "Merchant (제휴식당 = BrandHQ)",
+      "category": "식권 플랫폼",
+      "description": "제휴식당은 BrandHQ 계층을 그대로 재사용한다. 프랜차이즈/단일 매장 모두 BrandHQ + Branch 구조에 매핑되며, BrandHQPortal 에 식권 전용 라우트만 얹는다.",
+      "sections": {
+        "purpose": {
+          "title": "왜 제휴식당 = BrandHQ 인가",
+          "content": "`BrandHQ` 는 여러 지점을 소유한 브랜드 본사다. 제휴식당도 본질적으로 같다:\n\n- 프랜차이즈 식당 = 본사 1개 + 지점 N개 → 그대로 BrandHQ 구조\n- 단일 매장 식당 = BrandHQ 1개 + Branch 1개 (엣지 케이스)\n- 구내식당 운영사 = BrandHQ 1개 + 공장별 Branch N개\n\n메뉴·지점·직원·영업시간 관리가 이미 `BrandHQPortal` 에 존재하므로, 식권 참여는 **참여 플래그 + 수수료율 + 정산계좌 + 실시간 승인 인박스** 몇 개만 얹으면 된다. 별도 MerchantApp 은 필요 없다."
+        },
+        "brandhq_reuse": {
+          "title": "BrandHQPortal 재사용 방식",
+          "content": "- 기존 BrandHQ 엔티티는 그대로 유지\n- 식권 전용 보조 엔티티만 BrandHQ 에 1:1 attach\n  - `MealTicketMerchantEnrollment` — 참여 레코드\n  - `MealTicketMerchantCommissionRate` — 수수료율\n  - `MealTicketMerchantSettlementAccount` — 정산 은행계좌\n- 참여 여부(`MealTicketMerchantEnrollment.isActive`) 가 true 일 때만 메뉴와 라우트가 노출"
+        },
+        "routes": {
+          "title": "BrandHQPortal 식권 라우트 (Merchant 관점)",
+          "content": "```\n/mealticket/enrollment      식권 플랫폼 참여 신청 / 계약 상태\n/mealticket/inbox           실시간 승인 요청 인박스 (Open Loop QR)\n/mealticket/transactions    승인/거절/환불 내역\n/mealticket/settlement      정산 스케줄, 수수료 차감, 입금 상태\n/mealticket/invoices        플랫폼이 발행한 수수료 전자세금계산서\n/mealticket/account         정산 은행계좌, 세금코드\n```"
+        },
+        "enrollment_flag": {
+          "title": "노출 토글 규칙",
+          "content": "- 식권 기능은 `MealTicketMerchantEnrollment.isActive === true` 일 때만 BrandHQPortal 메뉴에 노출한다.\n- `Corporate` 도메인을 본 포털이 다루지 않는다. 고객 기업 전용은 `CorporatePortal` 이다.\n- 결제 승인 로직은 여기 두지 않는다 — `CentralApi/modules/mealticket/transaction` 이 담당한다."
+        },
+        "closed_loop_terminal": {
+          "title": "Closed Loop 단말 (구내식당)",
+          "content": "산업단지 / 공장 구내식당의 대면 결제는 `MerchantApp` 이 아니라 **Edge POS 설계서 부록 Z** 의 `MealTicketClosedLoopTerminal` Device 타입으로 처리한다.\n\n- 승인 SLA: 단말당 0.8초 (교대조 변경 시간 Shift Rush 대응)\n- 인증 수단: `RFID_BADGE`, `BIOMETRIC_FACE`, `BIOMETRIC_FINGERPRINT`\n- 네트워크 단절 시 로컬 캐싱 허용 + 복구 시 일괄 동기화\n- 실시간 외부 승인형 거래(Open Loop) 는 Outbox 재전송 대상이 아니며, 이 규칙의 예외는 오직 Closed Loop 전용 테이블에만 적용된다."
         }
       }
     },

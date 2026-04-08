@@ -106,7 +106,7 @@
 
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/{ko,vi,en}/setup.json` | msgKey: setup.favorites.* |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/{ko,vi,en}/setup.json` | msgKey: setup.favorites.* |
 | Error | 코드 기반 (type, device, code, msgKey) | 완성 문장 금지 |
 | Permission | 관리자 전용 — Setup/Maintenance 모드 접근 권한 필요 | |
 

@@ -177,7 +177,7 @@
 
 ### 5.6 i18n
 
-- 섹션 타이틀, 라벨, 버튼: SharedAssets/i18n/locales/ 기반 msgKey
+- 섹션 타이틀, 라벨, 버튼: BrandPosApp/PosUi/src/i18n/locales/ 기반 msgKey
 
 ---
 

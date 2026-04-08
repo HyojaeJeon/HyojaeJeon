@@ -44,7 +44,8 @@ export const auditLogConnectionOperation: GraphQLOperation<
         after: $after
         first: $first
       ) {
-        totalCount
+        success { code message requestId data {
+          totalCount
         pageInfo {
           hasNextPage
           hasPreviousPage
@@ -68,6 +69,8 @@ export const auditLogConnectionOperation: GraphQLOperation<
             createdAt
           }
         }
+        } }
+        error { code message requestId details }
       }
     }
   `,

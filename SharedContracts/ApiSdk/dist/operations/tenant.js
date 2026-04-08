@@ -3,7 +3,8 @@ export const distributorsOperation = {
     document: `
     query Distributors($skip: Int, $take: Int) {
       distributors(skip: $skip, take: $take) {
-        id
+        success { code message requestId data {
+          id
         distributorCode
         companyName
         legalName
@@ -17,6 +18,8 @@ export const distributorsOperation = {
         contactPhone
         createdAt
         updatedAt
+        } }
+        error { code message requestId details }
       }
     }
   `,
@@ -26,7 +29,8 @@ export const brandsOperation = {
     document: `
     query Brands($distributorId: ID, $skip: Int, $take: Int) {
       brands(distributorId: $distributorId, skip: $skip, take: $take) {
-        id
+        success { code message requestId data {
+          id
         distributorId
         brandCode
         brandName
@@ -39,6 +43,8 @@ export const brandsOperation = {
         status
         createdAt
         updatedAt
+        } }
+        error { code message requestId details }
       }
     }
   `,
@@ -48,7 +54,8 @@ export const branchesOperation = {
     document: `
     query Branches($brandHQId: ID!, $skip: Int, $take: Int) {
       branches(brandHQId: $brandHQId, skip: $skip, take: $take) {
-        id
+        success { code message requestId data {
+          id
         brandHQId
         distributorId
         branchCode
@@ -66,6 +73,8 @@ export const branchesOperation = {
         closingDate
         createdAt
         updatedAt
+        } }
+        error { code message requestId details }
       }
     }
   `,
@@ -75,7 +84,8 @@ export const branchOperation = {
     document: `
     query Branch($id: ID!) {
       branch(id: $id) {
-        id
+        success { code message requestId data {
+          id
         brandHQId
         distributorId
         branchCode
@@ -107,6 +117,8 @@ export const branchOperation = {
           createdAt
           updatedAt
         }
+        } }
+        error { code message requestId details }
       }
     }
   `,
@@ -116,7 +128,8 @@ export const edgePosTerminalsOperation = {
     document: `
     query EdgePosTerminals($branchId: ID!, $skip: Int, $take: Int) {
       edgePosTerminals(branchId: $branchId, skip: $skip, take: $take) {
-        id
+        success { code message requestId data {
+          id
         branchId
         terminalCode
         terminalName
@@ -128,6 +141,8 @@ export const edgePosTerminalsOperation = {
         lastHeartbeatAt
         createdAt
         updatedAt
+        } }
+        error { code message requestId details }
       }
     }
   `,
@@ -137,7 +152,8 @@ export const edgePosTerminalOperation = {
     document: `
     query EdgePosTerminal($id: ID!) {
       edgePosTerminal(id: $id) {
-        id
+        success { code message requestId data {
+          id
         branchId
         terminalCode
         terminalName
@@ -149,6 +165,8 @@ export const edgePosTerminalOperation = {
         lastHeartbeatAt
         createdAt
         updatedAt
+        } }
+        error { code message requestId details }
       }
     }
   `,

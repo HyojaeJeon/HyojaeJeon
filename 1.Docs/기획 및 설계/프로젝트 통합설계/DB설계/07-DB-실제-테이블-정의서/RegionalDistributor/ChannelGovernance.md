@@ -241,11 +241,11 @@
 - 롤아웃 대상 범위 정의
 - 배포/다운로드 가능한 액션 통제
 
-### 1.6 ChannelUser
+### 1.6 DistributorUser
 
 | 항목 | 값 |
 |---|---|
-| 테이블명 | `ChannelUser` |
+| 테이블명 | `DistributorUser` |
 | 소유 주체 | `SuperAdmin/CentralApi` |
 | 저장 위치 | Central PostgreSQL |
 | 원본 | Central |
@@ -521,11 +521,11 @@
 - Định nghĩa phạm vi rollout
 - Kiểm soát action có thể deploy
 
-### 2.6 ChannelUser
+### 2.6 DistributorUser
 
 | Hạng mục | Giá trị |
 |---|---|
-| Tên bảng | `ChannelUser` |
+| Tên bảng | `DistributorUser` |
 | Chủ thể sở hữu | `SuperAdmin/CentralApi` |
 | Nơi lưu | Central PostgreSQL |
 | Nguồn gốc | Central |

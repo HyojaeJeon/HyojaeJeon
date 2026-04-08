@@ -29,7 +29,7 @@
 | 동기/비동기 분류 | UI 알림 자체는 **비동기 후처리** -- DB 커밋 완료 후 발생 |
 | PosRealTime 규칙 | UseCases만 PosRealTimeSender 호출 권한을 가진다 |
 | UI 이벤트 중복 방지 | `isPendingRequest(requestId)`로 자기 요청 응답 이벤트 무시, 외부 변경만 처리 |
-| i18n | `SharedAssets/i18n/locales/{ko,en,vi}` -- msgKey 기반 |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/{ko,en,vi}` -- msgKey 기반 |
 
 ## 3. 기능목록
 
@@ -165,7 +165,7 @@ PAYMENT:QR:REFRESH
 | 3 | isPendingRequest 체크 로직 (PosRequestSender 연동) | BrandPosApp/PosUi/bridge | TODO |
 | 4 | RTK Query 캐시 직접 패치 로직 | BrandPosApp/PosUi/store/api | TODO |
 | 5 | mock PosRealTime 이벤트 fixture | BrandPosApp/PosUi/mocks | TODO |
-| 6 | i18n 키 등록 (payment.notification.*) | SharedAssets/i18n/locales | TODO |
+| 6 | i18n 키 등록 (payment.notification.*) | BrandPosApp/PosUi/src/i18n/locales | TODO |
 
 ---
 

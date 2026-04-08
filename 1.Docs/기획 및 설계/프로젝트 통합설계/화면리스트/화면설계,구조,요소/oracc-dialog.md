@@ -161,7 +161,7 @@
 ### 5.6 i18n / Error / Permission
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/` 기반 msgKey | KR/EN/VN 3개 언어, 금액 라벨 포함 |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/` 기반 msgKey | KR/EN/VN 3개 언어, 금액 라벨 포함 |
 | Error | Device Error 코드 기반 (type, device, code, msgKey) | 카드 리더기/프린터 오류 |
 | Permission | TODO | 담당자/권한에 따른 결제 수단 활성화 |
 

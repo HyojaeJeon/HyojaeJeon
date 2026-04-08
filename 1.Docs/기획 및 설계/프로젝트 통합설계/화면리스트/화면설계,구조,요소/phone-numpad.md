@@ -155,8 +155,8 @@ size="full" (512x386)              size="compact" (400x300)
 | 작업 | 대상 파일 경로 | 상태 |
 |---|---|---|
 | Organism 구현 | `BrandPosApp/PosUi/src/shared/ui/organisms/PhoneNumpad.tsx` | TODO |
-| i18n (ko) | `SharedAssets/i18n/locales/ko/customer.json` | TODO |
-| i18n (vi) | `SharedAssets/i18n/locales/vi/customer.json` | TODO |
+| i18n (ko) | `BrandPosApp/PosUi/src/i18n/locales/ko/customer.json` | TODO |
+| i18n (vi) | `BrandPosApp/PosUi/src/i18n/locales/vi/customer.json` | TODO |
 
 ---
 

@@ -152,7 +152,7 @@
 
 ### 5.6 i18n
 
-- 필드 라벨, 버튼: SharedAssets/i18n/locales/ 기반 msgKey
+- 필드 라벨, 버튼: BrandPosApp/PosUi/src/i18n/locales/ 기반 msgKey
 - 대표매장 편집 불가 안내: msgKey 기반 (하드코딩 금지)
 
 ---

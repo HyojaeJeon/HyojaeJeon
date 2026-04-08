@@ -187,7 +187,7 @@
 ### 5.6 i18n / Error / Permission
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/` 기반 msgKey | KR/EN/VN 3개 언어 전환 |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/` 기반 msgKey | KR/EN/VN 3개 언어 전환 |
 | Error | Device Error 코드 기반 (type, device, code, msgKey) | 카드 리더기, 외부 PG 오류 |
 | Permission | 주문/결제 실행: 로그인된 직원 전원. 결제 수단 설정/버튼 배치 관리: 관리자 또는 권한 직원. 결제 수단별 활성화는 국가/매장 설정 기반 | 베트남 전용(ZALOPAY/NAPAS/INFOPLUS), 한국 전용(PAYCO/카카오/제로페이) |
 

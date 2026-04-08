@@ -46,6 +46,9 @@
       "@mocks/*": [
         "src/mocks/*"
       ],
+      "@contracts/*": [
+        "src/contracts/*"
+      ],
       "@i18n/*": [
         "src/i18n/*"
       ],

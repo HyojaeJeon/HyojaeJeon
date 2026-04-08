@@ -5,9 +5,7 @@ export interface LanguagesQueryVariables {
   take?: number;
 }
 
-export interface LanguagesQueryData {
-  languages: Language[];
-}
+export type LanguagesQueryData = Language[];
 
 export const languagesOperation: GraphQLOperation<
   LanguagesQueryData,
@@ -17,7 +15,8 @@ export const languagesOperation: GraphQLOperation<
   document: `
     query Languages($skip: Int, $take: Int) {
       languages(skip: $skip, take: $take) {
-        id
+        success { code message requestId data {
+          id
         languageCode
         nativeName
         displayName
@@ -26,6 +25,8 @@ export const languagesOperation: GraphQLOperation<
         isActive
         createdAt
         updatedAt
+        } }
+        error { code message requestId details }
       }
     }
   `,

@@ -3,7 +3,8 @@ export const loginOperation = {
     document: `
     mutation Login($input: LoginInput!) {
       login(input: $input) {
-        accessToken
+        success { code message requestId data {
+          accessToken
         expiresIn
         user {
           id
@@ -11,12 +12,144 @@ export const loginOperation = {
           displayName
           email
           phone
-          roleCode
+          userType
+          distributorId
+          brandHQId
+          corporateId
           status
           lastLoginAt
+          passwordChangedAt
           createdAt
           updatedAt
         }
+        } }
+        error { code message requestId details }
+      }
+    }
+  `,
+};
+export const authAccountsOperation = {
+    operationName: 'AuthAccounts',
+    document: `
+    query AuthAccounts($userType: String, $skip: Int, $take: Int) {
+      authAccounts(userType: $userType, skip: $skip, take: $take) {
+        success { code message requestId data {
+          id
+        loginId
+        displayName
+        email
+        phone
+        userType
+        distributorId
+        brandHQId
+        corporateId
+        status
+        lastLoginAt
+        passwordChangedAt
+        createdAt
+        updatedAt
+        } }
+        error { code message requestId details }
+      }
+    }
+  `,
+};
+export const authAccountOperation = {
+    operationName: 'AuthAccount',
+    document: `
+    query AuthAccount($userType: String!, $id: ID!) {
+      authAccount(userType: $userType, id: $id) {
+        success { code message requestId data {
+          id
+        loginId
+        displayName
+        email
+        phone
+        userType
+        distributorId
+        brandHQId
+        corporateId
+        status
+        lastLoginAt
+        passwordChangedAt
+        createdAt
+        updatedAt
+        } }
+        error { code message requestId details }
+      }
+    }
+  `,
+};
+export const createAuthAccountOperation = {
+    operationName: 'CreateAuthAccount',
+    document: `
+    mutation CreateAuthAccount($input: CreateAuthAccountInput!) {
+      createAuthAccount(input: $input) {
+        success { code message requestId data {
+          id
+        loginId
+        displayName
+        email
+        phone
+        userType
+        distributorId
+        brandHQId
+        corporateId
+        status
+        lastLoginAt
+        passwordChangedAt
+        createdAt
+        updatedAt
+        } }
+        error { code message requestId details }
+      }
+    }
+  `,
+};
+export const updateAuthAccountOperation = {
+    operationName: 'UpdateAuthAccount',
+    document: `
+    mutation UpdateAuthAccount($userType: String!, $id: ID!, $input: UpdateAuthAccountInput!) {
+      updateAuthAccount(userType: $userType, id: $id, input: $input) {
+        success { code message requestId data {
+          id
+        loginId
+        displayName
+        email
+        phone
+        userType
+        distributorId
+        brandHQId
+        corporateId
+        status
+        lastLoginAt
+        passwordChangedAt
+        createdAt
+        updatedAt
+        } }
+        error { code message requestId details }
+      }
+    }
+  `,
+};
+export const deleteAuthAccountOperation = {
+    operationName: 'DeleteAuthAccount',
+    document: `
+    mutation DeleteAuthAccount($userType: String!, $id: ID!) {
+      deleteAuthAccount(userType: $userType, id: $id) {
+        success { code message requestId data }
+        error { code message requestId details }
+      }
+    }
+  `,
+};
+export const changePasswordOperation = {
+    operationName: 'ChangePassword',
+    document: `
+    mutation ChangePassword($currentPassword: String!, $newPassword: String!) {
+      changePassword(currentPassword: $currentPassword, newPassword: $newPassword) {
+        success { code message requestId data }
+        error { code message requestId details }
       }
     }
   `,

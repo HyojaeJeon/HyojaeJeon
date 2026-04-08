@@ -15,7 +15,7 @@
         },
         "standard_layers": {
           "title": "Tầng kinh doanh tiêu chuẩn",
-          "content": "| Tầng | Vai trò |\n|---|---|\n| **SuperAdmin** | Chủ thể vận hành nhà cung cấp nền tảng |\n| **RegionalDistributor** | Đại lý/đối tác kênh có quyền phân phối độc quyền quốc gia/khu vực |\n| **BrandHQ** | Chủ thể vận hành trụ sở thương hiệu |\n| **Branch** | Cửa hàng/chi nhánh riêng lẻ trực thuộc thương hiệu |\n| **EdgePos** | Thiết bị đầu cuối POS được lắp đặt tại chi nhánh |\n| **Device** | Thiết bị ngoại vi kết nối với EdgePos |"
+          "content": "| Tầng | Vai trò |\n|---|---|\n| **SuperAdmin** | Chủ thể vận hành nhà cung cấp nền tảng |\n| **RegionalDistributor** | Đại lý/đối tác kênh có quyền phân phối độc quyền quốc gia/khu vực |\n| **BrandHQ** | Trụ sở thương hiệu (trong ngữ cảnh phiếu ăn: bao gồm cả nhà hàng đối tác) |\n| **Corporate** | **Tầng mới dành riêng cho phiếu ăn.** Doanh nghiệp B2B. Không sở hữu Branch, chỉ sở hữu nhân viên / ngân sách / chính sách / hoá đơn |\n| **Branch** | Cửa hàng/chi nhánh riêng lẻ trực thuộc thương hiệu |\n| **EdgePos** | Thiết bị đầu cuối POS được lắp đặt tại chi nhánh |\n| **Device** | Thiết bị ngoại vi kết nối với EdgePos (bao gồm `MealTicketClosedLoopTerminal`) |"
         },
         "db_identifiers": {
           "title": "Tiêu chuẩn định danh DB",
@@ -23,11 +23,11 @@
         },
         "project_specs": {
           "title": "Tóm tắt SPEC xác nhận theo dự án",
-          "content": "| Project | SPEC xác nhận | DB / Storage | Hợp đồng / Truyền thông |\n|---|---|---|---|\n| **BrandPosApp** | C++ + CEF + Next.js(TS) | SQLite local DB | cefQuery + realtime event |\n| **RegionalDistributorPortal** | Next.js(TS) + App Router | Không truy cập DB trực tiếp | Apollo Client + GraphQL-first |\n| **BrandHQPortal** | Next.js(TS) + App Router | Không truy cập DB trực tiếp | Apollo Client + GraphQL-first |\n| **SuperAdmin/Portal** | Next.js(TS) + App Router | Không truy cập DB trực tiếp | Apollo Client + GraphQL-first |\n| **SuperAdmin/CentralApi** | NestJS + Fastify + Apollo Server | Prisma + PostgreSQL + raw SQL | GraphQL-first, REST only via Fastify |\n| **SuperAdmin/SyncWorkers** | Node.js(TS) + BullMQ | Redis + Central DB | Queue-driven |\n| **SharedKernel** | C++ shared kernel | - | native helper / protocol |\n| **SharedContracts** | TypeScript contract package | - | DTO / enum / schema |\n| **SharedAssets** | versioned runtime assets | - | i18n / static assets |"
+          "content": "| Project | SPEC xác nhận | DB / Storage | Hợp đồng / Truyền thông |\n|---|---|---|---|\n| **BrandPosApp** | C++ + CEF + Next.js(TS) | SQLite local DB | cefQuery + realtime event |\n| **RegionalDistributorPortal** | Next.js(TS) + App Router | Không truy cập DB trực tiếp | Apollo Client + GraphQL-first |\n| **BrandHQPortal** | Next.js(TS) + App Router | Không truy cập DB trực tiếp | Apollo Client + GraphQL-first |\n| **SuperAdmin/Portal** | Next.js(TS) + App Router | Không truy cập DB trực tiếp | Apollo Client + GraphQL-first |\n| **CorporatePortal** | Next.js(TS) + App Router | Không truy cập DB trực tiếp | Apollo Client + GraphQL-first (dành riêng tầng Corporate phiếu ăn, dev port 3003) |\n| **SuperAdmin/CentralApi** | NestJS + Fastify + Apollo Server | Prisma + PostgreSQL + raw SQL | GraphQL-first, REST only via Fastify |\n| **SuperAdmin/SyncWorkers** | Node.js(TS) + BullMQ | Redis + Central DB | Queue-driven |\n| **SharedKernel** | C++ shared kernel | - | native helper / protocol |\n| **SharedContracts** | TypeScript contract package | - | DTO / enum / schema |\n| **SharedAssets** | versioned runtime assets | - | static assets |"
         },
         "shared_assets": {
-          "title": "Nguyên tắc phân phối đa ngôn ngữ/SharedAssets",
-          "content": "- `SharedAssets` không phải server runtime chung mà là **gói nguồn gốc có quản lý phiên bản**\n- `SharedAssets/i18n/locales/` là nguồn gốc dịch thuật duy nhất cho tất cả nền tảng\n- Mỗi nền tảng sao chép/đóng gói tài sản locale cần thiết trong pipeline build của mình\n- Bộ ngôn ngữ hỗ trợ mặc định: `ko`, `vi`, `en`\n- Tùy chọn ngôn ngữ theo người dùng/thương hiệu/chi nhánh được quản lý bằng cài đặt DB, chuỗi hiển thị thực tế được giải mã bằng locale key"
+          "title": "Nguyên tắc i18n nội bộ",
+          "content": "- `SharedAssets` chỉ là static assets và không sở hữu translation\n- `BrandPosApp/PosUi/src/i18n/locales/` là nguồn gốc dịch thuật duy nhất cho tất cả nền tảng\n- Mỗi nền tảng sao chép/đóng gói tài sản locale cần thiết trong pipeline build của mình\n- Bộ ngôn ngữ hỗ trợ mặc định: `ko`, `vi`, `en`\n- Tùy chọn ngôn ngữ theo người dùng/thương hiệu/chi nhánh được quản lý bằng cài đặt DB, chuỗi hiển thị thực tế được giải mã bằng locale key"
         },
         "full_stack_overview": {
           "title": "Tổng quan toàn bộ stack",
@@ -46,7 +46,7 @@
         },
         "confirmed_spec": {
           "title": "Spec xác nhận",
-          "content": "| Thành phần | SPEC xác nhận | Ghi chú |\n|---|---|---|\n| SuperAdmin/Portal | Next.js(TS) + App Router + Apollo Client | Portal vận hành nhà cung cấp |\n| SuperAdmin/CentralApi | NestJS + Fastify + Apollo Server 5 | Multi-tenancy, RBAC, audit |\n| SuperAdmin/SyncWorkers | Node.js(TS) + BullMQ + Redis | outbox, retry, reconciliation |\n| SharedContracts | TypeScript contract package | Nguồn gốc duy nhất hợp đồng chung |\n| SharedAssets | runtime assets | i18n / static assets |"
+          "content": "| Thành phần | SPEC xác nhận | Ghi chú |\n|---|---|---|\n| SuperAdmin/Portal | Next.js(TS) + App Router + Apollo Client | Portal vận hành nhà cung cấp |\n| SuperAdmin/CentralApi | NestJS + Fastify + Apollo Server 5 | Multi-tenancy, RBAC, audit |\n| SuperAdmin/SyncWorkers | Node.js(TS) + BullMQ + Redis | outbox, retry, reconciliation |\n| SharedContracts | TypeScript contract package | Nguồn gốc duy nhất hợp đồng chung |\n| SharedAssets | runtime assets | static assets |"
         },
         "platform_overview": {
           "title": "Tổng quan toàn nền tảng",
@@ -129,6 +129,34 @@
         "settings_inheritance": {
           "title": "Mô hình kế thừa cài đặt",
           "content": "Thứ tự ưu tiên đánh giá cài đặt:\n\n1. `Global Default`\n2. `BrandHQ Default`\n3. `Branch Override`\n4. `EdgePos Override`\n\nQuy tắc:\n- Tối thiểu hóa override\n- Phải có khả năng theo dõi giá trị đến từ tầng nào\n- Quản lý `PolicyVersion`, `CatalogVersion` cùng khi triển khai"
+        },
+        "capability_entitlement_principles": {
+          "title": "Capability Entitlement — Nguyên tắc",
+          "content": "BrandHQ phải hỗ trợ đồng thời ba kịch bản kinh doanh:\n\n1. **POS + Phiếu ăn** — vừa vận hành cửa hàng vừa nhận thanh toán phiếu ăn\n2. **Chỉ tham gia phiếu ăn** — không dùng POS riêng, chỉ chấp nhận thanh toán phiếu ăn\n3. **Chỉ POS** — không tham gia nền tảng phiếu ăn\n\nĐể làm được điều đó, BrandHQ áp dụng **Entitlement theo Capability**.\n\n- Một BrandHQ có thể **đăng ký độc lập capability `POS` và `MEAL_TICKET`** (mở rộng sau với `DELIVERY_AGGREGATOR`, `KDS`...).\n- **Nguồn duy nhất là bảng `BrandHqEntitlement`**.\n- Toggle UI không phải là bảo mật. Mọi enforcement thực sự nằm ở **service layer của CentralApi**.\n- Không phải feature flag mà là **entitlement (quyền sản phẩm)** với chuyển trạng thái và truy vết hợp đồng."
+        },
+        "capability_entitlement_data_model": {
+          "title": "Capability Entitlement — Mô hình dữ liệu",
+          "content": "| Cột | Kiểu | Mô tả |\n|---|---|---|\n| `id` | uuid | PK |\n| `brandHqId` | FK → BrandHQ | Chủ sở hữu |\n| `capability` | enum `BrandHqCapability` | `POS` / `MEAL_TICKET` / ... |\n| `status` | enum `BrandHqEntitlementStatus` | `ACTIVE` / `SUSPENDED` / `TRIAL` / `EXPIRED` / `REVOKED` |\n| `activatedAt` | timestamp | Thời điểm cấp |\n| `expiresAt` | timestamp? | Hết hạn (null nếu không) |\n| `grantedBySuperAdminId` | FK | Người cấp |\n| `revokedAt` | timestamp? | Thời điểm thu hồi |\n| `revokeReason` | text? | Lý do thu hồi |\n| `contractRef` | text? | Tham chiếu hợp đồng |\n\nNguồn SharedContracts: `SharedContracts/ApiSdk/src/entitlement/{enums,dto}.ts`."
+        },
+        "capability_entitlement_server_rules": {
+          "title": "Capability Entitlement — Quy tắc CentralApi",
+          "content": "- `modules/entitlement/EntitlementService` là **điểm gác duy nhất**.\n- Service domain khác gọi ở dòng đầu tiên của method:\n\n```\nawait this.entitlement.requireCapability(ctx, 'MEAL_TICKET');\n```\n\n- Gọi tại **service layer chứ không phải resolver** (theo CLAUDE.md).\n- `SuperAdmin` / `RegionalDistributor` được **bỏ qua** gác để hỗ trợ cross-tenant.\n- Mutation Grant / Suspend / Resume / Revoke phải invalidate cache Redis (TTL 30s) và ghi vào `AuditLog` với `actionType=ENTITLEMENT_*`.\n- Query `me` trả về `brandHq.activeCapabilities: BrandHqCapability[]`."
+        },
+        "capability_entitlement_portal_rules": {
+          "title": "Capability Entitlement — Quy tắc BrandHQPortal",
+          "content": "- Sau đăng nhập, lấy `me.brandHq.activeCapabilities` và inject vào `<CapabilityProvider>`.\n- Component con dùng hook `useCapability('POS')` / `useCapability('MEAL_TICKET')`.\n- Mục menu/sidebar có meta `requires`, không render nếu thiếu capability.\n- Route group `(pos)/`, `(mealticket)/` của Next.js App Router gác trong `layout.tsx`. Thiếu thì điều hướng `/upgrade`.\n- Trang `/upgrade` hiển thị CTA \"Tính năng này yêu cầu đăng ký — liên hệ SuperAdmin\". Không phải 403.\n- Khi revoke, Redis pub/sub → portal refetch `me` ở request kế tiếp."
+        },
+        "capability_entitlement_rbac": {
+          "title": "Capability Entitlement — Công thức quyền (capability ∩ RBAC)",
+          "content": "```\nQuyền thực = BrandHq.activeCapabilities ∩ User.roles.permissions\n```\n\n- Capability gắn với **BrandHQ** (sản phẩm đăng ký)\n- RBAC gắn với **User** (vai trò nhân viên)\n- Giao của hai tập là quyền thực sự."
+        },
+        "capability_entitlement_superadmin_ui": {
+          "title": "Capability Entitlement — UI quản trị SuperAdmin",
+          "content": "Route: `SuperAdmin/Portal` → `/brands/:brandHqId/entitlements`\n\nChức năng:\n\n- Danh sách capability đang active\n- Nút `[Grant POS]` / `[Grant MEAL_TICKET]`\n- Trạng thái / hạn / lịch sử của từng entitlement\n- Hành động Suspend / Resume / Revoke\n- Liên kết tham chiếu hợp đồng (`contractRef`)\n\nMutation:\n\n```\ngrantBrandHqCapability(brandHqId, capability, expiresAt?, contractRef?)\nsuspendBrandHqCapability(entitlementId, reason)\nresumeBrandHqCapability(entitlementId)\nrevokeBrandHqCapability(entitlementId, reason)\n```\n\nMọi thay đổi tự động ghi vào `AuditLog`."
+        },
+        "capability_entitlement_mealticket": {
+          "title": "Capability Entitlement — Áp dụng cho domain MealTicket",
+          "content": "- Tất cả write service trong `modules/mealticket/{wallet,policy,transaction,settlement,einvoice}` phải gọi `requireCapability(ctx, 'MEAL_TICKET')`.\n- Ngoại lệ: `modules/mealticket/merchant` các API **đọc** (landing đăng ký) cho phép mà không cần capability. Nhưng chuyển `enrollment.isActive=true` thì bắt buộc có `MEAL_TICKET`.\n- Domain POS (`catalog`, `policy`, `deploy`, branch ops) yêu cầu `requireCapability(ctx, 'POS')`.\n\n**Nguyên tắc bảo mật**: ẩn menu ở portal không chặn được enumeration. Phải gác ở service layer."
         },
         "deployment_sync": {
           "title": "Triển khai và đồng bộ",
@@ -245,7 +273,7 @@
         },
         "p1_contract": {
           "title": "P1 — Hợp đồng / Giao diện",
-          "content": "- [ ] Tiêu chuẩn Envelope tin nhắn được áp dụng chung cho tất cả kênh\n- [ ] Quy tắc sử dụng trường `v`, `requestId`, `timestamp`, `idempotencyKey` đã được cố định\n- [ ] Ví dụ yêu cầu/phản hồi Bridge đã được tài liệu hóa\n- [ ] UX xử lý `VERSION_MISMATCH` đã được xác định"
+          "content": "- [ ] Tiêu chuẩn message frame được áp dụng chung cho tất cả kênh\n- [ ] Quy tắc sử dụng trường `v`, `requestId`, `timestamp`, `idempotencyKey` đã được cố định\n- [ ] Ví dụ yêu cầu/phản hồi Bridge đã được tài liệu hóa\n- [ ] UX xử lý `VERSION_MISMATCH` đã được xác định"
         },
         "p1_observability": {
           "title": "P1 — Khả năng quan sát",
@@ -258,6 +286,91 @@
         "p1_deployment": {
           "title": "P1 — Triển khai / Build tĩnh",
           "content": "- [ ] Next.js build theo tiêu chuẩn `output: 'export'`\n- [ ] Danh sách tính năng bị cấm trong static export đã được chia sẻ\n- [ ] Scheme handler `app://pos/` cung cấp quy tắc routing file tĩnh\n- [ ] Quy tắc đồng bộ phiên bản UI/CEF/tài nguyên tồn tại"
+        }
+      }
+    },
+    "mealticket_overview": {
+      "title": "Tổng quan nền tảng phiếu ăn / Ánh xạ chủ thể",
+      "category": "Thiết kế tổng hợp dự án",
+      "description": "Cấu trúc tổng thể tích hợp nền tảng phiếu ăn B2B vào Platform hiện có. Không tách server riêng — nhúng như module domain mealticket trong SuperAdmin/CentralApi.",
+      "sections": {
+        "purpose": {
+          "title": "Mục đích và quyết định",
+          "content": "Nền tảng phiếu ăn **không tách thành server riêng**. Nó được nhúng vào `SuperAdmin/CentralApi` như module domain `mealticket`, dùng chung tenancy · auth · RBAC · audit log · pipeline đối soát.\n\nChỉ duy trì **bounded context logic** cho tới khi điều kiện tách vật lý (quy định / tải / tách tổ chức) được đáp ứng."
+        },
+        "subject_mapping": {
+          "title": "Ánh xạ chủ thể",
+          "content": "| Chủ thể phiếu ăn | Tầng Platform | Portal/App |\n|---|---|---|\n| Nhà cung cấp nền tảng | `SuperAdmin` | `SuperAdmin/Portal` |\n| Nhà hàng đối tác (chuỗi / đơn lẻ) | `BrandHQ` (+ `Branch`) | `BrandHQPortal` (tái sử dụng, thêm `/mealticket/*`) |\n| **Doanh nghiệp B2B** (HR/Tài chính) | **`Corporate`** (tầng mới) | **`CorporatePortal`** (dự án mới) |\n| Nhân viên | Người dùng thuộc `Corporate` | `MealTicketEmployeeApp` (mobile mới) |\n| Thiết bị RFID/Sinh trắc căng-tin | `EdgePos` / `Device` | `MealTicketClosedLoopTerminal` |\n\n**Quan trọng**: nhà hàng đối tác ánh xạ về `BrandHQ`, còn doanh nghiệp khách hàng là tầng mới `Corporate` chứ không phải `BrandHQ`."
+        },
+        "domain_boundaries": {
+          "title": "Ranh giới domain trong CentralApi",
+          "content": "- `modules/mealticket/wallet` — ví nhân viên, token có điều kiện\n- `modules/mealticket/policy` — builder chính sách theo phòng ban / chức danh / khung giờ\n- `modules/mealticket/transaction` — phê duyệt Open Loop / Closed Loop thời gian thực\n- `modules/mealticket/settlement` — đối soát 3-Way Matching, batch thanh toán merchant\n- `modules/mealticket/einvoice` — hoá đơn điện tử hợp nhất GDT\n- `modules/mealticket/merchant` — enrollment / biểu phí / tài khoản thanh toán của BrandHQ"
+        },
+        "portal_matrix": {
+          "title": "Ma trận dự án",
+          "content": "| Dự án | Trạng thái | Vai trò |\n|---|---|---|\n| `SuperAdmin/Portal` | hiện có | Hợp đồng đối tác / engine biểu phí / phát hiện gian lận / tích hợp GDT |\n| `BrandHQPortal` | tái sử dụng | Dành cho nhà hàng đối tác. Thêm `/mealticket/*` |\n| `CorporatePortal` | **mới** | Dành cho doanh nghiệp khách hàng (dev port 3003) |\n| `MealTicketEmployeeApp` | mới | Ứng dụng mobile cho nhân viên |"
+        },
+        "offline_rules": {
+          "title": "Quy tắc Offline / Sync",
+          "content": "- Giao dịch phê duyệt thời gian thực **không gửi lại qua Outbox**. Offline thì chặn.\n- Thiết bị Closed Loop cho phép cache local khi mất mạng + đồng bộ batch khi phục hồi (SLA 0.8s / thiết bị).\n- `idempotencyKey` sinh tại thiết bị, giữ cho tới khi nhận ACK thành công."
+        },
+        "split_triggers": {
+          "title": "Điều kiện tách vật lý",
+          "content": "Tách `MealTicketApi` thành service độc lập khi:\n\n1. Tải giao dịch phiếu ăn đe doạ SLA CentralApi\n2. Chu kỳ deploy của phiếu ăn và POS tách khỏi nhau\n3. Phạm vi tuân thủ quy định / PII / PCI khác POS"
+        }
+      }
+    },
+    "mealticket_corporate": {
+      "title": "Corporate (Doanh nghiệp B2B)",
+      "category": "Thiết kế tổng hợp dự án",
+      "description": "Tầng Corporate của nền tảng phiếu ăn và phạm vi trách nhiệm của CorporatePortal.",
+      "sections": {
+        "purpose": {
+          "title": "Lý do thêm tầng Corporate",
+          "content": "Khách hàng doanh nghiệp **không sở hữu Branch**. Họ chỉ sở hữu nhân viên · ngân sách · chính sách · hoá đơn.\n\nTrong khi đó `BrandHQ` sở hữu menu · chi nhánh · kho · nhân viên · giờ hoạt động, nên mô hình domain hoàn toàn khác. Do đó `Corporate` được thêm như tầng **anh em** với `BrandHQ`."
+        },
+        "scope": {
+          "title": "Phạm vi CorporatePortal",
+          "content": "**Quản lý**: phòng ban, nhân viên, ví điện tử, chính sách phiếu ăn, ngân sách, danh sách merchant được phép, hoá đơn điện tử hợp nhất, tích hợp HRIS.\n\n**Không quản lý**:\n\n| Tài nguyên | Dự án sở hữu |\n|---|---|\n| Menu / chi nhánh / kho / nhân viên / giờ hoạt động | `BrandHQPortal` |\n| Hợp đồng đối tác · engine biểu phí | `SuperAdmin/Portal` |\n| Phê duyệt thanh toán real-time | `CentralApi/modules/mealticket/transaction` |\n| Thiết bị Closed Loop | `MealTicketClosedLoopTerminal` |"
+        },
+        "routes": {
+          "title": "Route (bản thảo)",
+          "content": "```\n/dashboard          Tiêu hao ngân sách\n/departments        Cây phòng ban\n/employees          Nhân viên / Wallet / RFID\n/policies           Builder chính sách\n/budget             Nạp tiền / phân bổ\n/merchants          Whitelist merchant\n/invoices           Hoá đơn điện tử hợp nhất\n/integrations       HRIS\n/settings           Thông tin công ty\n```"
+        },
+        "domain_model": {
+          "title": "Mô hình domain",
+          "content": "```\nCorporate\n ├─ Department\n ├─ Employee → Wallet\n ├─ MealPolicy\n ├─ FundingAccount\n ├─ AllowedMerchantPool\n └─ ConsolidatedInvoice (GDT)\n```\n\nNguồn SharedContracts: `MealTicketCorporate` trong `SharedContracts/ApiSdk/src/mealticket/dto.ts`."
+        },
+        "rules": {
+          "title": "Quy tắc",
+          "content": "1. Root GraphQL chỉ dùng namespace `Query.meal*`, `Mutation.meal*`.\n2. DTO / enum / event chỉ import từ `SharedContracts/ApiSdk/src/mealticket`.\n3. Scope multi-tenant do service layer của CentralApi cưỡng chế.\n4. Không chia sẻ code / entity / route với `BrandHQPortal`."
+        }
+      }
+    },
+    "mealticket_merchant": {
+      "title": "Merchant (Nhà hàng đối tác = BrandHQ)",
+      "category": "Thiết kế tổng hợp dự án",
+      "description": "Nhà hàng đối tác tái sử dụng tầng BrandHQ. BrandHQPortal chỉ thêm các route phiếu ăn.",
+      "sections": {
+        "purpose": {
+          "title": "Vì sao nhà hàng đối tác = BrandHQ",
+          "content": "`BrandHQ` là trụ sở thương hiệu sở hữu nhiều chi nhánh. Nhà hàng đối tác cũng vậy — chuỗi hay đơn lẻ đều ánh xạ sang BrandHQ + Branch. Menu, chi nhánh, nhân viên, giờ hoạt động đã có sẵn trong BrandHQPortal, nên tham gia phiếu ăn chỉ cần thêm cờ enrollment, biểu phí, tài khoản thanh toán và inbox phê duyệt real-time."
+        },
+        "brandhq_reuse": {
+          "title": "Cách tái sử dụng BrandHQPortal",
+          "content": "- Giữ nguyên entity BrandHQ hiện có\n- Thêm entity phụ attach 1:1:\n  - `MealTicketMerchantEnrollment`\n  - `MealTicketMerchantCommissionRate`\n  - `MealTicketMerchantSettlementAccount`\n- Menu chỉ hiện khi `MealTicketMerchantEnrollment.isActive === true`"
+        },
+        "routes": {
+          "title": "Route phiếu ăn (góc nhìn Merchant)",
+          "content": "```\n/mealticket/enrollment      Đăng ký / trạng thái hợp đồng\n/mealticket/inbox           Inbox phê duyệt real-time\n/mealticket/transactions    Lịch sử duyệt / từ chối / hoàn\n/mealticket/settlement      Đối soát / trừ phí / chuyển khoản\n/mealticket/invoices        Hoá đơn phí nền tảng\n/mealticket/account         Tài khoản ngân hàng, MST\n```"
+        },
+        "enrollment_flag": {
+          "title": "Quy tắc hiển thị",
+          "content": "- Chỉ hiện khi `MealTicketMerchantEnrollment.isActive === true`.\n- Portal này không quản lý domain `Corporate`.\n- Logic phê duyệt thanh toán thuộc `CentralApi/modules/mealticket/transaction`."
+        },
+        "closed_loop_terminal": {
+          "title": "Thiết bị Closed Loop (căng-tin)",
+          "content": "Căng-tin khu công nghiệp / nhà máy dùng kiểu thiết bị `MealTicketClosedLoopTerminal` (Phụ lục Z của Edge POS).\n\n- SLA phê duyệt: 0.8s / thiết bị\n- Phương thức xác thực: `RFID_BADGE`, `BIOMETRIC_FACE`, `BIOMETRIC_FINGERPRINT`\n- Cache local khi mất mạng + đồng bộ batch khi phục hồi"
         }
       }
     }
@@ -281,7 +394,7 @@
     "d": {
       "title": "Luong Yeu cau (Request Flow)",
       "summary": "UI → PosRequestSender → cefQuery → C++ Responder → Actions → UseCases",
-      "detail": "### PosRequestSender.ts — Tao va Gui Phong bi\n\n```\ninterface Envelope {\n  v: number              // Phien ban giao thuc (hien tai la 1)\n  requestId: string      // Tu dong tao qua crypto.randomUUID()\n  timestamp: string      // ISO 8601\n  cmd: string            // 'TABLE:SELECT'\n  params: Record<string, unknown>\n  idempotencyKey?: string\n}\n\ninterface PosResponse {\n  v: number\n  requestId: string\n  timestamp: string\n  ok: boolean\n  code: string           // 'OK' | 'BUSY' | 'DUPLICATE' | ma loi\n  data?: unknown\n  error?: { message: string }\n}\n```\n\n### Lua chon Transport\n\n```\ngetTransport():\n├── window.cefQuery ton tai? → cefTransport (POS thuc te)\n└── Khong co              → mockTransport (che do dev)\n```\n\n### cefTransport.ts — Goi CEF Native\n\n```\nwindow.cefQuery({\n  request: JSON.stringify(envelope),\n  onSuccess: (response) => JSON.parse(response),\n  onFailure: (errorCode, errorMessage) => throw Error\n})\n```\n\n### mockTransport.ts — Phan hoi gia cho Phat trien\n\n```\nCac lenh ho tro:\n├── 'TABLE:GET_ALL'  → Tra ve fixture table.json\n├── 'TABLE:SELECT'   → Doi status bang thanh 'U'\n├── 'MENU:GET_ALL'   → Tra ve fixture menu.json\n├── 'ORDER:GET'      → Tra ve don hang trong\n├── 'ORDER:ADD_ITEM' → Xac nhan them mon\n└── 'PAYMENT:EXECUTE'→ Thanh cong thanh toan sau 1.5 giay\n\nDieu khien dev:\n- window.__MOCK_DELAY_MS = 200   // Mo phong do tre mang\n- window.__MOCK_OFFLINE = true   // Mo phong trang thai offline\n```\n\n### Phia C++ tiep nhan: PosRequestResponder.cpp\n\n```\nTiep nhan → Phan tich JSON → Xac minh phien ban giao thuc (v=1)\n→ Dinh tuyen theo tien to cmd den domain:\n  ├── 'TABLE:*'   → TableActions::Handle()\n  ├── 'ORDER:*'   → OrderActions::Handle()\n  ├── 'PAYMENT:*' → PaymentActions::Handle()\n  └── 'SYSTEM:*'  → SystemActions::Handle()\n→ Tao dinh dang phan hoi chuan → Serialize JSON → Tra ve qua callback cefQuery\n```\n\n### TableActions.cpp — Vi du Thin Router\n\n```\nTableActions::Handle(cmd, params_json, requestId, idempotencyKey)\n├── 'TABLE:GET_ALL'  → RefreshTablesUseCase.Execute(ctx)\n└── 'TABLE:SELECT'   → SelectTableUseCase.Execute(ctx, tableCode)\n\n// Khong co logic nghiep vu trong Actions — chi goi UseCase\n```\n\n**Cam**:\n- Thuc thi SQL truc tiep trong Actions\n- Ket hop nhieu Manager truc tiep trong Actions\n- Goi `window.cefQuery` truc tiep tu component"
+      "detail": "### PosRequestSender.ts — Tao va Gui Phong bi\n\n```\ninterface MessageFrame {\n  v: number              // Phien ban giao thuc (hien tai la 1)\n  requestId: string      // Tu dong tao qua crypto.randomUUID()\n  timestamp: string      // ISO 8601\n  cmd: string            // 'TABLE:SELECT'\n  params: Record<string, unknown>\n  idempotencyKey?: string\n}\n\ninterface PosResponse {\n  v: number\n  requestId: string\n  timestamp: string\n  ok: boolean\n  code: string           // 'OK' | 'BUSY' | 'DUPLICATE' | ma loi\n  data?: unknown\n  error?: { message: string }\n}\n```\n\n### Lua chon Transport\n\n```\ngetTransport():\n├── window.cefQuery ton tai? → cefTransport (POS thuc te)\n└── Khong co              → mockTransport (che do dev)\n```\n\n### cefTransport.ts — Goi CEF Native\n\n```\nwindow.cefQuery({\n  request: JSON.stringify(envelope),\n  onSuccess: (response) => JSON.parse(response),\n  onFailure: (errorCode, errorMessage) => throw Error\n})\n```\n\n### mockTransport.ts — Phan hoi gia cho Phat trien\n\n```\nCac lenh ho tro:\n├── 'TABLE:GET_ALL'  → Tra ve fixture table.json\n├── 'TABLE:SELECT'   → Doi status bang thanh 'U'\n├── 'MENU:GET_ALL'   → Tra ve fixture menu.json\n├── 'ORDER:GET'      → Tra ve don hang trong\n├── 'ORDER:ADD_ITEM' → Xac nhan them mon\n└── 'PAYMENT:EXECUTE'→ Thanh cong thanh toan sau 1.5 giay\n\nDieu khien dev:\n- window.__MOCK_DELAY_MS = 200   // Mo phong do tre mang\n- window.__MOCK_OFFLINE = true   // Mo phong trang thai offline\n```\n\n### Phia C++ tiep nhan: PosRequestResponder.cpp\n\n```\nTiep nhan → Phan tich JSON → Xac minh phien ban giao thuc (v=1)\n→ Dinh tuyen theo tien to cmd den domain:\n  ├── 'TABLE:*'   → TableActions::Handle()\n  ├── 'ORDER:*'   → OrderActions::Handle()\n  ├── 'PAYMENT:*' → PaymentActions::Handle()\n  └── 'SYSTEM:*'  → SystemActions::Handle()\n→ Tao dinh dang phan hoi chuan → Serialize JSON → Tra ve qua callback cefQuery\n```\n\n### TableActions.cpp — Vi du Thin Router\n\n```\nTableActions::Handle(cmd, params_json, requestId, idempotencyKey)\n├── 'TABLE:GET_ALL'  → RefreshTablesUseCase.Execute(ctx)\n└── 'TABLE:SELECT'   → SelectTableUseCase.Execute(ctx, tableCode)\n\n// Khong co logic nghiep vu trong Actions — chi goi UseCase\n```\n\n**Cam**:\n- Thuc thi SQL truc tiep trong Actions\n- Ket hop nhieu Manager truc tiep trong Actions\n- Goi `window.cefQuery` truc tiep tu component"
     },
     "e": {
       "title": "Luu tru Du lieu (Persistence)",

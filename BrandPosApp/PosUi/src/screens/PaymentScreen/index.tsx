@@ -26,7 +26,7 @@ import PaymentHistoryList from './components/PaymentHistoryList';
 // PaymentScreen -- 결제 메인 화면 (account-dialog.md / account-dialog-vn.md 통합)
 //
 // KR/VN 로케일 통합: i18n 키 기반 단일 화면.
-// VN 고유 차이(통화 포맷, 세금 표시)는 SharedAssets/i18n/locales/vi/ 에서 관리.
+// VN 고유 차이(통화 포맷, 세금 표시)는 앱 내부 i18n인 PosUi/src/i18n/locales/vi/ 에서 관리.
 // -------------------------------------------------------------------
 
 /** 주문 항목 stub 타입 */

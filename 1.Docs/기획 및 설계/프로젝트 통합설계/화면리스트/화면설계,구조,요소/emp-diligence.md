@@ -140,7 +140,7 @@ EMP_DILIGENCE는 직원 근태관리 전용 화면이다. 출퇴근 처리, 근�
 
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/{ko,vi,en}/staff.json` | msgKey 기반 |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/{ko,vi,en}/staff.json` | msgKey 기반 |
 | Error | 코드 기반: `{ type, code, msgKey, severity, recoverable }` | `ALREADY_CLOCKED_IN` 등 |
 | Permission | **로그인 직원 (자기 기록)**, **관리자 (전체 직원 기록)**. 급여 지급은 관리자 전용. | |
 

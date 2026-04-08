@@ -52,18 +52,22 @@ interface SectionGroup {
 const SECTION_ORDER = [
   'Shared/ReferenceData',
   'SuperAdmin/Governance',
+  'SuperAdmin/Rbac',
   'Distributor/ChannelGovernance',
   'BrandHQ/MasterData',
   'EdgePOS/OperationalCore',
+  'MealTicket/Domain',
   'Legacy',
 ];
 
 const SECTION_LABELS: Record<string, string> = {
   'Shared/ReferenceData': 'Shared',
   'SuperAdmin/Governance': 'SuperAdmin',
+  'SuperAdmin/Rbac': 'SuperAdmin RBAC',
   'Distributor/ChannelGovernance': 'Distributor',
   'BrandHQ/MasterData': 'BrandHQ',
   'EdgePOS/OperationalCore': 'EdgePOS',
+  'MealTicket/Domain': 'MealTicket',
   Legacy: 'Legacy HJ-POS',
 };
 

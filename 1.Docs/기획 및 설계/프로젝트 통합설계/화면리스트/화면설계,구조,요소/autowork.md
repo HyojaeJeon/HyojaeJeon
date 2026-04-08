@@ -153,7 +153,7 @@ AUTOWORK은 일일 마감/정산 화면이다. 영업 종료 시 매출 요약, 
 
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/{ko,vi,en}/accounting.json` | msgKey 기반 |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/{ko,vi,en}/accounting.json` | msgKey 기반 |
 | Error | 코드 기반: `{ type, code, msgKey, severity, recoverable }` | `ALREADY_CLOSED` 등 |
 | Permission | **관리자 전용**. 일반 직원은 마감 화면 진입 불가. | |
 

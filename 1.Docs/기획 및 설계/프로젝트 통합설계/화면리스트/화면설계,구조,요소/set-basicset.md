@@ -126,7 +126,7 @@ POS 운영의 기초 설정 항목(환경, 테이블, 추가기능, 주문판매
 
 ### 5.6 i18n
 
-- 탭 라벨, 설정 항목명, 버튼: SharedAssets/i18n/locales/ 기반 msgKey
+- 탭 라벨, 설정 항목명, 버튼: BrandPosApp/PosUi/src/i18n/locales/ 기반 msgKey
 - 저장 확인 다이얼로그: msgKey 기반
 
 ---

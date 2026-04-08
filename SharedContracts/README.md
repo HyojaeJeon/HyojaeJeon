@@ -11,7 +11,7 @@
 ### 담당 범위
 - DTO, 요청/응답 envelope, enum, event payload
 - GraphQL input/output 타입, validation schema, pagination type
-- tenant/brand/branch/edgePos 식별자 타입, error code, locale key
+- tenant/brand/branch/edgePos 식별자 타입, public response shape
 - `ApiSdk/` 하위 패키지로 Portal/Edge가 재사용할 GraphQL operation/typed SDK를 제공할 수 있다.
 
 ### 규칙
@@ -47,7 +47,7 @@
 ### Phạm vi phụ trách
 - DTO, envelope request/response, enum, event payload
 - GraphQL input/output type, validation schema, pagination type
-- type định danh tenant/brand/branch/edgePos, error code, locale key
+- type định danh tenant/brand/branch/edgePos, public response shape
 - Có thể cung cấp package con `ApiSdk/` để Portal/Edge tái sử dụng operation GraphQL và SDK typed.
 
 ### Quy tắc

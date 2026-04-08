@@ -133,7 +133,7 @@ INISET은 POS 초기 설정 화면이다. POS 타입, 번호, 매장PC 이름, �
 
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/{ko,vi,en}/system.json` | msgKey 기반 |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/{ko,vi,en}/system.json` | msgKey 기반 |
 | Error | 코드 기반: `{ type, code, msgKey, severity, recoverable }` | |
 | Permission | **관리자 전용**. feature flag로 유지보수 모드에서만 접근 가능. | |
 

@@ -148,7 +148,7 @@ VIETTEL_ISSUANCE는 베트남 전자세금계산서(Viettel S-Invoice) 발행 �
 
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/vi/viettel.json` | 베트남 전용, vi 필수 |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/vi/viettel.json` | 베트남 전용, vi 필수 |
 | Error | 코드 기반: `{ type, code, msgKey, severity, recoverable }` | `OFFLINE_BLOCKED`, `ISSUANCE_FAILED` |
 | Permission | **로그인 직원 전원** (베트남 시장). locale=vi 또는 feature flag 활성화 시에만 접근 가능. | |
 
@@ -191,7 +191,7 @@ VIETTEL_ISSUANCE는 베트남 전자세금계산서(Viettel S-Invoice) 발행 �
 | ExternalBridge | `BrandPosApp/Infrastructure/ExternalBridge/Viettel/` | TODO |
 | Persistence | `BrandPosApp/Infrastructure/Persistence/SQLite/Tables/Customer/CustCrud.cpp` | TODO |
 | RTK Query | `BrandPosApp/PosUi/src/store/api/viettelApi.ts` | TODO |
-| i18n (vi) | `SharedAssets/i18n/locales/vi/viettel.json` | TODO |
+| i18n (vi) | `BrandPosApp/PosUi/src/i18n/locales/vi/viettel.json` | TODO |
 | Screen Shell | `BrandPosApp/PosUi/src/screens/PaymentScreen/components/ViettelIssuanceDialog.tsx` | DONE (shell) |
 
 ---

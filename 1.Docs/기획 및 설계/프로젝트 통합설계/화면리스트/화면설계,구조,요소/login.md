@@ -143,7 +143,7 @@ LOGIN은 POS 부팅 시 최초 진입점이 되는 직원 로그인 화면이다
 
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/{ko,vi,en}/login.json` | msgKey 기반, 완성 문장 하드코딩 금지 |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/{ko,vi,en}/login.json` | msgKey 기반, 완성 문장 하드코딩 금지 |
 | Error | 코드 기반: `{ type, code, msgKey, severity, recoverable }` | `INVALID_PASSWORD` → msgKey: `login.error.invalidPassword` |
 | Permission | **미로그인 접근**. 로그인 전 유일하게 허용되는 화면이다. 인증 불필요. | |
 
@@ -182,8 +182,8 @@ LOGIN은 POS 부팅 시 최초 진입점이 되는 직원 로그인 화면이다
 | Persistence | `BrandPosApp/Infrastructure/Persistence/SQLite/Tables/Staff/StaffCrud.cpp` | TODO |
 | Persistence | `BrandPosApp/Infrastructure/Persistence/SQLite/Tables/System/ConfigCrud.cpp` | TODO |
 | RTK Query | `BrandPosApp/PosUi/src/store/api/systemApi.ts` | TODO |
-| i18n | `SharedAssets/i18n/locales/ko/login.json` | TODO |
-| i18n | `SharedAssets/i18n/locales/vi/login.json` | TODO |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/ko/login.json` | TODO |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/vi/login.json` | TODO |
 
 ---
 
@@ -221,3 +221,4 @@ LOGIN은 POS 부팅 시 최초 진입점이 되는 직원 로그인 화면이다
 | 날짜 | 범위 | 상태 | 완료 범위 | 남은 범위 | 내용 |
 |---|---|---|---|---|---|
 | 2026-04-05 | Shell 구현 | 완료 | 레이아웃+로컬상태+stub | Bridge/UseCase 연동, RTK Query 연동, i18n | LoginScreen shell 구현 완료. 숫자패드(CLR/BS), 직원ID/비밀번호/시작금액/거스름돈 입력, 영업일 날짜(ReadOnly), Login/Order Login 두 모드 버튼, 최소화 stub handler 구현. |
+| 2026-04-08 | Reference 리팩터 (6단계 워크플로우 적용) | 완료 | 계약/fixture/endpoint/컴포넌트/문서 5단계 | SYSTEM:MINIMIZE bridge endpoint, i18n 문구 정리, 영업일 systemApi 연동 | PosUi 화면 작업 6단계 워크플로우 reference 구현. (1) `src/contracts/auth/login.types.ts` 신설 — `LoginRequest`/`AuthSession`/`LoginErrorPayload`, `LoginMode` enum 은 `UPPER_SNAKE_CASE`. (2) `src/mocks/fixtures/auth/login.fixture.ts` — default/empty/error 3종 시나리오 강제. (3) `store/api/authApi.ts` — `queryFn` switch (mock/bridge/rest) reference 패턴, `NEXT_PUBLIC_DATA_SOURCE` 빌드 타임 분기. (4) 화면 컴포넌트 — 인라인 `InputRow` 제거, 신규 공용 `shared/ui/molecules/IconLabelField` 로 이전. 화면 인라인 키패드 제거, `shared/ui/molecules/NumPad` 에 `variant: 'compact'` (4x3 / no confirm) 추가하여 사용. 화면 전용 컴포넌트(`LoginBrandPanel`, `LoginIcons`)는 `screens/LoginScreen` 폴더 내부에만 분리. (5) `tsconfig` 에 `@contracts/*` path alias 추가. (6) 백엔드 연동 시 변경 지점: `.env.local` 의 `NEXT_PUBLIC_DATA_SOURCE=bridge` 한 줄. 화면/타입/fixture 코드 수정 0. |

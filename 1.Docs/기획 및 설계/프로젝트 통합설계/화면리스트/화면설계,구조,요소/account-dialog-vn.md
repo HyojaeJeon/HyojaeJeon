@@ -23,7 +23,7 @@ IDD_ACCOUNT_DIALOG_VN은 KR 버전(IDD_ACCOUNT_DIALOG)의 베트남 로케일 �
 ## 2. 상위 기준 연결
 
 `account-dialog.md` 섹션 2와 동일. 추가 참조:
-- CLAUDE.md: i18n 규칙 - 번역 원본은 `SharedAssets/i18n/locales/` 하나
+- CLAUDE.md: i18n 규칙 - 번역 원본은 `BrandPosApp/PosUi/src/i18n/locales/` 하나
 
 ---
 
@@ -54,7 +54,7 @@ IDD_ACCOUNT_DIALOG_VN은 KR 버전(IDD_ACCOUNT_DIALOG)의 베트남 로케일 �
 ### 5.6 i18n / Error / Permission (VN 고유)
 
 **i18n - VN 로케일 차이**
-- 번역 원본: `SharedAssets/i18n/locales/vi/payment.json`
+- 번역 원본: `BrandPosApp/PosUi/src/i18n/locales/vi/payment.json`
 - 통화 포맷: VND (소수점 없음, 천 단위 구분자 `.`)
 - 세금 표시: 베트남 VAT 규정 기반 표시
 - 숨김 버튼 조건: KR 버전과 동일하게 INI feature flag 기반
@@ -78,7 +78,7 @@ IDD_ACCOUNT_DIALOG_VN은 KR 버전(IDD_ACCOUNT_DIALOG)의 베트남 로케일 �
 ## 7. 완료 기준
 
 - [ ] KR 버전 PaymentScreen에서 VN 로케일 정상 동작
-- [ ] `SharedAssets/i18n/locales/vi/payment.json` 번역 완료
+- [ ] `BrandPosApp/PosUi/src/i18n/locales/vi/payment.json` 번역 완료
 - [ ] VND 통화 포맷 정상 표시
 - [ ] 별도 VN 다이얼로그 미생성 확인
 
@@ -90,7 +90,7 @@ IDD_ACCOUNT_DIALOG_VN은 KR 버전(IDD_ACCOUNT_DIALOG)의 베트남 로케일 �
 
 | 계층 | 파일 경로 | 설명 |
 |---|---|---|
-| i18n | SharedAssets/i18n/locales/vi/payment.json | 베트남어 결제 번역 |
+| i18n | BrandPosApp/PosUi/src/i18n/locales/vi/payment.json | 베트남어 결제 번역 |
 
 ---
 

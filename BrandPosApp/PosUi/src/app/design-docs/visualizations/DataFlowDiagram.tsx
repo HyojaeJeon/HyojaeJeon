@@ -85,9 +85,9 @@ export default function DataFlowDiagram() {
         </div>
       </div>
 
-      {/* JSON Envelope */}
+      {/* JSON MessageFrame */}
       <div className="mt-4 rounded-xl bg-slate-900 p-4 text-[11px] font-mono text-slate-300 leading-relaxed">
-        <div className="text-slate-500 mb-1">// JSON Envelope (all messages)</div>
+        <div className="text-slate-500 mb-1">// JSON MessageFrame (all messages)</div>
         <div>{'{'}</div>
         <div className="pl-4">
           <span className="text-cyan-400">&quot;v&quot;</span>: <span className="text-amber-300">1</span>,

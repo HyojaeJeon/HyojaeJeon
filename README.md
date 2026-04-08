@@ -9,13 +9,14 @@
 
 ### 담당 범위
 - `BrandPosApp`(Setup/Maintenance mode 포함), `BrandAdminPortal`, `SuperAdmin`, `SharedKernel`, `SharedContracts`, `SharedAssets`, `1.Docs` 전체 구조
-- `SuperAdmin` 아래에는 `Portal`, `CentralApi`, `SyncWorkers`가 있다.
+- `SuperAdmin`은 서버 전용 디렉토리가 아니라 `Portal`, `CentralApi`, `SyncWorkers`를 묶는 상위 suite 경계다.
+- `SuperAdmin/Portal`은 독립 웹 앱, `SuperAdmin/CentralApi`는 백엔드, `SuperAdmin/SyncWorkers`는 워커다.
 - 공용 자산 원본과 공통 계약은 빌드 산출물과 분리해서 관리한다.
 
 ### 규칙
 - 설계 문서와 CLAUDE.md를 최우선 기준으로 삼는다.
 - 루트는 조정과 설명의 위치이지, 하위 계층 책임을 구현하는 위치가 아니다.
-- 다국어 원본은 `SharedAssets/i18n/locales`를 따라야 하며, 각 앱은 빌드 산출물에 포함해 사용한다.
+- 다국어 원본은 각 프로젝트 내부 i18n이 소유한다. `SharedAssets`는 static assets only이며 번역 원본이 아니다.
 
 ### 해도 되는 것
 - 저장소 수준 문서와 공통 운영 규칙을 정리한다.
@@ -41,7 +42,7 @@
 ### Quy tắc
 - Luôn lấy tài liệu thiết kế và CLAUDE.md làm chuẩn ưu tiên cao nhất.
 - Thư mục gốc chỉ dùng để điều phối và mô tả, không dùng để triển khai trách nhiệm của các tầng con.
-- Nguồn đa ngôn ngữ phải theo `SharedAssets/i18n/locales`; từng app chỉ sử dụng qua artifact build của chính nó.
+- Nguồn đa ngôn ngữ do từng project tự sở hữu; `SharedAssets` chỉ giữ static assets, không giữ translation source.
 
 ### Được phép làm
 - Tổ chức tài liệu cấp repository và quy tắc vận hành dùng chung.

@@ -53,7 +53,7 @@ Mục tiêu của tầng `RegionalDistributor` gồm 5 điểm.
 | `RegionalDistributorPortal` | `Next.js(TypeScript) + App Router + Apollo Client` | GraphQL-first | 대리점/통합유통 전용 Web 프로젝트 |
 | 중앙 연결 | `SuperAdmin/CentralApi` | GraphQL API | 계약/라이선스/배포/정산 데이터 조회 |
 | UI 상태 | `Redux Toolkit` 필요 시 사용 | - | 화면 상태, 폼, 필터 |
-| 다국어 / i18n | `SharedAssets/i18n/locales` + `i18next` | build-time copy | `RegionalDistributorPortal` UI 문자열/메시지의 공통 원본 |
+| 다국어 / i18n | `각 프로젝트 내부 i18n` + `i18next` | build-time copy | `RegionalDistributorPortal` UI 문자열/메시지의 공통 원본 |
 | 직접 DB 접근 | 없음 | - | 모든 영속 데이터는 중앙 API 경유 |
 | 공통 계약 | `SharedContracts` | TypeScript DTO | 권한/territory/license schema |
 | 로그/감사 | `SuperAdmin/CentralApi` | audit log | 대리점 활동 추적 |
@@ -69,7 +69,7 @@ Mục tiêu của tầng `RegionalDistributor` gồm 5 điểm.
   - DataLoader는 Apollo Server resolver의 서버 측 책임이다.
 - 대량 목록은 pagination, lazy loading, fragment 분리로 처리한다.
 - `SharedContracts`를 DTO/enum/event의 단일 원본으로 사용한다.
-- `SharedAssets/i18n/locales`를 번역 원본으로 사용한다.
+- 번역 원본은 이 프로젝트 내부 i18n이다.
 - 유지보수 원칙:
   - distributor/territory/license/rollout 도메인별로 feature를 분리한다.
   - 화면별 서버 상태를 Redux에 중복 저장하지 않는다.
@@ -84,7 +84,7 @@ Mục tiêu của tầng `RegionalDistributor` gồm 5 điểm.
   - DataLoader là trách nhiệm phía server của Apollo Server resolver.
 - Danh sách lớn phải xử lý bằng pagination, lazy loading và tách fragment.
 - Dùng `SharedContracts` làm nguồn gốc duy nhất cho DTO/enum/event.
-- Dùng `SharedAssets/i18n/locales` làm nguồn dịch.
+- Dùng i18n nội bộ của project này làm nguồn dịch.
 - Nguyên tắc maintainability:
   - Tách feature theo domain distributor/territory/license/rollout.
   - Không lưu trùng server state vào Redux.

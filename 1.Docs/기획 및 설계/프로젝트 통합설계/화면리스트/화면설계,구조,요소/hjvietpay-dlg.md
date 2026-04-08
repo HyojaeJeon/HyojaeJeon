@@ -31,7 +31,7 @@ HJ VietPay QR 결제 모달이다. QR 코드를 생성하여 고객이 HJ VietPa
 | Offline-First 정책 | QR 결제는 온라인 필수이므로 예외 -- 오프라인 감지 시 UseCase 진입 차단 |
 | 멱등성 | `requestId` + `idempotencyKey` 기반, `PAYMENT:QR:GENERATE` / `PAYMENT:QR:CONFIRM` |
 | UI 컴포넌트 원본 | `shared/ui/organisms/QRPaymentModal` |
-| i18n | `SharedAssets/i18n/locales/{ko,en,vi}` -- msgKey 기반, 완성 문장 하드코딩 금지 |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/{ko,en,vi}` -- msgKey 기반, 완성 문장 하드코딩 금지 |
 
 ## 3. 기능목록
 
@@ -43,7 +43,7 @@ HJ VietPay QR 결제 모달이다. QR 코드를 생성하여 고객이 HJ VietPa
 | HV-F04 | 대기 후 닫기 | `PAYMENT:QR:CANCEL` | `CancelQRPaymentUseCase` | `SaleMgr` | `ExternalBridge/PaymentGateways/HJVietPay` | P1 |
 | HV-F05 | QR 코드 인쇄 | `DEVICE:PRINT` | TODO: 인쇄 UseCase 확정 필요 | `SaleMgr` | `Infrastructure/Device/Printer` | P1 |
 | HV-F06 | 모달 닫기/취소 | -- (UI 내부 상태) | -- | -- | -- | P0 |
-| HV-F07 | 언어 전환 (KR/EN/VN) | -- (i18n 전환) | -- | -- | `SharedAssets/i18n/locales/*` | P2 |
+| HV-F07 | 언어 전환 (KR/EN/VN) | -- (i18n 전환) | -- | -- | `BrandPosApp/PosUi/src/i18n/locales/*` | P2 |
 
 **레거시 대비 차이점**: HJVietPay는 자동 폴링(`CHECK_STATUS`)이 없다. 결제 완료를 POS 직원이 IDC_PAYMENT_OK 버튼으로 수동 확정한다. 신규 QRPaymentModal에서는 gateway adapter 설정으로 폴링 비활성화 + 수동 확정 버튼 표시를 제어한다.
 
@@ -185,7 +185,7 @@ PAYMENT:QR:REFRESH
 | 5 | ExternalBridge/PaymentGateways/HJVietPay 어댑터 | BrandPosApp/Infrastructure/ExternalBridge | TODO |
 | 6 | WaitPaymentCrud / SellSlipCrud / SellDetailCrud SQLite 영속화 | BrandPosApp/Infrastructure/Persistence/SQLite | TODO |
 | 7 | mockTransport QR 결제 fixture (HJVietPay) | BrandPosApp/PosUi/mocks | TODO |
-| 8 | i18n 키 등록 (payment.qr.*) | SharedAssets/i18n/locales | TODO |
+| 8 | i18n 키 등록 (payment.qr.*) | BrandPosApp/PosUi/src/i18n/locales | TODO |
 | 9 | Screen Shell | BrandPosApp/PosUi/src/screens/PaymentScreen/components/HJVietPayDialog.tsx | DONE (shell) |
 
 ---
@@ -211,7 +211,7 @@ PAYMENT:QR:REFRESH
 |---|---|---|
 | IDOK (숨김) | 프로그래밍적 결제 완료 트리거 | 수동 확정 CONFIRM 흐름으로 통합 |
 | IDCANCEL | 닫기/취소 | QRPaymentModal 닫기 버튼 |
-| IDC_BTN_KR / IDC_BTN_EN / IDC_BTN_VN | 언어 전환 | i18n 시스템 통합 (SharedAssets/i18n/locales/) |
+| IDC_BTN_KR / IDC_BTN_EN / IDC_BTN_VN | 언어 전환 | i18n 시스템 통합 (BrandPosApp/PosUi/src/i18n/locales/) |
 | IDC_PRINT (숨김) | QR 코드 인쇄 (현재 미사용) | QRPaymentModal 공통 인쇄 기능으로 통합 시 활성화 여부 결정 |
 | IDC_PAYMENT_OK | 결제 확인 (수동 확정) | QRPaymentModal 결제 확인 버튼 |
 | IDC_CLOSE | 닫기 | QRPaymentModal 닫기 + 취소 플로우로 통합 |

@@ -2,10 +2,16 @@
 
 interface NumPadProps {
   onInput: (key: string) => void;
-  onConfirm: () => void;
+  onConfirm?: () => void;
   onClear: () => void;
   onBackspace: () => void;
   disabled?: boolean;
+  /**
+   * 'standard' (기본): 4x4, '확인' 버튼 포함, '00'/'000' 금액 키 포함.
+   * 'compact'        : 4x3, '확인' 없음. 비밀번호/숫자 ID 입력용.
+   *                    LoginScreen 등 confirm 액션이 별도 버튼인 화면에서 사용.
+   */
+  variant?: 'standard' | 'compact';
 }
 
 interface KeyDef {
@@ -13,6 +19,27 @@ interface KeyDef {
   action: 'input' | 'clear' | 'backspace' | 'confirm';
   variant: 'default' | 'warn' | 'primary';
 }
+
+const COMPACT_KEYS: KeyDef[][] = [
+  [
+    { label: '7',   action: 'input',     variant: 'default' },
+    { label: '8',   action: 'input',     variant: 'default' },
+    { label: '9',   action: 'input',     variant: 'default' },
+    { label: 'C',   action: 'clear',     variant: 'warn' },
+  ],
+  [
+    { label: '4',   action: 'input',     variant: 'default' },
+    { label: '5',   action: 'input',     variant: 'default' },
+    { label: '6',   action: 'input',     variant: 'default' },
+    { label: '←',   action: 'backspace', variant: 'primary' },
+  ],
+  [
+    { label: '1',   action: 'input',     variant: 'default' },
+    { label: '2',   action: 'input',     variant: 'default' },
+    { label: '3',   action: 'input',     variant: 'default' },
+    { label: '0',   action: 'input',     variant: 'default' },
+  ],
+];
 
 const KEYS: KeyDef[][] = [
   [
@@ -58,7 +85,10 @@ export default function NumPad({
   onClear,
   onBackspace,
   disabled = false,
+  variant = 'standard',
 }: NumPadProps) {
+  const keys = variant === 'compact' ? COMPACT_KEYS : KEYS;
+
   const handlePress = (key: KeyDef) => {
     if (disabled) return;
     switch (key.action) {
@@ -72,7 +102,7 @@ export default function NumPad({
         onBackspace();
         break;
       case 'confirm':
-        onConfirm();
+        onConfirm?.();
         break;
     }
   };
@@ -84,7 +114,7 @@ export default function NumPad({
         ${disabled ? 'opacity-[var(--opacity-disabled)] pointer-events-none' : ''}
       `}
     >
-      {KEYS.flat().map((key) => (
+      {keys.flat().map((key) => (
         <button
           key={key.label}
           type="button"

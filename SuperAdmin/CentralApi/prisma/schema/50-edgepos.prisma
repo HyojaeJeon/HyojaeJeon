@@ -17,20 +17,21 @@
 //   Vì ứng dụng Edge POS hoạt động theo mô hình Offline-First, bảng này dùng cho mục đích giám sát/quản lý từ trung tâm.
 model EdgePosTerminal {
   id              String    @id @default(uuid()) @db.Uuid
-  branchId        String    @db.Uuid                         // 한국어: 소속 지점 FK / Tiếng Việt: FK chi nhánh sở hữu
-  terminalCode    String    @unique @db.VarChar(50)          // 한국어: 단말기 코드 (고유) / Tiếng Việt: Mã thiết bị đầu cuối (duy nhất)
-  terminalName    String    @db.VarChar(200)                 // 한국어: 단말기 이름 / Tiếng Việt: Tên thiết bị đầu cuối
-  terminalRole    String    @default("Main") @db.VarChar(30) // 한국어: 단말기 역할 (Main/Sub) / Tiếng Việt: Vai trò thiết bị (Main/Sub)
-  appVersion      String    @db.VarChar(50)                  // 한국어: Edge POS 앱 버전 / Tiếng Việt: Phiên bản ứng dụng Edge POS
-  dbVersion       String    @db.VarChar(50)                  // 한국어: 로컬 SQLite DB 스키마 버전 / Tiếng Việt: Phiên bản schema SQLite cục bộ
-  status          String    @default("Active") @db.VarChar(20)
-  lastSyncAt      DateTime? @db.Timestamptz()                // 한국어: 마지막 중앙 서버 동기화 시각 / Tiếng Việt: Thời điểm đồng bộ máy chủ trung tâm cuối
-  lastHeartbeatAt DateTime? @db.Timestamptz()                // 한국어: 마지막 하트비트 수신 시각 / Tiếng Việt: Thời điểm nhận heartbeat cuối
+  branchId        String    @db.Uuid // 한국어: 소속 지점 FK / Tiếng Việt: FK chi nhánh sở hữu
+  terminalCode    String    @unique @db.VarChar(50) // 한국어: 단말기 코드 (고유) / Tiếng Việt: Mã thiết bị đầu cuối (duy nhất)
+  terminalName    String    @db.VarChar(200) // 한국어: 단말기 이름 / Tiếng Việt: Tên thiết bị đầu cuối
+  terminalRole    String    @default("MAIN") @db.VarChar(30) // 한국어: 단말기 역할 (Main/Sub) / Tiếng Việt: Vai trò thiết bị (Main/Sub)
+  appVersion      String    @db.VarChar(50) // 한국어: Edge POS 앱 버전 / Tiếng Việt: Phiên bản ứng dụng Edge POS
+  dbVersion       String    @db.VarChar(50) // 한국어: 로컬 SQLite DB 스키마 버전 / Tiếng Việt: Phiên bản schema SQLite cục bộ
+  status          String    @default("ACTIVE") @db.VarChar(20)
+  lastSyncAt      DateTime? @db.Timestamptz() // 한국어: 마지막 중앙 서버 동기화 시각 / Tiếng Việt: Thời điểm đồng bộ máy chủ trung tâm cuối
+  lastHeartbeatAt DateTime? @db.Timestamptz() // 한국어: 마지막 하트비트 수신 시각 / Tiếng Việt: Thời điểm nhận heartbeat cuối
   createdAt       DateTime  @default(now()) @db.Timestamptz()
   updatedAt       DateTime  @updatedAt @db.Timestamptz()
   deletedAt       DateTime? @db.Timestamptz()
 
-  branch Branch @relation(fields: [branchId], references: [id])
+  // P0-2: EdgePosTerminal 은 지점 운영 주요 자산. 지점 삭제 전 단말기 회수/이관 필수 (Restrict).
+  branch Branch @relation(fields: [branchId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
   @@index([branchId, status], name: "idx_terminal_branch_status")
 }

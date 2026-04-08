@@ -6,9 +6,10 @@
   "license": "UNLICENSED",
   "scripts": {
     "prepare:persisted-queries": "node ./scripts/sync-persisted-query-allow-list.mjs",
-    "prebuild": "npm --prefix ../../SharedContracts/ApiSdk run build && npm run prepare:persisted-queries",
+    "prebuild": "npm --prefix ../../SharedContracts/ApiSdk run build && npm run prepare:persisted-queries && npm run lint:discriminators",
+    "lint:discriminators": "node ./scripts/lint-discriminators.mjs",
     "build": "nest build",
-    "postbuild": "npm run prepare:persisted-queries",
+    "postbuild": "npm run prepare:persisted-queries && npm --prefix ../../SharedContracts/ApiSdk run validate:operations",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -38,6 +39,7 @@
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/passport": "^11.0.0",
     "@nestjs/platform-fastify": "^11.1.0",
+    "@socket.io/redis-adapter": "^8.3.0",
     "@prisma/client": "^6.9.0",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
@@ -50,7 +52,9 @@
     "ioredis": "^5.6.1",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
+    "redis": "^4.7.0",
     "reflect-metadata": "^0.2.2",
+    "socket.io": "^4.8.1",
     "rxjs": "^7.8.2"
   },
   "devDependencies": {
@@ -93,8 +97,9 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
     "moduleNameMapper": {
-      "^@modules/(.*)$": "<rootDir>/modules/$1",
-      "^@common/(.*)$": "<rootDir>/common/$1"
+      "^@core/(.*)$": "<rootDir>/core/$1",
+      "^@platform/(.*)$": "<rootDir>/platform/$1",
+      "^@shared/(.*)$": "<rootDir>/shared/$1"
     }
   }
 }

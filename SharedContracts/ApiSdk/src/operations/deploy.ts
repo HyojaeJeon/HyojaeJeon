@@ -5,9 +5,7 @@ export interface DeployPackagesQueryVariables {
   take?: number;
 }
 
-export interface DeployPackagesQueryData {
-  deployPackages: DeployPackage[];
-}
+export type DeployPackagesQueryData = DeployPackage[];
 
 export const deployPackagesOperation: GraphQLOperation<
   DeployPackagesQueryData,
@@ -17,7 +15,8 @@ export const deployPackagesOperation: GraphQLOperation<
   document: `
     query DeployPackages($skip: Int, $take: Int) {
       deployPackages(skip: $skip, take: $take) {
-        id
+        success { code message requestId data {
+          id
         packageCode
         version
         platformTarget
@@ -26,6 +25,8 @@ export const deployPackagesOperation: GraphQLOperation<
         releasedAt
         createdAt
         updatedAt
+        } }
+        error { code message requestId details }
       }
     }
   `,
@@ -38,9 +39,7 @@ export interface DeployReleasesQueryVariables {
   take?: number;
 }
 
-export interface DeployReleasesQueryData {
-  deployReleases: DeployRelease[];
-}
+export type DeployReleasesQueryData = DeployRelease[];
 
 export const deployReleasesOperation: GraphQLOperation<
   DeployReleasesQueryData,
@@ -50,7 +49,8 @@ export const deployReleasesOperation: GraphQLOperation<
   document: `
     query DeployReleases($scopeType: String!, $scopeId: ID!, $skip: Int, $take: Int) {
       deployReleases(scopeType: $scopeType, scopeId: $scopeId, skip: $skip, take: $take) {
-        id
+        success { code message requestId data {
+          id
         packageId
         scopeType
         scopeId
@@ -61,6 +61,8 @@ export const deployReleasesOperation: GraphQLOperation<
         releaseNote
         createdAt
         updatedAt
+        } }
+        error { code message requestId details }
       }
     }
   `,
@@ -70,9 +72,7 @@ export interface DeployReleaseQueryVariables {
   id: string;
 }
 
-export interface DeployReleaseQueryData {
-  deployRelease?: DeployRelease | null;
-}
+export type DeployReleaseQueryData = DeployRelease | null;
 
 export const deployReleaseOperation: GraphQLOperation<
   DeployReleaseQueryData,
@@ -82,7 +82,8 @@ export const deployReleaseOperation: GraphQLOperation<
   document: `
     query DeployRelease($id: ID!) {
       deployRelease(id: $id) {
-        id
+        success { code message requestId data {
+          id
         packageId
         scopeType
         scopeId
@@ -93,6 +94,8 @@ export const deployReleaseOperation: GraphQLOperation<
         releaseNote
         createdAt
         updatedAt
+        } }
+        error { code message requestId details }
       }
     }
   `,

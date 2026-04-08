@@ -139,7 +139,7 @@ INOUT_DIALOG는 현금 입출금 관리 화면이다. 기간별 입출금 조회
 
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/{ko,vi,en}/accounting.json` | msgKey 기반 |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/{ko,vi,en}/accounting.json` | msgKey 기반 |
 | Error | 코드 기반: `{ type, code, msgKey, severity, recoverable }` | `INVALID_AMOUNT`, `INSUFFICIENT_CASH` |
 | Permission | **관리자 또는 입출금 권한 직원**. 일반 직원은 입출금 권한이 부여된 경우에만 접근 가능. | |
 

@@ -69,8 +69,8 @@ Sản phẩm cuối cùng được chia thành 3 tầng như sau.
 | `SuperAdmin/SyncWorkers` | `Node.js(TypeScript) + BullMQ + Redis` | Queue-driven | outbox, retry, reconciliation, notification |
 | `SharedContracts` | `TypeScript contract package` | - | 공통 계약 단일 원본 |
 | `SharedKernel` | `C++ shared kernel` | - | native helper/protocol |
-| `SharedAssets` | runtime assets | - | i18n / static assets |
-| `다국어 / i18n` | `SharedAssets/i18n/locales` + `i18next` | build-time copy | `SuperAdmin/Portal` UI 문자열/메시지의 공통 원본 |
+| `SharedAssets` | runtime static assets | - | static assets only |
+| `다국어 / i18n` | `각 프로젝트 내부 i18n` + `i18next` | build-time copy | `SuperAdmin/Portal` UI 문자열/메시지의 공통 원본 |
 
 ### 1.2 CentralApi 실행/성능 원칙
 

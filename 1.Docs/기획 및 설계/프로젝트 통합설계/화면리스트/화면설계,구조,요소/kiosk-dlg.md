@@ -20,7 +20,7 @@
 |-----------|-----------|
 | 04-Edge-POS-아키텍처-설계서 | 계층 흐름, CEF/UI 운영 규칙 (1024x768 고정 해상도, 터치 사용성) |
 | 05-Edge-POS-전체-흐름-AZ-가이드 | 키오스크 주문 흐름 |
-| CLAUDE.md | Offline-First, i18n 규칙 (SharedAssets/i18n/locales/ 원본) |
+| CLAUDE.md | Offline-First, i18n 규칙 (BrandPosApp/PosUi/src/i18n/locales/ 원본) |
 
 ## 3. 기능목록
 
@@ -60,7 +60,7 @@
 | shared/ui 컴포넌트 | 용도 | 비고 |
 |---|---|---|
 | shared/ui/organisms/DataGrid | 주문 목록 그리드 | 가상 스크롤 적용 |
-| shared/ui/molecules/LanguageSelector | 다국어 선택 (KR/EN/CN/JP) | 설정에 따라 조건부 활성화, i18n은 SharedAssets/i18n/locales/ 원본 |
+| shared/ui/molecules/LanguageSelector | 다국어 선택 (KR/EN/CN/JP) | 설정에 따라 조건부 활성화, i18n은 BrandPosApp/PosUi/src/i18n/locales/ 원본 |
 
 ## 5. 구현명세
 
@@ -142,7 +142,7 @@
 - [ ] KioskMgr 도메인 로직 구현 (주문 확인/취소/수정)
 - [ ] screens/KioskScreen 화면 구현 (1024x768 터치 사용성 준수)
 - [ ] 메뉴 그룹/카테고리 데이터 기반 동적 렌더링 구현
-- [ ] 다국어 LanguageSelector 구현 (SharedAssets/i18n/locales/ 원본)
+- [ ] 다국어 LanguageSelector 구현 (BrandPosApp/PosUi/src/i18n/locales/ 원본)
 - [ ] 무응답 타임아웃 타이머 구현 (useEffect 기반)
 - [ ] 바코드 스캔 핸들러 구현 (숨김 input + onKeyDown)
 - [ ] 주문 버튼 최소 터치 크기 44x44px 보장

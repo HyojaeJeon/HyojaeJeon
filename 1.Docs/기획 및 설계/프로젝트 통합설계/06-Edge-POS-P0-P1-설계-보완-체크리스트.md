@@ -70,7 +70,7 @@
 
 ### 3. 계약 / 인터페이스
 
-- [ ] 메시지 Envelope 표준이 모든 채널에 공통 적용된다
+- [ ] 메시지 success / error 표준이 모든 채널에 공통 적용된다
 - [ ] `v`, `requestId`, `timestamp`, `idempotencyKey` 필드 사용 규칙이 고정되어 있다
 - [ ] Bridge 요청/응답 예제가 문서화되어 있다
 - [ ] `VERSION_MISMATCH` 처리 UX가 정의되어 있다

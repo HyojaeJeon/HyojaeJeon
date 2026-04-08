@@ -11,7 +11,13 @@
       "decoratorMetadata": true
     },
     "target": "es2021",
-    "keepClassNames": true
+    "keepClassNames": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@core/*": ["core/*"],
+      "@platform/*": ["platform/*"],
+      "@shared/*": ["shared/*"]
+    }
   },
   "module": {
     "type": "commonjs"

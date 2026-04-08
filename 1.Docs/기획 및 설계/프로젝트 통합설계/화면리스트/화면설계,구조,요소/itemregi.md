@@ -91,7 +91,7 @@
 ### 5.6 i18n / Error / Permission
 | 항목 | 규칙 | 비고 |
 |---|---|---|
-| i18n | `SharedAssets/i18n/locales/` 기반 msgKey | 필드 라벨 (바코드, 상품명, 판매가, 매입가 등) |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/` 기반 msgKey | 필드 라벨 (바코드, 상품명, 판매가, 매입가 등) |
 | Error | 코드 기반 (type, device, code, msgKey). `DUPLICATE_BARCODE`: 동일 바코드 상품 존재. `INVALID_PRICE`: 판매가 0 이하 | 완성 문장 금지 |
 | Permission | 관리자 전용: 상품 등록/수정은 관리자 권한 필요. 일반 직원은 접근 불가 | |
 

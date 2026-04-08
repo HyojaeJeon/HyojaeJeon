@@ -30,7 +30,7 @@ ZaloPay QR 결제 모달이다. 결제 금액에 대한 QR 코드를 생성하�
 | Offline-First 정책 | QR 결제는 온라인 필수이므로 예외 -- 오프라인 감지 시 UseCase 진입 차단 |
 | 멱등성 | `requestId` + `idempotencyKey` 기반, `PAYMENT:QR:GENERATE` / `PAYMENT:QR:CONFIRM` |
 | UI 컴포넌트 원본 | `shared/ui/organisms/QRPaymentModal` |
-| i18n | `SharedAssets/i18n/locales/{ko,en,vi}` -- msgKey 기반, 완성 문장 하드코딩 금지 |
+| i18n | `BrandPosApp/PosUi/src/i18n/locales/{ko,en,vi}` -- msgKey 기반, 완성 문장 하드코딩 금지 |
 
 ## 3. 기능목록
 
@@ -44,7 +44,7 @@ ZaloPay QR 결제 모달이다. 결제 금액에 대한 QR 코드를 생성하�
 | ZP-F06 | QR 코드 인쇄 | `DEVICE:PRINT` | TODO: 인쇄 UseCase 확정 필요 | `SaleMgr` | `Infrastructure/Device/Printer` | P1 |
 | ZP-F07 | 대기 후 닫기 | `PAYMENT:QR:CANCEL` | `CancelQRPaymentUseCase` | `SaleMgr` | `ExternalBridge/PaymentGateways/ZaloPay` | P1 |
 | ZP-F08 | 모달 닫기/취소 | -- (UI 내부 상태) | -- | -- | -- | P0 |
-| ZP-F09 | 언어 전환 (KR/EN/VN) | -- (i18n 전환) | -- | -- | `SharedAssets/i18n/locales/*` | P2 |
+| ZP-F09 | 언어 전환 (KR/EN/VN) | -- (i18n 전환) | -- | -- | `BrandPosApp/PosUi/src/i18n/locales/*` | P2 |
 
 ## 4. UI 구조
 
@@ -187,7 +187,7 @@ PAYMENT:QR:REFRESH
 | 5 | ExternalBridge/PaymentGateways/ZaloPay 어댑터 | BrandPosApp/Infrastructure/ExternalBridge | TODO |
 | 6 | WaitPaymentCrud / SellSlipCrud / SellDetailCrud SQLite 영속화 | BrandPosApp/Infrastructure/Persistence/SQLite | TODO |
 | 7 | mockTransport QR 결제 fixture | BrandPosApp/PosUi/mocks | TODO |
-| 8 | i18n 키 등록 (payment.qr.*) | SharedAssets/i18n/locales | TODO |
+| 8 | i18n 키 등록 (payment.qr.*) | BrandPosApp/PosUi/src/i18n/locales | TODO |
 | 9 | Screen Shell | BrandPosApp/PosUi/src/screens/PaymentScreen/components/ZaloPayQRDialog.tsx | DONE (shell) |
 
 ---
@@ -214,7 +214,7 @@ PAYMENT:QR:REFRESH
 | IDOK (숨김) | 프로그래밍적 결제 완료 트리거 | CheckQRStatus 성공 시 자동 확정 흐름으로 대체 |
 | IDCANCEL | 닫기/취소 | QRPaymentModal 닫기 버튼 |
 | IDC_PAYMENT_UPDATE (숨김) | 타이머 기반 자동 폴링 트리거 | React useEffect + RTK Query polling으로 대체 |
-| IDC_BTN_KR / IDC_BTN_EN / IDC_BTN_VN | 언어 전환 | i18n 시스템 통합 (SharedAssets/i18n/locales/) |
+| IDC_BTN_KR / IDC_BTN_EN / IDC_BTN_VN | 언어 전환 | i18n 시스템 통합 (BrandPosApp/PosUi/src/i18n/locales/) |
 | IDC_CLOSE_WAIT | 대기 후 닫기 | QRPaymentModal 대기 후 닫기 액션 |
 | IDC_QRCANCEL | QR 코드 취소 | QRPaymentModal QR 취소 액션 |
 | IDC_PAYMENT_CHECK | 수표 조회 (결제 확인) | QRPaymentModal 결제 확인 액션 |
