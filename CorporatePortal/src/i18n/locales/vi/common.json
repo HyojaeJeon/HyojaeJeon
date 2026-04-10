@@ -1,0 +1,126 @@
+{
+  "app": {
+    "name": "Cong Doanh Nghiep",
+    "tagline": "Nen tang quan ly phieu an",
+    "metaTitle": "Cong Doanh Nghiep — Quan ly phieu an",
+    "metaDescription": "Cong quan ly phieu an, ngan sach va chinh sach cho nhan vien"
+  },
+  "nav": {
+    "dashboard": "Tong quan",
+    "departments": "Phong ban",
+    "employees": "Nhan vien",
+    "policies": "Chinh sach",
+    "budget": "Ngan sach",
+    "budget.ledger": "So cai",
+    "merchants": "Nha hang lien ket",
+    "invoices": "Hoa don dien tu",
+    "integrations": "Tich hop",
+    "settings": "Cai dat",
+    "settings.company": "Thong tin cong ty",
+    "settings.admins": "Quan tri vien",
+    "settings.session": "Tai khoan"
+  },
+  "common": {
+    "loading": "Dang tai...",
+    "empty": "Khong co du lieu",
+    "error": "Da xay ra loi",
+    "retry": "Thu lai",
+    "confirm": "Xac nhan",
+    "cancel": "Huy",
+    "save": "Luu",
+    "delete": "Xoa",
+    "edit": "Chinh sua",
+    "create": "Tao moi",
+    "search": "Tim kiem",
+    "filter": "Loc",
+    "refresh": "Lam moi",
+    "export": "Xuat",
+    "import": "Nhap",
+    "download": "Tai xuong",
+    "upload": "Tai len",
+    "back": "Quay lai",
+    "next": "Tiep theo",
+    "previous": "Truoc",
+    "close": "Dong",
+    "yes": "Co",
+    "no": "Khong",
+    "all": "Tat ca",
+    "active": "Hoat dong",
+    "inactive": "Khong hoat dong",
+    "status": "Trang thai",
+    "actions": "Thao tac",
+    "total": "Tong",
+    "details": "Chi tiet",
+    "signOut": "Dang xuat",
+    "comingSoon": "Sap ra mat",
+    "comingSoonDescription": "Tinh nang nay dang duoc phat trien."
+  },
+  "login": {
+    "title": "Dang nhap Cong Doanh Nghiep",
+    "loginId": "Ten dang nhap",
+    "password": "Mat khau",
+    "submit": "Dang nhap",
+    "forgotPassword": "Quen mat khau?",
+    "loginFailed": "Dang nhap that bai. Vui long kiem tra lai."
+  },
+  "action": {
+    "create": "Tao moi",
+    "refresh": "Lam moi",
+    "export": "Xuat",
+    "addEmployee": "Them nhan vien",
+    "addDepartment": "Them phong ban",
+    "addPolicy": "Them chinh sach",
+    "inviteAdmin": "Moi quan tri vien",
+    "csvUpload": "Tai CSV len",
+    "csvExport": "Xuat CSV",
+    "terminate": "Cho nghi viec",
+    "suspend": "Tam dung",
+    "resume": "Khoi phuc",
+    "assignBadge": "Gan the",
+    "requestIssuance": "Yeu cau phat hanh",
+    "dispute": "Khieu nai",
+    "downloadPdf": "Tai PDF",
+    "downloadXml": "Tai XML"
+  },
+  "period": {
+    "current": "Thang nay",
+    "previous": "Thang truoc",
+    "quarter": "Quy",
+    "custom": "Tuy chon"
+  },
+  "wallet": {
+    "companyAllowance": "Diem ho tro cong ty",
+    "personalTopUp": "Nap ca nhan",
+    "availableBalance": "So du kha dung",
+    "pointBadge": "P",
+    "refundable": "Co the hoan",
+    "conditionalPoint": "Diem co dieu kien — chi dung cho phieu an"
+  },
+  "fundingModel": {
+    "unassigned": "Chua cap",
+    "prepaidDeposit": "Tra truoc",
+    "creditNet15": "Tra sau (15 ngay)",
+    "creditNet30": "Tra sau (30 ngay)"
+  },
+  "invoiceStatus": {
+    "DRAFT": "Cho xem xet",
+    "DISPUTED": "Dang khieu nai",
+    "REQUESTED": "Da yeu cau",
+    "SUBMITTING": "Dang nop",
+    "ACCEPTED": "Da phat hanh",
+    "REJECTED": "Bi tu choi",
+    "VOIDED": "Vo hieu"
+  },
+  "walletStatus": {
+    "ACTIVE": "Hoat dong",
+    "SUSPENDED": "Tam dung",
+    "FROZEN": "Dong bang",
+    "CLOSED": "Da dong"
+  },
+  "employmentType": {
+    "FULL_TIME": "Chinh thuc",
+    "CONTRACT": "Hop dong",
+    "DISPATCH": "Biet phai",
+    "CONTRACTOR_AGENCY": "Nha thau"
+  }
+}

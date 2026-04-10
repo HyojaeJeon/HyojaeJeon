@@ -1,16 +1,26 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import { RootProviders } from '@providers/RootProviders';
+import { AppShell } from '@shared/layout';
+import { getMessages, DEFAULT_LOCALE } from '@i18n/messages';
+import '@styles/globals.css';
 
-export const metadata: Metadata = {
-  title: 'Corporate Portal — MealTicket',
-  description:
-    '식권 플랫폼 B2B 고객 기업(Corporate) 전용 관리 포털. 기준서 §2.1 Corporate 계층 단독 UI 프로젝트.',
-};
+export function generateMetadata(): Metadata {
+  const messages = getMessages(DEFAULT_LOCALE);
+  return {
+    title: messages.app.metaTitle,
+    description: messages.app.metaDescription,
+  };
+}
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="ko">
-      <body>{children}</body>
+    <html lang={DEFAULT_LOCALE} suppressHydrationWarning>
+      <body>
+        <RootProviders>
+          <AppShell>{children}</AppShell>
+        </RootProviders>
+      </body>
     </html>
   );
 }

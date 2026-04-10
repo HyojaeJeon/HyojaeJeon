@@ -1,0 +1,126 @@
+{
+  "app": {
+    "name": "Corporate Portal",
+    "tagline": "Meal Ticket Management Platform",
+    "metaTitle": "Corporate Portal — Meal Ticket Platform",
+    "metaDescription": "Corporate portal for employee meal ticket, budget, and policy management"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "departments": "Departments",
+    "employees": "Employees",
+    "policies": "Meal Policies",
+    "budget": "Budget",
+    "budget.ledger": "Ledger",
+    "merchants": "Merchants",
+    "invoices": "E-Invoices",
+    "integrations": "Integrations",
+    "settings": "Settings",
+    "settings.company": "Company Info",
+    "settings.admins": "Admin Accounts",
+    "settings.session": "My Account"
+  },
+  "common": {
+    "loading": "Loading...",
+    "empty": "No data available",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "refresh": "Refresh",
+    "export": "Export",
+    "import": "Import",
+    "download": "Download",
+    "upload": "Upload",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No",
+    "all": "All",
+    "active": "Active",
+    "inactive": "Inactive",
+    "status": "Status",
+    "actions": "Actions",
+    "total": "Total",
+    "details": "Details",
+    "signOut": "Sign Out",
+    "comingSoon": "Coming Soon",
+    "comingSoonDescription": "This feature is currently under development."
+  },
+  "login": {
+    "title": "Corporate Portal Login",
+    "loginId": "Login ID",
+    "password": "Password",
+    "submit": "Sign In",
+    "forgotPassword": "Forgot password?",
+    "loginFailed": "Login failed. Please check your credentials."
+  },
+  "action": {
+    "create": "Create",
+    "refresh": "Refresh",
+    "export": "Export",
+    "addEmployee": "Add Employee",
+    "addDepartment": "Add Department",
+    "addPolicy": "Add Policy",
+    "inviteAdmin": "Invite Admin",
+    "csvUpload": "CSV Upload",
+    "csvExport": "CSV Export",
+    "terminate": "Terminate",
+    "suspend": "Suspend",
+    "resume": "Resume",
+    "assignBadge": "Assign Badge",
+    "requestIssuance": "Request Issuance",
+    "dispute": "Dispute",
+    "downloadPdf": "Download PDF",
+    "downloadXml": "Download XML"
+  },
+  "period": {
+    "current": "This Month",
+    "previous": "Last Month",
+    "quarter": "Quarter",
+    "custom": "Custom Range"
+  },
+  "wallet": {
+    "companyAllowance": "Company Allowance Points",
+    "personalTopUp": "Personal Top-up Balance",
+    "availableBalance": "Available Balance",
+    "pointBadge": "P",
+    "refundable": "Refundable",
+    "conditionalPoint": "Conditional points — meal ticket payments only"
+  },
+  "fundingModel": {
+    "unassigned": "Unassigned",
+    "prepaidDeposit": "Prepaid Deposit",
+    "creditNet15": "Credit NET15",
+    "creditNet30": "Credit NET30"
+  },
+  "invoiceStatus": {
+    "DRAFT": "Review Pending",
+    "DISPUTED": "Disputed",
+    "REQUESTED": "Issuance Requested",
+    "SUBMITTING": "Submitting",
+    "ACCEPTED": "Issued",
+    "REJECTED": "Rejected",
+    "VOIDED": "Voided"
+  },
+  "walletStatus": {
+    "ACTIVE": "Active",
+    "SUSPENDED": "Suspended",
+    "FROZEN": "Frozen",
+    "CLOSED": "Closed"
+  },
+  "employmentType": {
+    "FULL_TIME": "Full-time",
+    "CONTRACT": "Contract",
+    "DISPATCH": "Dispatch",
+    "CONTRACTOR_AGENCY": "Contractor"
+  }
+}

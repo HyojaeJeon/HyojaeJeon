@@ -1,0 +1,126 @@
+{
+  "app": {
+    "name": "기업 포털",
+    "tagline": "식권 관리 플랫폼",
+    "metaTitle": "기업 포털 — 식권 관리 플랫폼",
+    "metaDescription": "임직원 식권 관리, 예산 관리, 정책 설정을 위한 기업 포털"
+  },
+  "nav": {
+    "dashboard": "대시보드",
+    "departments": "부서 관리",
+    "employees": "임직원",
+    "policies": "식대 정책",
+    "budget": "예산 관리",
+    "budget.ledger": "원장 내역",
+    "merchants": "제휴 식당",
+    "invoices": "전자세금계산서",
+    "integrations": "연동 관리",
+    "settings": "설정",
+    "settings.company": "회사 정보",
+    "settings.admins": "관리자 계정",
+    "settings.session": "내 계정"
+  },
+  "common": {
+    "loading": "로딩 중...",
+    "empty": "데이터가 없습니다",
+    "error": "오류가 발생했습니다",
+    "retry": "다시 시도",
+    "confirm": "확인",
+    "cancel": "취소",
+    "save": "저장",
+    "delete": "삭제",
+    "edit": "편집",
+    "create": "생성",
+    "search": "검색",
+    "filter": "필터",
+    "refresh": "새로고침",
+    "export": "내보내기",
+    "import": "가져오기",
+    "download": "다운로드",
+    "upload": "업로드",
+    "back": "뒤로",
+    "next": "다음",
+    "previous": "이전",
+    "close": "닫기",
+    "yes": "예",
+    "no": "아니오",
+    "all": "전체",
+    "active": "활성",
+    "inactive": "비활성",
+    "status": "상태",
+    "actions": "액션",
+    "total": "합계",
+    "details": "상세",
+    "signOut": "로그아웃",
+    "comingSoon": "준비 중",
+    "comingSoonDescription": "이 기능은 현재 개발 중입니다."
+  },
+  "login": {
+    "title": "기업 포털 로그인",
+    "loginId": "아이디",
+    "password": "비밀번호",
+    "submit": "로그인",
+    "forgotPassword": "비밀번호를 잊으셨나요?",
+    "loginFailed": "로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요."
+  },
+  "action": {
+    "create": "생성",
+    "refresh": "새로고침",
+    "export": "내보내기",
+    "addEmployee": "임직원 추가",
+    "addDepartment": "부서 추가",
+    "addPolicy": "정책 추가",
+    "inviteAdmin": "관리자 초대",
+    "csvUpload": "CSV 업로드",
+    "csvExport": "CSV 내보내기",
+    "terminate": "퇴사 처리",
+    "suspend": "일시 정지",
+    "resume": "정지 해제",
+    "assignBadge": "배지 매핑",
+    "requestIssuance": "발행 요청",
+    "dispute": "이의 제기",
+    "downloadPdf": "PDF 다운로드",
+    "downloadXml": "XML 다운로드"
+  },
+  "period": {
+    "current": "이번 달",
+    "previous": "지난 달",
+    "quarter": "분기",
+    "custom": "기간 선택"
+  },
+  "wallet": {
+    "companyAllowance": "회사 지원금 포인트",
+    "personalTopUp": "개인 충전 잔액",
+    "availableBalance": "사용 가능 금액",
+    "pointBadge": "P",
+    "refundable": "환불 가능",
+    "conditionalPoint": "조건부 포인트 — 식권 결제에만 사용 가능"
+  },
+  "fundingModel": {
+    "unassigned": "미부여",
+    "prepaidDeposit": "예치금 선납",
+    "creditNet15": "사후 정산 (15일)",
+    "creditNet30": "사후 정산 (30일)"
+  },
+  "invoiceStatus": {
+    "DRAFT": "검토 대기",
+    "DISPUTED": "이의 제기 중",
+    "REQUESTED": "발행 요청됨",
+    "SUBMITTING": "제출 중",
+    "ACCEPTED": "발급 완료",
+    "REJECTED": "거부됨",
+    "VOIDED": "무효"
+  },
+  "walletStatus": {
+    "ACTIVE": "활성",
+    "SUSPENDED": "정지",
+    "FROZEN": "동결",
+    "CLOSED": "해지"
+  },
+  "employmentType": {
+    "FULL_TIME": "정규직",
+    "CONTRACT": "계약직",
+    "DISPATCH": "파견",
+    "CONTRACTOR_AGENCY": "용역"
+  }
+}
