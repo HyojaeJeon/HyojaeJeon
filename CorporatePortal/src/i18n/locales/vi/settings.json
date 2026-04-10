@@ -9,10 +9,10 @@
     "tab3": "Cài đặt hóa đơn điện tử",
     "companyName": "Tên công ty",
     "taxCode": "Mã số thuế",
-    "representativeName": "Tên người đại diện",
-    "addressCity": "Tỉnh/Thành phố",
-    "addressDistrict": "Quận/Huyện",
-    "addressWard": "Phường/Xã",
+    "representativeName": "Người đại diện",
+    "addressCity": "Tỉnh / Thành phố",
+    "addressDistrict": "Quận / Huyện",
+    "addressWard": "Phường / Xã",
     "addressDetail": "Địa chỉ chi tiết",
     "contactName": "Tên người liên hệ",
     "contactEmail": "Email",
@@ -23,7 +23,7 @@
     "consolidationStrategy": "Chiến lược gộp hóa đơn"
   },
   "admins": {
-    "title": "Tài khoản quản trị viên",
+    "title": "Tài khoản quản trị",
     "invite": "Mời quản trị viên",
     "email": "Email",
     "role": "Vai trò",

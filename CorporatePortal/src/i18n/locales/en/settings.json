@@ -10,7 +10,7 @@
     "companyName": "Company Name",
     "taxCode": "Tax Code",
     "representativeName": "Representative Name",
-    "addressCity": "City/Province",
+    "addressCity": "City / Province",
     "addressDistrict": "District",
     "addressWard": "Ward",
     "addressDetail": "Detailed Address",
