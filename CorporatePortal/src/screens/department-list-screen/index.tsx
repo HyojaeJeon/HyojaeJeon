@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQuery, useMutation } from '@apollo/client';
 import { Plus, RefreshCw } from 'lucide-react';
 import {
   DetailPageTemplate,
@@ -17,15 +18,13 @@ import { useI18n } from '@i18n/I18nProvider';
 import { useHasPermission } from '@rbac/useHasPermission';
 import { PERMISSIONS } from '@rbac/permissions';
 import { LockedScreen } from '@screens/common/LockedScreen';
-
-interface DepartmentRow {
-  id: string;
-  departmentCode: string;
-  departmentName: string;
-  parentDepartmentName: string | null;
-  employeeCount: number;
-  isExternalSync: boolean;
-}
+import {
+  DEPARTMENTS_QUERY,
+  CREATE_DEPARTMENT_MUTATION,
+  type DepartmentsData,
+  type DepartmentRow,
+} from '@graphql/queries/department';
+import { useCorporateId } from '@shared/hooks/useCorporateId';
 
 export function DepartmentListScreen() {
   const { t } = useI18n();
@@ -33,9 +32,14 @@ export function DepartmentListScreen() {
   const canRead = useHasPermission(PERMISSIONS.DEPARTMENT_READ);
   const canWrite = useHasPermission(PERMISSIONS.DEPARTMENT_WRITE);
 
-  // TODO: useQuery(DEPARTMENT_LIST_QUERY, { variables: { corporateId } })
-  const departments: DepartmentRow[] = [];
-  const loading = false;
+  const corporateId = useCorporateId();
+  const { data, loading, refetch } = useQuery<DepartmentsData>(DEPARTMENTS_QUERY, {
+    variables: { corporateId },
+    skip: !corporateId,
+  });
+  const departments: DepartmentRow[] = data?.mealDepartments?.success?.data ?? [];
+
+  const [create, { loading: creating }] = useMutation(CREATE_DEPARTMENT_MUTATION);
 
   const [showForm, setShowForm] = useState(false);
   const [code, setCode] = useState('');
@@ -78,10 +82,29 @@ export function DepartmentListScreen() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    // TODO: Call mealDepartmentCreate mutation
-    setCode('');
-    setName('');
-    setShowForm(false);
+    try {
+      const result = await create({
+        variables: {
+          input: {
+            corporateId,
+            departmentCode: code,
+            departmentName: name,
+            parentDepartmentId: null,
+          },
+        },
+      });
+      const gqlError = result.data?.mealDepartmentCreate?.error;
+      if (gqlError) {
+        setError(gqlError.message);
+        return;
+      }
+      await refetch();
+      setCode('');
+      setName('');
+      setShowForm(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '부서 생성에 실패했습니다.');
+    }
   };
 
   return (
@@ -92,7 +115,7 @@ export function DepartmentListScreen() {
         description: '회사 부서 조직도를 관리합니다.',
         actions: (
           <div className="flex gap-2">
-            <Button variant="ghost" startIcon={<RefreshCw size={14} />}>{t('common.refresh')}</Button>
+            <Button variant="ghost" startIcon={<RefreshCw size={14} />} onClick={() => refetch()}>{t('common.refresh')}</Button>
             {canWrite && (
               <Button variant="primary" startIcon={<Plus size={14} />} onClick={() => setShowForm((v) => !v)}>
                 {t('action.addDepartment')}
@@ -120,7 +143,7 @@ export function DepartmentListScreen() {
               </div>
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="ghost" onClick={() => setShowForm(false)}>{t('common.cancel')}</Button>
-                <Button type="submit" variant="primary">{t('common.create')}</Button>
+                <Button type="submit" variant="primary" disabled={creating}>{creating ? '생성 중...' : t('common.create')}</Button>
               </div>
             </form>
           </SectionCard>

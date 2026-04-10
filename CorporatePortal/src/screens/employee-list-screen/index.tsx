@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQuery, useMutation } from '@apollo/client';
 import { Plus, RefreshCw, Download } from 'lucide-react';
 import {
   DetailPageTemplate,
@@ -17,22 +18,17 @@ import { useI18n } from '@i18n/I18nProvider';
 import { useHasPermission } from '@rbac/useHasPermission';
 import { PERMISSIONS } from '@rbac/permissions';
 import { LockedScreen } from '@screens/common/LockedScreen';
+import {
+  EMPLOYEES_QUERY,
+  CREATE_EMPLOYEE_MUTATION,
+  type EmployeesData,
+  type EmployeeRow,
+} from '@graphql/queries/employee';
+import { DEPARTMENTS_QUERY, type DepartmentsData } from '@graphql/queries/department';
+import { useCorporateId } from '@shared/hooks/useCorporateId';
 
 type WalletStatus = 'ACTIVE' | 'SUSPENDED' | 'FROZEN' | 'CLOSED';
 type EmploymentType = 'FULL_TIME' | 'CONTRACT' | 'DISPATCH' | 'CONTRACTOR_AGENCY';
-
-interface EmployeeRow {
-  id: string;
-  employeeCode: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  departmentId: string;
-  departmentName: string;
-  employmentType: EmploymentType;
-  walletStatus: WalletStatus;
-  badgeRfid: string | null;
-}
 
 const EMPLOYMENT_TYPE_LABEL: Record<EmploymentType, string> = {
   FULL_TIME: '정규직',
@@ -60,9 +56,21 @@ export function EmployeeListScreen() {
   const canRead = useHasPermission(PERMISSIONS.EMPLOYEE_READ);
   const canWrite = useHasPermission(PERMISSIONS.EMPLOYEE_WRITE);
 
-  // TODO: useQuery(EMPLOYEE_LIST_QUERY, { variables: { corporateId } })
-  const employees: EmployeeRow[] = [];
-  const loading = false;
+  const corporateId = useCorporateId();
+  const { data, loading, refetch } = useQuery<EmployeesData>(EMPLOYEES_QUERY, {
+    variables: { corporateId, skip: 0, take: 50 },
+    skip: !corporateId,
+  });
+  const employees: EmployeeRow[] = data?.mealEmployees?.success?.data ?? [];
+
+  const [create, { loading: creating }] = useMutation(CREATE_EMPLOYEE_MUTATION);
+
+  // Fetch departments for the dropdown
+  const { data: deptData } = useQuery<DepartmentsData>(DEPARTMENTS_QUERY, {
+    variables: { corporateId },
+    skip: !corporateId,
+  });
+  const departments = deptData?.mealDepartments?.success?.data ?? [];
 
   const [showForm, setShowForm] = useState(false);
   const [employeeCode, setEmployeeCode] = useState('');
@@ -72,9 +80,6 @@ export function EmployeeListScreen() {
   const [departmentId, setDepartmentId] = useState('');
   const [employmentType, setEmploymentType] = useState<EmploymentType>('FULL_TIME');
   const [error, setError] = useState<string | null>(null);
-
-  // TODO: useQuery(DEPARTMENT_LIST_QUERY) for department dropdown
-  const departments: { id: string; departmentName: string }[] = [];
 
   if (!canRead) return <LockedScreen />;
 
@@ -94,7 +99,7 @@ export function EmployeeListScreen() {
       key: 'departmentName',
       header: '부서',
       width: '160px',
-      render: (r) => <span className="text-fg-muted">{r.departmentName}</span>,
+      render: (r) => <span className="text-fg-muted">{r.departmentName ?? '—'}</span>,
     },
     {
       key: 'employmentType',
@@ -102,7 +107,7 @@ export function EmployeeListScreen() {
       width: '120px',
       render: (r) => (
         <Badge tone="neutral" size="sm">
-          {EMPLOYMENT_TYPE_LABEL[r.employmentType]}
+          {r.employmentType ? (EMPLOYMENT_TYPE_LABEL[r.employmentType as EmploymentType] ?? r.employmentType) : '—'}
         </Badge>
       ),
     },
@@ -111,8 +116,8 @@ export function EmployeeListScreen() {
       header: '지갑상태',
       width: '120px',
       render: (r) => (
-        <Badge tone={WALLET_STATUS_TONE[r.walletStatus]} size="sm" startDot>
-          {r.walletStatus}
+        <Badge tone={r.walletStatus ? (WALLET_STATUS_TONE[r.walletStatus as WalletStatus] ?? 'neutral') : 'neutral'} size="sm" startDot>
+          {r.walletStatus ?? '—'}
         </Badge>
       ),
     },
@@ -127,22 +132,40 @@ export function EmployeeListScreen() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    // TODO: Call employeeCreate mutation
-    setEmployeeCode('');
-    setFullName('');
-    setEmail('');
-    setPhone('');
-    setDepartmentId('');
-    setEmploymentType('FULL_TIME');
-    setShowForm(false);
+    try {
+      const result = await create({
+        variables: {
+          input: {
+            corporateId,
+            employeeCode,
+            fullName,
+            email,
+            phone: phone || null,
+            departmentId,
+            employmentType,
+          },
+        },
+      });
+      const gqlError = result.data?.mealEmployeeCreate?.error;
+      if (gqlError) {
+        setError(gqlError.message);
+        return;
+      }
+      await refetch();
+      setEmployeeCode('');
+      setFullName('');
+      setEmail('');
+      setPhone('');
+      setDepartmentId('');
+      setEmploymentType('FULL_TIME');
+      setShowForm(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '임직원 생성에 실패했습니다.');
+    }
   };
 
   const handleExportCsv = () => {
     // TODO: Implement CSV export
-  };
-
-  const handleRefresh = () => {
-    // TODO: refetch query
   };
 
   return (
@@ -153,7 +176,7 @@ export function EmployeeListScreen() {
         description: '임직원 목록을 관리합니다.',
         actions: (
           <div className="flex gap-2">
-            <Button variant="ghost" startIcon={<RefreshCw size={14} />} onClick={handleRefresh}>
+            <Button variant="ghost" startIcon={<RefreshCw size={14} />} onClick={() => refetch()}>
               {t('common.refresh')}
             </Button>
             <Button variant="ghost" startIcon={<Download size={14} />} onClick={handleExportCsv}>
@@ -230,8 +253,8 @@ export function EmployeeListScreen() {
                 <Button type="button" variant="ghost" onClick={() => setShowForm(false)}>
                   {t('common.cancel')}
                 </Button>
-                <Button type="submit" variant="primary">
-                  {t('common.create')}
+                <Button type="submit" variant="primary" disabled={creating}>
+                  {creating ? '생성 중...' : t('common.create')}
                 </Button>
               </div>
             </form>
