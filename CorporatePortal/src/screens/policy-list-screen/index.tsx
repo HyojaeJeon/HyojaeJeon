@@ -31,10 +31,10 @@ interface PolicyRow {
   effectiveTo: string;
 }
 
-const STATUS_TONE: Record<PolicyStatus, 'success' | 'info' | 'warn' | 'neutral'> = {
+const STATUS_TONE: Record<PolicyStatus, 'success' | 'info' | 'warning' | 'neutral'> = {
   ACTIVE: 'success',
   SCHEDULED: 'info',
-  PAUSED: 'warn',
+  PAUSED: 'warning',
   EXPIRED: 'neutral',
   DRAFT: 'neutral',
 };

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { RefreshCw, AlertTriangle, FileText } from 'lucide-react';
 import {
@@ -50,11 +50,11 @@ const STATUS_LABEL: Record<InvoiceStatus, string> = {
   VOIDED: '무효',
 };
 
-const STATUS_TONE: Record<InvoiceStatus, 'neutral' | 'warn' | 'brand' | 'success' | 'danger'> = {
+const STATUS_TONE: Record<InvoiceStatus, 'neutral' | 'warning' | 'brand' | 'success' | 'danger'> = {
   DRAFT: 'neutral',
-  DISPUTED: 'warn',
+  DISPUTED: 'warning',
   REQUESTED: 'brand',
-  SUBMITTING: 'warn',
+  SUBMITTING: 'warning',
   ACCEPTED: 'success',
   REJECTED: 'danger',
   VOIDED: 'neutral',
@@ -260,7 +260,7 @@ export function InvoiceListScreen() {
       )}
 
       {/* Filters */}
-      <SectionCard title="필터" padding="compact">
+      <SectionCard title="필터" padding="sm">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
             <label className="text-[12px] font-semibold text-fg-muted">연도</label>

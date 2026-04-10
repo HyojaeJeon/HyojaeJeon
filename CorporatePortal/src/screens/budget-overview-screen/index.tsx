@@ -22,7 +22,8 @@ export function BudgetOverviewScreen() {
 
   // TODO: useQuery for corporate funding policy + budget overview
   const loading = true;
-  const fundingModel: FundingModel = 'UNASSIGNED'; // will be replaced by query data
+  // TODO: Replace with actual query data — mealFundingAccountByCorporate(corporateId)
+  const fundingModel = 'UNASSIGNED' as FundingModel;
 
   const renderFundingCard = () => {
     switch (fundingModel) {

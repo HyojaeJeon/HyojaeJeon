@@ -74,7 +74,7 @@ export function EmployeeDetailScreen() {
 
   // TODO: useQuery(EMPLOYEE_DETAIL_QUERY, { variables: { employeeId: params.id } })
   const loading = false;
-  const employee: EmployeeDetail | null = null;
+  const employee = null as EmployeeDetail | null;
 
   const handleEdit = () => {
     // TODO: Open edit modal or navigate to edit page
@@ -128,7 +128,7 @@ export function EmployeeDetailScreen() {
         {
           label: '지갑 상태',
           value: employee?.walletStatus ?? '—',
-          tone: employee ? (WALLET_STATUS_TONE[employee.walletStatus] === 'warning' ? 'warn' : WALLET_STATUS_TONE[employee.walletStatus]) as 'success' | 'warn' | 'info' | 'neutral' | 'brand' : 'neutral',
+          tone: employee ? WALLET_STATUS_TONE[employee.walletStatus] : 'neutral',
         },
         {
           label: '사용 가능 금액',
@@ -166,7 +166,7 @@ export function EmployeeDetailScreen() {
       {activeTab === 'overview' && (
         <>
           {/* Profile information */}
-          <SectionCard title="기본 정보" className="mb-3">
+          <SectionCard title="기본 정보">
             {loading || !employee ? (
               <div className="space-y-3">
                 {[1, 2, 3, 4].map((i) => (
