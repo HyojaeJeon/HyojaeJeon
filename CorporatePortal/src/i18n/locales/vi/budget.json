@@ -1,36 +1,36 @@
 {
   "page": {
     "title": "Quản lý ngân sách",
-    "description": "Xem trạng thái cấp vốn và tình hình sử dụng điểm của toàn công ty"
+    "description": "Xem trạng thái funding và tình hình tiêu thụ điểm của toàn công ty"
   },
   "funding": {
     "title": "Trạng thái Funding Policy",
     "unassigned": {
-      "title": "Funding Policy chưa được cấp",
-      "description": "Nhà cung cấp nền tảng (SuperAdmin) sẽ đánh giá tín dụng của công ty bạn và cấp chính sách Prepaid hoặc Credit.",
+      "title": "Chưa được cấp Funding Policy",
+      "description": "Nhà cung cấp nền tảng (SuperAdmin) sẽ đánh giá tín dụng của công ty bạn rồi cấp chính sách Prepaid hoặc Credit.",
       "blocked": "Ở trạng thái này, không thể nạp điểm cho nhân viên.",
-      "allowedNote": "Vẫn có thể đăng ký nhân viên / thiết lập chính sách / cấu hình nhà cung cấp cho phép."
+      "allowedNote": "Vẫn có thể đăng ký nhân viên / thiết lập chính sách / cấu hình cửa hàng cho phép."
     },
     "prepaid": {
-      "title": "Prepaid Deposit (Phương thức ký quỹ trả trước)",
+      "title": "Ký quỹ trả trước (Prepaid Deposit)",
       "escrow": "Số dư ký quỹ",
-      "monthlyBudget": "Ngân sách hàng tháng (khuyến nghị)",
-      "used": "Đã sử dụng",
+      "monthlyBudget": "Ngân sách tháng (khuyến nghị)",
+      "used": "Đang sử dụng",
       "remaining": "Còn lại (có thể nạp)",
       "bankInfo": "Hướng dẫn nộp tiền qua ngân hàng",
-      "recordDeposit": "Ghi nhận nộp tiền"
+      "recordDeposit": "Ghi nhận đã nộp tiền"
     },
     "credit": {
-      "title": "Phương thức thanh toán sau",
+      "title": "Hậu thanh toán (Credit)",
       "creditLimit": "Hạn mức tín dụng",
       "thisMonth": "Sử dụng tháng này",
-      "available": "Hạn mức còn lại",
+      "available": "Còn trống trong hạn mức",
       "nextSettlement": "Ngày quyết toán tiếp theo",
       "requestUpgrade": "Yêu cầu nâng hạn mức"
     }
   },
   "summary": {
-    "title": "Tóm tắt sử dụng điểm tháng này",
+    "title": "Tóm tắt tiêu thụ điểm tháng này",
     "totalBudget": "Tổng ngân sách",
     "charged": "Điểm đã nạp",
     "used": "Đã sử dụng thực tế",
@@ -38,6 +38,6 @@
     "expiring": "Sắp tự động hủy"
   },
   "loadHistory": {
-    "title": "Lịch sử nạp tiền"
+    "title": "Lịch sử nạp điểm"
   }
 }

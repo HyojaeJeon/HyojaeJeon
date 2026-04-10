@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useQuery } from '@apollo/client';
 import { Plus, RefreshCw } from 'lucide-react';
 import {
   DetailPageTemplate,
@@ -16,20 +17,14 @@ import { useHasPermission } from '@rbac/useHasPermission';
 import { PERMISSIONS } from '@rbac/permissions';
 import { LockedScreen } from '@screens/common/LockedScreen';
 import { formatCurrency } from '@shared/utils/format';
+import {
+  POLICIES_QUERY,
+  type PoliciesData,
+  type PolicyRow,
+} from '@graphql/queries/policy';
+import { useCorporateId } from '@shared/hooks/useCorporateId';
 
 type PolicyStatus = 'ACTIVE' | 'SCHEDULED' | 'PAUSED' | 'EXPIRED' | 'DRAFT';
-
-interface PolicyRow {
-  id: string;
-  policyCode: string;
-  policyName: string;
-  status: PolicyStatus;
-  maxPerTransactionVnd: number;
-  dailyLimitVnd: number;
-  allowSplitPayment: boolean;
-  effectiveFrom: string;
-  effectiveTo: string;
-}
 
 const STATUS_TONE: Record<PolicyStatus, 'success' | 'info' | 'warning' | 'neutral'> = {
   ACTIVE: 'success',
@@ -45,9 +40,12 @@ export function PolicyListScreen() {
   const canRead = useHasPermission(PERMISSIONS.POLICY_READ);
   const canWrite = useHasPermission(PERMISSIONS.POLICY_WRITE);
 
-  // TODO: useQuery(POLICY_LIST_QUERY, { variables: { corporateId } })
-  const policies: PolicyRow[] = [];
-  const loading = false;
+  const corporateId = useCorporateId();
+  const { data, loading, refetch } = useQuery<PoliciesData>(POLICIES_QUERY, {
+    variables: { corporateId },
+    skip: !corporateId,
+  });
+  const policies: PolicyRow[] = data?.mealPoliciesByCorporate?.success?.data ?? [];
 
   if (!canRead) return <LockedScreen />;
 
@@ -68,7 +66,7 @@ export function PolicyListScreen() {
       header: '상태',
       width: '110px',
       render: (r) => (
-        <Badge tone={STATUS_TONE[r.status]} size="sm">
+        <Badge tone={STATUS_TONE[r.status as PolicyStatus] ?? 'neutral'} size="sm">
           {r.status}
         </Badge>
       ),
@@ -78,7 +76,9 @@ export function PolicyListScreen() {
       header: '1회한도',
       width: '140px',
       render: (r) => (
-        <span className="num font-semibold">{formatCurrency(r.maxPerTransactionVnd)}</span>
+        <span className="num font-semibold">
+          {r.maxPerTransactionVnd ? formatCurrency(r.maxPerTransactionVnd) : '—'}
+        </span>
       ),
     },
     {
@@ -86,7 +86,9 @@ export function PolicyListScreen() {
       header: '일일한도',
       width: '140px',
       render: (r) => (
-        <span className="num font-semibold">{formatCurrency(r.dailyLimitVnd)}</span>
+        <span className="num font-semibold">
+          {r.dailyLimitVnd ? formatCurrency(r.dailyLimitVnd) : '—'}
+        </span>
       ),
     },
     {
@@ -105,7 +107,7 @@ export function PolicyListScreen() {
       width: '200px',
       render: (r) => (
         <span className="text-[12px] text-fg-muted">
-          {r.effectiveFrom} ~ {r.effectiveTo}
+          {r.effectiveFrom} ~ {r.effectiveTo ?? '무기한'}
         </span>
       ),
     },
@@ -119,7 +121,7 @@ export function PolicyListScreen() {
         description: '식대 정책을 조회하고 관리합니다.',
         actions: (
           <div className="flex gap-2">
-            <Button variant="ghost" startIcon={<RefreshCw size={14} />}>
+            <Button variant="ghost" startIcon={<RefreshCw size={14} />} onClick={() => refetch()}>
               {t('common.refresh')}
             </Button>
             {canWrite && (

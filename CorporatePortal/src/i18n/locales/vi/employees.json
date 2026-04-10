@@ -1,7 +1,7 @@
 {
   "page": {
     "title": "Nhân viên",
-    "description": "Quản lý danh sách nhân viên theo phòng ban và ánh xạ thẻ nhân viên"
+    "description": "Quản lý danh sách nhân viên theo phòng ban và liên kết thẻ"
   },
   "table": {
     "code": "Mã nhân viên",
@@ -33,8 +33,8 @@
   "action": {
     "terminate": "Xử lý nghỉ việc",
     "suspend": "Tạm ngưng",
-    "resume": "Kích hoạt lại",
-    "assignBadge": "Gán thẻ nhân viên"
+    "resume": "Mở lại",
+    "assignBadge": "Liên kết thẻ"
   },
   "empty": "Chưa có nhân viên nào được đăng ký.",
   "syncBanner": "Nhân viên này đang được đồng bộ từ HRIS (Base.vn). Một số trường chỉ có thể chỉnh sửa trên hệ thống bên ngoài.",
@@ -43,7 +43,7 @@
     "walletClose": "Trạng thái ví: ACTIVE → CLOSED",
     "pointExpire": "Toàn bộ điểm hỗ trợ công ty sẽ tự động hủy",
     "badgeInvalidate": "Thẻ (RFID) bị vô hiệu hóa → chặn tại thiết bị đầu cuối",
-    "policyRelease": "Hủy bỏ các chính sách đã áp dụng",
+    "policyRelease": "Gỡ bỏ các chính sách đã áp dụng",
     "irreversible": "Thao tác này không thể hoàn tác."
   }
 }

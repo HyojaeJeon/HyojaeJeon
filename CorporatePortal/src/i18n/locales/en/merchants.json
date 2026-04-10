@@ -7,7 +7,7 @@
     "name": "Restaurant Name",
     "category": "Category",
     "loopType": "Payment Method",
-    "monthlyCount": "This Month's Usage",
+    "monthlyCount": "This Month's Visits",
     "monthlyAmount": "This Month's Amount",
     "allowed": "Allowed"
   },
@@ -19,6 +19,6 @@
     "convenience": "Convenience Store",
     "delivery": "Delivery"
   },
-  "empty": "No partner restaurants found.",
+  "empty": "No partner restaurants available.",
   "allowToggle": "Toggle Allowed Status"
 }

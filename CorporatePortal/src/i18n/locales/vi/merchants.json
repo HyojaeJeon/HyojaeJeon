@@ -15,10 +15,10 @@
     "all": "Tất cả",
     "korean": "Món Hàn",
     "vietnamese": "Món Việt",
-    "cafe": "Quán cà phê",
+    "cafe": "Cà phê",
     "convenience": "Cửa hàng tiện lợi",
     "delivery": "Giao hàng"
   },
-  "empty": "Không có nhà hàng liên kết nào.",
+  "empty": "Chưa có nhà hàng đối tác nào.",
   "allowToggle": "Thay đổi trạng thái cho phép"
 }

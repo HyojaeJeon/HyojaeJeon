@@ -5,13 +5,13 @@
   },
   "table": {
     "period": "Kỳ",
-    "refId": "Mã tham chiếu",
+    "refId": "Số tham chiếu",
     "totalAmount": "Tổng số tiền",
     "vat": "VAT",
     "lineCount": "Số dòng",
     "status": "Trạng thái",
     "reviewDeadline": "Hạn xem xét",
-    "gdtReceipt": "Mã tiếp nhận GDT"
+    "gdtReceipt": "Số tiếp nhận GDT"
   },
   "status": {
     "DRAFT": "Chờ xem xét",

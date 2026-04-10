@@ -1,22 +1,22 @@
 {
   "page": {
     "title": "Budget Management",
-    "description": "View the company-wide funding status and point consumption overview"
+    "description": "View company-wide funding status and point consumption overview"
   },
   "funding": {
     "title": "Funding Policy Status",
     "unassigned": {
       "title": "Funding Policy has not been assigned yet",
       "description": "The platform provider (SuperAdmin) will evaluate your company's creditworthiness and assign a Prepaid or Credit policy.",
-      "blocked": "Point top-ups for employees are not available in this state.",
-      "allowedNote": "Employee registration / policy setup / merchant allowance configuration is still available."
+      "blocked": "In this state, employee point top-ups are not available.",
+      "allowedNote": "Employee registration / policy configuration / merchant allowance settings are still available."
     },
     "prepaid": {
       "title": "Prepaid Deposit",
       "escrow": "Escrow Balance",
       "monthlyBudget": "Monthly Budget (Recommended)",
       "used": "In Use",
-      "remaining": "Remaining (Available to Load)",
+      "remaining": "Remaining (Available for Top-up)",
       "bankInfo": "Bank Deposit Instructions",
       "recordDeposit": "Record Deposit"
     },
@@ -24,7 +24,7 @@
       "title": "Post-Settlement (Credit)",
       "creditLimit": "Credit Limit",
       "thisMonth": "This Month's Usage",
-      "available": "Available Credit",
+      "available": "Available Within Limit",
       "nextSettlement": "Next Settlement Date",
       "requestUpgrade": "Request Limit Increase"
     }
@@ -32,12 +32,12 @@
   "summary": {
     "title": "This Month's Point Consumption Summary",
     "totalBudget": "Total Budget",
-    "charged": "Points Loaded",
+    "charged": "Points Charged",
     "used": "Actual Usage",
     "unused": "Unused",
-    "expiring": "Scheduled for Auto-Expiry"
+    "expiring": "Scheduled for Expiration"
   },
   "loadHistory": {
-    "title": "Load History"
+    "title": "Top-up History"
   }
 }

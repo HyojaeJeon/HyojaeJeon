@@ -1,13 +1,13 @@
 {
   "page": {
     "title": "Chính sách suất ăn",
-    "description": "Quản lý chính sách kết hợp phòng ban/chức vụ/khung giờ/hạn mức"
+    "description": "Quản lý chính sách bằng cách kết hợp phòng ban / chức vụ / khung giờ / hạn mức"
   },
   "table": {
     "code": "Mã chính sách",
     "name": "Tên chính sách",
     "status": "Trạng thái",
-    "maxPerTxn": "Hạn mức/lần",
+    "maxPerTxn": "Hạn mức mỗi lần",
     "dailyLimit": "Hạn mức hàng ngày",
     "split": "Cho phép Split",
     "effectiveRange": "Thời hạn hiệu lực"
@@ -17,9 +17,9 @@
     "tab2": "Khung giờ",
     "tab3": "Hạn mức",
     "tab4": "Đối tượng áp dụng",
-    "tab5": "Nhà cung cấp/Danh mục",
-    "priority": "Mức ưu tiên",
-    "priorityHint": "Khi xung đột, số thấp hơn được ưu tiên. Mặc định: 100",
+    "tab5": "Cửa hàng / Danh mục",
+    "priority": "Độ ưu tiên",
+    "priorityHint": "Khi xung đột, số thấp hơn sẽ được ưu tiên. Mặc định: 100",
     "splitPayment": "Cho phép Split Payment",
     "splitPaymentHint": "Tự động bù từ nạp cá nhân khi điểm hỗ trợ công ty không đủ",
     "carryover": "Cho phép chuyển tiếp",

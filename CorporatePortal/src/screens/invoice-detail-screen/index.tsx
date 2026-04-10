@@ -1,6 +1,8 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { useQuery, useMutation } from '@apollo/client';
 import {
   ArrowLeft,
   Send,
@@ -20,6 +22,7 @@ import {
   Button,
   Badge,
   Skeleton,
+  Input,
   type DataTableColumn,
   DataTable,
 } from '@platform/shared-ui';
@@ -27,6 +30,15 @@ import { useI18n } from '@i18n/I18nProvider';
 import { useHasPermission } from '@rbac/useHasPermission';
 import { PERMISSIONS } from '@rbac/permissions';
 import { LockedScreen } from '@screens/common/LockedScreen';
+import { formatCurrency } from '@shared/utils/format';
+import {
+  INVOICE_DETAIL_QUERY,
+  REQUEST_ISSUANCE_MUTATION,
+  DISPUTE_MUTATION,
+  type InvoiceDetailData,
+  type InvoiceDetail,
+  type InvoiceLine,
+} from '@graphql/queries/invoice';
 
 type InvoiceStatus =
   | 'DRAFT'
@@ -57,22 +69,6 @@ const STATUS_TONE: Record<InvoiceStatus, 'neutral' | 'warning' | 'brand' | 'succ
   VOIDED: 'neutral',
 };
 
-interface TimelineEvent {
-  id: string;
-  eventType: 'CREATED' | 'REQUESTED' | 'DISPUTED' | 'SUBMITTED' | 'ACCEPTED' | 'REJECTED' | 'VOIDED' | 'COMMENT';
-  actorName: string;
-  description: string;
-  occurredAt: string;
-}
-
-interface LineItem {
-  id: string;
-  description: string;
-  quantity: number;
-  unitPriceVnd: number;
-  totalVnd: number;
-}
-
 function computeDDay(deadline: string | null): string | null {
   if (!deadline) return null;
   const now = new Date();
@@ -84,51 +80,75 @@ function computeDDay(deadline: string | null): string | null {
   return `D-${diffDays}`;
 }
 
-function getTimelineIcon(eventType: TimelineEvent['eventType']) {
-  switch (eventType) {
-    case 'CREATED':
-      return <FileText size={16} className="text-fg-muted" />;
-    case 'REQUESTED':
-      return <Send size={16} style={{ color: 'var(--brand)' }} />;
-    case 'DISPUTED':
-      return <MessageSquare size={16} style={{ color: 'var(--warn)' }} />;
-    case 'SUBMITTED':
-      return <Loader2 size={16} style={{ color: 'var(--brand)' }} />;
-    case 'ACCEPTED':
-      return <CheckCircle2 size={16} style={{ color: 'var(--success)' }} />;
-    case 'REJECTED':
-      return <XCircle size={16} className="text-danger" />;
-    case 'VOIDED':
-      return <Ban size={16} className="text-fg-muted" />;
-    case 'COMMENT':
-      return <MessageSquare size={16} className="text-fg-muted" />;
-  }
+function formatPeriod(start: string, end: string): string {
+  const s = new Date(start);
+  const e = new Date(end);
+  const fmt = (d: Date) =>
+    `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+  return `${fmt(s)} ~ ${fmt(e)}`;
 }
 
 export function InvoiceDetailScreen() {
   const { t } = useI18n();
   const router = useRouter();
+  const params = useParams<{ id: string }>();
   const canRead = useHasPermission(PERMISSIONS.INVOICE_READ);
   const canRequest = useHasPermission(PERMISSIONS.INVOICE_REQUEST);
   const canDispute = useHasPermission(PERMISSIONS.INVOICE_DISPUTE);
 
+  const [disputeReason, setDisputeReason] = useState('');
+  const [showDisputeForm, setShowDisputeForm] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  const { data, loading, refetch } = useQuery<InvoiceDetailData>(INVOICE_DETAIL_QUERY, {
+    variables: { id: params?.id },
+    skip: !params?.id,
+  });
+  const invoice = (data?.eInvoice?.success?.data ?? null) as InvoiceDetail | null;
+
+  const [requestIssuance, { loading: requesting }] = useMutation(REQUEST_ISSUANCE_MUTATION);
+  const [dispute, { loading: disputing }] = useMutation(DISPUTE_MUTATION);
+
   if (!canRead) return <LockedScreen />;
 
-  // TODO: useQuery for invoiceDetail(params.id) - replace these skeleton placeholders
-  const loading = true;
-  const status = 'DRAFT' as InvoiceStatus;
-  const reviewDeadline: string | null = null;
-  const timelineEvents: TimelineEvent[] = [];
-  const lineItems: LineItem[] = [];
+  const status = (invoice?.status ?? 'DRAFT') as InvoiceStatus;
+  const dday = computeDDay(invoice?.reviewDueAt ?? null);
+  const lines: InvoiceLine[] = invoice?.lines ?? [];
 
-  const dday = computeDDay(reviewDeadline);
-
-  const handleRequestIssuance = () => {
-    // TODO: mutation invoiceRequestIssuance
+  const handleRequestIssuance = async () => {
+    setActionError(null);
+    try {
+      const result = await requestIssuance({ variables: { id: params?.id } });
+      const gqlError = result.data?.eInvoiceRequestIssuance?.error;
+      if (gqlError) {
+        setActionError(gqlError.message);
+        return;
+      }
+      await refetch();
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : '발행 요청에 실패했습니다.');
+    }
   };
 
-  const handleDispute = () => {
-    // TODO: mutation invoiceDispute
+  const handleDispute = async () => {
+    setActionError(null);
+    if (!disputeReason.trim()) {
+      setActionError('이의 제기 사유를 입력해주세요.');
+      return;
+    }
+    try {
+      const result = await dispute({ variables: { id: params?.id, reason: disputeReason } });
+      const gqlError = result.data?.eInvoiceDispute?.error;
+      if (gqlError) {
+        setActionError(gqlError.message);
+        return;
+      }
+      setDisputeReason('');
+      setShowDisputeForm(false);
+      await refetch();
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : '이의 제기에 실패했습니다.');
+    }
   };
 
   const handleDownloadPdf = () => {
@@ -144,33 +164,57 @@ export function InvoiceDetailScreen() {
       case 'DRAFT':
         return (
           <div
-            className="sticky top-0 z-10 flex items-center gap-4 rounded-xl border-2 px-5 py-4"
+            className="sticky top-0 z-10 flex flex-col gap-3 rounded-xl border-2 px-5 py-4"
             style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}
           >
-            <Clock size={24} className="text-fg-muted" />
-            <div className="flex-1">
-              <p className="text-sm font-bold text-fg">검토 대기 중</p>
-              <p className="text-[12px] text-fg-muted">
-                마감일 전에 내용을 확인하고 발행 요청하세요.
-              </p>
-            </div>
-            {dday && (
-              <span className="rounded-full bg-[var(--surface-2)] px-3 py-1 text-[13px] font-bold text-fg">
-                {dday}
-              </span>
+            {actionError && (
+              <div className="rounded-md p-2 text-[12px] text-danger" style={{ background: 'var(--danger-soft)' }}>
+                {actionError}
+              </div>
             )}
-            <div className="flex gap-2">
-              {canDispute && (
-                <Button variant="ghost" startIcon={<MessageSquare size={14} />} onClick={handleDispute}>
-                  이의 제기
-                </Button>
+            <div className="flex items-center gap-4">
+              <Clock size={24} className="text-fg-muted" />
+              <div className="flex-1">
+                <p className="text-sm font-bold text-fg">검토 대기 중</p>
+                <p className="text-[12px] text-fg-muted">
+                  마감일 전에 내용을 확인하고 발행 요청하세요.
+                </p>
+              </div>
+              {dday && (
+                <span className="rounded-full bg-[var(--surface-2)] px-3 py-1 text-[13px] font-bold text-fg">
+                  {dday}
+                </span>
               )}
-              {canRequest && (
-                <Button variant="primary" startIcon={<Send size={14} />} onClick={handleRequestIssuance}>
-                  발행 요청
-                </Button>
-              )}
+              <div className="flex gap-2">
+                {canDispute && (
+                  <Button variant="ghost" startIcon={<MessageSquare size={14} />} onClick={() => setShowDisputeForm((v) => !v)}>
+                    이의 제기
+                  </Button>
+                )}
+                {canRequest && (
+                  <Button variant="primary" startIcon={<Send size={14} />} onClick={handleRequestIssuance} disabled={requesting}>
+                    {requesting ? '요청 중...' : '발행 요청'}
+                  </Button>
+                )}
+              </div>
             </div>
+            {showDisputeForm && canDispute && (
+              <div className="flex items-end gap-3 border-t pt-3" style={{ borderColor: 'var(--border)' }}>
+                <div className="flex flex-1 flex-col gap-1.5">
+                  <label className="text-[12px] font-semibold text-fg-muted">이의 제기 사유 *</label>
+                  <Input
+                    value={disputeReason}
+                    onChange={(e) => setDisputeReason(e.target.value)}
+                    placeholder="이의 제기 사유를 입력하세요"
+                    required
+                  />
+                </div>
+                <Button variant="ghost" onClick={() => setShowDisputeForm(false)}>취소</Button>
+                <Button variant="primary" onClick={handleDispute} disabled={disputing}>
+                  {disputing ? '제출 중...' : '제출'}
+                </Button>
+              </div>
+            )}
           </div>
         );
 
@@ -188,6 +232,11 @@ export function InvoiceDetailScreen() {
               <p className="text-[12px] text-fg-muted">
                 이의 제기 내용이 SuperAdmin에게 전달되었습니다. 응답을 기다려주세요.
               </p>
+              {invoice?.disputeReason && (
+                <p className="mt-1 text-[12px] text-fg-muted">
+                  사유: {invoice.disputeReason}
+                </p>
+              )}
             </div>
           </div>
         );
@@ -266,6 +315,11 @@ export function InvoiceDetailScreen() {
               <p className="text-[12px] text-fg-muted">
                 세금계산서가 GDT에서 거부되었습니다. SuperAdmin에게 문의하세요.
               </p>
+              {invoice?.rejectionReason && (
+                <p className="mt-1 text-[12px] text-fg-muted">
+                  거부 사유: {invoice.rejectionReason}
+                </p>
+              )}
             </div>
             <Button variant="danger" size="sm" onClick={() => { /* TODO: open support link */ }}>
               SuperAdmin 문의
@@ -291,11 +345,16 @@ export function InvoiceDetailScreen() {
     }
   };
 
-  const lineItemCols: DataTableColumn<LineItem>[] = [
+  const lineItemCols: DataTableColumn<InvoiceLine>[] = [
     {
-      key: 'description',
+      key: 'itemName',
       header: '항목',
-      render: (r) => <span className="text-fg">{r.description}</span>,
+      render: (r) => (
+        <div>
+          <span className="text-fg">{r.itemName}</span>
+          {r.itemCode && <span className="ml-2 font-mono text-[11px] text-fg-subtle">{r.itemCode}</span>}
+        </div>
+      ),
     },
     {
       key: 'quantity',
@@ -307,13 +366,19 @@ export function InvoiceDetailScreen() {
       key: 'unitPrice',
       header: '단가',
       width: '140px',
-      render: (r) => <span className="num text-fg-muted">{r.unitPriceVnd.toLocaleString('vi-VN')} VND</span>,
+      render: (r) => <span className="num text-fg-muted">{formatCurrency(r.unitPriceVnd)}</span>,
+    },
+    {
+      key: 'vatAmount',
+      header: 'VAT',
+      width: '120px',
+      render: (r) => <span className="num text-fg-muted">{formatCurrency(r.vatAmountVnd)}</span>,
     },
     {
       key: 'total',
       header: '합계',
       width: '140px',
-      render: (r) => <span className="num font-semibold">{r.totalVnd.toLocaleString('vi-VN')} VND</span>,
+      render: (r) => <span className="num font-semibold">{formatCurrency(r.payAmountVnd)}</span>,
     },
   ];
 
@@ -322,9 +387,9 @@ export function InvoiceDetailScreen() {
       header={{
         breadcrumbs: [
           { label: t('nav.invoices'), href: '/invoices' },
-          { label: loading ? '...' : '인보이스 상세' },
+          { label: loading ? '...' : (invoice?.invoiceNo ?? '인보이스 상세') },
         ],
-        title: loading ? t('common.loading') : '인보이스 상세',
+        title: loading ? t('common.loading') : (invoice?.invoiceNo ?? '인보이스 상세'),
         actions: (
           <div className="flex gap-2">
             <Button
@@ -339,7 +404,7 @@ export function InvoiceDetailScreen() {
       }}
     >
       {/* Status Action Panel */}
-      <div className="mb-4">{renderStatusActionPanel()}</div>
+      {!loading && <div className="mb-4">{renderStatusActionPanel()}</div>}
 
       {/* Section 1: Invoice Header */}
       <SectionCard title="인보이스 정보">
@@ -356,11 +421,13 @@ export function InvoiceDetailScreen() {
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             <div className="flex flex-col gap-1">
               <span className="text-[12px] font-semibold text-fg-muted">참조번호</span>
-              <span className="font-mono text-sm text-fg">—</span>
+              <span className="font-mono text-sm text-fg">{invoice?.invoiceNo ?? '—'}</span>
             </div>
             <div className="flex flex-col gap-1">
               <span className="text-[12px] font-semibold text-fg-muted">기간</span>
-              <span className="text-sm text-fg">—</span>
+              <span className="text-sm text-fg">
+                {invoice ? formatPeriod(invoice.periodStart, invoice.periodEnd) : '—'}
+              </span>
             </div>
             <div className="flex flex-col gap-1">
               <span className="text-[12px] font-semibold text-fg-muted">상태</span>
@@ -370,23 +437,31 @@ export function InvoiceDetailScreen() {
             </div>
             <div className="flex flex-col gap-1">
               <span className="text-[12px] font-semibold text-fg-muted">생성일</span>
-              <span className="text-sm text-fg">—</span>
+              <span className="text-sm text-fg">
+                {invoice?.createdAt ? new Date(invoice.createdAt).toLocaleDateString('ko-KR') : '—'}
+              </span>
             </div>
             <div className="flex flex-col gap-1">
               <span className="text-[12px] font-semibold text-fg-muted">총금액</span>
-              <span className="text-sm font-semibold text-fg">—</span>
+              <span className="text-sm font-semibold text-fg">
+                {invoice ? formatCurrency(invoice.totPayableVnd) : '—'}
+              </span>
             </div>
             <div className="flex flex-col gap-1">
               <span className="text-[12px] font-semibold text-fg-muted">VAT</span>
-              <span className="text-sm text-fg">—</span>
+              <span className="text-sm text-fg">
+                {invoice ? formatCurrency(invoice.totVatAmountVnd) : '—'}
+              </span>
             </div>
             <div className="flex flex-col gap-1">
               <span className="text-[12px] font-semibold text-fg-muted">검토마감일</span>
-              <span className="text-sm text-fg">—</span>
+              <span className="text-sm text-fg">
+                {invoice?.reviewDueAt ? new Date(invoice.reviewDueAt).toLocaleDateString('ko-KR') : '—'}
+              </span>
             </div>
             <div className="flex flex-col gap-1">
               <span className="text-[12px] font-semibold text-fg-muted">GDT접수번호</span>
-              <span className="font-mono text-sm text-fg">—</span>
+              <span className="font-mono text-sm text-fg">{invoice?.gdtReceiptNo ?? '—'}</span>
             </div>
           </div>
         )}
@@ -408,27 +483,19 @@ export function InvoiceDetailScreen() {
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
               <div className="flex flex-col gap-1">
                 <span className="text-[12px] font-semibold text-fg-muted">사업자명</span>
-                <span className="text-sm text-fg">—</span>
+                <span className="text-sm text-fg">{invoice?.sellerCompanyName ?? '—'}</span>
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-[12px] font-semibold text-fg-muted">세금코드</span>
-                <span className="font-mono text-sm text-fg">—</span>
-              </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-[12px] font-semibold text-fg-muted">대표자</span>
-                <span className="text-sm text-fg">—</span>
+                <span className="font-mono text-sm text-fg">{invoice?.sellerTaxCode ?? '—'}</span>
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-[12px] font-semibold text-fg-muted">주소</span>
-                <span className="text-sm text-fg">—</span>
+                <span className="text-sm text-fg">{invoice?.sellerAddress ?? '—'}</span>
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-[12px] font-semibold text-fg-muted">이메일</span>
-                <span className="text-sm text-fg">—</span>
-              </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-[12px] font-semibold text-fg-muted">전화번호</span>
-                <span className="text-sm text-fg">—</span>
+                <span className="text-sm text-fg">{invoice?.sellerEmail ?? '—'}</span>
               </div>
             </div>
           )}
@@ -451,27 +518,19 @@ export function InvoiceDetailScreen() {
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
               <div className="flex flex-col gap-1">
                 <span className="text-[12px] font-semibold text-fg-muted">사업자명</span>
-                <span className="text-sm text-fg">—</span>
+                <span className="text-sm text-fg">{invoice?.buyerCompanyName ?? '—'}</span>
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-[12px] font-semibold text-fg-muted">세금코드</span>
-                <span className="font-mono text-sm text-fg">—</span>
-              </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-[12px] font-semibold text-fg-muted">대표자</span>
-                <span className="text-sm text-fg">—</span>
+                <span className="font-mono text-sm text-fg">{invoice?.buyerTaxCode ?? '—'}</span>
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-[12px] font-semibold text-fg-muted">주소</span>
-                <span className="text-sm text-fg">—</span>
+                <span className="text-sm text-fg">{invoice?.buyerAddress ?? '—'}</span>
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-[12px] font-semibold text-fg-muted">이메일</span>
-                <span className="text-sm text-fg">—</span>
-              </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-[12px] font-semibold text-fg-muted">전화번호</span>
-                <span className="text-sm text-fg">—</span>
+                <span className="text-sm text-fg">{invoice?.buyerEmail ?? '—'}</span>
               </div>
             </div>
           )}
@@ -480,7 +539,7 @@ export function InvoiceDetailScreen() {
 
       {/* Section 4: Line Items */}
       <div className="mt-4">
-        <SectionCard title="라인 항목" description="인보이스 세부 항목" padding="none">
+        <SectionCard title="라인 항목" description={`${lines.length}건`} padding="none">
           {loading ? (
             <div className="space-y-2 p-4">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -490,7 +549,7 @@ export function InvoiceDetailScreen() {
           ) : (
             <DataTable
               columns={lineItemCols}
-              rows={lineItems}
+              rows={lines}
               rowKey={(r) => r.id}
               compact
               emptyState="라인 항목이 없습니다."
@@ -499,57 +558,45 @@ export function InvoiceDetailScreen() {
         </SectionCard>
       </div>
 
-      {/* Section 5: Timeline */}
-      <div className="mt-4">
-        <SectionCard title="검토/발행 타임라인" description="인보이스 이벤트 이력">
-          {loading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <Skeleton width={32} height={32} radius={16} />
-                  <div className="flex-1 space-y-1">
-                    <Skeleton width={200} height={14} />
-                    <Skeleton width={300} height={12} />
-                  </div>
-                  <Skeleton width={100} height={12} />
-                </div>
-              ))}
-            </div>
-          ) : timelineEvents.length === 0 ? (
-            <p className="text-sm text-fg-muted">이벤트 이력이 없습니다.</p>
-          ) : (
+      {/* Section 5: Submission Logs */}
+      {invoice?.submissionLogs && invoice.submissionLogs.length > 0 && (
+        <div className="mt-4">
+          <SectionCard title="제출 이력" description={`${invoice.submissionLogs.length}건`}>
             <div className="space-y-0">
-              {timelineEvents.map((event, idx) => (
-                <div
-                  key={event.id}
-                  className="relative flex items-start gap-3 py-3"
-                >
-                  {/* Connector line */}
-                  {idx < timelineEvents.length - 1 && (
-                    <div
-                      className="absolute left-4 top-10 h-full w-px"
-                      style={{ background: 'var(--border)' }}
-                    />
-                  )}
+              {invoice.submissionLogs.map((log) => (
+                <div key={log.id} className="flex items-start gap-3 border-b py-3 last:border-b-0" style={{ borderColor: 'var(--border)' }}>
                   <div
                     className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
                     style={{ background: 'var(--surface-2)' }}
                   >
-                    {getTimelineIcon(event.eventType)}
+                    {log.status === 'SUCCESS' ? (
+                      <CheckCircle2 size={16} style={{ color: 'var(--success)' }} />
+                    ) : log.status === 'FAILED' ? (
+                      <XCircle size={16} className="text-danger" />
+                    ) : (
+                      <Loader2 size={16} className="text-fg-muted" />
+                    )}
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-fg">{event.actorName}</p>
-                    <p className="text-[12px] text-fg-muted">{event.description}</p>
+                    <p className="text-sm font-semibold text-fg">
+                      Attempt #{log.attempt} - {log.providerType} ({log.environment})
+                    </p>
+                    <p className="text-[12px] text-fg-muted">
+                      {log.status}{log.durationMs ? ` - ${log.durationMs}ms` : ''}
+                    </p>
+                    {log.errorMessage && (
+                      <p className="mt-0.5 text-[12px] text-danger">{log.errorCode}: {log.errorMessage}</p>
+                    )}
                   </div>
                   <span className="shrink-0 text-[11px] text-fg-subtle">
-                    {new Date(event.occurredAt).toLocaleString('ko-KR')}
+                    {new Date(log.createdAt).toLocaleString('ko-KR')}
                   </span>
                 </div>
               ))}
             </div>
-          )}
-        </SectionCard>
-      </div>
+          </SectionCard>
+        </div>
+      )}
     </DetailPageTemplate>
   );
 }

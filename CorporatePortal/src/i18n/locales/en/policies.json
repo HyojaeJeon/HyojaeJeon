@@ -1,7 +1,7 @@
 {
   "page": {
     "title": "Meal Allowance Policies",
-    "description": "Manage policies combining department/position/time slots/limits"
+    "description": "Manage policies by combining department / position / time slot / limit"
   },
   "table": {
     "code": "Policy Code",
@@ -17,13 +17,13 @@
     "tab2": "Time Slots",
     "tab3": "Limits",
     "tab4": "Target Scope",
-    "tab5": "Merchants/Categories",
+    "tab5": "Merchants / Categories",
     "priority": "Priority",
-    "priorityHint": "Lower number wins on conflict. Default: 100",
+    "priorityHint": "In case of conflict, the lower number wins. Default: 100",
     "splitPayment": "Allow Split Payment",
     "splitPaymentHint": "Automatically supplement from Personal Top-up Balance when Company Allowance Points are insufficient",
     "carryover": "Allow Carryover",
-    "carryoverHint": "Carry unused points over to the next month"
+    "carryoverHint": "Carry over unused points to the next month"
   },
   "status": {
     "DRAFT": "Draft",

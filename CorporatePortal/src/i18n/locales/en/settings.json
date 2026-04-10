@@ -6,7 +6,7 @@
     "title": "Company Information",
     "tab1": "Legal Information",
     "tab2": "Contact",
-    "tab3": "e-Invoice Settings",
+    "tab3": "E-Invoice Settings",
     "companyName": "Company Name",
     "taxCode": "Tax Code",
     "representativeName": "Representative Name",
@@ -43,7 +43,7 @@
     "newPassword": "New Password",
     "confirmPassword": "Confirm Password",
     "changePassword": "Change Password",
-    "language": "Language",
+    "language": "Language Settings",
     "timezone": "Timezone"
   }
 }

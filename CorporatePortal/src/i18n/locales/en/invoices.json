@@ -1,7 +1,7 @@
 {
   "page": {
-    "title": "Electronic Tax Invoices",
-    "description": "Review and request issuance of monthly consolidated electronic tax invoices"
+    "title": "E-Invoices",
+    "description": "Review and request issuance of monthly consolidated e-invoices"
   },
   "table": {
     "period": "Period",
@@ -23,7 +23,7 @@
     "VOIDED": "Voided"
   },
   "alert": {
-    "draftPending": "An invoice is pending review. Please verify the contents and request issuance.",
+    "draftPending": "An invoice is pending review. Please verify the details and request issuance.",
     "rejected": "The invoice was rejected by GDT. Please contact SuperAdmin."
   },
   "action": {
@@ -46,7 +46,7 @@
     "irreversible": "Once confirmed, SuperAdmin will review → submit to WeTax → GDT will issue."
   },
   "disputeForm": {
-    "title": "Dispute",
+    "title": "File a Dispute",
     "placeholder": "Please specify the line / amount / date in detail (minimum 30 characters)",
     "minLength": "The dispute reason must be at least 30 characters."
   }
