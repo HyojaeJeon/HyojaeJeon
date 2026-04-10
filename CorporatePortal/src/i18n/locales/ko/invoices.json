@@ -1,0 +1,53 @@
+{
+  "page": {
+    "title": "전자세금계산서",
+    "description": "월간 통합 전자세금계산서를 검토하고 발행 요청합니다"
+  },
+  "table": {
+    "period": "기간",
+    "refId": "참조 번호",
+    "totalAmount": "총 금액",
+    "vat": "VAT",
+    "lineCount": "라인 수",
+    "status": "상태",
+    "reviewDeadline": "검토 마감",
+    "gdtReceipt": "GDT 접수번호"
+  },
+  "status": {
+    "DRAFT": "검토 대기",
+    "DISPUTED": "이의 제기 중",
+    "REQUESTED": "발행 요청됨",
+    "SUBMITTING": "제출 중",
+    "ACCEPTED": "발급 완료",
+    "REJECTED": "거부됨",
+    "VOIDED": "무효"
+  },
+  "alert": {
+    "draftPending": "인보이스가 검토 대기 중입니다. 내용 확인 후 발행 요청을 해주세요.",
+    "rejected": "인보이스가 GDT에서 거부되었습니다. SuperAdmin에게 문의하세요."
+  },
+  "action": {
+    "requestIssuance": "발행 요청",
+    "dispute": "이의 제기",
+    "downloadPdf": "PDF 다운로드",
+    "downloadXml": "XML 다운로드",
+    "contactSuperAdmin": "SuperAdmin에 문의"
+  },
+  "detail": {
+    "header": "인보이스 헤더",
+    "seller": "발급자 정보 (Seller)",
+    "buyer": "수신자 정보 (Buyer)",
+    "lineItems": "라인 항목",
+    "timeline": "검토/발행 타임라인"
+  },
+  "requestConfirm": {
+    "title": "발행 요청 확인",
+    "message": "이 인보이스의 발행을 요청하시겠습니까?",
+    "irreversible": "확정 후 SuperAdmin이 검수 → WeTax에 제출 → GDT 발급됩니다."
+  },
+  "disputeForm": {
+    "title": "이의 제기",
+    "placeholder": "구체적인 라인 / 금액 / 날짜를 명시해주세요 (최소 30자)",
+    "minLength": "이의 제기 사유는 최소 30자 이상 입력해야 합니다."
+  }
+}

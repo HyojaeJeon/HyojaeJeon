@@ -1,0 +1,24 @@
+{
+  "page": {
+    "title": "제휴 식당",
+    "description": "우리 임직원이 사용할 수 있는 가맹 식당을 관리합니다"
+  },
+  "table": {
+    "name": "식당명",
+    "category": "카테고리",
+    "loopType": "결제 방식",
+    "monthlyCount": "이번달 이용",
+    "monthlyAmount": "이번달 금액",
+    "allowed": "허용"
+  },
+  "filter": {
+    "all": "전체",
+    "korean": "한식",
+    "vietnamese": "베트남식",
+    "cafe": "카페",
+    "convenience": "편의점",
+    "delivery": "배달"
+  },
+  "empty": "가맹 식당이 없습니다.",
+  "allowToggle": "허용 상태 변경"
+}

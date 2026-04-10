@@ -1,0 +1,20 @@
+{
+  "page": {
+    "title": "부서 관리",
+    "description": "회사 부서 조직도를 관리합니다"
+  },
+  "table": {
+    "code": "부서 코드",
+    "name": "부서명",
+    "parent": "상위 부서",
+    "employees": "인원 수",
+    "hrisSync": "HRIS 동기화"
+  },
+  "form": {
+    "title": "부서 추가",
+    "codePlaceholder": "RND",
+    "namePlaceholder": "연구개발팀"
+  },
+  "empty": "등록된 부서가 없습니다. '부서 추가' 버튼을 눌러 시작하세요.",
+  "syncBanner": "이 부서는 HRIS(Base.vn)에서 동기화 중입니다. 수정은 원본 시스템에서 진행하세요."
+}

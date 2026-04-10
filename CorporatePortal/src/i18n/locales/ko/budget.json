@@ -1,0 +1,43 @@
+{
+  "page": {
+    "title": "예산 관리",
+    "description": "회사 전체의 funding 상태와 포인트 소진 현황을 확인합니다"
+  },
+  "funding": {
+    "title": "Funding Policy 상태",
+    "unassigned": {
+      "title": "Funding Policy가 아직 부여되지 않았습니다",
+      "description": "플랫폼 공급자(SuperAdmin)가 귀사의 신용도를 평가한 후 Prepaid 또는 Credit 정책을 부여합니다.",
+      "blocked": "이 상태에서는 임직원 포인트 충전이 불가능합니다.",
+      "allowedNote": "임직원 등록 / 정책 설정 / 머천트 허용 설정은 가능합니다."
+    },
+    "prepaid": {
+      "title": "Prepaid Deposit (예치금 선납 방식)",
+      "escrow": "에스크로 잔액",
+      "monthlyBudget": "월 예산 (권장)",
+      "used": "사용 중",
+      "remaining": "잔여 (충전 가능)",
+      "bankInfo": "은행 납입 안내",
+      "recordDeposit": "납입 완료 기록"
+    },
+    "credit": {
+      "title": "사후 정산 방식",
+      "creditLimit": "신용 한도",
+      "thisMonth": "이번 달 사용",
+      "available": "한도 내 여유",
+      "nextSettlement": "다음 정산일",
+      "requestUpgrade": "한도 상향 요청"
+    }
+  },
+  "summary": {
+    "title": "이번 달 포인트 소진 요약",
+    "totalBudget": "총 예산",
+    "charged": "충전된 포인트",
+    "used": "실제 사용",
+    "unused": "미사용",
+    "expiring": "자동 소멸 예정"
+  },
+  "loadHistory": {
+    "title": "충전 이력"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "page": {
+    "title": "식대 정책",
+    "description": "부서/직급/시간대/한도를 조합하여 정책을 관리합니다"
+  },
+  "table": {
+    "code": "정책 코드",
+    "name": "정책명",
+    "status": "상태",
+    "maxPerTxn": "1회 한도",
+    "dailyLimit": "일일 한도",
+    "split": "Split 허용",
+    "effectiveRange": "유효 기간"
+  },
+  "builder": {
+    "tab1": "기본 정보",
+    "tab2": "시간대",
+    "tab3": "한도",
+    "tab4": "적용 대상",
+    "tab5": "머천트/카테고리",
+    "priority": "우선순위",
+    "priorityHint": "충돌 시 낮은 번호가 이깁니다. 기본값: 100",
+    "splitPayment": "Split Payment 허용",
+    "splitPaymentHint": "회사 지원금 부족 시 개인 충전으로 자동 보충",
+    "carryover": "이월 허용",
+    "carryoverHint": "미사용 포인트를 다음 달로 이월"
+  },
+  "status": {
+    "DRAFT": "초안",
+    "SCHEDULED": "예약됨",
+    "ACTIVE": "활성",
+    "PAUSED": "일시 중지",
+    "EXPIRED": "만료"
+  },
+  "empty": "등록된 정책이 없습니다."
+}

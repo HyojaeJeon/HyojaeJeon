@@ -1,0 +1,49 @@
+{
+  "page": {
+    "title": "임직원",
+    "description": "부서별 임직원 명단과 배지 매핑을 관리합니다"
+  },
+  "table": {
+    "code": "사번",
+    "name": "이름",
+    "department": "부서",
+    "employmentType": "고용 형태",
+    "walletStatus": "지갑 상태",
+    "badge": "배지 번호",
+    "lastTransaction": "최근 결제"
+  },
+  "form": {
+    "title": "임직원 추가",
+    "codePlaceholder": "EMP001",
+    "namePlaceholder": "홍길동"
+  },
+  "detail": {
+    "overview": "개요",
+    "ledger": "원장(포인트 거래 내역)",
+    "transactions": "거래 내역",
+    "profile": "기본 정보",
+    "allowance": "식권 계정",
+    "companyAllowance": "회사 지원금 포인트",
+    "personalTopUp": "개인 충전 잔액",
+    "availableBalance": "사용 가능 금액",
+    "dailyLimit": "일일 한도",
+    "pointNote": "조건부 포인트 — 식권 결제에만 사용 가능",
+    "refundable": "환불 가능"
+  },
+  "action": {
+    "terminate": "퇴사 처리",
+    "suspend": "일시 정지",
+    "resume": "정지 해제",
+    "assignBadge": "배지 매핑"
+  },
+  "empty": "등록된 임직원이 없습니다.",
+  "syncBanner": "이 임직원은 HRIS(Base.vn)에서 동기화 중입니다. 일부 필드는 외부 시스템에서만 수정할 수 있습니다.",
+  "terminateConfirm": {
+    "title": "퇴사 처리 확인",
+    "walletClose": "지갑 상태: ACTIVE → CLOSED",
+    "pointExpire": "회사 지원금 포인트 전액 자동 소멸",
+    "badgeInvalidate": "배지(RFID) 무효화 → 단말 차단",
+    "policyRelease": "적용된 정책 해제",
+    "irreversible": "이 작업은 되돌릴 수 없습니다."
+  }
+}
