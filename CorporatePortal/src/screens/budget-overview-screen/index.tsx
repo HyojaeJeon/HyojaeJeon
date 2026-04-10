@@ -1,8 +1,11 @@
 'use client';
 
+import { useQuery } from '@apollo/client';
+import { RefreshCw } from 'lucide-react';
 import {
   DetailPageTemplate,
   SectionCard,
+  Button,
   Badge,
   Skeleton,
 } from '@platform/shared-ui';
@@ -11,6 +14,12 @@ import { useHasPermission } from '@rbac/useHasPermission';
 import { PERMISSIONS } from '@rbac/permissions';
 import { LockedScreen } from '@screens/common/LockedScreen';
 import { formatCurrency } from '@shared/utils/format';
+import {
+  FUNDING_ACCOUNT_QUERY,
+  type FundingAccountData,
+  type FundingAccount,
+} from '@graphql/queries/budget';
+import { useCorporateId } from '@shared/hooks/useCorporateId';
 
 type FundingModel = 'UNASSIGNED' | 'PREPAID_DEPOSIT' | 'CREDIT_NET15' | 'CREDIT_NET30';
 
@@ -18,12 +27,15 @@ export function BudgetOverviewScreen() {
   const { t } = useI18n();
   const canRead = useHasPermission(PERMISSIONS.WALLET_READ);
 
-  if (!canRead) return <LockedScreen />;
+  const corporateId = useCorporateId();
+  const { data, loading, refetch } = useQuery<FundingAccountData>(FUNDING_ACCOUNT_QUERY, {
+    variables: { corporateId },
+    skip: !corporateId,
+  });
+  const fundingAccount = (data?.mealFundingAccount?.success?.data ?? null) as FundingAccount | null;
+  const fundingModel: FundingModel = (fundingAccount?.fundingModel as FundingModel) ?? 'UNASSIGNED';
 
-  // TODO: useQuery for corporate funding policy + budget overview
-  const loading = true;
-  // TODO: Replace with actual query data — mealFundingAccountByCorporate(corporateId)
-  const fundingModel = 'UNASSIGNED' as FundingModel;
+  if (!canRead) return <LockedScreen />;
 
   const renderFundingCard = () => {
     switch (fundingModel) {
@@ -35,7 +47,7 @@ export function BudgetOverviewScreen() {
           >
             <div className="flex items-start gap-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-full text-2xl" style={{ background: 'var(--warn)' }}>
-                ⚠
+                !
               </div>
               <div className="flex-1">
                 <h3 className="text-base font-bold text-fg">
@@ -64,28 +76,40 @@ export function BudgetOverviewScreen() {
               style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}
             >
               <p className="text-[12px] font-semibold text-fg-muted">에스크로 잔액</p>
-              <Skeleton width={120} height={28} />
+              <p className="mt-1 text-lg font-bold text-fg">
+                {fundingAccount?.depositBalanceVnd ? formatCurrency(fundingAccount.depositBalanceVnd) : '—'}
+              </p>
             </div>
             <div
               className="rounded-xl border p-5"
               style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}
             >
               <p className="text-[12px] font-semibold text-fg-muted">월 예산</p>
-              <Skeleton width={120} height={28} />
+              <p className="mt-1 text-lg font-bold text-fg">
+                {fundingAccount?.monthlyBudgetVnd ? formatCurrency(fundingAccount.monthlyBudgetVnd) : '—'}
+              </p>
             </div>
             <div
               className="rounded-xl border p-5"
               style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}
             >
               <p className="text-[12px] font-semibold text-fg-muted">사용 중</p>
-              <Skeleton width={120} height={28} />
+              <p className="mt-1 text-lg font-bold text-fg">
+                {fundingAccount?.monthlySpentVnd ? formatCurrency(fundingAccount.monthlySpentVnd) : '—'}
+              </p>
             </div>
             <div
               className="rounded-xl border p-5"
               style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}
             >
               <p className="text-[12px] font-semibold text-fg-muted">잔여</p>
-              <Skeleton width={120} height={28} />
+              <p className="mt-1 text-lg font-bold text-fg">
+                {fundingAccount?.monthlyBudgetVnd && fundingAccount?.monthlySpentVnd
+                  ? formatCurrency(
+                      Number(fundingAccount.monthlyBudgetVnd) - Number(fundingAccount.monthlySpentVnd),
+                    )
+                  : '—'}
+              </p>
             </div>
           </div>
         );
@@ -100,22 +124,43 @@ export function BudgetOverviewScreen() {
                 style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}
               >
                 <p className="text-[12px] font-semibold text-fg-muted">신용 한도</p>
-                <Skeleton width={120} height={28} />
+                <p className="mt-1 text-lg font-bold text-fg">
+                  {fundingAccount?.creditLimitVnd ? formatCurrency(fundingAccount.creditLimitVnd) : '—'}
+                </p>
               </div>
               <div
                 className="rounded-xl border p-5"
                 style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}
               >
-                <p className="text-[12px] font-semibold text-fg-muted">사용률</p>
-                <Skeleton width="100%" height={12} radius={6} />
-                <Skeleton width={80} height={16} />
+                <p className="text-[12px] font-semibold text-fg-muted">사용 중</p>
+                <p className="mt-1 text-lg font-bold text-fg">
+                  {fundingAccount?.creditOutstandingVnd ? formatCurrency(fundingAccount.creditOutstandingVnd) : '—'}
+                </p>
+                {fundingAccount?.creditLimitVnd && fundingAccount?.creditOutstandingVnd && (
+                  <div className="mt-2">
+                    <div className="h-2 w-full rounded-full" style={{ background: 'var(--surface-3)' }}>
+                      <div
+                        className="h-2 rounded-full"
+                        style={{
+                          background: 'var(--brand)',
+                          width: `${Math.min(100, (Number(fundingAccount.creditOutstandingVnd) / Number(fundingAccount.creditLimitVnd)) * 100)}%`,
+                        }}
+                      />
+                    </div>
+                    <p className="mt-1 text-[11px] text-fg-muted">
+                      {((Number(fundingAccount.creditOutstandingVnd) / Number(fundingAccount.creditLimitVnd)) * 100).toFixed(1)}% 사용
+                    </p>
+                  </div>
+                )}
               </div>
               <div
                 className="rounded-xl border p-5"
                 style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}
               >
-                <p className="text-[12px] font-semibold text-fg-muted">다음 정산일</p>
-                <Skeleton width={100} height={28} />
+                <p className="text-[12px] font-semibold text-fg-muted">정산 조건</p>
+                <p className="mt-1 text-lg font-bold text-fg">
+                  {fundingModel === 'CREDIT_NET15' ? 'NET 15' : 'NET 30'}
+                </p>
               </div>
             </div>
           </div>
@@ -132,6 +177,13 @@ export function BudgetOverviewScreen() {
         breadcrumbs: [{ label: t('nav.budget') }],
         title: t('nav.budget'),
         description: '예산 현황, 포인트 소진 요약, 충전 이력을 확인합니다.',
+        actions: (
+          <div className="flex gap-2">
+            <Button variant="ghost" startIcon={<RefreshCw size={14} />} onClick={() => refetch()}>
+              {t('common.refresh')}
+            </Button>
+          </div>
+        ),
       }}
     >
       {/* Section 1: Funding Policy 상태 */}
@@ -147,30 +199,100 @@ export function BudgetOverviewScreen() {
                 : '신용 NET30'
         }
       >
-        {renderFundingCard()}
+        {loading ? (
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="rounded-xl border p-5"
+                style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}
+              >
+                <Skeleton width={80} height={12} />
+                <Skeleton width={120} height={28} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          renderFundingCard()
+        )}
       </SectionCard>
 
       {/* Section 2: 이번 달 포인트 소진 요약 */}
       <div className="mt-4">
         <SectionCard title="이번 달 포인트 소진 요약">
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
-            {[
-              '총 지급 포인트',
-              '사용 포인트',
-              '잔여 포인트',
-              '거래 건수',
-              '평균 건당 금액',
-            ].map((label) => (
+          {loading ? (
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-xl border p-5"
+                  style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}
+                >
+                  <Skeleton width={80} height={12} />
+                  <Skeleton width={100} height={28} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
               <div
-                key={label}
                 className="rounded-xl border p-5"
                 style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}
               >
-                <p className="text-[12px] font-semibold text-fg-muted">{label}</p>
-                <Skeleton width={100} height={28} />
+                <p className="text-[12px] font-semibold text-fg-muted">월 예산</p>
+                <p className="mt-1 text-lg font-bold text-fg">
+                  {fundingAccount?.monthlyBudgetVnd ? formatCurrency(fundingAccount.monthlyBudgetVnd) : '—'}
+                </p>
               </div>
-            ))}
-          </div>
+              <div
+                className="rounded-xl border p-5"
+                style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}
+              >
+                <p className="text-[12px] font-semibold text-fg-muted">사용 포인트</p>
+                <p className="mt-1 text-lg font-bold text-fg">
+                  {fundingAccount?.monthlySpentVnd ? formatCurrency(fundingAccount.monthlySpentVnd) : '—'}
+                </p>
+              </div>
+              <div
+                className="rounded-xl border p-5"
+                style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}
+              >
+                <p className="text-[12px] font-semibold text-fg-muted">잔여 포인트</p>
+                <p className="mt-1 text-lg font-bold text-fg">
+                  {fundingAccount?.monthlyBudgetVnd && fundingAccount?.monthlySpentVnd
+                    ? formatCurrency(
+                        Number(fundingAccount.monthlyBudgetVnd) - Number(fundingAccount.monthlySpentVnd),
+                      )
+                    : '—'}
+                </p>
+              </div>
+              <div
+                className="rounded-xl border p-5"
+                style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}
+              >
+                <p className="text-[12px] font-semibold text-fg-muted">계정 상태</p>
+                <p className="mt-1">
+                  <Badge tone={fundingAccount?.status === 'ACTIVE' ? 'success' : 'neutral'} size="sm">
+                    {fundingAccount?.status ?? '—'}
+                  </Badge>
+                </p>
+              </div>
+              <div
+                className="rounded-xl border p-5"
+                style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}
+              >
+                <p className="text-[12px] font-semibold text-fg-muted">최근 입금</p>
+                <p className="mt-1 text-lg font-bold text-fg">
+                  {fundingAccount?.lastDepositAmountVnd ? formatCurrency(fundingAccount.lastDepositAmountVnd) : '—'}
+                </p>
+                {fundingAccount?.lastDepositAt && (
+                  <p className="text-[11px] text-fg-muted">
+                    {new Date(fundingAccount.lastDepositAt).toLocaleDateString('ko-KR')}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
         </SectionCard>
       </div>
 
