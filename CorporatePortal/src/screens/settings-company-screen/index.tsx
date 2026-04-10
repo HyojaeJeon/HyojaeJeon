@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { Save, Pencil, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation } from '@apollo/client';
+import { Save, Pencil, X, RefreshCw } from 'lucide-react';
 import {
   DetailPageTemplate,
   SectionCard,
@@ -13,6 +14,13 @@ import { useI18n } from '@i18n/I18nProvider';
 import { useHasPermission } from '@rbac/useHasPermission';
 import { PERMISSIONS } from '@rbac/permissions';
 import { LockedScreen } from '@screens/common/LockedScreen';
+import {
+  CORPORATE_PROFILE_QUERY,
+  UPDATE_CORPORATE_MUTATION,
+  type CorporateProfileData,
+  type CorporateProfile,
+} from '@graphql/queries/corporate';
+import { useCorporateId } from '@shared/hooks/useCorporateId';
 
 type ConsolidationStrategy =
   | 'BY_MERCHANT'
@@ -44,14 +52,20 @@ export function SettingsCompanyScreen() {
 
   const [activeTab, setActiveTab] = useState<TabKey>('legal');
   const [editing, setEditing] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
-  // TODO: useQuery for corporateProfile
-  const loading = true;
+  const corporateId = useCorporateId();
+  const { data, loading, refetch } = useQuery<CorporateProfileData>(CORPORATE_PROFILE_QUERY, {
+    variables: { id: corporateId },
+    skip: !corporateId,
+  });
+  const profile = (data?.mealCorporate?.success?.data ?? null) as CorporateProfile | null;
+
+  const [updateCorporate, { loading: saving }] = useMutation(UPDATE_CORPORATE_MUTATION);
 
   // Tab 1: Legal info
   const [companyName, setCompanyName] = useState('');
   const [taxCode, setTaxCode] = useState('');
-  const [representativeName, setRepresentativeName] = useState('');
   const [addressCity, setAddressCity] = useState('');
   const [addressDistrict, setAddressDistrict] = useState('');
   const [addressWard, setAddressWard] = useState('');
@@ -69,15 +83,84 @@ export function SettingsCompanyScreen() {
   const [consolidationStrategy, setConsolidationStrategy] =
     useState<ConsolidationStrategy>('BY_MERCHANT');
 
+  // Pre-fill form fields from query data
+  useEffect(() => {
+    if (profile) {
+      setCompanyName(profile.companyName ?? '');
+      setTaxCode(profile.taxCode ?? '');
+      setAddressCity(profile.addressCity ?? '');
+      setAddressDistrict(profile.addressDistrict ?? '');
+      setAddressWard(profile.addressWard ?? '');
+      setAddressDetail(profile.addressDetail ?? '');
+      setContactName(profile.contactName ?? '');
+      setContactEmail(profile.contactEmail ?? '');
+      setContactPhone(profile.contactPhone ?? '');
+      setContactFax(profile.contactFax ?? '');
+      setBankAccountNumber(profile.bankAccountNumber ?? '');
+      setBankName(profile.bankName ?? '');
+      setConsolidationStrategy(
+        (profile.einvoiceConsolidationStrategy as ConsolidationStrategy) ?? 'BY_MERCHANT',
+      );
+    }
+  }, [profile]);
+
   if (!canRead) return <LockedScreen />;
 
   const handleSave = async () => {
-    // TODO: mutation corporateProfileUpdate
-    setEditing(false);
+    setSaveError(null);
+    try {
+      const result = await updateCorporate({
+        variables: {
+          id: corporateId,
+          input: {
+            companyName,
+            taxCode,
+            addressCity,
+            addressDistrict,
+            addressWard,
+            addressDetail,
+            contactName,
+            contactEmail,
+            contactPhone,
+            contactFax,
+            bankAccountNumber,
+            bankName,
+            einvoiceConsolidationStrategy: consolidationStrategy,
+          },
+        },
+      });
+      const gqlError = result.data?.mealCorporateUpdate?.error;
+      if (gqlError) {
+        setSaveError(gqlError.message);
+        return;
+      }
+      await refetch();
+      setEditing(false);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : '저장에 실패했습니다.');
+    }
   };
 
   const handleCancel = () => {
-    // TODO: reset to original values from query
+    // Reset to original values from query
+    if (profile) {
+      setCompanyName(profile.companyName ?? '');
+      setTaxCode(profile.taxCode ?? '');
+      setAddressCity(profile.addressCity ?? '');
+      setAddressDistrict(profile.addressDistrict ?? '');
+      setAddressWard(profile.addressWard ?? '');
+      setAddressDetail(profile.addressDetail ?? '');
+      setContactName(profile.contactName ?? '');
+      setContactEmail(profile.contactEmail ?? '');
+      setContactPhone(profile.contactPhone ?? '');
+      setContactFax(profile.contactFax ?? '');
+      setBankAccountNumber(profile.bankAccountNumber ?? '');
+      setBankName(profile.bankName ?? '');
+      setConsolidationStrategy(
+        (profile.einvoiceConsolidationStrategy as ConsolidationStrategy) ?? 'BY_MERCHANT',
+      );
+    }
+    setSaveError(null);
     setEditing(false);
   };
 
@@ -85,6 +168,11 @@ export function SettingsCompanyScreen() {
 
   const renderLegalTab = () => (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      {saveError && activeTab === 'legal' && (
+        <div className="rounded-md p-2 text-[12px] text-danger md:col-span-2" style={{ background: 'var(--danger-soft)' }}>
+          {saveError}
+        </div>
+      )}
       <div className="flex flex-col gap-1.5">
         <label className="text-[12px] font-semibold text-fg-muted">회사명 *</label>
         {loading ? (
@@ -117,20 +205,6 @@ export function SettingsCompanyScreen() {
         )}
         {taxCode && (taxCode.length < 10 || taxCode.length > 13) && (
           <span className="text-[11px] text-danger">세금코드는 10~13자리 숫자입니다.</span>
-        )}
-      </div>
-      <div className="flex flex-col gap-1.5 md:col-span-2">
-        <label className="text-[12px] font-semibold text-fg-muted">대표자명 *</label>
-        {loading ? (
-          <Skeleton height={36} />
-        ) : (
-          <Input
-            value={representativeName}
-            onChange={(e) => setRepresentativeName(e.target.value)}
-            placeholder="홍길동"
-            readOnly={readOnly}
-            required
-          />
         )}
       </div>
       <div className="flex flex-col gap-1.5">
@@ -190,6 +264,11 @@ export function SettingsCompanyScreen() {
 
   const renderContactTab = () => (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      {saveError && activeTab === 'contact' && (
+        <div className="rounded-md p-2 text-[12px] text-danger md:col-span-2" style={{ background: 'var(--danger-soft)' }}>
+          {saveError}
+        </div>
+      )}
       <div className="flex flex-col gap-1.5">
         <label className="text-[12px] font-semibold text-fg-muted">담당자명</label>
         {loading ? (
@@ -328,8 +407,8 @@ export function SettingsCompanyScreen() {
                 <Button variant="ghost" startIcon={<X size={14} />} onClick={handleCancel}>
                   {t('common.cancel')}
                 </Button>
-                <Button variant="primary" startIcon={<Save size={14} />} onClick={handleSave}>
-                  {t('common.save')}
+                <Button variant="primary" startIcon={<Save size={14} />} onClick={handleSave} disabled={saving}>
+                  {saving ? '저장 중...' : t('common.save')}
                 </Button>
               </>
             )}
@@ -376,8 +455,8 @@ export function SettingsCompanyScreen() {
           <Button variant="ghost" onClick={handleCancel}>
             {t('common.cancel')}
           </Button>
-          <Button variant="primary" startIcon={<Save size={14} />} onClick={handleSave}>
-            {t('common.save')}
+          <Button variant="primary" startIcon={<Save size={14} />} onClick={handleSave} disabled={saving}>
+            {saving ? '저장 중...' : t('common.save')}
           </Button>
         </div>
       )}
