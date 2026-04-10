@@ -24,7 +24,7 @@ export function PolicyBuilderScreen() {
 
   const [activeTab, setActiveTab] = useState(0);
 
-  // Form state — Tab 1: 기본 정보
+  // Form state -- Tab 1: 기본 정보
   const [policyCode, setPolicyCode] = useState('');
   const [policyName, setPolicyName] = useState('');
   const [description, setDescription] = useState('');
@@ -32,13 +32,13 @@ export function PolicyBuilderScreen() {
   const [effectiveFrom, setEffectiveFrom] = useState('');
   const [effectiveTo, setEffectiveTo] = useState('');
 
-  // Form state — Tab 3: 한도
+  // Form state -- Tab 3: 한도
   const [maxPerTransactionVnd, setMaxPerTransactionVnd] = useState('');
   const [dailyLimitVnd, setDailyLimitVnd] = useState('');
   const [allowSplitPayment, setAllowSplitPayment] = useState(false);
   const [allowCarryover, setAllowCarryover] = useState(false);
 
-  // Form state — Tab 4: 적용 대상
+  // Form state -- Tab 4: 적용 대상
   const [targetScope, setTargetScope] = useState<'ALL' | 'DEPARTMENT' | 'RANK'>('ALL');
 
   if (!canWrite) return <LockedScreen />;
@@ -48,7 +48,7 @@ export function PolicyBuilderScreen() {
 
   const renderTab = () => {
     switch (activeTab) {
-      /* ─── Tab 1: 기본 정보 ─── */
+      /* --- Tab 1: 기본 정보 --- */
       case 0:
         return (
           <SectionCard title="기본 정보">
@@ -120,7 +120,7 @@ export function PolicyBuilderScreen() {
           </SectionCard>
         );
 
-      /* ─── Tab 2: 시간대 ─── */
+      /* --- Tab 2: 시간대 --- */
       case 1:
         return (
           <SectionCard title="시간대">
@@ -133,7 +133,7 @@ export function PolicyBuilderScreen() {
           </SectionCard>
         );
 
-      /* ─── Tab 3: 한도 ─── */
+      /* --- Tab 3: 한도 --- */
       case 2:
         return (
           <SectionCard title="한도">
@@ -196,7 +196,7 @@ export function PolicyBuilderScreen() {
           </SectionCard>
         );
 
-      /* ─── Tab 4: 적용 대상 ─── */
+      /* --- Tab 4: 적용 대상 --- */
       case 3:
         return (
           <SectionCard title="적용 대상">
@@ -234,7 +234,7 @@ export function PolicyBuilderScreen() {
           </SectionCard>
         );
 
-      /* ─── Tab 5: 머천트/카테고리 ─── */
+      /* --- Tab 5: 머천트/카테고리 --- */
       case 4:
         return (
           <SectionCard title="머천트/카테고리">
