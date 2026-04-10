@@ -1,0 +1,36 @@
+{
+  "page": {
+    "title": "Chính sách suất ăn",
+    "description": "Quản lý chính sách kết hợp phòng ban/chức vụ/khung giờ/hạn mức"
+  },
+  "table": {
+    "code": "Mã chính sách",
+    "name": "Tên chính sách",
+    "status": "Trạng thái",
+    "maxPerTxn": "Hạn mức/lần",
+    "dailyLimit": "Hạn mức hàng ngày",
+    "split": "Cho phép Split",
+    "effectiveRange": "Thời hạn hiệu lực"
+  },
+  "builder": {
+    "tab1": "Thông tin cơ bản",
+    "tab2": "Khung giờ",
+    "tab3": "Hạn mức",
+    "tab4": "Đối tượng áp dụng",
+    "tab5": "Nhà cung cấp/Danh mục",
+    "priority": "Mức ưu tiên",
+    "priorityHint": "Khi xung đột, số thấp hơn được ưu tiên. Mặc định: 100",
+    "splitPayment": "Cho phép Split Payment",
+    "splitPaymentHint": "Tự động bù từ nạp cá nhân khi điểm hỗ trợ công ty không đủ",
+    "carryover": "Cho phép chuyển tiếp",
+    "carryoverHint": "Chuyển điểm chưa sử dụng sang tháng tiếp theo"
+  },
+  "status": {
+    "DRAFT": "Bản nháp",
+    "SCHEDULED": "Đã lên lịch",
+    "ACTIVE": "Đang hoạt động",
+    "PAUSED": "Tạm dừng",
+    "EXPIRED": "Hết hạn"
+  },
+  "empty": "Chưa có chính sách nào được đăng ký."
+}

@@ -1,0 +1,20 @@
+{
+  "page": {
+    "title": "Department Management",
+    "description": "Manage the company department organization chart"
+  },
+  "table": {
+    "code": "Department Code",
+    "name": "Department Name",
+    "parent": "Parent Department",
+    "employees": "Headcount",
+    "hrisSync": "HRIS Sync"
+  },
+  "form": {
+    "title": "Add Department",
+    "codePlaceholder": "RND",
+    "namePlaceholder": "R&D Team"
+  },
+  "empty": "No departments registered. Click the 'Add Department' button to get started.",
+  "syncBanner": "This department is being synced from HRIS (Base.vn). Please make changes in the source system."
+}

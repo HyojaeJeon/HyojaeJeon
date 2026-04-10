@@ -1,0 +1,49 @@
+{
+  "page": {
+    "title": "Employees",
+    "description": "Manage employee lists by department and badge mapping"
+  },
+  "table": {
+    "code": "Employee ID",
+    "name": "Name",
+    "department": "Department",
+    "employmentType": "Employment Type",
+    "walletStatus": "Wallet Status",
+    "badge": "Badge Number",
+    "lastTransaction": "Last Transaction"
+  },
+  "form": {
+    "title": "Add Employee",
+    "codePlaceholder": "EMP001",
+    "namePlaceholder": "John Doe"
+  },
+  "detail": {
+    "overview": "Overview",
+    "ledger": "Ledger (Point Transaction History)",
+    "transactions": "Transaction History",
+    "profile": "Basic Information",
+    "allowance": "Meal Voucher Account",
+    "companyAllowance": "Company Allowance Points",
+    "personalTopUp": "Personal Top-up Balance",
+    "availableBalance": "Available Balance",
+    "dailyLimit": "Daily Limit",
+    "pointNote": "Conditional points — can only be used for meal voucher payments",
+    "refundable": "Refundable"
+  },
+  "action": {
+    "terminate": "Terminate",
+    "suspend": "Suspend",
+    "resume": "Resume",
+    "assignBadge": "Assign Badge"
+  },
+  "empty": "No employees registered.",
+  "syncBanner": "This employee is being synced from HRIS (Base.vn). Some fields can only be modified in the external system.",
+  "terminateConfirm": {
+    "title": "Confirm Termination",
+    "walletClose": "Wallet status: ACTIVE → CLOSED",
+    "pointExpire": "All Company Allowance Points will be automatically forfeited",
+    "badgeInvalidate": "Badge (RFID) invalidated → blocked at terminal",
+    "policyRelease": "Applied policies will be released",
+    "irreversible": "This action cannot be undone."
+  }
+}

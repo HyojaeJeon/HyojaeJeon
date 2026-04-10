@@ -1,0 +1,49 @@
+{
+  "page": {
+    "title": "Nhân viên",
+    "description": "Quản lý danh sách nhân viên theo phòng ban và ánh xạ thẻ nhân viên"
+  },
+  "table": {
+    "code": "Mã nhân viên",
+    "name": "Họ tên",
+    "department": "Phòng ban",
+    "employmentType": "Hình thức tuyển dụng",
+    "walletStatus": "Trạng thái ví",
+    "badge": "Số thẻ",
+    "lastTransaction": "Giao dịch gần nhất"
+  },
+  "form": {
+    "title": "Thêm nhân viên",
+    "codePlaceholder": "EMP001",
+    "namePlaceholder": "Nguyễn Văn A"
+  },
+  "detail": {
+    "overview": "Tổng quan",
+    "ledger": "Sổ cái (lịch sử giao dịch điểm)",
+    "transactions": "Lịch sử giao dịch",
+    "profile": "Thông tin cơ bản",
+    "allowance": "Tài khoản phiếu ăn",
+    "companyAllowance": "Điểm hỗ trợ công ty",
+    "personalTopUp": "Nạp cá nhân",
+    "availableBalance": "Số dư khả dụng",
+    "dailyLimit": "Hạn mức hàng ngày",
+    "pointNote": "Điểm có điều kiện — chỉ sử dụng được cho thanh toán phiếu ăn",
+    "refundable": "Có thể hoàn tiền"
+  },
+  "action": {
+    "terminate": "Xử lý nghỉ việc",
+    "suspend": "Tạm ngưng",
+    "resume": "Kích hoạt lại",
+    "assignBadge": "Gán thẻ nhân viên"
+  },
+  "empty": "Chưa có nhân viên nào được đăng ký.",
+  "syncBanner": "Nhân viên này đang được đồng bộ từ HRIS (Base.vn). Một số trường chỉ có thể chỉnh sửa trên hệ thống bên ngoài.",
+  "terminateConfirm": {
+    "title": "Xác nhận xử lý nghỉ việc",
+    "walletClose": "Trạng thái ví: ACTIVE → CLOSED",
+    "pointExpire": "Toàn bộ điểm hỗ trợ công ty sẽ tự động hủy",
+    "badgeInvalidate": "Thẻ (RFID) bị vô hiệu hóa → chặn tại thiết bị đầu cuối",
+    "policyRelease": "Hủy bỏ các chính sách đã áp dụng",
+    "irreversible": "Thao tác này không thể hoàn tác."
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "page": {
+    "title": "Budget Management",
+    "description": "View the company-wide funding status and point consumption overview"
+  },
+  "funding": {
+    "title": "Funding Policy Status",
+    "unassigned": {
+      "title": "Funding Policy has not been assigned yet",
+      "description": "The platform provider (SuperAdmin) will evaluate your company's creditworthiness and assign a Prepaid or Credit policy.",
+      "blocked": "Point top-ups for employees are not available in this state.",
+      "allowedNote": "Employee registration / policy setup / merchant allowance configuration is still available."
+    },
+    "prepaid": {
+      "title": "Prepaid Deposit",
+      "escrow": "Escrow Balance",
+      "monthlyBudget": "Monthly Budget (Recommended)",
+      "used": "In Use",
+      "remaining": "Remaining (Available to Load)",
+      "bankInfo": "Bank Deposit Instructions",
+      "recordDeposit": "Record Deposit"
+    },
+    "credit": {
+      "title": "Post-Settlement (Credit)",
+      "creditLimit": "Credit Limit",
+      "thisMonth": "This Month's Usage",
+      "available": "Available Credit",
+      "nextSettlement": "Next Settlement Date",
+      "requestUpgrade": "Request Limit Increase"
+    }
+  },
+  "summary": {
+    "title": "This Month's Point Consumption Summary",
+    "totalBudget": "Total Budget",
+    "charged": "Points Loaded",
+    "used": "Actual Usage",
+    "unused": "Unused",
+    "expiring": "Scheduled for Auto-Expiry"
+  },
+  "loadHistory": {
+    "title": "Load History"
+  }
+}

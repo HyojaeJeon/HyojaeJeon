@@ -1,0 +1,53 @@
+{
+  "page": {
+    "title": "Hóa đơn điện tử",
+    "description": "Xem xét và yêu cầu phát hành hóa đơn điện tử tổng hợp hàng tháng"
+  },
+  "table": {
+    "period": "Kỳ",
+    "refId": "Mã tham chiếu",
+    "totalAmount": "Tổng số tiền",
+    "vat": "VAT",
+    "lineCount": "Số dòng",
+    "status": "Trạng thái",
+    "reviewDeadline": "Hạn xem xét",
+    "gdtReceipt": "Mã tiếp nhận GDT"
+  },
+  "status": {
+    "DRAFT": "Chờ xem xét",
+    "DISPUTED": "Đang khiếu nại",
+    "REQUESTED": "Đã yêu cầu phát hành",
+    "SUBMITTING": "Đang gửi",
+    "ACCEPTED": "Đã phát hành",
+    "REJECTED": "Bị từ chối",
+    "VOIDED": "Đã hủy"
+  },
+  "alert": {
+    "draftPending": "Hóa đơn đang chờ xem xét. Vui lòng kiểm tra nội dung và yêu cầu phát hành.",
+    "rejected": "Hóa đơn đã bị GDT từ chối. Vui lòng liên hệ SuperAdmin."
+  },
+  "action": {
+    "requestIssuance": "Yêu cầu phát hành",
+    "dispute": "Khiếu nại",
+    "downloadPdf": "Tải PDF",
+    "downloadXml": "Tải XML",
+    "contactSuperAdmin": "Liên hệ SuperAdmin"
+  },
+  "detail": {
+    "header": "Tiêu đề hóa đơn",
+    "seller": "Thông tin bên bán (Seller)",
+    "buyer": "Thông tin bên mua (Buyer)",
+    "lineItems": "Các mục chi tiết",
+    "timeline": "Tiến trình xem xét/phát hành"
+  },
+  "requestConfirm": {
+    "title": "Xác nhận yêu cầu phát hành",
+    "message": "Bạn có muốn yêu cầu phát hành hóa đơn này không?",
+    "irreversible": "Sau khi xác nhận, SuperAdmin sẽ kiểm tra → gửi lên WeTax → GDT phát hành."
+  },
+  "disputeForm": {
+    "title": "Khiếu nại",
+    "placeholder": "Vui lòng nêu rõ dòng / số tiền / ngày cụ thể (tối thiểu 30 ký tự)",
+    "minLength": "Lý do khiếu nại phải có ít nhất 30 ký tự."
+  }
+}

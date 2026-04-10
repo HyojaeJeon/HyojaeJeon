@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQuery } from '@apollo/client';
 import { RefreshCw, AlertTriangle, FileText } from 'lucide-react';
 import {
   DetailPageTemplate,
@@ -17,6 +18,12 @@ import { useHasPermission } from '@rbac/useHasPermission';
 import { PERMISSIONS } from '@rbac/permissions';
 import { LockedScreen } from '@screens/common/LockedScreen';
 import { formatCurrency } from '@shared/utils/format';
+import {
+  INVOICES_QUERY,
+  type InvoicesData,
+  type InvoiceRow,
+} from '@graphql/queries/invoice';
+import { useCorporateId } from '@shared/hooks/useCorporateId';
 
 type InvoiceStatus =
   | 'DRAFT'
@@ -26,19 +33,6 @@ type InvoiceStatus =
   | 'ACCEPTED'
   | 'REJECTED'
   | 'VOIDED';
-
-interface InvoiceRow {
-  id: string;
-  refId: string;
-  periodStart: string;
-  periodEnd: string;
-  totalAmountVnd: number;
-  vatAmountVnd: number;
-  lineItemCount: number;
-  status: InvoiceStatus;
-  reviewDeadline: string | null;
-  gdtAcceptanceNumber: string | null;
-}
 
 const STATUS_LABEL: Record<InvoiceStatus, string> = {
   DRAFT: '검토 대기',
@@ -105,9 +99,12 @@ export function InvoiceListScreen() {
   const [filterMonth, setFilterMonth] = useState<number>(new Date().getMonth() + 1);
   const [filterStatus, setFilterStatus] = useState<InvoiceStatus | null>(null);
 
-  // TODO: useQuery(INVOICE_LIST_QUERY, { variables: { corporateId, year, month } })
-  const invoices: InvoiceRow[] = [];
-  const loading = false;
+  const corporateId = useCorporateId();
+  const { data, loading, refetch } = useQuery<InvoicesData>(INVOICES_QUERY, {
+    variables: { corporateId, skip: 0, take: 100 },
+    skip: !corporateId,
+  });
+  const invoices: InvoiceRow[] = data?.eInvoicesByCorporate?.success?.data ?? [];
 
   if (!canRead) return <LockedScreen />;
 
@@ -130,17 +127,17 @@ export function InvoiceListScreen() {
       ),
     },
     {
-      key: 'refId',
+      key: 'invoiceNo',
       header: '참조번호',
       width: '160px',
-      render: (r) => <span className="font-mono text-[12px]">{r.refId}</span>,
+      render: (r) => <span className="font-mono text-[12px]">{r.invoiceNo ?? '—'}</span>,
     },
     {
       key: 'totalAmount',
       header: '총금액',
       width: '140px',
       render: (r) => (
-        <span className="num font-semibold">{formatCurrency(r.totalAmountVnd)}</span>
+        <span className="num font-semibold">{formatCurrency(r.totPayableVnd)}</span>
       ),
     },
     {
@@ -148,32 +145,32 @@ export function InvoiceListScreen() {
       header: 'VAT',
       width: '120px',
       render: (r) => (
-        <span className="num text-fg-muted">{formatCurrency(r.vatAmountVnd)}</span>
+        <span className="num text-fg-muted">{formatCurrency(r.totVatAmountVnd)}</span>
       ),
     },
     {
-      key: 'lineItemCount',
+      key: 'sourceTransactionCount',
       header: '라인수',
       width: '80px',
-      render: (r) => <span className="num">{r.lineItemCount}</span>,
+      render: (r) => <span className="num">{r.sourceTransactionCount ?? '—'}</span>,
     },
     {
       key: 'status',
       header: '상태',
       width: '130px',
       render: (r) => (
-        <Badge tone={STATUS_TONE[r.status]} size="sm" startDot>
-          {STATUS_LABEL[r.status]}
+        <Badge tone={STATUS_TONE[r.status as InvoiceStatus] ?? 'neutral'} size="sm" startDot>
+          {STATUS_LABEL[r.status as InvoiceStatus] ?? r.status}
         </Badge>
       ),
     },
     {
-      key: 'reviewDeadline',
+      key: 'reviewDueAt',
       header: '검토마감',
       width: '100px',
       render: (r) => {
         if (r.status !== 'DRAFT') return <span className="text-fg-subtle">—</span>;
-        const dday = computeDDay(r.reviewDeadline);
+        const dday = computeDDay(r.reviewDueAt);
         if (!dday) return <span className="text-fg-subtle">—</span>;
         const isUrgent = dday.startsWith('D+') || dday === 'D-Day' || (dday.startsWith('D-') && parseInt(dday.slice(2)) <= 3);
         return (
@@ -184,20 +181,16 @@ export function InvoiceListScreen() {
       },
     },
     {
-      key: 'gdtAcceptanceNumber',
+      key: 'gdtReceiptNo',
       header: 'GDT접수번호',
       width: '160px',
       render: (r) => (
         <span className="font-mono text-[12px] text-fg-muted">
-          {r.gdtAcceptanceNumber ?? '—'}
+          {r.gdtReceiptNo ?? '—'}
         </span>
       ),
     },
   ];
-
-  const handleRefresh = () => {
-    // TODO: refetch query
-  };
 
   return (
     <DetailPageTemplate
@@ -207,7 +200,7 @@ export function InvoiceListScreen() {
         description: '전자세금계산서 목록을 조회합니다.',
         actions: (
           <div className="flex gap-2">
-            <Button variant="ghost" startIcon={<RefreshCw size={14} />} onClick={handleRefresh}>
+            <Button variant="ghost" startIcon={<RefreshCw size={14} />} onClick={() => refetch()}>
               새로고침
             </Button>
           </div>

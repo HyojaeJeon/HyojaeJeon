@@ -1,0 +1,53 @@
+{
+  "page": {
+    "title": "Electronic Tax Invoices",
+    "description": "Review and request issuance of monthly consolidated electronic tax invoices"
+  },
+  "table": {
+    "period": "Period",
+    "refId": "Reference ID",
+    "totalAmount": "Total Amount",
+    "vat": "VAT",
+    "lineCount": "Line Count",
+    "status": "Status",
+    "reviewDeadline": "Review Deadline",
+    "gdtReceipt": "GDT Receipt Number"
+  },
+  "status": {
+    "DRAFT": "Pending Review",
+    "DISPUTED": "Disputed",
+    "REQUESTED": "Issuance Requested",
+    "SUBMITTING": "Submitting",
+    "ACCEPTED": "Issued",
+    "REJECTED": "Rejected",
+    "VOIDED": "Voided"
+  },
+  "alert": {
+    "draftPending": "An invoice is pending review. Please verify the contents and request issuance.",
+    "rejected": "The invoice was rejected by GDT. Please contact SuperAdmin."
+  },
+  "action": {
+    "requestIssuance": "Request Issuance",
+    "dispute": "Dispute",
+    "downloadPdf": "Download PDF",
+    "downloadXml": "Download XML",
+    "contactSuperAdmin": "Contact SuperAdmin"
+  },
+  "detail": {
+    "header": "Invoice Header",
+    "seller": "Seller Information",
+    "buyer": "Buyer Information",
+    "lineItems": "Line Items",
+    "timeline": "Review/Issuance Timeline"
+  },
+  "requestConfirm": {
+    "title": "Confirm Issuance Request",
+    "message": "Would you like to request issuance of this invoice?",
+    "irreversible": "Once confirmed, SuperAdmin will review → submit to WeTax → GDT will issue."
+  },
+  "disputeForm": {
+    "title": "Dispute",
+    "placeholder": "Please specify the line / amount / date in detail (minimum 30 characters)",
+    "minLength": "The dispute reason must be at least 30 characters."
+  }
+}

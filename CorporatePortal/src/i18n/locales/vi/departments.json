@@ -1,0 +1,20 @@
+{
+  "page": {
+    "title": "Quản lý phòng ban",
+    "description": "Quản lý sơ đồ tổ chức phòng ban của công ty"
+  },
+  "table": {
+    "code": "Mã phòng ban",
+    "name": "Tên phòng ban",
+    "parent": "Phòng ban cấp trên",
+    "employees": "Số nhân viên",
+    "hrisSync": "Đồng bộ HRIS"
+  },
+  "form": {
+    "title": "Thêm phòng ban",
+    "codePlaceholder": "RND",
+    "namePlaceholder": "Phòng Nghiên cứu & Phát triển"
+  },
+  "empty": "Chưa có phòng ban nào được đăng ký. Nhấn nút 'Thêm phòng ban' để bắt đầu.",
+  "syncBanner": "Phòng ban này đang được đồng bộ từ HRIS (Base.vn). Vui lòng chỉnh sửa trên hệ thống gốc."
+}

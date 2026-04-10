@@ -1,0 +1,49 @@
+{
+  "page": {
+    "title": "Settings"
+  },
+  "company": {
+    "title": "Company Information",
+    "tab1": "Legal Information",
+    "tab2": "Contact",
+    "tab3": "e-Invoice Settings",
+    "companyName": "Company Name",
+    "taxCode": "Tax Code",
+    "representativeName": "Representative Name",
+    "addressCity": "City/Province",
+    "addressDistrict": "District",
+    "addressWard": "Ward",
+    "addressDetail": "Detailed Address",
+    "contactName": "Contact Name",
+    "contactEmail": "Email",
+    "contactPhone": "Phone Number",
+    "contactFax": "Fax",
+    "bankAccountNumber": "Bank Account Number",
+    "bankName": "Bank Name",
+    "consolidationStrategy": "Invoice Consolidation Strategy"
+  },
+  "admins": {
+    "title": "Admin Accounts",
+    "invite": "Invite Admin",
+    "email": "Email",
+    "role": "Role",
+    "status": "Status",
+    "lastLogin": "Last Login",
+    "roleOwner": "Corporate Owner",
+    "roleHr": "HR Admin",
+    "roleFinance": "Finance Admin",
+    "roleViewer": "View Only",
+    "empty": "No administrators registered."
+  },
+  "session": {
+    "title": "My Account",
+    "profile": "My Profile",
+    "password": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "changePassword": "Change Password",
+    "language": "Language",
+    "timezone": "Timezone"
+  }
+}

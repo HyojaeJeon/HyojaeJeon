@@ -1,0 +1,49 @@
+{
+  "page": {
+    "title": "Cài đặt"
+  },
+  "company": {
+    "title": "Thông tin công ty",
+    "tab1": "Thông tin pháp lý",
+    "tab2": "Liên hệ",
+    "tab3": "Cài đặt hóa đơn điện tử",
+    "companyName": "Tên công ty",
+    "taxCode": "Mã số thuế",
+    "representativeName": "Tên người đại diện",
+    "addressCity": "Tỉnh/Thành phố",
+    "addressDistrict": "Quận/Huyện",
+    "addressWard": "Phường/Xã",
+    "addressDetail": "Địa chỉ chi tiết",
+    "contactName": "Tên người liên hệ",
+    "contactEmail": "Email",
+    "contactPhone": "Số điện thoại",
+    "contactFax": "Fax",
+    "bankAccountNumber": "Số tài khoản ngân hàng",
+    "bankName": "Tên ngân hàng",
+    "consolidationStrategy": "Chiến lược gộp hóa đơn"
+  },
+  "admins": {
+    "title": "Tài khoản quản trị viên",
+    "invite": "Mời quản trị viên",
+    "email": "Email",
+    "role": "Vai trò",
+    "status": "Trạng thái",
+    "lastLogin": "Đăng nhập lần cuối",
+    "roleOwner": "Quản trị viên cao nhất",
+    "roleHr": "Quản trị nhân sự",
+    "roleFinance": "Quản trị tài chính",
+    "roleViewer": "Chỉ xem",
+    "empty": "Chưa có quản trị viên nào được đăng ký."
+  },
+  "session": {
+    "title": "Tài khoản của tôi",
+    "profile": "Hồ sơ của tôi",
+    "password": "Đổi mật khẩu",
+    "currentPassword": "Mật khẩu hiện tại",
+    "newPassword": "Mật khẩu mới",
+    "confirmPassword": "Xác nhận mật khẩu",
+    "changePassword": "Đổi mật khẩu",
+    "language": "Cài đặt ngôn ngữ",
+    "timezone": "Múi giờ"
+  }
+}

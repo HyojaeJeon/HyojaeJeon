@@ -1,0 +1,24 @@
+{
+  "page": {
+    "title": "Partner Restaurants",
+    "description": "Manage partner restaurants available for employee use"
+  },
+  "table": {
+    "name": "Restaurant Name",
+    "category": "Category",
+    "loopType": "Payment Method",
+    "monthlyCount": "This Month's Usage",
+    "monthlyAmount": "This Month's Amount",
+    "allowed": "Allowed"
+  },
+  "filter": {
+    "all": "All",
+    "korean": "Korean",
+    "vietnamese": "Vietnamese",
+    "cafe": "Cafe",
+    "convenience": "Convenience Store",
+    "delivery": "Delivery"
+  },
+  "empty": "No partner restaurants found.",
+  "allowToggle": "Toggle Allowed Status"
+}

@@ -1,0 +1,36 @@
+{
+  "page": {
+    "title": "Meal Allowance Policies",
+    "description": "Manage policies combining department/position/time slots/limits"
+  },
+  "table": {
+    "code": "Policy Code",
+    "name": "Policy Name",
+    "status": "Status",
+    "maxPerTxn": "Per-Transaction Limit",
+    "dailyLimit": "Daily Limit",
+    "split": "Split Allowed",
+    "effectiveRange": "Effective Period"
+  },
+  "builder": {
+    "tab1": "Basic Information",
+    "tab2": "Time Slots",
+    "tab3": "Limits",
+    "tab4": "Target Scope",
+    "tab5": "Merchants/Categories",
+    "priority": "Priority",
+    "priorityHint": "Lower number wins on conflict. Default: 100",
+    "splitPayment": "Allow Split Payment",
+    "splitPaymentHint": "Automatically supplement from Personal Top-up Balance when Company Allowance Points are insufficient",
+    "carryover": "Allow Carryover",
+    "carryoverHint": "Carry unused points over to the next month"
+  },
+  "status": {
+    "DRAFT": "Draft",
+    "SCHEDULED": "Scheduled",
+    "ACTIVE": "Active",
+    "PAUSED": "Paused",
+    "EXPIRED": "Expired"
+  },
+  "empty": "No policies registered."
+}
