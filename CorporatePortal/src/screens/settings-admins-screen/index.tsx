@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery, useMutation } from '@apollo/client';
 import { Plus, RefreshCw } from 'lucide-react';
 import {
   DetailPageTemplate,
@@ -16,18 +17,16 @@ import { useI18n } from '@i18n/I18nProvider';
 import { useHasPermission } from '@rbac/useHasPermission';
 import { PERMISSIONS } from '@rbac/permissions';
 import { LockedScreen } from '@screens/common/LockedScreen';
+import {
+  ADMINS_QUERY,
+  ADMIN_INVITE_MUTATION,
+  type AdminsData,
+  type AdminRow,
+} from '@graphql/queries/admin';
+import { useCorporateId } from '@shared/hooks/useCorporateId';
 
 type AdminRole = 'CORPORATE_OWNER' | 'HR_ADMIN' | 'FINANCE_ADMIN' | 'VIEWER';
 type AdminStatus = 'ACTIVE' | 'PENDING_INVITE' | 'SUSPENDED';
-
-interface AdminRow {
-  id: string;
-  fullName: string;
-  email: string;
-  role: AdminRole;
-  status: AdminStatus;
-  lastLoginAt: string | null;
-}
 
 const ROLE_LABEL: Record<AdminRole, string> = {
   CORPORATE_OWNER: '소유자',
@@ -61,34 +60,40 @@ export function SettingsAdminsScreen() {
 
   const [showInviteForm, setShowInviteForm] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteDisplayName, setInviteDisplayName] = useState('');
   const [inviteRole, setInviteRole] = useState<AdminRole>('VIEWER');
   const [error, setError] = useState<string | null>(null);
 
-  // TODO: useQuery(ADMIN_LIST_QUERY, { variables: { corporateId } })
-  const admins: AdminRow[] = [];
-  const loading = false;
+  const corporateId = useCorporateId();
+  const { data, loading, refetch } = useQuery<AdminsData>(ADMINS_QUERY, {
+    variables: { corporateId },
+    skip: !corporateId,
+  });
+  const admins: AdminRow[] = data?.corporateAdmins?.success?.data ?? [];
+
+  const [invite, { loading: inviting }] = useMutation(ADMIN_INVITE_MUTATION);
 
   if (!canWrite) return <LockedScreen />;
 
   const cols: DataTableColumn<AdminRow>[] = [
     {
-      key: 'fullName',
+      key: 'displayName',
       header: '이름',
-      render: (r) => <span className="font-semibold text-fg">{r.fullName}</span>,
+      render: (r) => <span className="font-semibold text-fg">{r.displayName}</span>,
     },
     {
       key: 'email',
       header: '이메일',
       width: '220px',
-      render: (r) => <span className="text-[12px] text-fg-muted">{r.email}</span>,
+      render: (r) => <span className="text-[12px] text-fg-muted">{r.email ?? '—'}</span>,
     },
     {
-      key: 'role',
+      key: 'roleCode',
       header: '역할',
       width: '140px',
       render: (r) => (
-        <Badge tone={ROLE_TONE[r.role]} size="sm">
-          {ROLE_LABEL[r.role]}
+        <Badge tone={ROLE_TONE[r.roleCode as AdminRole] ?? 'neutral'} size="sm">
+          {ROLE_LABEL[r.roleCode as AdminRole] ?? r.roleCode ?? '—'}
         </Badge>
       ),
     },
@@ -97,8 +102,8 @@ export function SettingsAdminsScreen() {
       header: '상태',
       width: '120px',
       render: (r) => (
-        <Badge tone={STATUS_TONE[r.status]} size="sm" startDot>
-          {STATUS_LABEL[r.status]}
+        <Badge tone={STATUS_TONE[r.status as AdminStatus] ?? 'neutral'} size="sm" startDot>
+          {STATUS_LABEL[r.status as AdminStatus] ?? r.status}
         </Badge>
       ),
     },
@@ -112,52 +117,6 @@ export function SettingsAdminsScreen() {
         </span>
       ),
     },
-    {
-      key: 'actions',
-      header: '액션',
-      width: '100px',
-      render: (r) => (
-        <div className="flex gap-1">
-          {r.status === 'ACTIVE' && (
-            <button
-              type="button"
-              className="rounded px-2 py-1 text-[11px] font-semibold text-danger hover:bg-[var(--danger-soft)]"
-              onClick={(e) => {
-                e.stopPropagation();
-                // TODO: mutation suspendAdmin
-              }}
-            >
-              정지
-            </button>
-          )}
-          {r.status === 'SUSPENDED' && (
-            <button
-              type="button"
-              className="rounded px-2 py-1 text-[11px] font-semibold hover:bg-[var(--success-soft)]"
-              style={{ color: 'var(--success)' }}
-              onClick={(e) => {
-                e.stopPropagation();
-                // TODO: mutation reactivateAdmin
-              }}
-            >
-              복원
-            </button>
-          )}
-          {r.status === 'PENDING_INVITE' && (
-            <button
-              type="button"
-              className="rounded px-2 py-1 text-[11px] font-semibold text-fg-muted hover:bg-[var(--surface-2)]"
-              onClick={(e) => {
-                e.stopPropagation();
-                // TODO: mutation resendInvite
-              }}
-            >
-              재전송
-            </button>
-          )}
-        </div>
-      ),
-    },
   ];
 
   const handleInvite = async (e: React.FormEvent) => {
@@ -167,14 +126,30 @@ export function SettingsAdminsScreen() {
       setError('이메일을 입력해주세요.');
       return;
     }
-    // TODO: mutation inviteAdmin({ email: inviteEmail, role: inviteRole })
-    setInviteEmail('');
-    setInviteRole('VIEWER');
-    setShowInviteForm(false);
-  };
-
-  const handleRefresh = () => {
-    // TODO: refetch query
+    try {
+      const result = await invite({
+        variables: {
+          input: {
+            corporateId,
+            email: inviteEmail,
+            displayName: inviteDisplayName || inviteEmail,
+            roleCode: inviteRole,
+          },
+        },
+      });
+      const gqlError = result.data?.corporateAdminInvite?.error;
+      if (gqlError) {
+        setError(gqlError.message);
+        return;
+      }
+      await refetch();
+      setInviteEmail('');
+      setInviteDisplayName('');
+      setInviteRole('VIEWER');
+      setShowInviteForm(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '초대에 실패했습니다.');
+    }
   };
 
   return (
@@ -188,7 +163,7 @@ export function SettingsAdminsScreen() {
         description: '관리자 계정을 관리하고 새 관리자를 초대합니다.',
         actions: (
           <div className="flex gap-2">
-            <Button variant="ghost" startIcon={<RefreshCw size={14} />} onClick={handleRefresh}>
+            <Button variant="ghost" startIcon={<RefreshCw size={14} />} onClick={() => refetch()}>
               {t('common.refresh')}
             </Button>
             <Button
@@ -220,7 +195,7 @@ export function SettingsAdminsScreen() {
                   {error}
                 </div>
               )}
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[12px] font-semibold text-fg-muted">이메일 *</label>
                   <Input
@@ -229,6 +204,14 @@ export function SettingsAdminsScreen() {
                     placeholder="admin@company.com"
                     type="email"
                     required
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[12px] font-semibold text-fg-muted">이름</label>
+                  <Input
+                    value={inviteDisplayName}
+                    onChange={(e) => setInviteDisplayName(e.target.value)}
+                    placeholder="홍길동"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -250,8 +233,8 @@ export function SettingsAdminsScreen() {
                 <Button type="button" variant="ghost" onClick={() => setShowInviteForm(false)}>
                   {t('common.cancel')}
                 </Button>
-                <Button type="submit" variant="primary">
-                  초대 전송
+                <Button type="submit" variant="primary" disabled={inviting}>
+                  {inviting ? '전송 중...' : '초대 전송'}
                 </Button>
               </div>
             </form>
