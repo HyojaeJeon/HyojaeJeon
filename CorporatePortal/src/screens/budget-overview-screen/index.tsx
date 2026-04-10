@@ -5,9 +5,11 @@ import { RefreshCw } from 'lucide-react';
 import {
   DetailPageTemplate,
   SectionCard,
+  DataTable,
   Button,
   Badge,
   Skeleton,
+  type DataTableColumn,
 } from '@platform/shared-ui';
 import { useI18n } from '@i18n/I18nProvider';
 import { useHasPermission } from '@rbac/useHasPermission';
@@ -16,12 +18,35 @@ import { LockedScreen } from '@screens/common/LockedScreen';
 import { formatCurrency } from '@shared/utils/format';
 import {
   FUNDING_ACCOUNT_QUERY,
+  BUDGET_SUMMARY_QUERY,
+  ALLOWANCE_LOAD_BATCHES_QUERY,
   type FundingAccountData,
   type FundingAccount,
+  type BudgetSummaryData,
+  type AllowanceLoadBatchesData,
+  type AllowanceLoadBatch,
 } from '@graphql/queries/budget';
 import { useCorporateId } from '@shared/hooks/useCorporateId';
 
 type FundingModel = 'UNASSIGNED' | 'PREPAID_DEPOSIT' | 'CREDIT_NET15' | 'CREDIT_NET30';
+
+type BatchStatus = 'PENDING' | 'POSTED' | 'FAILED' | 'PARTIAL_SUCCESS';
+
+const BATCH_STATUS_TONE: Record<BatchStatus, 'neutral' | 'success' | 'danger' | 'warning'> = {
+  PENDING: 'neutral',
+  POSTED: 'success',
+  FAILED: 'danger',
+  PARTIAL_SUCCESS: 'warning',
+};
+
+function getCurrentPeriod(): { periodStart: string; periodEnd: string } {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const periodStart = new Date(year, month, 1).toISOString().slice(0, 10);
+  const periodEnd = new Date(year, month + 1, 0).toISOString().slice(0, 10);
+  return { periodStart, periodEnd };
+}
 
 export function BudgetOverviewScreen() {
   const { t } = useI18n();
@@ -35,7 +60,64 @@ export function BudgetOverviewScreen() {
   const fundingAccount = (data?.mealFundingAccount?.success?.data ?? null) as FundingAccount | null;
   const fundingModel: FundingModel = (fundingAccount?.fundingModel as FundingModel) ?? 'UNASSIGNED';
 
+  const { periodStart, periodEnd } = getCurrentPeriod();
+  const { data: summaryData, loading: summaryLoading } = useQuery<BudgetSummaryData>(BUDGET_SUMMARY_QUERY, {
+    variables: { corporateId, periodStart, periodEnd },
+    skip: !corporateId,
+  });
+
+  const { data: batchesData, loading: batchesLoading } = useQuery<AllowanceLoadBatchesData>(ALLOWANCE_LOAD_BATCHES_QUERY, {
+    variables: { corporateId, skip: 0, take: 10 },
+    skip: !corporateId,
+  });
+
+  const summary = summaryData?.mealBudgetSummary?.success?.data ?? null;
+  const batches = batchesData?.mealAllowanceLoadBatches?.success?.data ?? [];
+
   if (!canRead) return <LockedScreen />;
+
+  const batchColumns: DataTableColumn<AllowanceLoadBatch>[] = [
+    {
+      key: 'createdAt',
+      header: '일시',
+      width: '180px',
+      render: (r) => (
+        <span className="text-[13px] text-fg">
+          {new Date(r.createdAt).toLocaleString('ko-KR')}
+        </span>
+      ),
+    },
+    {
+      key: 'employeeCount',
+      header: '대상인원',
+      width: '100px',
+      align: 'right',
+      render: (r) => (
+        <span className="font-mono text-[13px] text-fg">{r.employeeCount}명</span>
+      ),
+    },
+    {
+      key: 'totalAmountVnd',
+      header: '총액',
+      width: '160px',
+      align: 'right',
+      render: (r) => (
+        <span className="font-mono text-[13px] font-semibold text-fg">
+          {formatCurrency(r.totalAmountVnd)} VND
+        </span>
+      ),
+    },
+    {
+      key: 'status',
+      header: '상태',
+      width: '140px',
+      render: (r) => (
+        <Badge tone={BATCH_STATUS_TONE[r.status as BatchStatus] ?? 'neutral'} size="sm">
+          {r.status}
+        </Badge>
+      ),
+    },
+  ];
 
   const renderFundingCard = () => {
     switch (fundingModel) {
@@ -220,7 +302,7 @@ export function BudgetOverviewScreen() {
       {/* Section 2: 이번 달 포인트 소진 요약 */}
       <div className="mt-4">
         <SectionCard title="이번 달 포인트 소진 요약">
-          {loading ? (
+          {summaryLoading ? (
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
               {Array.from({ length: 5 }).map((_, i) => (
                 <div
@@ -239,9 +321,18 @@ export function BudgetOverviewScreen() {
                 className="rounded-xl border p-5"
                 style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}
               >
-                <p className="text-[12px] font-semibold text-fg-muted">월 예산</p>
+                <p className="text-[12px] font-semibold text-fg-muted">월 총 예산</p>
                 <p className="mt-1 text-lg font-bold text-fg">
-                  {fundingAccount?.monthlyBudgetVnd ? formatCurrency(fundingAccount.monthlyBudgetVnd) : '—'}
+                  {summary?.totalBudgetVnd ? formatCurrency(summary.totalBudgetVnd) : '—'}
+                </p>
+              </div>
+              <div
+                className="rounded-xl border p-5"
+                style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}
+              >
+                <p className="text-[12px] font-semibold text-fg-muted">배정 포인트</p>
+                <p className="mt-1 text-lg font-bold text-fg">
+                  {summary?.totalAllocatedVnd ? formatCurrency(summary.totalAllocatedVnd) : '—'}
                 </p>
               </div>
               <div
@@ -250,7 +341,7 @@ export function BudgetOverviewScreen() {
               >
                 <p className="text-[12px] font-semibold text-fg-muted">사용 포인트</p>
                 <p className="mt-1 text-lg font-bold text-fg">
-                  {fundingAccount?.monthlySpentVnd ? formatCurrency(fundingAccount.monthlySpentVnd) : '—'}
+                  {summary?.totalSpentVnd ? formatCurrency(summary.totalSpentVnd) : '—'}
                 </p>
               </div>
               <div
@@ -259,37 +350,17 @@ export function BudgetOverviewScreen() {
               >
                 <p className="text-[12px] font-semibold text-fg-muted">잔여 포인트</p>
                 <p className="mt-1 text-lg font-bold text-fg">
-                  {fundingAccount?.monthlyBudgetVnd && fundingAccount?.monthlySpentVnd
-                    ? formatCurrency(
-                        Number(fundingAccount.monthlyBudgetVnd) - Number(fundingAccount.monthlySpentVnd),
-                      )
-                    : '—'}
+                  {summary?.totalRemainingVnd ? formatCurrency(summary.totalRemainingVnd) : '—'}
                 </p>
               </div>
               <div
                 className="rounded-xl border p-5"
                 style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}
               >
-                <p className="text-[12px] font-semibold text-fg-muted">계정 상태</p>
-                <p className="mt-1">
-                  <Badge tone={fundingAccount?.status === 'ACTIVE' ? 'success' : 'neutral'} size="sm">
-                    {fundingAccount?.status ?? '—'}
-                  </Badge>
-                </p>
-              </div>
-              <div
-                className="rounded-xl border p-5"
-                style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}
-              >
-                <p className="text-[12px] font-semibold text-fg-muted">최근 입금</p>
+                <p className="text-[12px] font-semibold text-fg-muted">대상 인원</p>
                 <p className="mt-1 text-lg font-bold text-fg">
-                  {fundingAccount?.lastDepositAmountVnd ? formatCurrency(fundingAccount.lastDepositAmountVnd) : '—'}
+                  {summary?.employeeCount != null ? `${summary.employeeCount}명` : '—'}
                 </p>
-                {fundingAccount?.lastDepositAt && (
-                  <p className="text-[11px] text-fg-muted">
-                    {new Date(fundingAccount.lastDepositAt).toLocaleDateString('ko-KR')}
-                  </p>
-                )}
               </div>
             </div>
           )}
@@ -299,14 +370,20 @@ export function BudgetOverviewScreen() {
       {/* Section 3: 충전 이력 */}
       <div className="mt-4">
         <SectionCard title="충전 이력" description="최근 충전/입금 내역" padding="none">
-          {loading ? (
+          {batchesLoading ? (
             <div className="space-y-2 p-4">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Skeleton key={i} height={30} />
               ))}
             </div>
           ) : (
-            <p className="p-4 text-sm text-fg-muted">충전 이력이 없습니다.</p>
+            <DataTable
+              columns={batchColumns}
+              rows={batches}
+              rowKey={(r) => r.id}
+              compact
+              emptyState="충전 이력이 없습니다."
+            />
           )}
         </SectionCard>
       </div>

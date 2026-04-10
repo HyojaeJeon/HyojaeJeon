@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit",
     "check": "npm run typecheck && npm run lint",
     "codegen": "graphql-codegen --config codegen.ts",
-    "codegen:watch": "graphql-codegen --config codegen.ts --watch"
+    "codegen:watch": "graphql-codegen --config codegen.ts --watch",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@apollo/client": "^3.11.0",
@@ -38,6 +40,7 @@
     "@graphql-codegen/cli": "^5.0.7",
     "@graphql-codegen/client-preset": "^4.8.3",
     "@next/eslint-plugin-next": "^16.2.3",
+    "@playwright/test": "^1.59.1",
     "@types/node": "^25.5.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
