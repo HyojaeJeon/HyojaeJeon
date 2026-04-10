@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, ChevronLeft, ChevronRight, Save } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { useQuery, useMutation } from '@apollo/client';
+import { ArrowLeft, ChevronLeft, ChevronRight, Save, Play, PauseCircle, XCircle } from 'lucide-react';
 import {
   DetailPageTemplate,
   SectionCard,
@@ -14,15 +15,35 @@ import { useI18n } from '@i18n/I18nProvider';
 import { useHasPermission } from '@rbac/useHasPermission';
 import { PERMISSIONS } from '@rbac/permissions';
 import { LockedScreen } from '@screens/common/LockedScreen';
+import { useCorporateId } from '@shared/hooks/useCorporateId';
+import {
+  POLICY_DETAIL_QUERY,
+  CREATE_POLICY_MUTATION,
+  UPDATE_POLICY_MUTATION,
+  PUBLISH_POLICY_MUTATION,
+  PAUSE_POLICY_MUTATION,
+  DEACTIVATE_POLICY_MUTATION,
+  type PolicyDetailData,
+  type CreatePolicyData,
+  type UpdatePolicyData,
+  type PublishPolicyData,
+  type PausePolicyData,
+  type DeactivatePolicyData,
+} from '@graphql/queries/policy';
 
 const TAB_NAMES = ['기본 정보', '시간대', '한도', '적용 대상', '머천트/카테고리'] as const;
 
 export function PolicyBuilderScreen() {
   const { t } = useI18n();
   const router = useRouter();
+  const params = useParams<{ id: string }>();
   const canWrite = useHasPermission(PERMISSIONS.POLICY_WRITE);
+  const corporateId = useCorporateId();
+
+  const isNew = params?.id === 'new' || !params?.id;
 
   const [activeTab, setActiveTab] = useState(0);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   // Form state -- Tab 1: 기본 정보
   const [policyCode, setPolicyCode] = useState('');
@@ -41,12 +62,144 @@ export function PolicyBuilderScreen() {
   // Form state -- Tab 4: 적용 대상
   const [targetScope, setTargetScope] = useState<'ALL' | 'DEPARTMENT' | 'RANK'>('ALL');
 
+  /* ── Queries ── */
+  const { data: detailData, loading: detailLoading } = useQuery<PolicyDetailData>(POLICY_DETAIL_QUERY, {
+    variables: { id: params?.id },
+    skip: isNew,
+  });
+
+  const policy = detailData?.mealPolicy?.success?.data ?? null;
+
+  /* ── Prefill form when editing ── */
+  useEffect(() => {
+    if (!policy) return;
+    setPolicyCode(policy.policyCode ?? '');
+    setPolicyName(policy.policyName ?? '');
+    setDescription('');
+    setPriority(0);
+    setEffectiveFrom(policy.effectiveFrom?.slice(0, 10) ?? '');
+    setEffectiveTo(policy.effectiveTo?.slice(0, 10) ?? '');
+    setMaxPerTransactionVnd(policy.maxPerTransactionVnd ?? '');
+    setDailyLimitVnd(policy.dailyLimitVnd ?? '');
+    setAllowSplitPayment(policy.allowSplitPayment ?? false);
+    setAllowCarryover(false);
+    if (policy.appliesToDepartmentIds?.length) {
+      setTargetScope('DEPARTMENT');
+    } else if (policy.appliesToRoleCodes?.length) {
+      setTargetScope('RANK');
+    } else {
+      setTargetScope('ALL');
+    }
+  }, [policy]);
+
+  /* ── Mutations ── */
+  const [createPolicy, { loading: creating }] = useMutation<CreatePolicyData>(CREATE_POLICY_MUTATION);
+  const [updatePolicy, { loading: updating }] = useMutation<UpdatePolicyData>(UPDATE_POLICY_MUTATION);
+  const [publishPolicy, { loading: publishing }] = useMutation<PublishPolicyData>(PUBLISH_POLICY_MUTATION);
+  const [pausePolicy, { loading: pausing }] = useMutation<PausePolicyData>(PAUSE_POLICY_MUTATION);
+  const [deactivatePolicy, { loading: deactivating }] = useMutation<DeactivatePolicyData>(DEACTIVATE_POLICY_MUTATION);
+
+  const saving = creating || updating;
+
   if (!canWrite) return <LockedScreen />;
+
+  const buildInput = () => ({
+    corporateId,
+    policyCode,
+    policyName,
+    effectiveFrom: effectiveFrom || undefined,
+    effectiveTo: effectiveTo || undefined,
+    maxPerTransactionVnd: maxPerTransactionVnd || undefined,
+    dailyLimitVnd: dailyLimitVnd || undefined,
+    allowSplitPayment,
+  });
+
+  const handleSave = async () => {
+    setActionError(null);
+    try {
+      if (isNew) {
+        const result = await createPolicy({ variables: { input: buildInput() } });
+        const err = result.data?.mealPolicyCreate?.error;
+        if (err) {
+          setActionError(err.message);
+          return;
+        }
+        const newId = result.data?.mealPolicyCreate?.success?.data?.id;
+        if (newId) {
+          router.push(`/policies/${newId}`);
+        }
+      } else {
+        const result = await updatePolicy({ variables: { id: params!.id, input: buildInput() } });
+        const err = result.data?.mealPolicyUpdate?.error;
+        if (err) {
+          setActionError(err.message);
+        }
+      }
+    } catch {
+      setActionError('저장 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handlePublish = async () => {
+    setActionError(null);
+    try {
+      const result = await publishPolicy({ variables: { id: params!.id } });
+      const err = result.data?.mealPolicyPublish?.error;
+      if (err) {
+        setActionError(err.message);
+      }
+    } catch {
+      setActionError('발행 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handlePause = async () => {
+    setActionError(null);
+    try {
+      const result = await pausePolicy({ variables: { id: params!.id } });
+      const err = result.data?.mealPolicyPause?.error;
+      if (err) {
+        setActionError(err.message);
+      }
+    } catch {
+      setActionError('일시 중지 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleDeactivate = async () => {
+    setActionError(null);
+    try {
+      const result = await deactivatePolicy({ variables: { id: params!.id } });
+      const err = result.data?.mealPolicyDeactivate?.error;
+      if (err) {
+        setActionError(err.message);
+      }
+    } catch {
+      setActionError('비활성화 중 오류가 발생했습니다.');
+    }
+  };
 
   const goNext = () => setActiveTab((prev) => Math.min(prev + 1, TAB_NAMES.length - 1));
   const goPrev = () => setActiveTab((prev) => Math.max(prev - 1, 0));
 
+  const policyStatus = policy?.status ?? null;
+  const canPublish = !isNew && (policyStatus === 'DRAFT' || policyStatus === 'PAUSED');
+  const canPause = !isNew && policyStatus === 'ACTIVE';
+  const canDeactivate = !isNew && (policyStatus === 'ACTIVE' || policyStatus === 'PAUSED');
+
   const renderTab = () => {
+    if (!isNew && detailLoading) {
+      return (
+        <SectionCard title="로딩 중...">
+          <div className="space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} height={40} />
+            ))}
+          </div>
+        </SectionCard>
+      );
+    }
+
     switch (activeTab) {
       /* --- Tab 1: 기본 정보 --- */
       case 0:
@@ -259,9 +412,9 @@ export function PolicyBuilderScreen() {
       header={{
         breadcrumbs: [
           { label: t('nav.policies'), href: '/policies' },
-          { label: '정책 편집' },
+          { label: isNew ? '새 정책' : (policy?.policyName ?? '정책 편집') },
         ],
-        title: '정책 빌더',
+        title: isNew ? '새 정책 만들기' : '정책 빌더',
         description: '탭별로 정책 세부 항목을 설정합니다.',
         actions: (
           <div className="flex gap-2">
@@ -272,13 +425,78 @@ export function PolicyBuilderScreen() {
             >
               {t('common.back')}
             </Button>
-            <Button variant="primary" startIcon={<Save size={14} />}>
+            {canPublish && (
+              <Button
+                variant="ghost"
+                startIcon={<Play size={14} />}
+                onClick={handlePublish}
+                loading={publishing}
+              >
+                발행
+              </Button>
+            )}
+            {canPause && (
+              <Button
+                variant="ghost"
+                startIcon={<PauseCircle size={14} />}
+                onClick={handlePause}
+                loading={pausing}
+              >
+                일시 중지
+              </Button>
+            )}
+            {canDeactivate && (
+              <Button
+                variant="danger"
+                startIcon={<XCircle size={14} />}
+                onClick={handleDeactivate}
+                loading={deactivating}
+              >
+                비활성화
+              </Button>
+            )}
+            <Button
+              variant="primary"
+              startIcon={<Save size={14} />}
+              onClick={handleSave}
+              loading={saving}
+            >
               저장
             </Button>
           </div>
         ),
       }}
     >
+      {/* Error banner */}
+      {actionError && (
+        <div
+          className="mb-4 rounded-lg border px-4 py-3 text-sm text-[var(--danger)]"
+          style={{ borderColor: 'var(--danger)', background: 'var(--danger-soft, rgba(239,68,68,0.08))' }}
+        >
+          {actionError}
+        </div>
+      )}
+
+      {/* Status badge for existing policies */}
+      {!isNew && policyStatus && (
+        <div className="mb-4">
+          <Badge
+            tone={
+              policyStatus === 'ACTIVE'
+                ? 'success'
+                : policyStatus === 'PAUSED'
+                  ? 'warning'
+                  : policyStatus === 'INACTIVE'
+                    ? 'neutral'
+                    : 'info'
+            }
+            size="sm"
+          >
+            {policyStatus}
+          </Badge>
+        </div>
+      )}
+
       {/* Tab Bar */}
       <div className="mb-4 flex gap-1 overflow-x-auto rounded-xl border p-1" style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}>
         {TAB_NAMES.map((name, idx) => (

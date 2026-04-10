@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
+import { useQuery, useMutation } from '@apollo/client';
 import { ArrowLeft, Pencil, PauseCircle, UserX, Info } from 'lucide-react';
 import {
   DetailPageTemplate,
@@ -16,10 +17,14 @@ import { useI18n } from '@i18n/I18nProvider';
 import { useHasPermission } from '@rbac/useHasPermission';
 import { PERMISSIONS } from '@rbac/permissions';
 import { LockedScreen } from '@screens/common/LockedScreen';
-import { EMPLOYEE_DETAIL_QUERY } from '@graphql/queries/employee';
-
-// Keep EMPLOYEE_DETAIL_QUERY imported for future wiring
-void EMPLOYEE_DETAIL_QUERY;
+import {
+  EMPLOYEE_DETAIL_QUERY,
+  TERMINATE_EMPLOYEE_MUTATION,
+  type EmployeeDetailData,
+  type EmployeeDetail as ServerEmployeeDetail,
+  type EmployeeFundingEntry,
+  type TerminateEmployeeData,
+} from '@graphql/queries/employee';
 
 type EmploymentType = 'FULL_TIME' | 'CONTRACT' | 'DISPATCH' | 'CONTRACTOR_AGENCY';
 type WalletStatus = 'ACTIVE' | 'SUSPENDED' | 'FROZEN' | 'CLOSED';
@@ -140,23 +145,74 @@ function formatVnd(value: number): string {
   return `${prefix}${value.toLocaleString('ko-KR')}`;
 }
 
+/** Map server-shape employee to local EmployeeDetail interface */
+function mapServerToLocal(server: ServerEmployeeDetail): EmployeeDetail {
+  const wallet = server.wallet;
+  return {
+    id: server.id,
+    employeeCode: server.employeeCode,
+    fullName: server.fullName,
+    email: server.email ?? '',
+    phone: server.phone ?? '',
+    departmentName: server.departmentName ?? '',
+    employmentType: (server.employmentType as EmploymentType) ?? 'FULL_TIME',
+    hireDate: server.createdAt?.slice(0, 10) ?? '',
+    walletStatus: (wallet?.status as WalletStatus) ?? (server.walletStatus as WalletStatus) ?? 'CLOSED',
+    isExternalSync: server.isExternalSync,
+    allowance: {
+      corporateFunding: wallet ? Number(wallet.companyAllowanceVnd) : 0,
+      personalBalance: wallet ? Number(wallet.personalTopUpVnd) : 0,
+      availableTotal: wallet ? Number(wallet.balanceVnd) : 0,
+      dailyLimit: wallet?.dailyLimitVnd ? Number(wallet.dailyLimitVnd) : 0,
+    },
+  };
+}
+
+/** Map server funding entries to local LedgerEntry[] */
+function mapFundingEntries(entries: EmployeeFundingEntry[]): LedgerEntry[] {
+  return entries.map((e) => ({
+    id: e.id,
+    datetime: new Date(e.createdAt).toLocaleString('ko-KR'),
+    sourceType: (e.sourceType === 'PERSONAL_TOP_UP' ? 'PERSONAL_TOP_UP' : 'COMPANY_ALLOWANCE') as LedgerSourceType,
+    amountVnd: Number(e.amountVnd),
+    status: 'POSTED' as LedgerStatus,
+    memo: e.memo,
+  }));
+}
+
 export function EmployeeDetailScreen() {
   const { t } = useI18n();
   const router = useRouter();
+  const params = useParams<{ id: string }>();
   const canRead = useHasPermission(PERMISSIONS.EMPLOYEE_READ);
   const canWrite = useHasPermission(PERMISSIONS.EMPLOYEE_WRITE);
 
   const [activeTab, setActiveTab] = useState<TabKey>('overview');
+  const [showTerminateDialog, setShowTerminateDialog] = useState(false);
+  const [terminateReason, setTerminateReason] = useState('');
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  /* ── Queries ── */
+  const { data, loading } = useQuery<EmployeeDetailData>(EMPLOYEE_DETAIL_QUERY, {
+    variables: { id: params?.id },
+    skip: !params?.id,
+  });
+
+  const serverEmployee = data?.mealEmployee?.success?.data ?? null;
+  const employee: EmployeeDetail | null = serverEmployee ? mapServerToLocal(serverEmployee) : null;
+
+  // Tab 2: ledger data from funding entries
+  const ledgerEntries: LedgerEntry[] = serverEmployee?.fundingEntries
+    ? mapFundingEntries(serverEmployee.fundingEntries)
+    : [];
+
+  // Tab 3: transaction data — separate query needed, keep empty for now
+  const transactionEntries: TransactionEntry[] = [];
+
+  /* ── Mutations ── */
+  const [terminateEmployee, { loading: terminating }] = useMutation<TerminateEmployeeData>(TERMINATE_EMPLOYEE_MUTATION);
 
   if (!canRead) return <LockedScreen />;
-
-  // TODO: useQuery(EMPLOYEE_DETAIL_QUERY, { variables: { employeeId: params.id } })
-  const loading = false;
-  const employee = null as EmployeeDetail | null;
-
-  // TODO: wire up ledger + transaction data from query
-  const ledgerEntries: LedgerEntry[] = [];
-  const transactionEntries: TransactionEntry[] = [];
 
   const handleEdit = () => {
     // TODO: Open edit modal or navigate to edit page
@@ -167,7 +223,24 @@ export function EmployeeDetailScreen() {
   };
 
   const handleTerminate = () => {
-    // TODO: Call employeeTerminate mutation
+    setShowTerminateDialog(true);
+  };
+
+  const handleConfirmTerminate = async () => {
+    setActionError(null);
+    try {
+      const result = await terminateEmployee({
+        variables: { id: params!.id },
+      });
+      const err = result.data?.mealEmployeeTerminate?.error;
+      if (err) {
+        setActionError(err.message);
+        return;
+      }
+      router.push('/employees');
+    } catch {
+      setActionError('퇴사 처리 중 오류가 발생했습니다.');
+    }
   };
 
   /* ── Ledger columns ── */
@@ -338,6 +411,59 @@ export function EmployeeDetailScreen() {
         },
       ]}
     >
+      {/* Terminate confirm dialog */}
+      {showTerminateDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div
+            className="w-full max-w-md rounded-xl border p-6 shadow-xl"
+            style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
+          >
+            <h3 className="text-lg font-bold text-fg">퇴사 처리 확인</h3>
+            <p className="mt-2 text-sm text-fg-muted">
+              <strong>{employee?.fullName ?? '해당 임직원'}</strong>을(를) 퇴사 처리하시겠습니까?
+            </p>
+            <ul className="mt-3 space-y-1 text-sm text-fg-muted">
+              <li>- 지갑이 즉시 동결(FROZEN)됩니다.</li>
+              <li>- 잔여 회사 지원금 포인트가 회수됩니다.</li>
+              <li>- 개인 충전 잔액은 환불 처리됩니다.</li>
+              <li>- 이 작업은 되돌릴 수 없습니다.</li>
+            </ul>
+            <div className="mt-4 flex flex-col gap-1.5">
+              <label className="text-[12px] font-semibold text-fg-muted">퇴사 사유 (선택)</label>
+              <textarea
+                className="rounded-lg border px-3 py-2 text-sm"
+                style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}
+                rows={2}
+                value={terminateReason}
+                onChange={(e) => setTerminateReason(e.target.value)}
+                placeholder="퇴사 사유를 입력하세요."
+              />
+            </div>
+            {actionError && (
+              <p className="mt-2 text-sm text-[var(--danger)]">{actionError}</p>
+            )}
+            <div className="mt-5 flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => { setShowTerminateDialog(false); setActionError(null); }}>
+                취소
+              </Button>
+              <Button variant="danger" onClick={handleConfirmTerminate} loading={terminating}>
+                퇴사 처리 확인
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error banner */}
+      {actionError && !showTerminateDialog && (
+        <div
+          className="mb-3 rounded-lg border px-4 py-3 text-sm text-[var(--danger)]"
+          style={{ borderColor: 'var(--danger)', background: 'var(--danger-soft, rgba(239,68,68,0.08))' }}
+        >
+          {actionError}
+        </div>
+      )}
+
       {/* External sync banner */}
       {employee?.isExternalSync && (
         <div className="mb-3 flex items-center gap-2 rounded-md border border-[var(--info)] bg-[var(--info-soft,rgba(59,130,246,0.08))] px-4 py-3 text-[13px] text-fg">
@@ -473,7 +599,6 @@ export function EmployeeDetailScreen() {
 
       {activeTab === 'ledger' && (
         <SectionCard title="원장(포인트 거래 내역)" description="회사 지원금 입출금 내역" padding="none">
-          {/* TODO: useQuery(EMPLOYEE_DETAIL_QUERY) and wire ledgerEntries */}
           <DataTable
             columns={ledgerColumns}
             rows={ledgerEntries}
@@ -486,7 +611,7 @@ export function EmployeeDetailScreen() {
 
       {activeTab === 'transactions' && (
         <SectionCard title="거래 내역" description="결제 및 사용 내역" padding="none">
-          {/* TODO: useQuery(EMPLOYEE_TRANSACTIONS_QUERY) and wire transactionEntries */}
+          {/* TODO: useQuery(EMPLOYEE_TRANSACTIONS_QUERY) — separate query needed */}
           <DataTable
             columns={transactionColumns}
             rows={transactionEntries}
