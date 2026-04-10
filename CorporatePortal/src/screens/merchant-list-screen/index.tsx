@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery, useMutation } from '@apollo/client';
+import { RefreshCw } from 'lucide-react';
 import {
   DetailPageTemplate,
   SectionCard,
@@ -15,19 +17,16 @@ import { useHasPermission } from '@rbac/useHasPermission';
 import { PERMISSIONS } from '@rbac/permissions';
 import { LockedScreen } from '@screens/common/LockedScreen';
 import { formatCurrency } from '@shared/utils/format';
+import {
+  ENROLLED_MERCHANTS_QUERY,
+  MERCHANT_ALLOW_TOGGLE_MUTATION,
+  type EnrolledMerchantsData,
+  type MerchantRow,
+} from '@graphql/queries/merchant';
+import { useCorporateId } from '@shared/hooks/useCorporateId';
 
 type LoopType = 'OPEN_LOOP' | 'CLOSED_LOOP';
 type CategoryFilter = '전체' | '한식' | '베트남식' | '카페' | '편의점' | '배달';
-
-interface MerchantRow {
-  id: string;
-  merchantName: string;
-  category: string;
-  loopType: LoopType;
-  monthlyTxCount: number;
-  monthlyAmountVnd: number;
-  allowed: boolean;
-}
 
 const CATEGORY_FILTERS: CategoryFilter[] = ['전체', '한식', '베트남식', '카페', '편의점', '배달'];
 
@@ -43,16 +42,26 @@ export function MerchantListScreen() {
 
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>('전체');
 
-  // TODO: useQuery(MERCHANT_LIST_QUERY, { variables: { corporateId, category } })
-  const merchants: MerchantRow[] = [];
-  const loading = false;
+  const corporateId = useCorporateId();
+  const { data, loading, refetch } = useQuery<EnrolledMerchantsData>(ENROLLED_MERCHANTS_QUERY, {
+    variables: { corporateId, skip: 0, take: 200 },
+    skip: !corporateId,
+  });
+  const merchants: MerchantRow[] = data?.mealEnrolledMerchants?.success?.data ?? [];
+
+  const [toggleAllow] = useMutation(MERCHANT_ALLOW_TOGGLE_MUTATION);
 
   if (!canRead) return <LockedScreen />;
 
-  const handleAllowToggle = (merchantId: string, currentAllowed: boolean) => {
-    // TODO: mealCorporateMerchantAllowToggle mutation
-    // mutate({ variables: { merchantId, allowed: !currentAllowed } })
-    console.log(`Toggle merchant ${merchantId} from ${currentAllowed} to ${!currentAllowed}`);
+  const handleAllowToggle = async (merchantId: string, currentAllowed: boolean) => {
+    try {
+      await toggleAllow({
+        variables: { corporateId, merchantId, isAllowed: !currentAllowed },
+      });
+      await refetch();
+    } catch (err) {
+      console.error('Toggle failed:', err);
+    }
   };
 
   const filteredMerchants =
@@ -62,9 +71,14 @@ export function MerchantListScreen() {
 
   const cols: DataTableColumn<MerchantRow>[] = [
     {
-      key: 'merchantName',
+      key: 'brandName',
       header: '식당명',
-      render: (r) => <span className="font-semibold text-fg">{r.merchantName}</span>,
+      render: (r) => (
+        <div>
+          <span className="font-semibold text-fg">{r.brandName}</span>
+          {r.branchName && <span className="ml-2 text-[12px] text-fg-muted">{r.branchName}</span>}
+        </div>
+      ),
     },
     {
       key: 'category',
@@ -72,7 +86,7 @@ export function MerchantListScreen() {
       width: '120px',
       render: (r) => (
         <Badge tone="neutral" size="sm">
-          {r.category}
+          {r.category ?? '—'}
         </Badge>
       ),
     },
@@ -81,43 +95,43 @@ export function MerchantListScreen() {
       header: 'loopType',
       width: '140px',
       render: (r) => (
-        <Badge tone={LOOP_TYPE_TONE[r.loopType]} size="sm">
+        <Badge tone={LOOP_TYPE_TONE[r.loopType as LoopType] ?? 'neutral'} size="sm">
           {r.loopType === 'OPEN_LOOP' ? 'Open Loop' : 'Closed Loop'}
         </Badge>
       ),
     },
     {
-      key: 'monthlyTxCount',
+      key: 'monthlyUsageCount',
       header: '이번달 이용건수',
       width: '130px',
-      render: (r) => <span className="num font-semibold">{r.monthlyTxCount}건</span>,
+      render: (r) => <span className="num font-semibold">{r.monthlyUsageCount}건</span>,
     },
     {
-      key: 'monthlyAmount',
+      key: 'monthlyUsageAmountVnd',
       header: '이번달 금액',
       width: '150px',
       render: (r) => (
-        <span className="num font-semibold">{formatCurrency(r.monthlyAmountVnd)}</span>
+        <span className="num font-semibold">{formatCurrency(r.monthlyUsageAmountVnd)}</span>
       ),
     },
     ...(canWrite
       ? [
           {
-            key: 'allowed' as const,
+            key: 'isAllowed' as const,
             header: '허용',
             width: '80px',
             render: (r: MerchantRow) => (
               <button
                 type="button"
                 role="switch"
-                aria-checked={r.allowed}
-                onClick={() => handleAllowToggle(r.id, r.allowed)}
+                aria-checked={r.isAllowed}
+                onClick={() => handleAllowToggle(r.id, r.isAllowed)}
                 className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors"
-                style={{ background: r.allowed ? 'var(--brand)' : 'var(--border)' }}
+                style={{ background: r.isAllowed ? 'var(--brand)' : 'var(--border)' }}
               >
                 <span
                   className="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform"
-                  style={{ transform: r.allowed ? 'translateX(20px)' : 'translateX(0)' }}
+                  style={{ transform: r.isAllowed ? 'translateX(20px)' : 'translateX(0)' }}
                 />
               </button>
             ),
@@ -132,6 +146,13 @@ export function MerchantListScreen() {
         breadcrumbs: [{ label: t('nav.merchants') }],
         title: t('nav.merchants'),
         description: '가맹 식당 목록을 조회하고 허용 여부를 관리합니다.',
+        actions: (
+          <div className="flex gap-2">
+            <Button variant="ghost" startIcon={<RefreshCw size={14} />} onClick={() => refetch()}>
+              {t('common.refresh')}
+            </Button>
+          </div>
+        ),
       }}
       summaryItems={[
         { label: '가맹점 수', value: filteredMerchants.length, tone: 'brand' },
