@@ -7,22 +7,25 @@
  *             của terminal Edge POS cụ thể.
  *             Nhận đồng bộ hướng lên qua REST webhook (SyncController), resolver này chỉ dùng để truy vấn.
  */
-import { Args, ID, Query, Resolver } from '@nestjs/graphql';
-import { UseGuards } from '@nestjs/common';
+import { Args, ID, Query, Resolver, Subscription } from '@nestjs/graphql';
 import { SyncService } from './sync.service';
 import { SyncStatusModel } from './models/sync-status.model';
+import { SyncEventModel } from './models/sync-event.model';
 import { SyncEventConnectionModel } from './models/sync-event-connection.model';
 import { SyncEventConnectionArgs } from './dto/sync-event-connection.args';
-import { GqlAuthGuard } from '@core/auth/guards/gql-auth.guard';
 import { createObjectResponse } from '@core/response/operation-response.factory';
+import { GraphqlSubscriptionBusService } from '@core/graphql/subscriptions/graphql-subscription-bus.service';
+import { RequirePermission } from '@core/rbac/decorators/require-permission.decorator';
 
 const SyncEventConnectionModel__Resp = createObjectResponse(SyncEventConnectionModel, 'SyncEventConnectionModelResponse');
 const SyncStatusModel__Resp = createObjectResponse(SyncStatusModel, 'SyncStatusModelResponse');
 
 @Resolver(() => SyncStatusModel)
-
 export class SyncResolver {
-  constructor(private readonly syncService: SyncService) {}
+  constructor(
+    private readonly syncService: SyncService,
+    private readonly subscriptionBus: GraphqlSubscriptionBusService,
+  ) {}
 
   /**
    * 한국어: 특정 Edge POS 단말의 동기화 상태 조회 — lastSyncAt, lastHeartbeatAt, status 반환.
@@ -38,5 +41,27 @@ export class SyncResolver {
     @Args() filter: SyncEventConnectionArgs,
   ): Promise<SyncEventConnectionModel> {
     return this.syncService.findEventConnection(filter);
+  }
+
+  @RequirePermission('edgepos.report.read')
+  @Subscription(() => SyncEventModel, {
+    name: 'syncEventReceived',
+    filter: (
+      payload: { syncEventReceived?: SyncEventModel },
+      variables: { edgePosId?: string; eventType?: string },
+    ) => {
+      const event = payload.syncEventReceived;
+      if (!event) return false;
+      if (variables.edgePosId && event.edgePosId !== variables.edgePosId) return false;
+      if (variables.eventType && event.eventType !== variables.eventType) return false;
+      return true;
+    },
+    resolve: (payload: { syncEventReceived?: SyncEventModel }) => payload.syncEventReceived,
+  })
+  syncEventReceived(
+    @Args('edgePosId', { type: () => ID, nullable: true }) _edgePosId?: string,
+    @Args('eventType', { type: () => String, nullable: true }) _eventType?: string,
+  ) {
+    return this.subscriptionBus.asyncIterator<SyncEventModel>('syncEventReceived');
   }
 }

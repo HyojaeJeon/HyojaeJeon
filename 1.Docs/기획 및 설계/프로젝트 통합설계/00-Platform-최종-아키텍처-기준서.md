@@ -343,7 +343,7 @@ flowchart TD
 - 서버 상태: Apollo Client
 - 계약: GraphQL-first
 - 중앙 연결: `SuperAdmin/CentralApi`
-- 주요 기능: 브랜드 온보딩, 라이선스, 버전 배포, 장애 모니터링, 원격 지원, 글로벌 감사 로그
+- 주요 기능: 브랜드 온보딩, 라이선스, 버전 배포, 장애 모니터링, 원격 지원, 글로벌 감사 로그, **플랫폼별 계정·역할·권한 통합 관리 (`/governance/tenant-users`, 화면 ID `SA-TENANT-USER-001`)**
 - 금지: 브랜드 실무 운영 화면을 여기서 중복 구현하지 않음
 
 #### Tiếng Việt

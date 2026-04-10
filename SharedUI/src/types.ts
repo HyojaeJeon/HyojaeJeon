@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 
-export type SharedUiTone = 'neutral' | 'brand' | 'success' | 'warning' | 'danger';
+export type SharedUiTone = 'neutral' | 'brand' | 'success' | 'warning' | 'danger' | 'info';
 
-export type SharedUiButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
+export type SharedUiButtonVariant = 'primary' | 'secondary' | 'ghost' | 'outline' | 'danger';
 
 export type SharedUiButtonSize = 'sm' | 'md' | 'lg';
 
@@ -16,6 +16,8 @@ export interface SharedUiStat {
   value: ReactNode;
   hint?: ReactNode;
   tone?: SharedUiTone;
+  icon?: ReactNode;
+  trend?: { direction: 'up' | 'down' | 'flat'; label: ReactNode };
 }
 
 export interface DataTableColumn<T> {
@@ -32,5 +34,6 @@ export interface DataTableProps<T> {
   rowKey: (row: T, index: number) => string;
   emptyState?: ReactNode;
   caption?: ReactNode;
+  compact?: boolean;
+  onRowClick?: (row: T, index: number) => void;
 }
-

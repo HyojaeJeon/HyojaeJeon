@@ -1,6 +1,7 @@
 # PosUi
 
 `경로`: `/BrandPosApp/PosUi`
+`로컬 dev port`: `3002`
 
 ## 역할
 

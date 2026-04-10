@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-04-08T08:19:57.032Z",
-  "operationCount": 38,
+  "generatedAt": "2026-04-09T10:18:53.504Z",
+  "operationCount": 47,
   "operations": [
     {
       "operationName": "AuditLogConnection",
@@ -103,12 +103,20 @@
       "sha256Hash": "71eb1c10f236109b83a33cc4c56516605646214cc48a7df97e3f98e11dfc051c"
     },
     {
+      "operationName": "RbacCreatePermission",
+      "sha256Hash": "ceda9c50d4f16e3f0c2e8e05c2a1d345438fc6b32177c9ff82933a97c2912048"
+    },
+    {
       "operationName": "RbacCreateRole",
-      "sha256Hash": "89f64613cbe28c799b1f716226d728c24ef63e9c29cc64dee7274d91ace4abab"
+      "sha256Hash": "a079b0d1a938ebe3852a68764347ae7f3a57f086386b144af9f2f74ac6abbb27"
+    },
+    {
+      "operationName": "RbacDeletePermission",
+      "sha256Hash": "14291ffd5ebe4247db4d14b4a57658c19e3c4abf5f239e2c8601aa9bf34ee2fd"
     },
     {
       "operationName": "RbacDeleteRole",
-      "sha256Hash": "395074fda3cb2979ba097f3ef5c73e51834af07838b9a61d749895339882b055"
+      "sha256Hash": "d924d0a9452f1304aeff5bc46b94360734db8f6c4b76cb7ea50892eade7e1e84"
     },
     {
       "operationName": "RbacEffectivePermissions",
@@ -116,11 +124,11 @@
     },
     {
       "operationName": "RbacListPermissions",
-      "sha256Hash": "da4a62726afdb83d19f8af6dd09a03f2a738970945e34201f6cdfcbd164f65bf"
+      "sha256Hash": "2b05dfd34705bb9f192b30f8099bc2878b8b0ed9d0593988e5703b4a1895b9a0"
     },
     {
       "operationName": "RbacListRoles",
-      "sha256Hash": "4fae3f008cc24eb4579912f2bde7800cefd4e40e4b90493287adb347e4f25043"
+      "sha256Hash": "e19aa931b31c20d94627c3df0b26b0388e7224bba34f56c96d96edec0e2100d8"
     },
     {
       "operationName": "RbacRemovePermissionFromRole",
@@ -132,19 +140,47 @@
     },
     {
       "operationName": "RbacRolePermissions",
-      "sha256Hash": "a6c4de60f6fc7c26a1ae1eafedfbdc80e3f2d3eab9b3daa56a62f59dec40c284"
+      "sha256Hash": "6d593cee312bb1c74e427b39bb4f6849033b497beaa510814c1e4cc3b7d439c2"
+    },
+    {
+      "operationName": "RbacUpdatePermission",
+      "sha256Hash": "66a5a1b5fc1280b721576bae050a4c561e894bb6553a4a5a5a62dad41a03eeae"
     },
     {
       "operationName": "RbacUpdateRole",
-      "sha256Hash": "9cd5a5b46e142aa168c69f973edff718a0abad381fe1ee69f46b83e1fec9748f"
+      "sha256Hash": "ac065caae1f5a4a4e3c1c27a4452e6b3f28a5ace91c28a53d12aed247a303c24"
     },
     {
       "operationName": "RbacUserAssignments",
       "sha256Hash": "d73cb12858583cc55716a287f328ccbb387514955b9e3058d08343ef0329622c"
     },
     {
+      "operationName": "ResetAuthAccountPassword",
+      "sha256Hash": "108f1097ce3ff74694778d0c1babaf7e54469d42f9b947305329cc53be44f136"
+    },
+    {
+      "operationName": "SuspendAuthAccount",
+      "sha256Hash": "e7df0b2cdb085b483270c0b4e59db63684908af9c11eca0904e64a1968a966c8"
+    },
+    {
       "operationName": "SyncEventConnection",
       "sha256Hash": "7aea3731f8cac5cfb886e98f158dcd0d0e8fb5140c239574651ba390a444f0d7"
+    },
+    {
+      "operationName": "TenantUserScreenBootstrap",
+      "sha256Hash": "a5ab237c0b68de78ea0f1b036ba1e031dfb29cbf1c34b249ad8e8efd585eb86b"
+    },
+    {
+      "operationName": "TenantUserScreenMatrix",
+      "sha256Hash": "0674289b7524d5b2e8cc71c74e9872f6b8fbab1ba1485a46acea28a2f4fced8a"
+    },
+    {
+      "operationName": "TenantUserScreenRoles",
+      "sha256Hash": "737acdadf6375b0798c707bc4622ce91ea90c12f0f6dec31c07578f56255b2b5"
+    },
+    {
+      "operationName": "TenantUserScreenUsers",
+      "sha256Hash": "03a33783f3110e34b990455904ed3d8e4662956b4a223ae620bda37cbf40c6b9"
     },
     {
       "operationName": "TopUpMealWallet",

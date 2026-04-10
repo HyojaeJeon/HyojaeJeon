@@ -42,7 +42,7 @@ export class AuthResolver {
   @RequirePermission('platform.user.read')
   @Query(() => AuthAccountModel__ListResp)
   async authAccounts(
-    @Args('userType', { nullable: true }) userType: string | null,
+    @Args('userType', { type: () => String, nullable: true }) userType: string | null,
     @Args() pagination: PaginationArgs,
   ): Promise<AuthAccountModel[]> {
     return this.authService.findAll(pagination.skip, pagination.take, userType ?? undefined);
@@ -97,6 +97,51 @@ export class AuthResolver {
       userId: actor.sub,
       tenantContext: actor.tenantContext,
     });
+  }
+
+  @RequirePermission('platform.user.write')
+  @Mutation(() => AuthAccountModel__Resp)
+  async suspendAuthAccount(
+    @Args('userType') userType: string,
+    @Args('id', { type: () => ID }) id: string,
+    @Args('nextStatus') nextStatus: string,
+    @Args('reason', { type: () => String, nullable: true }) reason: string | null,
+    @CurrentUser() actor: JwtPayload,
+  ): Promise<AuthAccountModel> {
+    if (nextStatus !== 'ACTIVE' && nextStatus !== 'SUSPENDED') {
+      throw new DomainError({ code: 'VALIDATION_ERROR', details: { reason: 'nextStatus must be ACTIVE or SUSPENDED' } });
+    }
+    return this.authService.suspendAccount(
+      userType as AuthUserType,
+      id,
+      nextStatus,
+      reason,
+      {
+        userType: actor.userType,
+        userId: actor.sub,
+        tenantContext: actor.tenantContext,
+      },
+    );
+  }
+
+  @RequirePermission('platform.user.write')
+  @Mutation(() => BooleanResponse)
+  async resetAuthAccountPassword(
+    @Args('userType') userType: string,
+    @Args('id', { type: () => ID }) id: string,
+    @Args('newPassword') newPassword: string,
+    @CurrentUser() actor: JwtPayload,
+  ): Promise<boolean> {
+    return this.authService.resetAccountPassword(
+      userType as AuthUserType,
+      id,
+      newPassword,
+      {
+        userType: actor.userType,
+        userId: actor.sub,
+        tenantContext: actor.tenantContext,
+      },
+    );
   }
 
   @SelfAction()

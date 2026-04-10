@@ -14,6 +14,11 @@
 - `SuperAdmin/Portal`은 독립 웹 앱, `SuperAdmin/CentralApi`는 백엔드, `SuperAdmin/SyncWorkers`는 워커다.
 - 공용 자산 원본과 공통 계약은 빌드 산출물과 분리해서 관리한다.
 
+### 로컬 개발 포트
+- `SuperAdmin/Portal`: `3001`
+- `BrandPosApp/PosUi`: `3002`
+- `CorporatePortal`: `3003`
+
 ### 규칙
 - 설계 문서와 CLAUDE.md를 최우선 기준으로 삼는다.
 - 루트는 조정과 설명의 위치이지, 하위 계층 책임을 구현하는 위치가 아니다.
@@ -39,6 +44,11 @@
 - Toàn bộ cấu trúc của `BrandPosApp`(bao gồm mode Setup/Maintenance), `BrandAdminPortal`, `SuperAdmin`, `SharedKernel`, `SharedContracts`, `SharedAssets` và `1.Docs`
 - Bên trong `SuperAdmin` có các thư mục `Portal`, `CentralApi`, `SyncWorkers`.
 - Nguồn tài sản chung và contract chung phải được quản lý tách khỏi artifact build.
+
+### Cổng dev cục bộ
+- `SuperAdmin/Portal`: `3001`
+- `BrandPosApp/PosUi`: `3002`
+- `CorporatePortal`: `3003`
 
 ### Quy tắc
 - Luôn lấy tài liệu thiết kế và CLAUDE.md làm chuẩn ưu tiên cao nhất.

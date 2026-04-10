@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { sharedUiTokens } from '../foundation/tokens';
+import { sharedUiTokens as T } from '../foundation/tokens';
 import { PageHeader, type PageHeaderProps } from '../composites/page-header';
 import { SummaryStrip } from '../composites/summary-strip';
 import type { SharedUiStat } from '../types';
@@ -11,18 +11,38 @@ export interface DashboardPageTemplateProps {
   secondary?: ReactNode;
 }
 
-export function DashboardPageTemplate({ header, metrics, primary, secondary }: DashboardPageTemplateProps) {
+export function DashboardPageTemplate({
+  header,
+  metrics,
+  primary,
+  secondary,
+}: DashboardPageTemplateProps) {
   return (
-    <main style={{ minHeight: '100vh', background: sharedUiTokens.colors.page }}>
-      <div style={{ maxWidth: sharedUiTokens.layout.pageWidth, margin: '0 auto', padding: `0 ${sharedUiTokens.spacing.xl} ${sharedUiTokens.spacing['3xl']}` }}>
-        <PageHeader {...header} />
-        {metrics && metrics.length > 0 && <SummaryStrip items={metrics} />}
-        <div style={{ display: 'grid', gridTemplateColumns: secondary ? 'minmax(0, 1fr) 360px' : 'minmax(0, 1fr)', gap: sharedUiTokens.spacing.xl, marginTop: sharedUiTokens.spacing.xl }}>
-          <section>{primary}</section>
-          {secondary && <aside>{secondary}</aside>}
+    <div
+      style={{
+        padding: `0 ${T.spacing.xl} ${T.spacing['2xl']}`,
+        maxWidth: T.layout.pageWidth,
+        margin: '0 auto',
+      }}
+    >
+      <PageHeader {...header} />
+      {metrics && metrics.length > 0 && (
+        <div style={{ marginBottom: T.spacing.lg }}>
+          <SummaryStrip items={metrics} />
         </div>
+      )}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: secondary ? 'minmax(0, 1fr) 380px' : 'minmax(0, 1fr)',
+          gap: T.spacing.lg,
+        }}
+      >
+        <section style={{ minWidth: 0, display: 'grid', gap: T.spacing.md }}>{primary}</section>
+        {secondary && (
+          <aside style={{ display: 'grid', gap: T.spacing.md }}>{secondary}</aside>
+        )}
       </div>
-    </main>
+    </div>
   );
 }
-

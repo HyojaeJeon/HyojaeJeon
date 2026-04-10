@@ -17,8 +17,10 @@ describe('PermissionService', () => {
     distributorUser: { findFirst: jest.fn() },
     brandAdminUser: { findFirst: jest.fn() },
     corporateAdminUser: { findFirst: jest.fn() },
-    userRoleAssignment: { findMany: jest.fn() },
-    role: { findUnique: jest.fn() },
+    userRoleAssignment: { findMany: jest.fn(), findFirst: jest.fn(), create: jest.fn(), count: jest.fn() },
+    role: { findUnique: jest.fn(), update: jest.fn(), create: jest.fn() },
+    rolePermission: { findMany: jest.fn(), count: jest.fn() },
+    permission: { create: jest.fn(), update: jest.fn(), delete: jest.fn(), findUnique: jest.fn() },
   };
 
   const audit: any = { log: jest.fn(async () => undefined) };
@@ -184,6 +186,184 @@ describe('PermissionService', () => {
       await expect(
         service.require({ userType: 'BRAND_ADMIN', userId: 'u1' } as any, 'brand.profile.write'),
       ).resolves.toBeUndefined();
+    });
+  });
+
+  describe('assignRole scope axis validation', () => {
+    beforeEach(() => {
+      prisma.role.findUnique.mockReset?.();
+      prisma.userRoleAssignment.findFirst = jest.fn().mockResolvedValue(null);
+      prisma.userRoleAssignment.create = jest.fn().mockResolvedValue({ id: 'a-1' });
+    });
+
+    it('rejects CORPORATE role assigned with scopeBrandHqId (axis mismatch)', async () => {
+      prisma.role.findUnique.mockResolvedValue({ id: 'r-1', roleCode: 'corp-admin', scope: 'CORPORATE' });
+      await expect(
+        service.assignRole(
+          { userType: 'SUPER_ADMIN', userId: 'admin-1' },
+          {
+            userType: 'CORPORATE_ADMIN',
+            userId: 'u-1',
+            roleCode: 'corp-admin',
+            scopeBrandHqId: 'brand-1',
+          },
+        ),
+      ).rejects.toMatchObject({ code: 'SCOPE_AXIS_MISMATCH' });
+    });
+
+    it('rejects BRAND_HQ role assigned with no scope axis (PLATFORM) ', async () => {
+      prisma.role.findUnique.mockResolvedValue({ id: 'r-2', roleCode: 'brand-admin', scope: 'BRAND_HQ' });
+      await expect(
+        service.assignRole(
+          { userType: 'SUPER_ADMIN', userId: 'admin-1' },
+          { userType: 'BRAND_ADMIN', userId: 'u-1', roleCode: 'brand-admin' },
+        ),
+      ).rejects.toMatchObject({ code: 'SCOPE_AXIS_MISMATCH' });
+    });
+
+    it('accepts BRAND_HQ role assigned with scopeBrandHqId', async () => {
+      prisma.role.findUnique.mockResolvedValue({ id: 'r-2', roleCode: 'brand-admin', scope: 'BRAND_HQ' });
+      await expect(
+        service.assignRole(
+          { userType: 'SUPER_ADMIN', userId: 'admin-1' },
+          {
+            userType: 'BRAND_ADMIN',
+            userId: 'u-1',
+            roleCode: 'brand-admin',
+            scopeBrandHqId: 'brand-1',
+          },
+        ),
+      ).resolves.toEqual({ id: 'a-1' });
+    });
+  });
+
+  describe('getRolePermissionsMatrix', () => {
+    it('returns only pairs whose role.scope matches the given scope', async () => {
+      const rows = [
+        { roleId: 'r-platform-1', permissionId: 'p-1' },
+        { roleId: 'r-platform-1', permissionId: 'p-2' },
+      ];
+      prisma.rolePermission.findMany.mockResolvedValue(rows);
+
+      const result = await service.getRolePermissionsMatrix('PLATFORM');
+
+      expect(result).toEqual(rows);
+      expect(prisma.rolePermission.findMany).toHaveBeenCalledWith({
+        where: { role: { scope: 'PLATFORM' } },
+        select: { roleId: true, permissionId: true },
+      });
+    });
+
+    it('returns empty array when no pairs exist for scope', async () => {
+      prisma.rolePermission.findMany.mockResolvedValue([]);
+      const result = await service.getRolePermissionsMatrix('CORPORATE');
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('multilingual CRUD (Slice B)', () => {
+    const actor = { userType: 'SUPER_ADMIN', userId: 'admin-1' };
+
+    it('createPermission writes multilingual fields and AuditLog', async () => {
+      const created = {
+        id: 'p-new',
+        permissionKey: 'brand.menu.read',
+        domain: 'brand',
+        name: 'Đọc menu',
+        nameKo: '메뉴 조회',
+        nameEn: 'Read menu',
+        description: 'desc-vi',
+        descriptionKo: 'desc-ko',
+        descriptionEn: 'desc-en',
+        isSystem: false,
+      };
+      prisma.permission.create.mockResolvedValue(created);
+
+      const result = await service.createPermission(actor, {
+        permissionKey: 'brand.menu.read',
+        domain: 'brand',
+        name: 'Đọc menu',
+        nameKo: '메뉴 조회',
+        nameEn: 'Read menu',
+        description: 'desc-vi',
+        descriptionKo: 'desc-ko',
+        descriptionEn: 'desc-en',
+      });
+
+      expect(result).toEqual(created);
+      expect(prisma.permission.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          permissionKey: 'brand.menu.read',
+          domain: 'brand',
+          name: 'Đọc menu',
+          nameKo: '메뉴 조회',
+          nameEn: 'Read menu',
+          description: 'desc-vi',
+          descriptionKo: 'desc-ko',
+          descriptionEn: 'desc-en',
+          isSystem: false,
+        }),
+      });
+      expect(audit.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          actionType: 'RBAC_PERMISSION_CREATE',
+          targetType: 'Permission',
+          targetId: 'p-new',
+          afterDataJson: expect.objectContaining({ nameKo: '메뉴 조회' }),
+        }),
+      );
+    });
+
+    it('deletePermission rejects isSystem=true with SYSTEM_PERMISSION_READONLY', async () => {
+      prisma.permission.findUnique.mockResolvedValue({
+        id: 'p-sys',
+        permissionKey: 'platform.rbac.write',
+        isSystem: true,
+      });
+      await expect(service.deletePermission(actor, 'p-sys')).rejects.toMatchObject({
+        code: 'SYSTEM_PERMISSION_READONLY',
+      });
+      expect(prisma.permission.delete).not.toHaveBeenCalled();
+    });
+
+    it('deleteRole rejects isSystem=true with SYSTEM_ROLE_READONLY', async () => {
+      prisma.role.findUnique.mockResolvedValue({
+        id: 'r-sys',
+        roleCode: 'PLATFORM_SUPER_ADMIN',
+        isSystem: true,
+      });
+      await expect(service.deleteRole(actor, 'r-sys')).rejects.toMatchObject({
+        code: 'SYSTEM_ROLE_READONLY',
+      });
+    });
+
+    it('updateRole partial multilingual update (nameKo only) writes only that field', async () => {
+      prisma.role.findUnique.mockResolvedValue({
+        id: 'r-1',
+        roleCode: 'BRAND_OPS',
+        roleName: 'Brand Ops',
+        scope: 'BRAND_HQ',
+        isSystem: false,
+      });
+      prisma.userRoleAssignment.findMany.mockResolvedValue([]);
+      prisma.role.update.mockResolvedValue({
+        id: 'r-1',
+        roleCode: 'BRAND_OPS',
+        roleName: 'Brand Ops',
+        nameKo: '브랜드 운영',
+        scope: 'BRAND_HQ',
+        isSystem: false,
+      });
+
+      await service.updateRole(actor, 'r-1', { nameKo: '브랜드 운영' });
+
+      expect(prisma.role.update).toHaveBeenCalledWith({
+        where: { id: 'r-1' },
+        data: { nameKo: '브랜드 운영' },
+      });
+      expect(audit.log).toHaveBeenCalledWith(
+        expect.objectContaining({ actionType: 'RBAC_ROLE_UPDATE', targetType: 'Role' }),
+      );
     });
   });
 

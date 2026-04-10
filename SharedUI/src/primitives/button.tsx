@@ -1,5 +1,7 @@
+'use client';
+
 import type { ButtonHTMLAttributes, CSSProperties, ReactNode } from 'react';
-import { sharedUiTokens } from '../foundation/tokens';
+import { sharedUiTokens as T } from '../foundation/tokens';
 import type { SharedUiButtonSize, SharedUiButtonVariant } from '../types';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -11,32 +13,39 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   fullWidth?: boolean;
 }
 
-const sizeStyles: Record<SharedUiButtonSize, { height: string; paddingInline: string; fontSize: string }> = {
-  sm: { height: '34px', paddingInline: '12px', fontSize: '13px' },
-  md: { height: '40px', paddingInline: '16px', fontSize: '14px' },
-  lg: { height: '46px', paddingInline: '20px', fontSize: '15px' },
+const sizeStyles: Record<SharedUiButtonSize, CSSProperties> = {
+  sm: { height: '34px', paddingInline: '12px', fontSize: '13px', borderRadius: T.radius.sm },
+  md: { height: '40px', paddingInline: '16px', fontSize: '13.5px', borderRadius: T.radius.sm },
+  lg: { height: '48px', paddingInline: '22px', fontSize: '14.5px', borderRadius: T.radius.md },
 };
 
-const variantStyles: Record<SharedUiButtonVariant, { background: string; color: string; border: string }> = {
+const variantStyles: Record<SharedUiButtonVariant, CSSProperties> = {
   primary: {
-    background: sharedUiTokens.colors.brand,
-    color: '#ffffff',
-    border: `1px solid ${sharedUiTokens.colors.brand}`,
+    background: T.colors.brand,
+    color: T.colors.brandFg,
+    border: `1px solid ${T.colors.brand}`,
+    boxShadow: T.shadow.sm,
   },
   secondary: {
-    background: sharedUiTokens.colors.surface,
-    color: sharedUiTokens.colors.text,
-    border: `1px solid ${sharedUiTokens.colors.border}`,
+    background: T.colors.surfaceMuted,
+    color: T.colors.text,
+    border: `1px solid ${T.colors.border}`,
+  },
+  outline: {
+    background: T.colors.surface,
+    color: T.colors.text,
+    border: `1px solid ${T.colors.borderStrong}`,
   },
   ghost: {
     background: 'transparent',
-    color: sharedUiTokens.colors.text,
+    color: T.colors.text,
     border: '1px solid transparent',
   },
   danger: {
-    background: sharedUiTokens.colors.danger,
+    background: T.colors.danger,
     color: '#ffffff',
-    border: `1px solid ${sharedUiTokens.colors.danger}`,
+    border: `1px solid ${T.colors.danger}`,
+    boxShadow: T.shadow.sm,
   },
 };
 
@@ -61,13 +70,13 @@ export function Button({
     justifyContent: 'center',
     gap: '8px',
     width: fullWidth ? '100%' : 'auto',
-    borderRadius: sharedUiTokens.radius.md,
-    fontFamily: sharedUiTokens.typography.fontFamily,
-    fontWeight: 600,
+    fontFamily: T.typography.fontFamily,
+    fontWeight: 700,
+    letterSpacing: '-0.015em',
     cursor: disabled || loading ? 'not-allowed' : 'pointer',
-    opacity: disabled || loading ? 0.6 : 1,
-    transition: 'transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease',
-    boxShadow: variant === 'primary' ? sharedUiTokens.shadow.sm : 'none',
+    opacity: disabled || loading ? 0.5 : 1,
+    transition: 'background 160ms ease, border-color 160ms ease, transform 120ms ease, box-shadow 160ms ease',
+    whiteSpace: 'nowrap',
     ...style,
   };
 
@@ -80,7 +89,7 @@ export function Button({
       {...props}
     >
       {startIcon}
-      <span>{loading ? 'Loading…' : children}</span>
+      <span>{loading ? '…' : children}</span>
       {endIcon}
     </button>
   );

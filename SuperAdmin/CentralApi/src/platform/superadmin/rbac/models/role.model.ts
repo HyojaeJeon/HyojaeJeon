@@ -14,7 +14,11 @@ export class RoleModel {
   @Field() scope!: string;
   @Field(() => Int) hierarchyLevel!: number;
   @Field() isSystem!: boolean;
+  @Field(() => String, { nullable: true }) nameKo?: string | null;
+  @Field(() => String, { nullable: true }) nameEn?: string | null;
   @Field(() => String, { nullable: true }) description?: string | null;
+  @Field(() => String, { nullable: true }) descriptionKo?: string | null;
+  @Field(() => String, { nullable: true }) descriptionEn?: string | null;
   @Field() createdAt!: Date;
   @Field() updatedAt!: Date;
 }

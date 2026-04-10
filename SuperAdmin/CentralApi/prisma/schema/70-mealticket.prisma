@@ -51,7 +51,6 @@ model MealCorporate {
   employees           MealEmployee[]
   policies            MealPolicy[]
   fundingAccounts     MealFundingAccount[]
-  invoices            MealConsolidatedEInvoice[]
   corporateAdminUsers CorporateAdminUser[]
 
   @@index([status], name: "idx_meal_corporate_status")
@@ -136,19 +135,19 @@ model MealEmployee {
 //   잔액은 VND BigInt 이며 companyAllowance / personalTopUp 버킷으로 분리된다.
 // Tiếng Việt: Ví điện tử của nhân viên.
 model MealWallet {
-  id            String   @id @default(uuid()) @db.Uuid
-  corporateId   String   @db.Uuid
-  employeeId    String   @unique @db.Uuid
-  status        String   @default("ACTIVE") @db.VarChar(20) // ACTIVE | SUSPENDED | FROZEN | CLOSED
-  balanceVnd    BigInt   @default(0)
-  companyAllowanceVnd BigInt @default(0)
-  personalTopUpVnd    BigInt @default(0)
-  dailyLimitVnd BigInt   @default(0)
-  createdAt     DateTime @default(now()) @db.Timestamptz()
-  updatedAt     DateTime @updatedAt @db.Timestamptz()
+  id                  String   @id @default(uuid()) @db.Uuid
+  corporateId         String   @db.Uuid
+  employeeId          String   @unique @db.Uuid
+  status              String   @default("ACTIVE") @db.VarChar(20) // ACTIVE | SUSPENDED | FROZEN | CLOSED
+  balanceVnd          BigInt   @default(0)
+  companyAllowanceVnd BigInt   @default(0)
+  personalTopUpVnd    BigInt   @default(0)
+  dailyLimitVnd       BigInt   @default(0)
+  createdAt           DateTime @default(now()) @db.Timestamptz()
+  updatedAt           DateTime @updatedAt @db.Timestamptz()
 
   // 직원 삭제 전 지갑 처리 필요 (잔액 회수). Restrict.
-  employee MealEmployee @relation(fields: [employeeId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  employee       MealEmployee             @relation(fields: [employeeId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   fundingEntries MealWalletFundingEntry[]
 
   @@index([corporateId, status], name: "idx_meal_wallet_corp_status")
@@ -158,17 +157,17 @@ model MealWallet {
 //   회사 지원금/개인 충전/조정 이력을 기록한다.
 // Tiếng Việt: Mục ghi sổ funding của wallet.
 model MealWalletFundingEntry {
-  id                 String                   @id @default(uuid()) @db.Uuid
-  walletId           String                   @db.Uuid
-  sourceType         MealWalletFundingSourceType
-  status             MealWalletFundingStatus  @default(POSTED)
-  amountVnd          BigInt
-  sourceBatchId      String?                  @db.VarChar(120)
-  sourceReferenceId  String?                  @db.VarChar(120)
-  note               String?                  @db.VarChar(500)
-  postedAt           DateTime?                @db.Timestamptz()
-  reversedAt         DateTime?                @db.Timestamptz()
-  createdAt          DateTime                 @default(now()) @db.Timestamptz()
+  id                String                      @id @default(uuid()) @db.Uuid
+  walletId          String                      @db.Uuid
+  sourceType        MealWalletFundingSourceType
+  status            MealWalletFundingStatus     @default(POSTED)
+  amountVnd         BigInt
+  sourceBatchId     String?                     @db.VarChar(120)
+  sourceReferenceId String?                     @db.VarChar(120)
+  note              String?                     @db.VarChar(500)
+  postedAt          DateTime?                   @db.Timestamptz()
+  reversedAt        DateTime?                   @db.Timestamptz()
+  createdAt         DateTime                    @default(now()) @db.Timestamptz()
 
   wallet MealWallet @relation(fields: [walletId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
@@ -329,190 +328,6 @@ model MealSettlementBatch {
 
   @@unique([brandHqId, periodStart, periodEnd], name: "uq_meal_settlement_brand_period")
   @@index([brandHqId, status], name: "idx_meal_settlement_brand_status")
-}
-
-// 한국어: 통합 전자세금계산서 (Consolidated E-Invoice) — 베트남 e-Invoice provider 연동.
-//   1차 provider 는 WeTax (apitest.wetax.com.vn). 향후 Bizzi/Misa/GDT-Direct 확장.
-//
-//   ── 식권 플랫폼 핵심 시나리오 (사양서 §4.3 통합 모드) ──
-//   매월 1일 SyncWorkers cron 이 모든 active corporate 에 대해 전월의 모든
-//   MealTransaction 을 합산하여 본 모델을 1행 생성한다 (DRAFT). SuperAdmin 검수 후
-//   WeTaxProvider 가 GDT 에 발행한다. seller 는 플랫폼 사업자, buyer 는 corporate.
-//
-//   사양서: 1.Docs/식권관리플랫폼/EInvoice-WeTax-사양.md
-//
-// Tiếng Việt: Hoá đơn điện tử hợp nhất — phát hành qua provider WeTax (chế độ tổng hợp tháng).
-model MealConsolidatedEInvoice {
-  id             String   @id @default(uuid()) @db.Uuid
-  corporateId    String   @db.Uuid
-  periodStart    DateTime @db.Date
-  periodEnd      DateTime @db.Date
-  totalAmountVnd BigInt   @default(0)
-  vatAmountVnd   BigInt   @default(0)
-  status         String   @default("DRAFT") @db.VarChar(30) // DRAFT | BUILT | SUBMITTING | ACCEPTED | REJECTED | VOIDED
-  gdtReceiptNo   String?  @db.VarChar(120)
-  xmlPayloadRef  String?  @db.VarChar(500)
-
-  // ── 통합 모드 필드 (사양서 §4.3) ──
-  // 라인 그룹화 전략. 사양서 §4.3.4 의 5 전략 중 하나.
-  // BY_MERCHANT (기본) / BY_DAY / BY_DEPARTMENT / BY_CATEGORY / SINGLE_LINE
-  consolidationStrategy  String? @default("BY_MERCHANT") @db.VarChar(30)
-  // 발급 시점의 플랫폼 사업자 (seller) 정보 박제 — taxCode/companyName/address/email 등
-  sellerSnapshot         Json?
-  // 발급 시점의 corporate (buyer) 정보 박제 — taxCode/companyName/address/contactEmail 등
-  buyerSnapshot          Json?
-  // 합산 대상 MealTransaction 건수 (감사용)
-  sourceTransactionCount Int?    @default(0)
-
-  // ── WeTax provider 필드 (사양서 §10) ──
-  // 멱등성 키 (yyyyMMddHHmmss + posNo + daySequence). dedupe 에 사용.
-  refId                String?  @db.VarChar(40)
-  // CQT 인증 코드 (provider 응답으로 채워짐)
-  cqtCode              String?  @db.VarChar(60)
-  // form number (WeTax 기본 '1')
-  formNo               String?  @db.VarChar(10)
-  // 시리얼 번호 (예: 'C25TKT')
-  serialNo             String?  @db.VarChar(40)
-  // 발급된 일련번호 (provider 응답)
-  invoiceNo            String?  @db.VarChar(40)
-  // provider 의 검색 키
-  lookupCode           String?  @db.VarChar(120)
-  // 발급/환불 구분 ('1' = Sell, '2' = Return)
-  transType            String?  @db.VarChar(2)
-  currencyCode         String?  @db.VarChar(10)
-  exchangeRate         Decimal? @db.Decimal(10, 4)
-  paymentMethod        String?  @db.VarChar(20)
-  // 사용된 provider 식별자 (WETAX/BIZZI/MISA/DIRECT_GDT)
-  providerType         String?  @db.VarChar(30)
-  // 감사용 raw 요청/응답 박제 (PII 마스킹 후 저장)
-  // 본 플랫폼은 통합 모드 단독이므로 buyer 는 항상 corporate (사업자) 이며,
-  // 'Khách lẻ' (개인 buyer) 케이스를 위한 buyerNotGetInvoice 컬럼은 두지 않는다.
-  // WeTax HTTP body 직렬화 시 raw provider layer 가 hardcoded 0 으로 채운다.
-  providerRequestJson  Json?
-  providerResponseJson Json?
-
-  createdAt DateTime @default(now()) @db.Timestamptz()
-  updatedAt DateTime @updatedAt @db.Timestamptz()
-
-  // E-Invoice 는 GDT 제출 감사 기록. Corporate 삭제 시에도 Restrict.
-  corporate      MealCorporate                  @relation(fields: [corporateId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  // 라인 항목 — t_wetax_invoice_details 와 1:1
-  lines          MealConsolidatedEInvoiceLine[]
-  // 발급 시도 이력 (재시도/감사)
-  submissionLogs EInvoiceSubmissionLog[]
-
-  @@unique([corporateId, periodStart, periodEnd], name: "uq_meal_invoice_corp_period")
-  // refId 는 멱등성 키 — 같은 refId 재요청 시 dedupe
-  @@unique([refId], name: "uq_meal_invoice_ref_id")
-  @@index([corporateId, status], name: "idx_meal_invoice_corp_status")
-  @@index([providerType, status, createdAt(sort: Desc)], name: "idx_meal_invoice_provider_status_time")
-}
-
-// 한국어: 통합 전자세금계산서의 라인 항목.
-//   `HJ-POS-TEST/WeTax/WeTaxMgr.h` 의 t_wetax_invoice_details 와 1:1.
-//   1 invoice = N lines. WeTaxLineMerger 로 음수 수량은 사전 합산되어 양수만 저장.
-// Tiếng Việt: Dòng chi tiết của hoá đơn hợp nhất.
-model MealConsolidatedEInvoiceLine {
-  id           String   @id @default(uuid()) @db.Uuid
-  invoiceId    String   @db.Uuid
-  // 1-based 순번 (merger 후 재부여)
-  seq          Int
-  itemCode     String?  @db.VarChar(60)
-  itemName     String   @db.VarChar(200)
-  // unit of measure (예: 'EA', 'KG', '개')
-  uom          String   @db.VarChar(20)
-  quantity     Int      @default(1)
-  unitPriceVnd BigInt   @default(0)
-  // 세전 합계
-  amountVnd    BigInt   @default(0)
-  // '0.0%' / '5.0%' / '8.0%' / '10.0%'
-  vatRate      String   @db.VarChar(10)
-  vatAmountVnd BigInt   @default(0)
-  // 세후 결제 금액
-  payAmountVnd BigInt   @default(0)
-  feature      String   @default("1") @db.VarChar(10)
-  dcRate       Decimal? @db.Decimal(5, 2)
-  dcAmountVnd  BigInt?  @default(0)
-
-  createdAt DateTime @default(now()) @db.Timestamptz()
-
-  invoice MealConsolidatedEInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  @@unique([invoiceId, seq], name: "uq_einvoice_line_seq")
-  @@index([invoiceId], name: "idx_einvoice_line_invoice")
-}
-
-// 한국어: e-Invoice provider 카탈로그 (WeTax / Bizzi / Misa / DIRECT_GDT).
-//   provider 자체의 메타 (활성 여부, 표시명) 만 보유. 환경별 credentials 는
-//   `EInvoiceProviderConfig` 가 따로 관리한다.
-// Tiếng Việt: Catalog các provider e-Invoice.
-model EInvoiceProvider {
-  id           String   @id @default(uuid()) @db.Uuid
-  // 'WETAX' | 'BIZZI' | 'MISA' | 'DIRECT_GDT'
-  providerType String   @unique @db.VarChar(30)
-  displayName  String   @db.VarChar(120)
-  description  String?  @db.VarChar(500)
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now()) @db.Timestamptz()
-  updatedAt    DateTime @updatedAt @db.Timestamptz()
-
-  configs EInvoiceProviderConfig[]
-}
-
-// 한국어: e-Invoice provider 의 환경별 설정 (SANDBOX/PROD).
-//   credentials 는 vault 경로만 보유. 평문 저장 금지 (사양서 §16).
-// Tiếng Việt: Cấu hình provider theo môi trường — tham chiếu vault, không lưu plaintext.
-model EInvoiceProviderConfig {
-  id                   String   @id @default(uuid()) @db.Uuid
-  providerId           String   @db.Uuid
-  // SANDBOX | PRODUCTION
-  environment          String   @db.VarChar(20)
-  baseUrl              String   @db.VarChar(255)
-  // vault 경로 (예: 'vault://wetax/sandbox/credentials')
-  credentialsVaultRef  String   @db.VarChar(500)
-  // CQT 인증 여부에 따라 'C' 또는 'K'
-  defaultSerialPrefix  String   @default("C") @db.VarChar(2)
-  defaultFormNo        String   @default("1") @db.VarChar(10)
-  defaultSerialType    String   @default("TKT") @db.VarChar(10)
-  defaultCurrencyCode  String   @default("VND") @db.VarChar(10)
-  defaultExchangeRate  Decimal  @default(1) @db.Decimal(10, 4)
-  defaultPaymentMethod String   @default("TM/CK") @db.VarChar(20)
-  // failover 대상 provider id (선택)
-  failoverProviderId   String?  @db.Uuid
-  isActive             Boolean  @default(true)
-  createdAt            DateTime @default(now()) @db.Timestamptz()
-  updatedAt            DateTime @updatedAt @db.Timestamptz()
-
-  provider EInvoiceProvider @relation(fields: [providerId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-
-  @@unique([providerId, environment], name: "uq_einvoice_provider_env")
-  @@index([isActive, environment], name: "idx_einvoice_provider_active")
-}
-
-// 한국어: e-Invoice 발급 시도 로그 — 재시도/감사용 append-only.
-//   PII 마스킹된 raw req/res 박제. 24개월 retention.
-// Tiếng Việt: Log mọi lần thử phát hành — append-only, dùng cho audit và retry.
-model EInvoiceSubmissionLog {
-  id           String   @id @default(uuid()) @db.Uuid
-  invoiceId    String   @db.Uuid
-  // 시도 횟수 (1-based, 같은 invoice 의 attempt 중복 금지)
-  attempt      Int
-  providerType String   @db.VarChar(30)
-  environment  String   @db.VarChar(20)
-  requestJson  Json?
-  responseJson Json?
-  // ACCEPTED | REJECTED | TIMEOUT | AUTH_FAILED | PROVIDER_DOWN | PARSE_ERROR | EMPTY_RESPONSE
-  status       String   @db.VarChar(30)
-  errorCode    String?  @db.VarChar(80)
-  errorMessage String?  @db.VarChar(1000)
-  durationMs   Int?
-  createdAt    DateTime @default(now()) @db.Timestamptz()
-
-  invoice MealConsolidatedEInvoice @relation(fields: [invoiceId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-
-  @@unique([invoiceId, attempt], name: "uq_einvoice_submission_attempt")
-  @@index([invoiceId, createdAt(sort: Desc)], name: "idx_einvoice_submission_invoice_time")
-  @@index([providerType, status, createdAt(sort: Desc)], name: "idx_einvoice_submission_provider_status")
 }
 
 // 한국어: 플랫폼 사업자 법인 정보 — 통합 인보이스의 seller (발급자) 매핑.

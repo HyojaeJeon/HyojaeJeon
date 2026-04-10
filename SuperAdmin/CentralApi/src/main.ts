@@ -12,7 +12,6 @@ import { ConfigService } from '@nestjs/config';
 import helmet from '@fastify/helmet';
 import compress from '@fastify/compress';
 import { AppModule } from './app.module';
-import { RealtimeService } from '@core/realtime/realtime.service';
 
 function readIntEnv(name: string, fallback: number): number {
   const raw = process.env[name];
@@ -90,15 +89,10 @@ async function bootstrap() {
   });
 
   const port = configService.get<number>('PORT', 4000);
-  await app.listen(port, '0.0.0.0');
-  const realtime = app.get(RealtimeService);
-  await realtime.attach(app.getHttpServer());
+  // Fastify 5 + Node 25: positional `listen(port, host)` 회귀 회피용 — object 형태 사용
+  await app.listen({ port: Number(port), host: '0.0.0.0' });
   Logger.log(`CentralApi running on http://localhost:${port}`, 'Bootstrap');
   Logger.log(`GraphQL Playground: http://localhost:${port}/graphql`, 'Bootstrap');
-  Logger.log(
-    `Realtime socket: ws://localhost:${port}${configService.get<string>('REALTIME_PATH', '/realtime')}`,
-    'Bootstrap',
-  );
 }
 
 bootstrap();

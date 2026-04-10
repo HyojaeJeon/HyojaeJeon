@@ -21,6 +21,7 @@ SuperAdmin/
 
 - `Portal`: `Next.js(TypeScript) + Apollo Client`
 - `Portal` 의 공용 UI 는 `SharedUI` 를 소비한다.
+- `Portal` 로컬 dev port 는 `3001` 이다.
 - `CentralApi`: `NestJS + Fastify + Apollo Server + Prisma + Redis`
 - `SyncWorkers`: `Node.js(TypeScript) + BullMQ + Redis`
 

@@ -3,23 +3,49 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3003 -H 0.0.0.0",
-    "build": "next build",
+    "dev": "next dev --webpack -p 3003 -H 0.0.0.0",
+    "build": "next build --webpack",
     "start": "next start -p 3003 -H 0.0.0.0",
-    "lint": "next lint"
+    "lint": "eslint src --max-warnings=0",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm run lint",
+    "codegen": "graphql-codegen --config codegen.ts",
+    "codegen:watch": "graphql-codegen --config codegen.ts --watch"
   },
   "dependencies": {
     "@apollo/client": "^3.11.0",
+    "@platform/shared-ui": "file:../SharedUI",
     "@reduxjs/toolkit": "^2.11.2",
+    "@tailwindcss/postcss": "^4.2.2",
+    "babel-plugin-react-compiler": "^1.0.0",
+    "clsx": "^2.1.1",
     "graphql": "^16.9.0",
+    "graphql-ws": "^5.16.2",
+    "lucide-react": "^0.468.0",
     "next": "^16.2.1",
+    "next-themes": "^0.4.6",
+    "postcss": "^8.5.9",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "react-redux": "^9.2.0"
+    "react-redux": "^9.2.0",
+    "sonner": "^1.7.4",
+    "tailwind-merge": "^2.6.1",
+    "tailwindcss": "^4.2.2",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.5",
+    "@graphql-codegen/cli": "^5.0.7",
+    "@graphql-codegen/client-preset": "^4.8.3",
+    "@next/eslint-plugin-next": "^16.2.3",
     "@types/node": "^25.5.2",
     "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@typescript-eslint/eslint-plugin": "^8.58.1",
+    "@typescript-eslint/parser": "^8.58.1",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.2.3",
+    "tsx": "^4.21.0",
     "typescript": "^6.0.2"
   }
 }

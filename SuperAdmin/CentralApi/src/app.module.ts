@@ -18,6 +18,7 @@ import { RedisModule } from '@core/redis/redis.module';
 import { RedisService } from '@core/redis/redis.service';
 import { CacheModule } from '@core/cache/cache.module';
 import { LoggingInterceptor } from '@core/interceptors/logging.interceptor';
+import { GraphqlSubscriptionModule } from '@core/graphql/subscriptions/graphql-subscription.module';
 import { createRequestLoaders } from '@core/graphql/loaders/create-request-loaders';
 import { createQueryComplexityPlugin } from '@core/graphql/plugins/query-complexity.plugin';
 import { ApolloRedisKeyValueCache } from '@core/graphql/plugins/apollo-redis-key-value-cache';
@@ -31,7 +32,6 @@ import { I18nModule } from '@core/i18n/i18n.module';
 import { resolveLocale, type SupportedLocale } from '@core/i18n/locale.util';
 import { DomainExceptionFilter } from '@core/response/domain-exception.filter';
 import { WrapResponseInterceptor } from '@core/response/wrap-response.interceptor';
-import { RealtimeModule } from '@core/realtime/realtime.module';
 import { CachePolicies } from '@core/cache/cache-policies';
 
 import { AuditModule as CoreAuditModule } from '@core/audit/audit.module';
@@ -57,7 +57,7 @@ import { PolicyModule } from '@platform/corporate/policy/policy.module';
 import { TransactionModule } from '@platform/corporate/transaction/transaction.module';
 import { SettlementModule } from '@platform/corporate/settlement/settlement.module';
 import { MerchantModule } from '@platform/corporate/merchant/merchant.module';
-import { EInvoiceModule } from '@platform/corporate/einvoice/einvoice.module';
+import { EInvoiceModule } from '@shared/einvoice/einvoice.module';
 
 // Shared (플랫폼 간 공유 도메인)
 import { EntitlementModule } from '@shared/entitlement/entitlement.module';
@@ -93,7 +93,7 @@ function headerValue(
     TenancyModule,
     I18nModule,
     CoreAuditModule,
-    RealtimeModule,
+    GraphqlSubscriptionModule,
 
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
@@ -126,6 +126,9 @@ function headerValue(
           sortSchema: true,
           playground: process.env.NODE_ENV !== 'production',
           introspection: process.env.NODE_ENV !== 'production',
+          subscriptions: {
+            'graphql-ws': true,
+          },
           persistedQueries: apqEnabled
             ? {
                 cache: apqCache,

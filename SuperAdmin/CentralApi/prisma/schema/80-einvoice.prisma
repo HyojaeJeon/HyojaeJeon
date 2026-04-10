@@ -1,0 +1,242 @@
+// 한국어: E-Invoice 도메인 — 베트남 GDT 전자세금계산서 통합/단건 발급의 공용 모델.
+//
+//   본 도메인은 특정 비즈니스(식권/POS/Brand 정산) 에 결합되지 않은 generic 도메인이다.
+//   `subjectType + subjectId` polymorphic 키로 발급 주체를 구분한다:
+//     - 'CORPORATE'           : 식권 플랫폼 (월별 통합)
+//     - 'BRAND_HQ'            : 브랜드 HQ 직접 발급 (가맹점 정산 invoice 등)
+//     - 'BRANCH'              : 단일 매장 단건 발급
+//     - 'EDGE_POS'            : POS 영수증 단건 발급 (HJ-POS 패턴)
+//
+//   `issuanceMode` 로 통합/단건 모드를 구분한다:
+//     - 'CONSOLIDATED'   : 기간 합산 1행 (식권 플랫폼 핵심)
+//     - 'SINGLE_RECEIPT' : POS 영수증 1건 = 인보이스 1건 (HJ-POS 패턴)
+//
+//   사양서: 1.Docs/식권관리플랫폼/EInvoice-WeTax-사양.md (1차 구현은 식권 통합 모드)
+//
+// Tiếng Việt: Domain E-Invoice — model dùng chung cho mọi luồng phát hành
+//   hoá đơn điện tử GDT (tổng hợp / đơn lẻ). Dùng polymorphic subjectType
+//   để phân biệt đối tượng phát hành mà không ràng buộc FK đến một domain cụ thể.
+
+// 한국어: 전자세금계산서 — generic root.
+//   ── Status (사양서 §4.3.2.a state machine, 베트남 법령 정합) ──
+//   DRAFT      : cron 또는 SuperAdmin 자동 생성 직후 (검토 대기)
+//   DISPUTED   : 발급 주체가 이의 제기 (수동 조사 대기)
+//   REQUESTED  : 발급 요청 (또는 reviewDueAt 자동 프로모션)
+//   SUBMITTING : 승인 → provider 호출 중
+//   ACCEPTED   : GDT 수락 (법적 효력 발생)
+//   REJECTED   : GDT 거부
+//   VOIDED     : 발급 후 취소 (Hoá đơn hủy bỏ — Thông tư 78/2021 §19)
+//   REPLACED   : 잘못 발급되어 다른 인보이스로 대체됨 (Hoá đơn thay thế)
+//   ADJUSTED   : 금액 조정 발급됨 (Hoá đơn điều chỉnh)
+model EInvoice {
+  id String @id @default(uuid()) @db.Uuid
+
+  // ── Polymorphic 발급 주체 ──
+  // subjectType: 'CORPORATE' | 'BRAND_HQ' | 'BRANCH' | 'EDGE_POS' (UPPER_SNAKE_CASE)
+  // subjectId: 위 도메인의 row id (FK 가 아니라 application-level reference)
+  subjectType String @db.VarChar(30)
+  subjectId   String @db.Uuid
+
+  // 발급 모드: 'CONSOLIDATED' (기간 합산) | 'SINGLE_RECEIPT' (영수증 1건)
+  issuanceMode String @default("CONSOLIDATED") @db.VarChar(30)
+
+  // ── 기간 (CONSOLIDATED 모드 기준) ──
+  // SINGLE_RECEIPT 모드는 periodStart=periodEnd=거래일.
+  periodStart DateTime @db.Date
+  periodEnd   DateTime @db.Date
+
+  status String @default("DRAFT") @db.VarChar(30)
+
+  // ── 금액 4분할 (베트남 Decree 123/2020 §10 / WeTax 표준) ──
+  totAmountVnd    BigInt @default(0)
+  totDiscountVnd  BigInt @default(0)
+  totVatAmountVnd BigInt @default(0)
+  totPayableVnd   BigInt @default(0)
+
+  // ── 통합 모드 메타 (CONSOLIDATED 일 때만 의미) ──
+  // BY_MERCHANT (기본) / BY_DAY / BY_DEPARTMENT / BY_CATEGORY / SINGLE_LINE
+  consolidationStrategy  String? @default("BY_MERCHANT") @db.VarChar(30)
+  // 합산 대상 source row 건수 (감사용)
+  sourceTransactionCount Int?    @default(0)
+
+  // ── Seller (발급 사업자) — Decree 123/2020 §10 정형 필드 ──
+  sellerTaxCode     String? @db.VarChar(20)
+  sellerCompanyName String? @db.VarChar(255)
+  sellerAddress     String? @db.VarChar(500)
+  sellerEmail       String? @db.VarChar(255)
+  sellerSnapshot    Json?
+
+  // ── Buyer (수령 주체) — Decree 123/2020 §10 정형 필드 ──
+  buyerTaxCode     String? @db.VarChar(20)
+  buyerCompanyName String? @db.VarChar(255)
+  buyerAddress     String? @db.VarChar(500)
+  buyerEmail       String? @db.VarChar(255)
+  buyerSnapshot    Json?
+
+  // ── 워크플로우 (사양서 §4.3.2 6단계 closing 흐름) ──
+  reviewDueAt        DateTime? @db.Timestamptz()
+  requestedByAdminId String?   @db.Uuid
+  requestedAt        DateTime? @db.Timestamptz()
+  disputedByAdminId  String?   @db.Uuid
+  disputedAt         DateTime? @db.Timestamptz()
+  disputeReason      String?   @db.VarChar(1000)
+  autoPromoted       Boolean   @default(false)
+  submittedByAdminId String?   @db.Uuid
+  submittedAt        DateTime? @db.Timestamptz()
+
+  // ── 법적 timestamp (Decree 123/2020 §10) ──
+  invoiceIssuedAt DateTime? @db.Timestamptz()
+  signedAt        DateTime? @db.Timestamptz()
+  acceptedAt      DateTime? @db.Timestamptz()
+  rejectedAt      DateTime? @db.Timestamptz()
+  rejectionReason String?   @db.VarChar(1000)
+
+  // ── Cancellation / Replacement / Adjustment (Thông tư 78/2021 §19) ──
+  replacedByInvoiceId     String?    @db.Uuid
+  adjustmentOfInvoiceId   String?    @db.Uuid
+  cancellationDecisionRef String?    @db.VarChar(255)
+  cancellationReason      String?    @db.VarChar(1000)
+  cancelledAt             DateTime?  @db.Timestamptz()
+  replacedBy              EInvoice?  @relation("EInvoiceReplacement", fields: [replacedByInvoiceId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  replaces                EInvoice[] @relation("EInvoiceReplacement")
+  adjusts                 EInvoice?  @relation("EInvoiceAdjustment", fields: [adjustmentOfInvoiceId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  adjustedBy              EInvoice[] @relation("EInvoiceAdjustment")
+
+  // ── WeTax (또는 다른) provider 응답 필드 ──
+  refId                String?  @db.VarChar(40)
+  cqtCode              String?  @db.VarChar(60)
+  isCqtCertified       Boolean  @default(false)
+  formNo               String?  @db.VarChar(10)
+  serialNo             String?  @db.VarChar(40)
+  invoiceNo            String?  @db.VarChar(40)
+  lookupCode           String?  @db.VarChar(120)
+  gdtReceiptNo         String?  @db.VarChar(120)
+  xmlPayloadRef        String?  @db.VarChar(500)
+  transType            String?  @default("1") @db.VarChar(2)
+  currencyCode         String?  @default("VND") @db.VarChar(10)
+  exchangeRate         Decimal? @default(1) @db.Decimal(10, 4)
+  paymentMethod        String?  @default("TM/CK") @db.VarChar(20)
+  providerType         String?  @db.VarChar(30)
+  providerRequestJson  Json?
+  providerResponseJson Json?
+
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+
+  lines          EInvoiceLine[]
+  submissionLogs EInvoiceSubmissionLog[]
+
+  // 같은 subject + 동일 기간은 1행 (멱등성 — CONSOLIDATED 모드)
+  @@unique([subjectType, subjectId, periodStart, periodEnd], name: "uq_einvoice_subject_period")
+  @@unique([refId], name: "uq_einvoice_ref_id")
+  // 베트남 법령: 같은 시리얼 안에서 invoice 번호 중복 금지
+  @@unique([serialNo, invoiceNo], name: "uq_einvoice_serial_no")
+  @@index([subjectType, subjectId, status], name: "idx_einvoice_subject_status")
+  @@index([providerType, status, createdAt(sort: Desc)], name: "idx_einvoice_provider_status_time")
+  @@index([status, reviewDueAt], name: "idx_einvoice_status_review_due")
+}
+
+// 한국어: 전자세금계산서 라인 항목.
+//   `HJ-POS-TEST/WeTax/WeTaxMgr.h` 의 t_wetax_invoice_details 와 1:1.
+//   1 invoice = N lines. WeTaxLineMerger 로 음수 수량은 사전 합산되어 양수만 저장.
+// Tiếng Việt: Dòng chi tiết hoá đơn.
+model EInvoiceLine {
+  id        String  @id @default(uuid()) @db.Uuid
+  invoiceId String  @db.Uuid
+  seq       Int
+  itemCode  String? @db.VarChar(60)
+  itemName  String  @db.VarChar(200)
+  uom       String  @db.VarChar(20)
+
+  // ── 수량/단가 — 베트남 법령상 소수 허용 (kg, lít 등) ──
+  quantity     Decimal @default(1) @db.Decimal(15, 4)
+  unitPriceVnd Decimal @default(0) @db.Decimal(20, 4)
+
+  // ── VAT 분류 (Decree 123/2020 §10) ──
+  // TAXED                : 일반 과세 (vatRatePct 적용)
+  // EXEMPT_KCT           : Không chịu thuế — 불과세품목
+  // NO_DECLARATION_KKKNT : Không kê khai không nộp thuế — 신고 불요
+  vatTreatment String  @default("TAXED") @db.VarChar(30)
+  vatRatePct   Decimal @default(0) @db.Decimal(5, 2)
+
+  amountVnd    BigInt   @default(0)
+  vatAmountVnd BigInt   @default(0)
+  payAmountVnd BigInt   @default(0)
+  feature      String   @default("1") @db.VarChar(10)
+  dcRate       Decimal? @db.Decimal(5, 2)
+  dcAmountVnd  BigInt?  @default(0)
+
+  createdAt DateTime @default(now()) @db.Timestamptz()
+
+  invoice EInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([invoiceId, seq], name: "uq_einvoice_line_seq")
+  @@index([invoiceId], name: "idx_einvoice_line_invoice")
+}
+
+// 한국어: e-Invoice provider 카탈로그 (WeTax / Bizzi / Misa / DIRECT_GDT).
+// Tiếng Việt: Catalog các provider e-Invoice.
+model EInvoiceProvider {
+  id           String   @id @default(uuid()) @db.Uuid
+  // 'WETAX' | 'BIZZI' | 'MISA' | 'DIRECT_GDT'
+  providerType String   @unique @db.VarChar(30)
+  displayName  String   @db.VarChar(120)
+  description  String?  @db.VarChar(500)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now()) @db.Timestamptz()
+  updatedAt    DateTime @updatedAt @db.Timestamptz()
+
+  configs EInvoiceProviderConfig[]
+}
+
+// 한국어: e-Invoice provider 의 환경별 설정 (SANDBOX/PROD).
+//   credentials 는 vault 경로만 보유. 평문 저장 금지 (사양서 §16).
+// Tiếng Việt: Cấu hình provider theo môi trường — tham chiếu vault, không lưu plaintext.
+model EInvoiceProviderConfig {
+  id                   String   @id @default(uuid()) @db.Uuid
+  providerId           String   @db.Uuid
+  // SANDBOX | PRODUCTION
+  environment          String   @db.VarChar(20)
+  baseUrl              String   @db.VarChar(255)
+  credentialsVaultRef  String   @db.VarChar(500)
+  defaultSerialPrefix  String   @default("C") @db.VarChar(2)
+  defaultFormNo        String   @default("1") @db.VarChar(10)
+  defaultSerialType    String   @default("TKT") @db.VarChar(10)
+  defaultCurrencyCode  String   @default("VND") @db.VarChar(10)
+  defaultExchangeRate  Decimal  @default(1) @db.Decimal(10, 4)
+  defaultPaymentMethod String   @default("TM/CK") @db.VarChar(20)
+  failoverProviderId   String?  @db.Uuid
+  isActive             Boolean  @default(true)
+  createdAt            DateTime @default(now()) @db.Timestamptz()
+  updatedAt            DateTime @updatedAt @db.Timestamptz()
+
+  provider EInvoiceProvider @relation(fields: [providerId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([providerId, environment], name: "uq_einvoice_provider_env")
+  @@index([isActive, environment], name: "idx_einvoice_provider_active")
+}
+
+// 한국어: e-Invoice 발급 시도 로그 — append-only, 24개월 retention.
+//   PII 마스킹된 raw req/res 박제.
+// Tiếng Việt: Log mọi lần thử phát hành — append-only.
+model EInvoiceSubmissionLog {
+  id           String   @id @default(uuid()) @db.Uuid
+  invoiceId    String   @db.Uuid
+  attempt      Int
+  providerType String   @db.VarChar(30)
+  environment  String   @db.VarChar(20)
+  requestJson  Json?
+  responseJson Json?
+  // ACCEPTED | REJECTED | TIMEOUT | AUTH_FAILED | PROVIDER_DOWN | PARSE_ERROR | EMPTY_RESPONSE
+  status       String   @db.VarChar(30)
+  errorCode    String?  @db.VarChar(80)
+  errorMessage String?  @db.VarChar(1000)
+  durationMs   Int?
+  createdAt    DateTime @default(now()) @db.Timestamptz()
+
+  invoice EInvoice @relation(fields: [invoiceId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([invoiceId, attempt], name: "uq_einvoice_submission_attempt")
+  @@index([invoiceId, createdAt(sort: Desc)], name: "idx_einvoice_submission_invoice_time")
+  @@index([providerType, status, createdAt(sort: Desc)], name: "idx_einvoice_submission_provider_status")
+}

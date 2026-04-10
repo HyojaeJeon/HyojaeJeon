@@ -11,8 +11,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '@core/prisma/prisma.service';
 import { RedisService } from '@core/redis/redis.service';
+import { GraphqlSubscriptionBusService } from '@core/graphql/subscriptions/graphql-subscription-bus.service';
 import { CachePolicies } from '@core/cache/cache-policies';
-import { SyncRealtimePublisher } from '@core/realtime/publishers/sync-realtime.publisher';
 import { SyncEventConnectionArgs } from './dto/sync-event-connection.args';
 import { SyncEventConnectionModel } from './models/sync-event-connection.model';
 import { decodeDateIdCursor, encodeDateIdCursor } from '@core/graphql/pagination/cursor.util';
@@ -40,7 +40,7 @@ export class SyncService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
-    private readonly realtime: SyncRealtimePublisher,
+    private readonly subscriptionBus: GraphqlSubscriptionBusService,
   ) {}
 
   /**
@@ -78,12 +78,6 @@ export class SyncService {
     // Tiếng Việt: Redis khả dụng mà lấy khóa thất bại → yêu cầu giống đang được xử lý bởi tiến trình khác
     if (redisAvailable && !lockToken) {
       this.logger.warn(`Duplicate sync payload detected by Redis lock: ${payload.requestId}`);
-      this.realtime.publishUpstreamDuplicate(payload.edgePosId, {
-        requestId: payload.requestId,
-        status: 'ALREADY_PROCESSED',
-        eventType: payload.eventType,
-        reason: 'REDIS_LOCK',
-      });
       return { status: 'ALREADY_PROCESSED', requestId: payload.requestId };
     }
 
@@ -94,9 +88,10 @@ export class SyncService {
       // ── P1-3: durable outbox 패턴 ──
       // AuditLog + EdgePosTerminal.lastSyncAt + SyncOutbox 를 단일 트랜잭션에서 atomic 처리.
       // Redis enqueue 는 worker hint 일 뿐, source of truth 는 SyncOutbox.
+      let acceptedEvent: { id: string; createdAt: Date } | null = null;
       try {
-        await this.prisma.$transaction(async (tx) => {
-          await tx.auditLog.create({
+        acceptedEvent = await this.prisma.$transaction(async (tx) => {
+          const auditLog = await tx.auditLog.create({
             data: {
               actorType: 'EDGE_POS',
               actorId: payload.edgePosId,
@@ -127,18 +122,16 @@ export class SyncService {
               status: 'PENDING',
             },
           });
+          return {
+            id: auditLog.id,
+            createdAt: auditLog.createdAt,
+          };
         });
       } catch (e) {
         // P2002 = unique violation on AuditLog.requestId → 동일 requestId 가 이미 처리됨.
         const code = (e as { code?: string })?.code;
         if (code === 'P2002') {
           this.logger.warn(`Duplicate requestId (race-safe): ${payload.requestId}`);
-          this.realtime.publishUpstreamDuplicate(payload.edgePosId, {
-            requestId: payload.requestId,
-            status: 'ALREADY_PROCESSED',
-            eventType: payload.eventType,
-            reason: 'P2002',
-          });
           return { status: 'ALREADY_PROCESSED', requestId: payload.requestId };
         }
         throw e;
@@ -165,11 +158,16 @@ export class SyncService {
         `Upstream sync persisted to outbox: ${payload.requestId} [${payload.eventType}]`,
       );
 
-      this.realtime.publishUpstreamAccepted(payload.edgePosId, {
-        requestId: payload.requestId,
-        status: 'ACCEPTED',
-        eventType: payload.eventType,
-      });
+      if (acceptedEvent) {
+        await this.subscriptionBus.publish('syncEventReceived', {
+          id: acceptedEvent.id,
+          edgePosId: payload.edgePosId,
+          eventType: payload.eventType,
+          requestId: payload.requestId,
+          payloadJson: payload.dataJson,
+          createdAt: acceptedEvent.createdAt,
+        });
+      }
 
       return { status: 'ACCEPTED', requestId: payload.requestId };
     } finally {

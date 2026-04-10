@@ -9,8 +9,8 @@ type HealthStatus = 'ok' | 'degraded' | 'disabled' | 'error';
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(RedisService.name);
-  private readonly enabled: boolean;
-  private readonly client: Redis | null;
+  private enabled: boolean;
+  private client: Redis | null;
 
   constructor(private readonly configService: ConfigService) {
     const info = resolveRedisConnectionInfo(this.configService);
@@ -49,7 +49,32 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit() {
     if (!this.client) return;
-    await this.client.connect();
+    // fail-soft: Redis 가 다운되어도 서버 부팅을 막지 않는다.
+    //   - 5초 timeout 내에 연결 실패하면 client 를 disable
+    //   - 이후 모든 메서드는 disabled 분기 (이미 client === null 체크 존재)
+    //   - 서비스 단위 기능은 cache miss / publish skip 으로 degrade
+    const CONNECT_TIMEOUT_MS = Number(process.env.REDIS_CONNECT_TIMEOUT_MS ?? 5000);
+    try {
+      await Promise.race([
+        this.client.connect(),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error(`Redis connect timeout (${CONNECT_TIMEOUT_MS}ms)`)), CONNECT_TIMEOUT_MS),
+        ),
+      ]);
+      this.logger.log('Redis connected');
+    } catch (error) {
+      this.logger.warn(
+        `Redis connect failed (degraded mode, server will continue): ${(error as Error).message}`,
+      );
+      // disable client so all subsequent calls return safe defaults
+      try {
+        this.client.disconnect();
+      } catch {
+        // ignore
+      }
+      this.client = null;
+      this.enabled = false;
+    }
   }
 
   async onModuleDestroy() {
@@ -59,6 +84,15 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
   isEnabled(): boolean {
     return this.enabled;
+  }
+
+  duplicateConnection(): Redis | null {
+    if (!this.client) return null;
+    return this.client.duplicate({
+      lazyConnect: true,
+      maxRetriesPerRequest: 2,
+      enableReadyCheck: true,
+    });
   }
 
   async ping(): Promise<HealthStatus> {

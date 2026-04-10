@@ -3,7 +3,7 @@
  *   PLATFORM_SUPER_ADMIN 만 grant/revoke 가능. 조회는 SUPPORT_ENGINEER 까지 허용.
  * Tiếng Việt: GraphQL resolver cho quản lý RBAC.
  */
-import { Args, ID, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { RequirePermission } from '@core/rbac/decorators/require-permission.decorator';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '@core/auth/guards/gql-auth.guard';
@@ -14,7 +14,12 @@ import {
 import { PermissionService } from '@core/rbac/permission.service';
 import { PermissionModel } from './models/permission.model';
 import { RoleModel } from './models/role.model';
+import { CreateRoleInput } from './dto/create-role.input';
+import { UpdateRoleInput } from './dto/update-role.input';
+import { CreatePermissionInput } from './dto/create-permission.input';
+import { UpdatePermissionInput } from './dto/update-permission.input';
 import { UserRoleAssignmentModel } from './models/user-role-assignment.model';
+import { RolePermissionPairModel } from './models/role-permission-pair.model';
 import {
   BooleanResponse,
   StringListResponse,
@@ -28,10 +33,12 @@ const ctxFromUser = (u: JwtPayload) => ({
 });
 
 const PermissionModel__ListResp = createListResponse(PermissionModel, 'PermissionModelListResponse');
+const PermissionModel__Resp = createObjectResponse(PermissionModel, 'PermissionModelResponse');
 const RoleModel__ListResp = createListResponse(RoleModel, 'RoleModelListResponse');
 const RoleModel__Resp = createObjectResponse(RoleModel, 'RoleModelResponse');
 const UserRoleAssignmentModel__ListResp = createListResponse(UserRoleAssignmentModel, 'UserRoleAssignmentModelListResponse');
 const UserRoleAssignmentModel__Resp = createObjectResponse(UserRoleAssignmentModel, 'UserRoleAssignmentModelResponse');
+const RolePermissionPairModel__ListResp = createListResponse(RolePermissionPairModel, 'RolePermissionPairModelListResponse');
 
 @Resolver()
 
@@ -128,55 +135,96 @@ export class PermissionResolver {
     return rows.map((rp) => rp.permission as unknown as PermissionModel);
   }
 
-  @Mutation(() => RoleModel__Resp)
+  /**
+   * 한국어: Matrix 탭 bulk fetch — scope 내 모든 (roleId, permissionId) pair.
+   * Tiếng Việt: Nạp hàng loạt cho tab Matrix.
+   */
+  @Query(() => RolePermissionPairModel__ListResp, { name: 'rbacRolePermissionsMatrix' })
+  @RequirePermission('platform.rbac.read')
+  async rbacRolePermissionsMatrix(
+    @Args('scope') scope: string,
+  ): Promise<RolePermissionPairModel[]> {
+    const rows = await this.service.getRolePermissionsMatrix(scope);
+    return rows.map((r) => ({ roleId: r.roleId, permissionId: r.permissionId }));
+  }
+
+  @Mutation(() => RoleModel__Resp, { name: 'rbacCreateRole' })
   @RequirePermission('platform.rbac.write')
   async rbacCreateRole(
-    @Args('roleCode') roleCode: string,
-    @Args('roleName') roleName: string,
-    @Args('scope') scope: string,
-    @Args('hierarchyLevel', { type: () => Int, nullable: true }) hierarchyLevel: number | null,
-    @Args('description', { nullable: true }) description: string | null,
+    @Args('input') input: CreateRoleInput,
     @CurrentUser() user: JwtPayload,
   ): Promise<RoleModel> {
     const created = await this.service.createRole(
       { userType: user.userType, userId: user.sub },
-      { roleCode, roleName, scope, hierarchyLevel: hierarchyLevel ?? 0, description },
+      input,
     );
     return created as unknown as RoleModel;
   }
 
-  @Mutation(() => RoleModel__Resp)
+  @Mutation(() => RoleModel__Resp, { name: 'rbacUpdateRole' })
   @RequirePermission('platform.rbac.write')
   async rbacUpdateRole(
-    @Args('id', { type: () => ID }) id: string,
-    @Args('roleName', { nullable: true }) roleName: string | null,
-    @Args('scope', { nullable: true }) scope: string | null,
-    @Args('hierarchyLevel', { type: () => Int, nullable: true }) hierarchyLevel: number | null,
-    @Args('description', { nullable: true }) description: string | null,
+    @Args('input') input: UpdateRoleInput,
     @CurrentUser() user: JwtPayload,
   ): Promise<RoleModel> {
+    const { roleId, ...rest } = input;
     const updated = await this.service.updateRole(
       { userType: user.userType, userId: user.sub },
-      id,
-      {
-        roleName: roleName ?? undefined,
-        scope: scope ?? undefined,
-        hierarchyLevel: hierarchyLevel ?? undefined,
-        description: description ?? undefined,
-      },
+      roleId,
+      rest,
     );
     return updated as unknown as RoleModel;
   }
 
-  @Mutation(() => BooleanResponse)
+  @Mutation(() => BooleanResponse, { name: 'rbacDeleteRole' })
   @RequirePermission('platform.rbac.write')
   async rbacDeleteRole(
-    @Args('id', { type: () => ID }) id: string,
+    @Args('roleId', { type: () => ID }) roleId: string,
     @CurrentUser() user: JwtPayload,
   ): Promise<boolean> {
     return this.service.deleteRole(
       { userType: user.userType, userId: user.sub },
-      id,
+      roleId,
+    );
+  }
+
+  @Mutation(() => PermissionModel__Resp, { name: 'rbacCreatePermission' })
+  @RequirePermission('platform.rbac.write')
+  async rbacCreatePermission(
+    @Args('input') input: CreatePermissionInput,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<PermissionModel> {
+    const created = await this.service.createPermission(
+      { userType: user.userType, userId: user.sub },
+      input,
+    );
+    return created as unknown as PermissionModel;
+  }
+
+  @Mutation(() => PermissionModel__Resp, { name: 'rbacUpdatePermission' })
+  @RequirePermission('platform.rbac.write')
+  async rbacUpdatePermission(
+    @Args('input') input: UpdatePermissionInput,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<PermissionModel> {
+    const { permissionId, ...rest } = input;
+    const updated = await this.service.updatePermission(
+      { userType: user.userType, userId: user.sub },
+      permissionId,
+      rest,
+    );
+    return updated as unknown as PermissionModel;
+  }
+
+  @Mutation(() => BooleanResponse, { name: 'rbacDeletePermission' })
+  @RequirePermission('platform.rbac.write')
+  async rbacDeletePermission(
+    @Args('permissionId', { type: () => ID }) permissionId: string,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<boolean> {
+    return this.service.deletePermission(
+      { userType: user.userType, userId: user.sub },
+      permissionId,
     );
   }
 

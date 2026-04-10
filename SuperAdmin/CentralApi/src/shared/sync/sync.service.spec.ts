@@ -26,12 +26,11 @@ describe('SyncService', () => {
     enqueueStream: jest.fn(),
   };
 
-  const realtime = {
-    publishUpstreamAccepted: jest.fn(),
-    publishUpstreamDuplicate: jest.fn(),
+  const subscriptionBus = {
+    publish: jest.fn(),
   };
 
-  const service = new SyncService(prisma as never, redis as never, realtime as never);
+  const service = new SyncService(prisma as never, redis as never, subscriptionBus as never);
 
   const payload = {
     v: 1,
@@ -55,12 +54,6 @@ describe('SyncService', () => {
 
     expect(result).toEqual({ status: 'ALREADY_PROCESSED', requestId: 'req-1' });
     expect(prisma.auditLog.findFirst).not.toHaveBeenCalled();
-    expect(realtime.publishUpstreamDuplicate).toHaveBeenCalledWith('edge-1', {
-      requestId: 'req-1',
-      status: 'ALREADY_PROCESSED',
-      eventType: 'ORDER_UPSERTED',
-      reason: 'REDIS_LOCK',
-    });
   });
 
   it('returns already processed when AuditLog.create raises P2002 unique violation', async () => {
@@ -78,19 +71,16 @@ describe('SyncService', () => {
       'sync:upstream:idempotency:idem-1',
       'lock-1',
     );
-    expect(realtime.publishUpstreamDuplicate).toHaveBeenCalledWith('edge-1', {
-      requestId: 'req-1',
-      status: 'ALREADY_PROCESSED',
-      eventType: 'ORDER_UPSERTED',
-      reason: 'P2002',
-    });
   });
 
   it('writes audit/update/stream records for accepted upstream sync payloads', async () => {
     redis.isEnabled.mockReturnValue(true);
     redis.acquireLock.mockResolvedValue('lock-1');
     prisma.auditLog.findFirst.mockResolvedValue(null);
-    prisma.auditLog.create.mockResolvedValue({ id: 'audit-1' });
+    prisma.auditLog.create.mockResolvedValue({
+      id: 'audit-1',
+      createdAt: new Date('2026-04-04T10:00:01.000Z'),
+    });
     prisma.edgePosTerminal.updateMany.mockResolvedValue({ count: 1 });
     redis.enqueueStream.mockResolvedValue('stream-1');
     redis.releaseLock.mockResolvedValue(true);
@@ -118,11 +108,14 @@ describe('SyncService', () => {
         eventType: 'ORDER_UPSERTED',
       }),
     );
-    expect(realtime.publishUpstreamAccepted).toHaveBeenCalledWith('edge-1', {
-      requestId: 'req-1',
-      status: 'ACCEPTED',
-      eventType: 'ORDER_UPSERTED',
-    });
+    expect(subscriptionBus.publish).toHaveBeenCalledWith(
+      'syncEventReceived',
+      expect.objectContaining({
+        id: 'audit-1',
+        edgePosId: 'edge-1',
+        requestId: 'req-1',
+      }),
+    );
     expect(result).toEqual({ status: 'ACCEPTED', requestId: 'req-1' });
   });
 

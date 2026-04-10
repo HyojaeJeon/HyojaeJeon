@@ -59,6 +59,21 @@ export interface DeleteAuthAccountMutationVariables {
 }
 export type DeleteAuthAccountMutationData = boolean;
 export declare const deleteAuthAccountOperation: GraphQLOperation<DeleteAuthAccountMutationData, DeleteAuthAccountMutationVariables>;
+export interface SuspendAuthAccountMutationVariables {
+    userType: AuthUserType;
+    id: string;
+    nextStatus: 'ACTIVE' | 'SUSPENDED';
+    reason?: string | null;
+}
+export type SuspendAuthAccountMutationData = AuthAccount;
+export declare const suspendAuthAccountOperation: GraphQLOperation<SuspendAuthAccountMutationData, SuspendAuthAccountMutationVariables>;
+export interface ResetAuthAccountPasswordMutationVariables {
+    userType: AuthUserType;
+    id: string;
+    newPassword: string;
+}
+export type ResetAuthAccountPasswordMutationData = boolean;
+export declare const resetAuthAccountPasswordOperation: GraphQLOperation<ResetAuthAccountPasswordMutationData, ResetAuthAccountPasswordMutationVariables>;
 export interface ChangePasswordMutationVariables {
     currentPassword: string;
     newPassword: string;

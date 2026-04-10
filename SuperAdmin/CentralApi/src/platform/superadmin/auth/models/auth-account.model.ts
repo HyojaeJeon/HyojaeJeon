@@ -26,7 +26,7 @@ export class AuthAccountModel {
   @Field(() => String, { nullable: true })
   phone?: string | null;
 
-  @Field()
+  @Field(() => String)
   userType!: AuthUserType;
 
   @Field()

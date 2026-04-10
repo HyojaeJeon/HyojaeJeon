@@ -5,11 +5,10 @@
  * Tiếng Việt: Cung cấp truy vấn GraphQL cho truy vấn và giải quyết kế thừa chính sách nền tảng.
  *             Truy vấn effectivePolicy sử dụng scope chain để giải quyết kế thừa chính sách theo cấp bậc.
  */
-import { Args, ID, Query, Resolver } from '@nestjs/graphql';
+import { Args, ID, Int, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { PlatformPolicyService } from './platform-policy.service';
 import { PlatformPolicyModel } from './models/platform-policy.model';
-import { PaginationArgs } from '@core/graphql/pagination/pagination.args';
 import { GqlAuthGuard } from '@core/auth/guards/gql-auth.guard';
 import { CurrentUser, JwtPayload } from '@core/auth/decorators/current-user.decorator';
 import { sanitizePolicyScopeChain } from '@core/tenancy/tenant-scope';
@@ -31,9 +30,10 @@ export class PlatformPolicyResolver {
   async policies(
     @Args('scopeType') scopeType: string,
     @Args('scopeId', { type: () => ID, nullable: true }) scopeId: string | null,
-    @Args() pagination: PaginationArgs,
+    @Args('skip', { type: () => Int, defaultValue: 0 }) skip: number,
+    @Args('take', { type: () => Int, defaultValue: 20 }) take: number,
   ) {
-    return this.service.findByScope(scopeType, scopeId, pagination.skip, pagination.take);
+    return this.service.findByScope(scopeType, scopeId, skip, take);
   }
 
   /**

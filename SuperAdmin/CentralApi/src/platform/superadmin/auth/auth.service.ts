@@ -13,6 +13,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -70,6 +71,10 @@ interface AuthAccountRow {
 type AuthAccountRecord = AuthAccountModel & {
   passwordHash: string;
   deletedAt?: Date | null;
+};
+
+type AuthAccountListRow = AuthAccountRow & {
+  userType: AuthUserType;
 };
 
 @Injectable()
@@ -361,23 +366,102 @@ export class AuthService {
   }
 
   private async listAllAccounts(skip: number, take: number): Promise<AuthAccountRecord[]> {
-    const [superAdmins, distributors, brandAdmins, corporateAdmins] = await Promise.all([
-      this.prisma.superAdminUser.findMany({ where: { deletedAt: null }, orderBy: { createdAt: 'desc' } }),
-      this.prisma.distributorUser.findMany({ where: { deletedAt: null }, orderBy: { createdAt: 'desc' } }),
-      this.prisma.brandAdminUser.findMany({ where: { deletedAt: null }, orderBy: { createdAt: 'desc' } }),
-      this.prisma.corporateAdminUser.findMany({ where: { deletedAt: null }, orderBy: { createdAt: 'desc' } }),
-    ]);
+    const rows = await this.prisma.$queryRaw<AuthAccountListRow[]>(Prisma.sql`
+      SELECT *
+      FROM (
+        SELECT
+          sa.id,
+          sa."loginId",
+          sa."passwordHash",
+          sa."displayName",
+          sa.email,
+          sa.phone,
+          sa.status,
+          sa."lastLoginAt",
+          sa."passwordChangedAt",
+          sa."createdAt",
+          sa."updatedAt",
+          sa."deletedAt",
+          NULL::uuid AS "distributorId",
+          NULL::uuid AS "brandHQId",
+          NULL::uuid AS "corporateId",
+          'SUPER_ADMIN'::text AS "userType"
+        FROM "SuperAdminUser" sa
+        WHERE sa."deletedAt" IS NULL
 
-    const mapped = [
-      ...(await Promise.all(superAdmins.map((row) => this.enrichAccount('SUPER_ADMIN', row)))),
-      ...(await Promise.all(distributors.map((row) => this.enrichAccount('DISTRIBUTOR_USER', row)))),
-      ...(await Promise.all(brandAdmins.map((row) => this.enrichAccount('BRAND_ADMIN', row)))),
-      ...(await Promise.all(corporateAdmins.map((row) => this.enrichAccount('CORPORATE_ADMIN', row)))),
-    ];
+        UNION ALL
 
-    return mapped
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-      .slice(skip, skip + take);
+        SELECT
+          du.id,
+          du."loginId",
+          du."passwordHash",
+          du."displayName",
+          du.email,
+          du.phone,
+          du.status,
+          du."lastLoginAt",
+          du."passwordChangedAt",
+          du."createdAt",
+          du."updatedAt",
+          du."deletedAt",
+          du."distributorId",
+          NULL::uuid AS "brandHQId",
+          NULL::uuid AS "corporateId",
+          'DISTRIBUTOR_USER'::text AS "userType"
+        FROM "DistributorUser" du
+        WHERE du."deletedAt" IS NULL
+
+        UNION ALL
+
+        SELECT
+          bu.id,
+          bu."loginId",
+          bu."passwordHash",
+          bu."displayName",
+          bu.email,
+          bu.phone,
+          bu.status,
+          bu."lastLoginAt",
+          bu."passwordChangedAt",
+          bu."createdAt",
+          bu."updatedAt",
+          bu."deletedAt",
+          bp."distributorId",
+          bu."brandHQId",
+          NULL::uuid AS "corporateId",
+          'BRAND_ADMIN'::text AS "userType"
+        FROM "BrandAdminUser" bu
+        LEFT JOIN "BrandProfile" bp ON bp.id = bu."brandHQId"
+        WHERE bu."deletedAt" IS NULL
+
+        UNION ALL
+
+        SELECT
+          cu.id,
+          cu."loginId",
+          cu."passwordHash",
+          cu."displayName",
+          cu.email,
+          cu.phone,
+          cu.status,
+          cu."lastLoginAt",
+          cu."passwordChangedAt",
+          cu."createdAt",
+          cu."updatedAt",
+          cu."deletedAt",
+          NULL::uuid AS "distributorId",
+          NULL::uuid AS "brandHQId",
+          cu."corporateId",
+          'CORPORATE_ADMIN'::text AS "userType"
+        FROM "CorporateAdminUser" cu
+        WHERE cu."deletedAt" IS NULL
+      ) merged_accounts
+      ORDER BY "createdAt" DESC, id DESC
+      OFFSET ${skip}
+      LIMIT ${take}
+    `);
+
+    return Promise.all(rows.map((row) => this.enrichAccount(row.userType, row)));
   }
 
   private async createAccountRow(
@@ -883,6 +967,137 @@ export class AuthService {
       default:
         throw new DomainError({ code: 'INVALID_USER_TYPE', params: { userType } });
     }
+    return true;
+  }
+
+  /**
+   * 한국어: 관리자가 타계정 상태를 전환한다 (SUSPENDED / ACTIVE 등).
+   *   - 트랜잭션 내에서 상태 변경 + 해당 계정의 모든 ACTIVE UserRoleAssignment 를 SUSPENDED 로 직접 바꾸지 않고
+   *     status 필드만 바꾼다 (role 은 살려둠). 실제 소프트 삭제 경로는 softDelete 를 사용.
+   *   - AuditLog 는 targetType 에 Prisma 모델 명(PascalCase 예외) 을 기록한다.
+   * Tiếng Việt: Đình chỉ hoặc kích hoạt lại tài khoản người thuê bởi quản trị viên.
+   */
+  async suspendAccount(
+    userType: AuthUserType,
+    id: string,
+    nextStatus: 'ACTIVE' | 'SUSPENDED',
+    reason: string | null,
+    actor: AuthActor,
+  ): Promise<AuthAccountRecord> {
+    const before = await this.findAccountById(userType, id);
+    if (!before) {
+      throw new DomainError({ code: 'USER_NOT_FOUND', params: { userId: id, userType } });
+    }
+    this.assertActorCanManage(actor, actor.tenantContext, {
+      distributorId: before.distributorId ?? null,
+      brandHQId: before.brandHQId ?? null,
+      corporateId: before.corporateId ?? null,
+    });
+
+    const data = { status: nextStatus };
+    let row: AuthAccountRow;
+    switch (userType) {
+      case 'SUPER_ADMIN':
+        row = (await this.prisma.superAdminUser.update({ where: { id }, data })) as AuthAccountRow;
+        break;
+      case 'DISTRIBUTOR_USER':
+        row = (await this.prisma.distributorUser.update({ where: { id }, data })) as AuthAccountRow;
+        break;
+      case 'BRAND_ADMIN':
+        row = (await this.prisma.brandAdminUser.update({ where: { id }, data })) as AuthAccountRow;
+        break;
+      case 'CORPORATE_ADMIN':
+        row = (await this.prisma.corporateAdminUser.update({ where: { id }, data })) as AuthAccountRow;
+        break;
+      default:
+        throw new DomainError({ code: 'INVALID_USER_TYPE', params: { userType } });
+    }
+
+    await this.permission.invalidate(userType, id);
+    await this.tenantContextService.invalidate(userType, id);
+
+    const account = await this.enrichAccount(userType, row);
+    await this.audit.log({
+      actorType: actor.userType,
+      actorId: actor.userId,
+      actionType: nextStatus === 'SUSPENDED' ? 'USER_SUSPEND' : 'USER_REACTIVATE',
+      targetType:
+        userType === 'SUPER_ADMIN'
+          ? 'SuperAdminUser'
+          : userType === 'DISTRIBUTOR_USER'
+            ? 'DistributorUser'
+            : userType === 'BRAND_ADMIN'
+              ? 'BrandAdminUser'
+              : 'CorporateAdminUser',
+      targetId: id,
+      beforeDataJson: { status: before.status, reason } as unknown as Record<string, unknown>,
+      afterDataJson: { status: nextStatus, reason } as unknown as Record<string, unknown>,
+    });
+    return account;
+  }
+
+  /**
+   * 한국어: 관리자가 타계정의 비밀번호를 강제 재설정한다.
+   *   - 현재 비밀번호 검증 없이 새 임시 비밀번호 해시로 교체한다.
+   *   - 호출 actor 가 대상 계정의 tenant scope 안에 있는지 assertActorCanManage 로 방어.
+   *   - AuditLog 에 이전/이후 해시는 기록하지 않는다 (비밀번호 평문/해시 유출 금지).
+   * Tiếng Việt: Quản trị viên đặt lại mật khẩu cho một tài khoản khác.
+   */
+  async resetAccountPassword(
+    userType: AuthUserType,
+    id: string,
+    newPassword: string,
+    actor: AuthActor,
+  ): Promise<boolean> {
+    const before = await this.findAccountById(userType, id);
+    if (!before) {
+      throw new DomainError({ code: 'USER_NOT_FOUND', params: { userId: id, userType } });
+    }
+    this.assertActorCanManage(actor, actor.tenantContext, {
+      distributorId: before.distributorId ?? null,
+      brandHQId: before.brandHQId ?? null,
+      corporateId: before.corporateId ?? null,
+    });
+
+    if (!newPassword || newPassword.length < 8) {
+      throw new DomainError({ code: 'VALIDATION_ERROR', details: { reason: 'New password too short' } });
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    const data = { passwordHash, passwordChangedAt: new Date() };
+    switch (userType) {
+      case 'SUPER_ADMIN':
+        await this.prisma.superAdminUser.update({ where: { id }, data });
+        break;
+      case 'DISTRIBUTOR_USER':
+        await this.prisma.distributorUser.update({ where: { id }, data });
+        break;
+      case 'BRAND_ADMIN':
+        await this.prisma.brandAdminUser.update({ where: { id }, data });
+        break;
+      case 'CORPORATE_ADMIN':
+        await this.prisma.corporateAdminUser.update({ where: { id }, data });
+        break;
+      default:
+        throw new DomainError({ code: 'INVALID_USER_TYPE', params: { userType } });
+    }
+
+    await this.audit.log({
+      actorType: actor.userType,
+      actorId: actor.userId,
+      actionType: 'USER_PASSWORD_RESET',
+      targetType:
+        userType === 'SUPER_ADMIN'
+          ? 'SuperAdminUser'
+          : userType === 'DISTRIBUTOR_USER'
+            ? 'DistributorUser'
+            : userType === 'BRAND_ADMIN'
+              ? 'BrandAdminUser'
+              : 'CorporateAdminUser',
+      targetId: id,
+      // 한국어: 비밀번호 평문/해시는 감사 로그에 기록하지 않는다.
+      beforeDataJson: { action: 'PASSWORD_RESET' } as unknown as Record<string, unknown>,
+    });
     return true;
   }
 }

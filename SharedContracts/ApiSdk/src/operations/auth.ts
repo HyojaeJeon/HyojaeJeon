@@ -229,6 +229,56 @@ export const deleteAuthAccountOperation: GraphQLOperation<
   `,
 };
 
+export interface SuspendAuthAccountMutationVariables {
+  userType: AuthUserType;
+  id: string;
+  nextStatus: 'ACTIVE' | 'SUSPENDED';
+  reason?: string | null;
+}
+
+export type SuspendAuthAccountMutationData = AuthAccount;
+
+export const suspendAuthAccountOperation: GraphQLOperation<
+  SuspendAuthAccountMutationData,
+  SuspendAuthAccountMutationVariables
+> = {
+  operationName: 'SuspendAuthAccount',
+  document: `
+    mutation SuspendAuthAccount($userType: String!, $id: ID!, $nextStatus: String!, $reason: String) {
+      suspendAuthAccount(userType: $userType, id: $id, nextStatus: $nextStatus, reason: $reason) {
+        success { code message requestId data {
+          id loginId displayName email phone userType distributorId brandHQId corporateId
+          status lastLoginAt passwordChangedAt createdAt updatedAt
+        } }
+        error { code message requestId details }
+      }
+    }
+  `,
+};
+
+export interface ResetAuthAccountPasswordMutationVariables {
+  userType: AuthUserType;
+  id: string;
+  newPassword: string;
+}
+
+export type ResetAuthAccountPasswordMutationData = boolean;
+
+export const resetAuthAccountPasswordOperation: GraphQLOperation<
+  ResetAuthAccountPasswordMutationData,
+  ResetAuthAccountPasswordMutationVariables
+> = {
+  operationName: 'ResetAuthAccountPassword',
+  document: `
+    mutation ResetAuthAccountPassword($userType: String!, $id: ID!, $newPassword: String!) {
+      resetAuthAccountPassword(userType: $userType, id: $id, newPassword: $newPassword) {
+        success { code message requestId data }
+        error { code message requestId details }
+      }
+    }
+  `,
+};
+
 export interface ChangePasswordMutationVariables {
   currentPassword: string;
   newPassword: string;

@@ -9,13 +9,11 @@
  *             Exports SyncService để các module khác như SyncWorkers sử dụng.
  */
 import { Module } from '@nestjs/common';
-import { RealtimeModule } from '@core/realtime/realtime.module';
 import { SyncController } from './sync.controller';
 import { SyncResolver } from './sync.resolver';
 import { SyncService } from './sync.service';
 
 @Module({
-  imports: [RealtimeModule],
   controllers: [SyncController],
   providers: [SyncResolver, SyncService],
   exports: [SyncService],

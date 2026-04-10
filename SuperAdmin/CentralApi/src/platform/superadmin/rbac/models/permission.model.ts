@@ -11,7 +11,12 @@ export class PermissionModel {
   @Field(() => ID) id!: string;
   @Field() permissionKey!: string;
   @Field() domain!: string;
+  @Field(() => String, { nullable: true }) name?: string | null;
+  @Field(() => String, { nullable: true }) nameKo?: string | null;
+  @Field(() => String, { nullable: true }) nameEn?: string | null;
   @Field(() => String, { nullable: true }) description?: string | null;
+  @Field(() => String, { nullable: true }) descriptionKo?: string | null;
+  @Field(() => String, { nullable: true }) descriptionEn?: string | null;
   @Field() isSystem!: boolean;
   @Field() createdAt!: Date;
   @Field() updatedAt!: Date;

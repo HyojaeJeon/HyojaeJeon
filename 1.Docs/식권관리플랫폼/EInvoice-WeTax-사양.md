@@ -11,7 +11,8 @@
 > - `1.Docs/기획 및 설계/프로젝트 통합설계/01-SuperAdmin-기능리스트.md` §13.1
 > - `1.Docs/식권관리플랫폼/프로젝트 개요.md` (베트남 세무·규제 배경)
 >
-> **신규 구현 위치**: `SuperAdmin/CentralApi/src/platform/corporate/einvoice/_internal/`
+> **신규 구현 위치**: `SuperAdmin/CentralApi/src/shared/einvoice/_internal/`
+> **DB 모델**: `EInvoice` + `EInvoiceLine` (polymorphic `subjectType + subjectId`, `issuanceMode='CONSOLIDATED' | 'SINGLE_RECEIPT'`) — `prisma/schema/80-einvoice.prisma`. 금액은 `totAmountVnd / totDiscountVnd / totVatAmountVnd / totPayableVnd` 4분할.
 
 ---
 
@@ -23,16 +24,31 @@
 - WeTax SaaS (`apitest.wetax.com.vn` / 향후 `api.wetax.com.vn`) 와의 **HTTP 통합 계약**
 - 인보이스 발급에 필요한 **요청/응답 JSON 스키마**
 - 발급 전 데이터 빌드 단계 (seller / buyer / lines) 의 **변환 규칙**
-- VAT / 통화 / 시리얼 / 음수 수량 / 개인고객 등 **엣지 케이스**
+- VAT / 통화 / 시리얼 / 음수 수량 등 **엣지 케이스**
 - 사업자번호 (Tax Code) **KYC 3-source fallback**
-- 응답 → 내부 모델 (`MealConsolidatedEInvoice`) **매핑 규칙**
+- 응답 → 내부 모델 (`EInvoice`) **매핑 규칙**
+- **통합 모드 단독** (월별 corporate × 1 invoice) 의 cron / 빌드 / 발급 / 검수 시퀀스
 
 ### 0.2 본 사양이 정의하지 않는 것 (위임)
 
-- WeTax 외 다른 provider (Bizzi / Misa / GDT Direct) — 별도 사양으로
+- WeTax 외 다른 provider (**Viettel S-Invoice** / **MISA meInvoice** / GDT Direct 등) 의 상세 HTTP 계약 — 본 사양은 1차 구현 WeTax 에만 한정. 추상화 interface 는 §12 에서 공통 정의. 세 provider 로드맵은 §17.1 참조.
 - 발급 큐 / 재시도 정책 / 회로 차단기 — `EInvoiceService` 책임
 - 권한 / 감사 / realtime — 기존 `core/rbac`, `core/audit`, `core/realtime` 사용
-- POS 영수증과의 통합 — `MealTransaction` ↔ `MealConsolidatedEInvoice` 의 service-layer 매핑 책임
+- POS 영수증과의 통합 — `MealTransaction` ↔ `EInvoice` 의 service-layer 매핑 책임
+- **CorporatePortal 측 화면 설계** (리스트 / 상세 / 다운로드 UX) — `1.Docs/식권관리플랫폼/CorporatePortal-작업계획서.md` §4.9 / §4.10 이 담당. 본 사양은 서버 / provider 계약만 정의.
+- **단건 모드 / 개인 buyer / `Khách lẻ` / `transType='2'(Return)`** — 본 식권 플랫폼은 통합 모드 단독이므로 사용하지 않음 (§4.0, §4.0.1, §4.0.3 참조).
+
+### 0.3 HJ-POS-TEST (레거시 POS) 에 구현된 3개 provider
+
+레거시 프로젝트 `HJ-POS-TEST` 에는 이미 베트남 e-Invoice 발행 가능한 3개 provider 가 존재하며, 본 Platform 은 이 3개 모두를 `EInvoiceProvider` 추상화 위에 동일 인터페이스로 구현한다:
+
+| Provider | 레거시 경로 | Base URL (Prod / Sandbox) | 인증 | Platform 구현 우선순위 |
+|---|---|---|---|---|
+| **WeTax** (WebCash Vietnam) | `HJ-POS-TEST/WeTax/WeTaxMgr.{h,cpp}` (1,842 lines) | `api.wetax.com.vn` / `apitest.wetax.com.vn` | Bearer (`POST /api/wtx/pa/v1/auth/login`) | **Phase 1 (본 사양서)** |
+| **Viettel S-Invoice** | `HJ-POS-TEST/ExcelAuto/ViettelTaxMgr.{h,cpp}` (52 KB) | `services/einvoiceapplication/api/InvoiceAPI/InvoiceWS/createInvoice/{taxCode}` | Bearer (`POST /auth/login`) — username 형식 `{taxCode}-{seq}` (예: `0100109106-509`) | **Phase 4 (§17.1)** |
+| **MISA meInvoice** | `HJ-POS-TEST/ExcelAuto/MisaTaxMgr.{h,cpp}` (31 KB) | `api.meinvoice.vn` / `testapi.meinvoice.vn` | Bearer (`POST /api/integration/auth/token`) + `POST /api/integration/invoice` | **Phase 4 (§17.1)** |
+
+**본 사양서는 WeTax 만 정의**하지만, §12 의 `EInvoiceProvider` interface 는 Viettel / MISA 가 향후 동일 인터페이스로 구현되도록 설계되어 있다. 3 provider 의 공통 필드 (seller / buyer / lines / totals) 는 이미 추상화되어 있고, provider 별 고유 credential + 설정 필드는 `EInvoiceProviderConfig.providerSpecificConfig` (Json) 로 분기 저장한다 (§12.1 참조).
 
 ---
 
@@ -306,16 +322,21 @@ export const WeTaxConstants = {
 
 > 본 모드는 식권 플랫폼이 베트남 시장에서 차별화되는 결정적 기능이며, "재무팀 영수증 처리 99% 자동화" 의 기술적 구현이다.
 
-#### 4.3.2 5단계 closing 흐름
+#### 4.3.2 6단계 closing 흐름 (하이브리드 — Corporate 검토 + 자동 fallback)
+
+> **설계 원칙**: 플랫폼 자동화 + Corporate 의 내용 검토 기회 + 세무 마감일 자동 fallback 을 모두 충족하는 **하이브리드 워크플로우**. 법적 seller 는 여전히 플랫폼 사업자 (불변), Corporate 의 역할은 "서비스 구매자의 내용 확인" 이지 "발행 주체" 가 아니다.
 
 ```
 [1] 매일: 임직원 결제
     → MealTransaction (status: APPROVED|SETTLED)
     → realtime topic: corporate.transaction.changed
 
-[2] 매월 1일 00:00: SyncWorkers cron
+[2] 매월 1일 00:00 GMT+7: SyncWorkers cron — DRAFT 자동 생성
     → EInvoiceConsolidationJob.runForAllActiveCorporates(period=prevMonth)
     → 각 corporate 별로 EInvoiceConsolidator.run() 호출
+    → EInvoice (status='DRAFT') + Lines 영속화
+    → reviewDueAt = periodStart + 7일 (Corporate 검토 마감일)
+    → realtime publish: corporate.einvoice.changed (CorporatePortal 구독)
 
 [3] EInvoiceConsolidator.run(corporateId, periodStart, periodEnd)
     a. 대상 거래 조회
@@ -331,38 +352,133 @@ export const WeTaxConstants = {
        ─ BY_CATEGORY: 메뉴 카테고리별 합산 1줄
        ─ SINGLE_LINE: 전체 1줄 ('Meal services {YYYY-MM}')
     c. VAT 분리 계산 (베트남 표준 8% 또는 10% 또는 면세)
-    d. MealConsolidatedEInvoice (status='DRAFT') + Lines 영속화
-    e. seller snapshot = 플랫폼 사업자 (Hyojung Softtech 등)
-    f. buyer  snapshot = corporate (companyName, taxCode, address, contactEmail)
-    g. periodStart / periodEnd 박제
-    h. refId = `MC{YYYYMM}{corporateId-12}` 형식 (멱등성)
-    i. realtime topic: platform.einvoice.consolidation.created
+    d. seller snapshot = 플랫폼 사업자 (PlatformLegalEntity.findActive())
+    e. buyer snapshot = corporate (companyName, taxCode, addressFull, contactEmail)
+    f. periodStart / periodEnd 박제
+    g. refId = `MC{YYYYMM}{corporateId-12}` 형식 (멱등성)
 
-[4] SuperAdmin 검수 (SA-EINV-003 큐)
-    a. /governance/compliance/einvoice/queue?status=DRAFT
-    b. 총액 / 거래수 / 라인 수 / 누락 건 검토
-    c. SuperAdmin 이 submitConsolidatedInvoice(id) 호출
-    d. EInvoiceService.publish(id):
+[4] Corporate 검토 단계 (CorporatePortal — 7일 window)
+    ── 케이스 A: Corporate 가 발행 요청 ──
+    a. /invoices 에서 DRAFT 인보이스 알림 수신 (🔔 "2026년 3월 인보이스가 검토 대기 중")
+    b. 총액 / 라인 수 / sourceTransactionCount / 그룹화 전략 검토
+    c. "발행 요청" 버튼 클릭 → mealConsolidatedInvoiceRequestIssuance(id) mutation
+    d. 서버: status 'DRAFT' → 'REQUESTED', requestedByAdminId / requestedAt 기록
+    e. AuditLog: actionType='EINVOICE_ISSUANCE_REQUESTED', actor=CorporateAdminUser
+
+    ── 케이스 B: Corporate 가 이의 제기 ──
+    a. 총액 이상 / 누락 의심 / 잘못된 머천트 매핑 등 발견
+    b. "이의 제기" 버튼 클릭 + 사유 입력 → mealConsolidatedInvoiceDispute(id, reason)
+    c. 서버: status 'DRAFT' → 'DISPUTED', disputedByAdminId / disputedAt / disputeReason 기록
+    d. 서버: SuperAdmin 에 알림 (platform.einvoice.disputed 토픽)
+    e. SuperAdmin 이 조사 → 수정 / 재생성 필요 시 status → 'DRAFT' 로 revert + Lines 재계산
+    f. Corporate 에게 재검토 요청
+
+    ── 케이스 C: Corporate 무응답 (7일 경과) ──
+    a. reviewDueAt 도달 (periodStart + 7일)
+    b. SyncWorkers 의 daily cron (매일 01:00) 이 `status='DRAFT' AND reviewDueAt < now()` 를 찾음
+    c. 자동으로 status 'DRAFT' → 'REQUESTED' 전환 (autoPromoted=true 플래그)
+    d. AuditLog: actionType='EINVOICE_AUTO_PROMOTED', reason='review_deadline_exceeded'
+    e. Corporate 에 알림 "검토 기간이 지나 자동으로 발행 요청 처리되었습니다"
+    f. 세무 마감일 (매월 20일, Decree 70/2025) 리스크 방지
+
+[5] SuperAdmin 검수 단계 (SA-EINV-003 큐)
+    a. /governance/compliance/einvoice/queue?status=REQUESTED 진입
+    b. Corporate 의 발행 요청 이력 확인 (autoPromoted 여부 포함)
+    c. 총액 / 거래수 / 라인 수 / 누락 건 최종 검토
+    d. 승인 → submitConsolidatedInvoice(id) → EInvoiceService.publish(id):
        - WeTaxProvider.publish(ctx) 호출
-       - ctx.seller = 플랫폼 사업자 정보 (corporate 의 가맹점이 아님!)
-       - ctx.buyer  = corporate (companyName, taxCode 필수)
-       - ctx.lines  = MealConsolidatedEInvoiceLine 들을 WeTaxInvoiceDetail 로 변환
+       - ctx.seller = 플랫폼 사업자 정보
+       - ctx.buyer  = corporate snapshot
+       - ctx.lines  = EInvoiceLine → WeTaxInvoiceDetail 변환
        - ctx.buyerNotGetInvoice = 0 (사업자 buyer 이므로 항상 0)
        - ctx.transType = '1' (Sell)
-       - WeTax → GDT → ACCEPTED
+       - status: 'REQUESTED' → 'SUBMITTING' → WeTax → GDT → 'ACCEPTED'
        - 응답을 invoice 모델에 기록
+    e. 거부 (긴급 수정 필요) → status → 'DRAFT' 로 revert + 사유 기록
+    f. GDT 거부 → status 'SUBMITTING' → 'REJECTED' + Corporate 에 알림
 
-[5] 기업고객 다운로드
-    a. SA-CORP-INV-001 (기존) 화면에서 corporate 별 인보이스 목록 표시
-    b. PDF/XML 다운로드 (provider 가 제공한 lookup_code 로)
-    c. corporate 의 재무팀이 단일 손금 증빙으로 회계 입력
+[6] 기업고객 수령 (CorporatePortal — 기업 재무팀이 직접 접근)
+    a. CorporatePortal `/invoices` (리스트) 에서 월별 인보이스 히스토리 조회
+       - 상태 배지: DRAFT / DISPUTED / REQUESTED / SUBMITTING / ACCEPTED / REJECTED / VOIDED
+       - ACCEPTED 상태의 행만 PDF/XML 다운로드 버튼 활성
+    b. CorporatePortal `/invoices/[id]` (상세) 에서 라인 / seller snapshot / buyer snapshot / 제출 이력 열람
+    c. PDF/XML 다운로드 (signed URL, 5분 만료 — provider 가 제공한 lookup_code 로 CentralApi 가 생성)
+    d. corporate 재무팀이 단일 손금 증빙으로 회계 입력
+    e. (병행) SuperAdmin/Portal 의 SA-EINV-* 화면에서 플랫폼 사업자가 같은 인보이스를 모니터링 / 재발행 / 감사
+
+> **중요 — 책임 분리 재확인**:
+> - **Corporate 의 "발행 요청"** 은 법적 발행 주체가 되는 것이 아니라 **서비스 구매자의 내용 확인 완료** 를 의미한다. seller 는 여전히 플랫폼 사업자.
+> - **`einvoice.request.write`** (발행 요청) / **`einvoice.dispute.write`** (이의 제기) — CorporatePortal role template (OWNER / FINANCE_ADMIN) 에 부여
+> - **`einvoice.publish.write`** (실제 발행 — WeTax 호출) — **SuperAdmin 전용**, CorporatePortal 에는 절대 부여 금지
+> - REJECTED 상태인 경우 CorporatePortal 은 "이 인보이스는 GDT 에서 거부되었습니다. SuperAdmin 에게 문의하세요" 안내 박스만 표시. 재제출은 SuperAdmin 책임.
 ```
+
+#### 4.3.2.a 상태 머신 (state machine)
+
+```
+         ┌────────────────────────────────────────────────────┐
+         │   [cron 매월 1일]                                   │
+         ▼                                                    │
+    ┌─────────┐                                              │
+    │  DRAFT  │──[Corporate 이의 제기]──▶ ┌──────────┐        │
+    └─────────┘                          │ DISPUTED │        │
+         │                               └──────────┘        │
+         │                                    │              │
+         │                          [SA 수정/재생성]          │
+         │                                    └──────────────┘
+         │
+         ├─[Corporate 발행 요청]─────────────┐
+         │                                   ▼
+         └─[reviewDueAt 경과, cron 자동]──▶ ┌──────────────┐
+                                           │  REQUESTED   │
+                                           └──────────────┘
+                                                 │
+                                          [SA 검수 승인]
+                                                 │
+                                                 ▼
+                                           ┌──────────────┐
+                                           │ SUBMITTING   │
+                                           └──────────────┘
+                                                 │
+                                          [WeTax → GDT]
+                                                 │
+                                        ┌────────┴─────────┐
+                                        ▼                  ▼
+                                  ┌──────────┐       ┌──────────┐
+                                  │ ACCEPTED │       │ REJECTED │
+                                  └──────────┘       └──────────┘
+                                        │                  │
+                                 [Portal 다운로드]    [SA 재시도 or VOID]
+                                                            │
+                                                            ▼
+                                                      ┌──────────┐
+                                                      │  VOIDED  │
+                                                      └──────────┘
+```
+
+**상태 전이 허용 매트릭스** (서버 가드 enforcement):
+
+| 현재 상태 | 허용 전이 | 트리거 주체 | mutation |
+|---|---|---|---|
+| (none) | → DRAFT | SyncWorkers cron | `runEInvoiceConsolidationForCorporate` |
+| DRAFT | → REQUESTED | Corporate OWNER/FINANCE_ADMIN | `mealConsolidatedInvoiceRequestIssuance` |
+| DRAFT | → REQUESTED (autoPromoted) | SyncWorkers daily cron | `autoPromoteOverdueDrafts` (internal) |
+| DRAFT | → DISPUTED | Corporate OWNER/FINANCE_ADMIN | `mealConsolidatedInvoiceDispute` |
+| DISPUTED | → DRAFT | SuperAdmin | `resolveDisputedInvoice` (SA 수정/재생성) |
+| REQUESTED | → SUBMITTING | SuperAdmin | `publishConsolidatedInvoice` |
+| REQUESTED | → DRAFT | SuperAdmin | `revertToDraft` (긴급 수정 필요 시) |
+| SUBMITTING | → ACCEPTED | WeTax 응답 성공 | (internal) |
+| SUBMITTING | → REJECTED | WeTax 응답 실패 | (internal) |
+| REJECTED | → SUBMITTING | SuperAdmin | `retryPublish` (provider 재시도) |
+| REJECTED | → DRAFT | SuperAdmin | `revertToDraft` (내용 수정 후 재발급) |
+| ACCEPTED | → VOIDED | SuperAdmin | `voidConsolidatedInvoice` (긴급 취소 — 감사 필수) |
+| VOIDED | (종결) | - | - |
 
 #### 4.3.3 통합 모드 핵심 속성 (요약)
 
 | 항목 | 통합 모드 |
 |---|---|
-| 트리거 | 매월 1일 SyncWorkers cron + SuperAdmin 검수 승인 |
+| 트리거 | 매월 1일 SyncWorkers cron DRAFT 자동 생성 → Corporate 발행 요청 (또는 7일 자동 승격) → SuperAdmin 검수 승인 → WeTax 발행 |
 | Seller | 플랫폼 사업자 (`PlatformLegalEntity.findActive()`) |
 | Buyer | 기업고객 corporate (taxCode + companyName + addressFull 필수) |
 | Lines 의미 | corporate 의 한달치 식권 거래를 그룹화 전략(consolidationStrategy) 으로 합산 |
@@ -371,8 +487,11 @@ export const WeTaxConstants = {
 | 멱등성 키 | `refId = MC + YYYYMM + corporateId-12` |
 | RefId 충돌 시 | 같은 corporate × 같은 달 → 같은 refId → @@unique 로 dedupe → 재실행 안전 |
 | 발급 단위 | 1 corporate × 1 month = 1 invoice |
+| Corporate 검토 window | 7일 (기본, `corporate.einvoiceReviewDays` 로 3~14일 조정 가능) |
+| 7일 경과 시 | SyncWorkers daily cron 이 자동으로 `REQUESTED` 로 승격 (`autoPromoted=true` 플래그 기록) |
 | `buyerNotGetInvoice` | **항상 0** (사업자 buyer 만 허용 — 개인 buyer 케이스 없음) |
 | `transType` | **항상 '1' (Sell)** — 환불은 별도 발급이 아니라 합산 차감 |
+| 법적 발행 주체 | 플랫폼 사업자 (Corporate 의 "발행 요청" 은 내용 확인 완료 표시일 뿐, seller 는 불변) |
 
 #### 4.3.4 라인 그룹화 전략 (consolidationStrategy)
 
@@ -467,13 +586,13 @@ EInvoiceConsolidationJob (cron, 매월 1일 00:00 GMT+7)
    │     │     ├─ groupedLines = LineGroupingFn(transactions, strategy)
    │     │     ├─ validate(...)
    │     │     ├─ refId = generateConsolidatedRefId(corporateId, periodStart)
-   │     │     ├─ MealConsolidatedEInvoice.create({
+   │     │     ├─ EInvoice.create({
    │     │     │     refId, corporateId, periodStart, periodEnd,
    │     │     │     consolidationStrategy, status='DRAFT',
    │     │     │     sellerSnapshot, buyerSnapshot,
-   │     │     │     totalAmountVnd, vatAmountVnd
+   │     │     │     totPayableVnd, totVatAmountVnd
    │     │     │   })
-   │     │     └─ MealConsolidatedEInvoiceLine.createMany(groupedLines)
+   │     │     └─ EInvoiceLine.createMany(groupedLines)
    │     │
    │     └─ realtime publish: platform.einvoice.consolidation.created
    │
@@ -481,10 +600,11 @@ EInvoiceConsolidationJob (cron, 매월 1일 00:00 GMT+7)
 
 ──────────────── (수동 / 자동 승인 분기) ────────────────
 
-EInvoiceService.publish(invoiceId)  ── SuperAdmin 또는 자동 승인 cron
+EInvoiceService.publish(invoiceId)  ── SuperAdmin 수동 승인 (REQUESTED 큐에서)
    │
-   ├─ 1. invoice = MealConsolidatedEInvoice.findById(id)
-   │     status === 'DRAFT' 또는 'BUILT' 만 허용
+   ├─ 1. invoice = EInvoice.findById(id)
+   │     status === 'REQUESTED' 만 허용 (§4.3.2.a 상태 머신 참조)
+   │     (REJECTED → SUBMITTING 재시도는 별도 mutation `retryPublish`)
    │
    ├─ 2. ctx = ConsolidatedPublishContextBuilder.build(invoice)
    │     ├─ ctx.seller = PlatformLegalEntity.getActive()
@@ -506,7 +626,7 @@ EInvoiceService.publish(invoiceId)  ── SuperAdmin 또는 자동 승인 cron
    │     })
    │
    ├─ 5. EInvoiceSubmissionLog.create({ attempt, requestJson, responseJson })
-   ├─ 6. AuditService.log(actionType='EINVOICE_PUBLISH', targetType='MealConsolidatedEInvoice')
+   ├─ 6. AuditService.log(actionType='EINVOICE_PUBLISH', targetType='EInvoice')
    └─ 7. realtime publish: corporate.einvoice.changed + platform.einvoice.submission.accepted
 ```
 
@@ -515,7 +635,7 @@ EInvoiceService.publish(invoiceId)  ── SuperAdmin 또는 자동 승인 cron
 ## 5. RefId 생성 규칙
 ## 5. Quy tắc sinh RefId
 
-식권 플랫폼은 **통합 모드 RefId 단 하나만** 사용한다. `MealConsolidatedEInvoice.refId` 컬럼에 저장되며 `@@unique` 제약으로 같은 corporate × 같은 달의 중복 발급을 dedupe 한다.
+식권 플랫폼은 **통합 모드 RefId 단 하나만** 사용한다. `EInvoice.refId` 컬럼에 저장되며 `@@unique` 제약으로 같은 corporate × 같은 달의 중복 발급을 dedupe 한다.
 
 ```typescript
 function generateConsolidatedRefId(corporateId: string, periodStart: Date): string {
@@ -581,7 +701,7 @@ WeTaxMgr.cpp 의 `MergeItemsByCode` 가 음수 환불 항목과 양수 판매 �
 
 ```typescript
 export function mergeLinesByItemCode(
-  lines: MealConsolidatedEInvoiceLine[]
+  lines: EInvoiceLine[]
 ): MergedLine[] {
   const grouped = new Map<string, MergedLine>();
 
@@ -647,19 +767,19 @@ async function lookupCompanyByTaxId(taxId: string): Promise<WeTaxCompany> {
 ## 10. 응답 → 내부 모델 매핑
 ## 10. Mapping response
 
-WeTaxMgr.cpp:280-327 의 `ProcessInvoiceResponse` 가 WeTax 응답을 `tCashReceipt` 에 매핑. 신규 구현은 `MealConsolidatedEInvoice` 모델을 갱신한다.
+WeTaxMgr.cpp:280-327 의 `ProcessInvoiceResponse` 가 WeTax 응답을 `tCashReceipt` 에 매핑. 신규 구현은 `EInvoice` 모델을 갱신한다.
 
 | WeTax 응답 필드 | 신규 Platform 필드 | 비고 |
 |---|---|---|
-| `data[0].lookup_code` | `MealConsolidatedEInvoice.lookupCode` | 검색 키 |
-| `data[0].cqt_code` | `MealConsolidatedEInvoice.cqtCode` | CQT 인증 코드 |
-| `data[0].ref_id` | `MealConsolidatedEInvoice.refId` | 멱등성 키 |
-| `data[0].serial_no` | `MealConsolidatedEInvoice.serialNo` | 'C25TKT' |
-| `data[0].invoice_no` | `MealConsolidatedEInvoice.invoiceNo` | 일련번호 |
+| `data[0].lookup_code` | `EInvoice.lookupCode` | 검색 키 |
+| `data[0].cqt_code` | `EInvoice.cqtCode` | CQT 인증 코드 |
+| `data[0].ref_id` | `EInvoice.refId` | 멱등성 키 |
+| `data[0].serial_no` | `EInvoice.serialNo` | 'C25TKT' |
+| `data[0].invoice_no` | `EInvoice.invoiceNo` | 일련번호 |
 | (조합) `serialNo + invoiceNo` | `gdtReceiptNo` | 조회 표시용 |
 | 전체 응답 | `providerResponseJson` | raw JSON 박제 (감사) |
 | 보낸 body | `providerRequestJson` | raw JSON 박제 (감사) |
-| `status.success` | `MealConsolidatedEInvoice.status` | true → ACCEPTED, false → REJECTED |
+| `status.success` | `EInvoice.status` | true → ACCEPTED, false → REJECTED |
 
 ---
 
@@ -719,7 +839,7 @@ export interface EInvoicePublishResult {
 
 export interface EInvoiceProvider {
   /** Provider 식별자 */
-  readonly type: 'WETAX' | 'BIZZI' | 'MISA' | 'DIRECT_GDT';
+  readonly type: 'WETAX' | 'VIETTEL' | 'MISA' | 'DIRECT_GDT';
 
   /** 인증 + 토큰 캐시 관리 */
   authenticate(config: EInvoiceProviderConfig): Promise<void>;
@@ -735,7 +855,7 @@ export interface EInvoiceProvider {
 }
 ```
 
-`WeTaxProvider implements EInvoiceProvider` — 1차 구현체. 향후 `BizziProvider`, `MisaProvider`, `GdtDirectProvider` 추가 시 동일 인터페이스만 따르면 된다.
+`WeTaxProvider implements EInvoiceProvider` — 1차 구현체. 향후 `ViettelProvider`, `MisaProvider`, `GdtDirectProvider` 추가 시 동일 인터페이스만 따르면 된다.
 
 ---
 
@@ -752,7 +872,7 @@ export interface EInvoiceProvider {
 | `_internal/wetax.merger.ts` | 음수 수량 머지 (단건 모드용) | `MergeItemsByCode` |
 | `_internal/wetax.provider.ts` | `EInvoiceProvider` 구현체 (단건 + 통합 둘 다 발급 단계는 동일) | `IssuanceInvoice` orchestrator |
 | `_internal/kyc-lookup.ts` | 3-source fallback | `GetCompanyByTaxId / Vietqr / Esgoo` |
-| **`_internal/einvoice-consolidator.ts`** | **통합 모드 빌더 — MealTransaction → MealConsolidatedEInvoiceLine 그룹화** | **신규 (식권 플랫폼 핵심)** |
+| **`_internal/einvoice-consolidator.ts`** | **통합 모드 빌더 — MealTransaction → EInvoiceLine 그룹화** | **신규 (식권 플랫폼 핵심)** |
 | **`_internal/consolidated-publish-context.builder.ts`** | **통합 모드 publish ctx 빌드 (seller=플랫폼, buyer=corporate)** | **신규** |
 | `einvoice.service.ts` (기존 leaf) | publish/void/retry/runConsolidationCron orchestrator + audit + realtime | (분리됨) |
 | `einvoice.resolver.ts` (기존 leaf) | GraphQL mutation 노출 (publish/void/retry/runConsolidationFor) | (분리됨) |
@@ -771,6 +891,20 @@ export interface EInvoiceProvider {
 |---|---|
 | `SuperAdmin/SyncWorkers/src/jobs/einvoice-consolidation.job.ts` (Phase 2 신설) | 매월 1일 00:00 GMT+7 cron — 모든 active corporate 순회 → CentralApi 의 `runConsolidationForCorporate(corporateId, period)` mutation 호출 |
 
+#### CorporatePortal 측 화면 (수령자 관점)
+
+SuperAdmin/Portal 이 발급 / 검수 / 재발행 / 감사 책임을 지는 반면, **CorporatePortal 은 수령자 전용** 이다. 같은 `EInvoice` row 를 두 프로젝트가 각자의 관점으로 본다.
+
+| 경로 | 책임 | 관련 permission |
+|---|---|---|
+| `CorporatePortal/src/app/invoices/page.tsx` | 월별 인보이스 리스트 + 필터 + 상태 배지 + PDF/XML 다운로드 버튼 (ACCEPTED 만 활성) | `einvoice.read` |
+| `CorporatePortal/src/app/invoices/[id]/page.tsx` | 인보이스 상세 6섹션 (헤더 / seller snapshot / buyer snapshot / 라인 / 제출 이력 P1 / 감사 P1) | `einvoice.read` |
+| `CorporatePortal/src/app/dashboard/page.tsx` 의 W6 위젯 | 이번 달 인보이스 상태 카드 + 다운로드 CTA | `einvoice.read` |
+| (금지) 재발행 / 수정 / 상태 변경 mutation | **절대 호출 금지** — 서버 측에서 `einvoice.publish.write` permission 차단 | (없음) |
+
+> CorporatePortal 은 `mealInvoicesByCorporate` / `mealInvoiceDetail` / `mealInvoiceDownloadPdf` / `mealInvoiceDownloadXml` query / mutation 만 사용한다. 발급 관련 mutation (`runEInvoiceConsolidationForCorporate` / `publishEInvoice` / `voidEInvoice` / `retryEInvoice`) 은 전부 SuperAdmin/Portal 전용.
+> 상세 설계는 `1.Docs/식권관리플랫폼/CorporatePortal-작업계획서.md` §4.9 (`/invoices`) / §4.10 (`/invoices/[id]`) 참조.
+
 CentralApi 측 mutation:
 
 ```graphql
@@ -783,7 +917,7 @@ mutation runEInvoiceConsolidationForCorporate(
   runEInvoiceConsolidationForCorporate(
     input: { corporateId: $corporateId, periodStart: $periodStart, periodEnd: $periodEnd, strategy: $strategy }
   ) {
-    success { ... data { id refId status totalAmountVnd lineCount } }
+    success { ... data { id refId status totPayableVnd lineCount } }
     error { code message }
   }
 }
@@ -796,42 +930,63 @@ mutation runEInvoiceConsolidationForCorporate(
 
 ### Prisma 스키마 (CentralApi)
 
-- [x] `MealConsolidatedEInvoice` 12 신규 필드 (cqtCode, formNo, serialNo, invoiceNo, refId, lookupCode, transType, currencyCode, exchangeRate, paymentMethod, providerType, buyerNotGetInvoice, providerRequestJson, providerResponseJson)
-- [x] `MealConsolidatedEInvoiceLine` 신규 모델
+- [x] `EInvoice` 신규 필드 (cqtCode, formNo, serialNo, invoiceNo, refId, lookupCode, transType, currencyCode, exchangeRate, paymentMethod, providerType, providerRequestJson, providerResponseJson)
+  > `buyerNotGetInvoice` 컬럼은 **제거**됨 (통합 모드 단독 정책, 항상 0 이므로 컬럼 의미 없음). WeTax HTTP body 직렬화 시 raw provider layer 가 hardcoded 0 으로 채운다.
+- [x] `EInvoiceLine` 신규 모델
 - [x] `EInvoiceProvider` 신규 모델
 - [x] `EInvoiceProviderConfig` 신규 모델
 - [x] `EInvoiceSubmissionLog` 신규 모델
-- [ ] **`MealConsolidatedEInvoice.consolidationStrategy` 필드 추가** (BY_MERCHANT/BY_DAY/BY_DEPARTMENT/BY_CATEGORY/SINGLE_LINE)
-- [ ] **`MealConsolidatedEInvoice.sellerSnapshot` Json 필드 추가** (발급 시점의 플랫폼 사업자 정보 박제)
-- [ ] **`MealConsolidatedEInvoice.buyerSnapshot` Json 필드 추가** (발급 시점의 corporate 정보 박제)
-- [ ] **`MealCorporate.einvoiceConsolidationStrategy` 필드 추가** (기본 BY_MERCHANT)
-- [ ] **`MealCorporate.addressFull` 필드 추가** (buyer_address 매핑)
-- [ ] **`PlatformLegalEntity` 신규 모델** (플랫폼 사업자 법인 정보, country 별)
-- [ ] 모든 새 relation 에 onDelete/onUpdate 명시 (P0-2 규칙)
-- [ ] migration script 생성 + 검증
+- [x] `EInvoice.consolidationStrategy` 필드 (BY_MERCHANT/BY_DAY/BY_DEPARTMENT/BY_CATEGORY/SINGLE_LINE)
+- [x] `EInvoice.sellerSnapshot` Json 필드 (발급 시점의 플랫폼 사업자 정보 박제)
+- [x] `EInvoice.buyerSnapshot` Json 필드 (발급 시점의 corporate 정보 박제, PII 마스킹)
+- [x] `EInvoice.sourceTransactionCount` Int 필드 (합산 대상 거래 건수)
+- [x] `MealCorporate.einvoiceConsolidationStrategy` 필드 (기본 BY_MERCHANT)
+- [x] `MealCorporate.addressFull` 필드 (buyer_address 매핑)
+- [x] `PlatformLegalEntity` 신규 모델 — 베트남 전용 (country 분기 없음). 한 시점에 `isActive=true` row 정확히 1개 불변식. 법인 변경은 신규 row + 기존 `isActive=false`.
+- [x] 모든 새 relation 에 onDelete/onUpdate 명시 (P0-2 규칙)
+- [x] `EInvoice.refId` @@unique 제약 (멱등성)
+- [x] `idx_meal_invoice_provider_status_time` 인덱스 (provider 별 모니터링 대시보드)
+- [x] migration script 생성 (`20260408104500_meal_einvoice_consolidated_mode`) — `prisma validate` 통과
+- [ ] `MealTicketWalletFundingEntry.status` enum 에 `EXPIRED` 추가 (CorporatePortal 작업계획서 §9.5 퇴사 자동 소멸 반영) + 신규 migration
+- [ ] **`EInvoice` 상태 머신 확장 필드** (하이브리드 워크플로우 — §4.3.2.a):
+  - `status` enum 확장: `DRAFT / DISPUTED / REQUESTED / SUBMITTING / ACCEPTED / REJECTED / VOIDED` (기존 + `DISPUTED` + `REQUESTED` 신규)
+  - `reviewDueAt` (timestamptz, nullable) — Corporate 검토 마감일 (periodStart + 7일)
+  - `requestedByAdminId` (uuid, nullable) — 발행 요청한 Corporate admin
+  - `requestedAt` (timestamptz, nullable)
+  - `autoPromoted` (boolean, default false) — 7일 경과 자동 승격 여부
+  - `disputedByAdminId` (uuid, nullable) — 이의 제기한 Corporate admin
+  - `disputedAt` (timestamptz, nullable)
+  - `disputeReason` (varchar(1000), nullable)
+  - `disputeResolvedAt` (timestamptz, nullable)
+  - `disputeResolvedByAdminId` (uuid, nullable)  — SuperAdmin actor
+  - 신규 migration 필요
 
 ### CentralApi 코드
 
 - [x] `_internal/einvoice-provider.interface.ts`
 - [x] `_internal/wetax.types.ts`
 - [x] `_internal/wetax.constants.ts`
-- [x] `_internal/wetax.merger.ts` (단건 모드)
+- [x] `_internal/wetax.merger.ts` (통합 모드 환불 차감용 — 단건 모드 발급용 아님)
 - [x] `_internal/wetax.serializer.ts`
-- [ ] `_internal/wetax.client.ts` (axios 실제 구현)
-- [ ] `_internal/wetax.provider.ts` (실제 호출)
-- [ ] `_internal/kyc-lookup.ts` (vietqr/esgoo 실제 호출)
-- [ ] **`_internal/einvoice-consolidator.ts`** (통합 모드 빌더 — MealTransaction → Line 그룹화)
-- [ ] **`_internal/consolidated-publish-context.builder.ts`** (publish ctx 빌드)
+- [x] `_internal/einvoice-consolidator.ts` — skeleton (TODO: 그룹화 함수 5개 실제 구현은 Phase 1 후속)
+- [x] `_internal/kyc-lookup.ts` — skeleton (3-source fallback)
+- [x] `_internal/wetax.provider.ts` — skeleton (`buyerNotGetInvoice` hardcoded 0)
+- [x] `_internal/wetax.client.ts` — skeleton
+- [ ] `_internal/wetax.client.ts` (axios 실제 HTTP 구현 — Phase 1 후속)
+- [ ] `_internal/wetax.provider.ts` (실제 호출 — Phase 1 후속)
+- [ ] `_internal/kyc-lookup.ts` (vietqr/esgoo 실제 호출 — Phase 1 후속)
+- [ ] `_internal/einvoice-consolidator.ts` — 5 그룹화 함수 실제 구현 + idempotency 검증 + DB 영속화
+- [ ] `_internal/consolidated-publish-context.builder.ts` (publish ctx 빌드)
 - [ ] `einvoice.service.ts` 확장 (publish/void/retry/runConsolidation)
 - [ ] `einvoice.resolver.ts` 확장 (5 mutation: publish/void/retry/runConsolidation/lookupBuyer)
 - [ ] `dto/publish-einvoice.input.ts` 확장
-- [ ] **`dto/run-consolidation.input.ts` 신규**
-- [ ] `models/meal-consolidated-einvoice.model.ts` 확장 (12 필드 + lines + 전략)
-- [ ] **`models/meal-consolidated-einvoice-line.model.ts` 신규**
+- [ ] `dto/run-consolidation.input.ts` 신규
+- [ ] `models/meal-consolidated-einvoice.model.ts` 확장 (신규 필드 + lines + 전략)
+- [ ] `models/meal-consolidated-einvoice-line.model.ts` 신규
 - [ ] `einvoice.service.spec.ts` (provider mock + 8~12 test)
 - [x] `_internal/wetax.merger.spec.ts` (8 케이스 통과)
 - [x] `_internal/wetax.serializer.spec.ts` (7 케이스 통과)
-- [ ] **`_internal/einvoice-consolidator.spec.ts` (5 그룹화 전략 × 엣지 케이스)**
+- [ ] `_internal/einvoice-consolidator.spec.ts` (5 그룹화 전략 × 엣지 케이스)
 
 ### SyncWorkers (월별 cron)
 
@@ -839,22 +994,47 @@ mutation runEInvoiceConsolidationForCorporate(
 - [ ] BullMQ scheduled job: `0 0 1 * *` GMT+7 (매월 1일 00:00)
 - [ ] CentralApi `runEInvoiceConsolidationForCorporate` mutation 호출 (loop)
 - [ ] 실패 시 재시도 + alert
+- [ ] **`meal-wallet-monthend-expire.job.ts` 신규** — 월말 23:59 cron, `MealTicketWalletFundingEntry` 중 `sourceType=COMPANY_ALLOWANCE` 잔여분을 정책에 따라 `EXPIRED` 처리 (CorporatePortal §9.4 Carryover & 월말 만료)
 
 ### 권한 + audit + realtime
 
-- [ ] 신규 권한 키 `platform.einvoice.read / platform.einvoice.write` (CentralApi seed 추가)
+- [x] Corporate 도메인 permission 25개 seed 완료 (기존 `corporate.*` 네임스페이스)
+- [ ] **`einvoice.*` 리소스 중심 permission 마이그레이션** (§23 D-26 / CorporatePortal 작업계획서 §8.3.2) — 기존 `corporate.invoice.read` / `corporate.invoice.write` 를 `domain='einvoice'` 로 이관하여 **SuperAdmin + Corporate 가 같은 permission key 를 공유** 하되 scope 로만 범위 제한. 총 8개 permission 등록:
+  - **`einvoice.read`** — 인보이스 조회 (scope=PLATFORM → 전체, scope=CORPORATE → 자기 corporate 만)
+  - **`einvoice.request.write`** — DRAFT → REQUESTED 전환 (Corporate OWNER / FINANCE_ADMIN + SA)
+  - **`einvoice.dispute.write`** — DRAFT → DISPUTED 전환 (위 동일)
+  - **`einvoice.publish.write`** — 실제 WeTax 발급 (REQUESTED → SUBMITTING → ACCEPTED). **SA 전용** — CorporatePortal role 에는 절대 부여 금지 (§4.0 법적 발행 주체는 플랫폼 사업자)
+  - **`einvoice.retry.write`** — REJECTED → SUBMITTING (SA 전용)
+  - **`einvoice.void.write`** — ACCEPTED → VOIDED (SA 전용)
+  - **`einvoice.revert.write`** — REQUESTED → DRAFT (SA 전용)
+  - **`einvoice.dispute.resolve.write`** — DISPUTED → DRAFT (SA 전용)
 - [ ] `RealtimeTopics.platform.einvoice.{submission.accepted,submission.rejected}` 신규 정의
+- [ ] `RealtimeTopics.corporate.einvoice.changed` — CorporatePortal `/invoices` 화면 실시간 업데이트용 (subscription, P1)
 - [ ] AuditService 의 actionType 에 `EINVOICE_PUBLISH / EINVOICE_VOID / EINVOICE_RETRY` 추가
+- [ ] 신규 corporate permission 4개 (`corporate.merchant.allow.write` / `corporate.report.read` / `corporate.audit.read` / `corporate.admin.manage`) — CorporatePortal 전용, CentralApi seed 추가
+- [ ] Corporate role template 4개 seed: `CORPORATE_OWNER / CORPORATE_HR_ADMIN / CORPORATE_FINANCE_ADMIN / CORPORATE_VIEWER` (`scope='CORPORATE'`, `isSystem=true`)
 
 ### SharedContracts
 
-- [ ] `SharedContracts/ApiSdk/src/operations/einvoice.ts` (publish, void, retry, lookupBuyer query)
+- [ ] `SharedContracts/ApiSdk/src/operations/einvoice.ts` (publish, void, retry, lookupBuyer query) — SuperAdmin 발급 flow 용
+- [ ] `SharedContracts/ApiSdk/src/operations/corporate-einvoice.ts` — CorporatePortal 수령자 flow 용 (`mealInvoicesByCorporate / mealInvoiceDetail / mealInvoiceDownloadPdf / mealInvoiceDownloadXml`)
+- [ ] Mutation 응답 shape 규칙: 영향받은 entity 의 full shape 반환 (CorporatePortal 의 refetch-free cache update 전략 전제)
 - [ ] persisted query manifest 자동 생성 통과
 
 ### Portal 화면 (Phase 2 전반)
 
-- [ ] `SA-EINV-001 ~ 006` 6 화면 구현
+**SuperAdmin/Portal** (발급자 관점 — 검수 / 재발행 / 감사):
+- [ ] `SA-EINV-001 ~ 007` 7 화면 구현 (DRAFT 큐 / DISPUTED 큐 / REQUESTED 큐 / 상세 / 재발행 / 실패 큐 / provider 모니터링 / 감사)
 - [ ] 기존 `SA-CORP-INV-001` 갱신 (provider 응답 표시)
+
+**CorporatePortal** (수령자 + 검토자 관점 — 검토 / 발행 요청 / 이의 제기 / 다운로드):
+- [ ] `/invoices` 리스트 화면 — 월별 인보이스 히스토리, 상태 (`DRAFT / DISPUTED / REQUESTED / SUBMITTING / ACCEPTED / REJECTED / VOIDED`) 필터, D-day 카운터, PDF/XML 다운로드 버튼 (ACCEPTED 만 활성)
+- [ ] `/invoices/[id]` 상세 화면 — 섹션 0 (상태별 액션 패널) + 섹션 1~5 (헤더 / seller / buyer / 라인 / 타임라인) + 섹션 6 제출 이력 P1 + 섹션 7 감사 P1
+- [ ] **DRAFT 상태 인보이스의 "발행 요청" 버튼** — `mealConsolidatedInvoiceRequestIssuance(id)` mutation. 권한: `einvoice.request.write` (OWNER + FINANCE_ADMIN)
+- [ ] **DRAFT 상태 인보이스의 "이의 제기" 버튼** — `mealConsolidatedInvoiceDispute(id, reason)` mutation. 권한: `einvoice.dispute.write`
+- [ ] `/dashboard` W6 위젯 — 이번 달 인보이스 상태 카드 (7개 상태 배지 + 상황별 CTA)
+- [ ] Corporate 전용 permission: `einvoice.read` / `einvoice.request.write` / `einvoice.dispute.write` 만 사용. `einvoice.publish.write` 는 **절대 호출 금지**
+- > 상세 설계는 `1.Docs/식권관리플랫폼/CorporatePortal-작업계획서.md` §4.9 / §4.10 참조
 
 ### 검증
 
@@ -869,15 +1049,62 @@ mutation runEInvoiceConsolidationForCorporate(
 ## 15. 비기능 요구사항 (NFR)
 ## 15. NFR
 
+### 15.1 성능 / 처리량
+
 | 항목 | 목표 |
 |---|---|
 | 발급 응답 시간 | p95 ≤ 5초 (WeTax 응답 + DB 업데이트 + audit) |
 | 동시 발급 처리량 | 초당 10건 (Phase 1), 100건 (Phase 4) |
+| 월초 cron 1회 처리 시간 | Corporate 100개 (평균 1,000 tx) 기준 ≤ 10분 / Corporate 500개 (평균 10,000 tx) 기준 ≤ 60분 |
+| 인보이스당 라인 수 한계 | 1,000 라인 (넘으면 `BY_MERCHANT` 대신 `BY_CATEGORY` 로 권장) |
+| 인보이스 조회 p95 | ≤ 500ms (CorporatePortal /invoices 리스트, 24개월 범위) |
+| 라인 drill-down p95 | ≤ 1s (500 라인 기준, virtual scroll) |
+| PDF 다운로드 URL 생성 | ≤ 200ms (signed URL — 실제 파일 다운로드는 S3 직접) |
+
+### 15.2 캐시 / 멱등성
+
+| 항목 | 목표 |
+|---|---|
 | 멱등성 | refId 기준 dedupe — 같은 refId 재요청 시 캐시된 결과 반환 |
 | 토큰 캐시 | Redis TTL 50분 (login expiresIn 의 90%) |
-| 로그 보관 | EInvoiceSubmissionLog 24개월 (감사 요건) |
 | KYC 캐시 | 사업자번호 결과 Redis TTL 24h |
-| WeTax 다운 시 | 자동 큐잉 + provider 다른 환경 (있으면) failover |
+| 인보이스 상세 캐시 | Redis TTL 1h (ACCEPTED 이후 불변) |
+| 라인 리스트 캐시 | Redis TTL 24h (invoice 가 ACCEPTED 이후 불변) |
+
+### 15.3 관측성 / 모니터링
+
+- **로그 보관**: `EInvoiceSubmissionLog` 24개월 (감사 요건) / `AuditLog.actionType LIKE 'EINVOICE_%'` 24개월
+- **대시보드 지표** (Grafana):
+  - `einvoice.draft.pending.count` — DRAFT 상태 인보이스 수 (검토 대기)
+  - `einvoice.disputed.count` — DISPUTED 상태 수 (SuperAdmin 처리 대기)
+  - `einvoice.requested.count` — REQUESTED 상태 수 (SA 검수 대기)
+  - `einvoice.auto_promoted.ratio` — 7일 자동 승격 비율 (전체 REQUESTED 대비)
+  - `einvoice.publish.latency.p95` — REQUESTED → ACCEPTED 평균 시간
+  - `einvoice.wetax.error.rate` — WeTax 응답 에러율 (5분 window)
+  - `einvoice.kyc.cache.hit.rate` — KYC fallback 캐시 적중률
+- **Alert 임계**:
+  - WeTax 에러율 > 10% (1시간) → oncall 호출
+  - DRAFT 적체 > 7일 경과 미처리 > 0건 → 서비스 책임자
+  - 7일 자동 승격 비율 > 30% → UX 개선 신호
+  - 발급 응답 p95 > 10초 → provider 성능 문제 조사
+
+### 15.4 장애 대응
+
+| 항목 | 대응 |
+|---|---|
+| WeTax 다운 시 | 자동 큐잉 + BullMQ retry (exponential backoff 1m / 5m / 15m / 1h) + provider failover (Viettel 또는 MISA 있으면) |
+| GDT 다운 | WeTax 응답 대기 유지 → 타임아웃 시 `REJECTED` + 사유 기록 → 수동 retry |
+| DB connection 손실 | Prisma 연결 풀 복구 → connection 복구 전까지 cron job 일시 정지 |
+| Redis 다운 | 토큰 / KYC 캐시 우회 (직접 WeTax 호출), 성능 저하만 발생 |
+| 월초 cron 자체 실패 | `einvoice-consolidation.job.ts` BullMQ 자동 재시도 (3회) 실패 시 SuperAdmin 긴급 알림 → 수동 실행 |
+| 하루 경과 자동 승격 cron 실패 | 다음날 cron 이 7일 초과 건을 함께 처리 (idempotent) |
+
+### 15.5 확장성 / 수평 스케일
+
+- **CentralApi einvoice leaf**: stateless → k8s Deployment + HPA. 발급 요청이 몰리는 월초에 2배 pod 확장
+- **SyncWorkers cron**: 단일 leader (Redis 분산 락 기반). 동시 실행 방지. 1 replica 로 충분
+- **Corporate 수평 확장**: 10,000개 corporate 가 될 때도 월초 cron 이 parallelism=10 으로 병렬 처리 가능 (corporate 별 독립적이므로 trivially parallel)
+- **제출 이력 (EInvoiceSubmissionLog)**: 월별 파티셔닝 → 24개월 초과분 S3 Glacier archive
 
 ---
 
@@ -896,12 +1123,92 @@ mutation runEInvoiceConsolidationForCorporate(
 ## 17. 향후 확장 (Phase 4+)
 ## 17. Mở rộng
 
-- **Bizzi provider** — 동일 인터페이스, 별도 client/serializer/merger
-- **Misa meInvoice provider** — 동일
-- **GDT Direct provider** — 자체 HSM, X.509 인증서, XML signing
-- **Auto-failover** — provider 다운 시 자동으로 다음 provider 로 전환
-- **A/B routing** — corporate 별로 다른 provider 사용 가능
-- **Reconciliation job** — 매일 새벽 GDT 와 일치 여부 cross-check
+### 17.1 Provider 확장 — HJ-POS-TEST 기반 3 provider 완전 반영
+
+**현재 (Phase 1)**: WeTax 단독 구현 (본 사양서)
+
+**Phase 4 (Viettel S-Invoice 신규 추가)**:
+- 레거시 `HJ-POS-TEST/ExcelAuto/ViettelTaxMgr.{h,cpp}` 기반
+- 신규 구현 위치: `SuperAdmin/CentralApi/src/platform/corporate/einvoice/_internal/viettel.{types,constants,client,serializer,provider}.ts`
+- HTTP 엔드포인트:
+  - `POST /auth/login` → Bearer token (`access_token`, `expires_in`, `invoice_cluster`)
+  - `POST /services/einvoiceapplication/api/InvoiceAPI/InvoiceWS/createInvoice/{taxCode}` → invoice 발급
+- Provider 고유 설정 (공급자 설정 화면 — 이미지 2):
+  - `username` (예: `0100109106-509` — taxCode-seq 형식)
+  - `password` (vault 저장)
+  - `invoiceType` (예: `'1'`)
+  - `templateCode` (예: `'1/8899'`)
+  - `invoiceSeries` (예: `'K23MMJ'`)
+- 요청 body 구조: `{ generalInvoiceInfo, sellerInfo, buyerInfo, itemInfo, payments, summarizeInfo, taxBreakdowns, metadata }`
+- Item 머지는 `MergeItemsByCode` (WeTax 와 동일 패턴) 재사용
+
+**Phase 4 (MISA meInvoice 신규 추가)**:
+- 레거시 `HJ-POS-TEST/ExcelAuto/MisaTaxMgr.{h,cpp}` 기반
+- 신규 구현 위치: `_internal/misa.{types,constants,client,serializer,provider}.ts`
+- Base URL:
+  - Prod: `https://api.meinvoice.vn`
+  - Sandbox: `https://testapi.meinvoice.vn`
+- HTTP 엔드포인트:
+  - `POST /api/integration/auth/token` → Bearer token
+  - `POST /api/integration/invoice` → invoice 발급 (response 에 `publishInvoiceResult` 포함)
+- Provider 고유 설정:
+  - `username` / `password` (vault)
+  - `invoiceSeries` (예: `'C22TAX'`)
+  - `adjustmentInvoiceType`
+  - Json 필드명 (PascalCase — `InvoiceName`, `OrgInvoiceType`, `InvoiceData`, `PublishInvoiceData` 등)
+
+**Phase 5+**:
+- **GDT Direct provider** — 자체 HSM, X.509 인증서, XML signing, GDT API 직접 연동 (중개자 제거)
+- **Auto-failover** — provider 다운 시 `EInvoiceProviderConfig.failoverProviderId` 로 자동 전환
+- **A/B routing** — corporate 별로 선호 provider 지정 (`MealCorporate.preferredProviderId` 신규 필드)
+- **Provider 동시 비교** — 같은 발급 요청을 여러 provider 에 병렬 전송하여 응답 속도 / 에러율 비교 (A/B 테스트, P5 이상)
+
+### 17.1.1 3 Provider 공통화 전략
+
+3 provider 모두 **동일한 비즈니스 목적** (베트남 GDT 에 전자세금계산서 제출) 이므로 공통 필드와 provider-specific 필드를 엄격히 분리한다:
+
+**공통 필드 (모든 provider 에 매핑 필수)** — `EInvoiceProvider` interface 가 보장:
+- seller: 플랫폼 사업자 (taxCode, legalName, addressFull, representativeName, contactEmail)
+- buyer: corporate (taxCode, companyName, addressFull, contactName, contactEmail, contactPhone)
+- lines: 각 라인 (seq, itemCode, itemName, uom, quantity, unitPriceVnd, amountVnd, vatRate, vatAmountVnd, payAmountVnd, feature)
+- totals: totalAmountVnd, vatAmountVnd, payAmountVnd
+- currency: VND (고정)
+
+**Provider 고유 필드** — `EInvoiceProviderConfig.providerSpecificConfig` (Json) 에 저장:
+
+| 필드 | WeTax | Viettel | MISA |
+|---|---|---|---|
+| username | ✅ (seller.userName) | ✅ (`{taxCode}-{seq}` 형식) | ✅ |
+| password | ✅ (vault) | ✅ (vault) | ✅ (vault) |
+| serialPrefix (`C`/`K`) | ✅ | - (InvoiceSeries 로 대체) | - |
+| formNo (`1`) | ✅ | - | - |
+| serialType (`TKT`) | ✅ | - | - |
+| invoiceType | - | ✅ (예: `'1'`) | - |
+| templateCode | - | ✅ (예: `'1/8899'`) | - |
+| invoiceSeries | - | ✅ (예: `'K23MMJ'`) | ✅ (예: `'C22TAX'`) |
+| adjustmentInvoiceType | - | ✅ (`'1'`/`'2'`) | ✅ |
+| currencyCode | ✅ (`VND`) | ✅ | ✅ |
+| exchangeRate | ✅ | ✅ | ✅ |
+| paymentMethod | ✅ (`TM/CK`) | ✅ | ✅ |
+| cusGetInvoiceRight | - | ✅ (boolean) | - |
+| invoice_cluster (login 응답) | - | ✅ (multi-cluster) | - |
+
+> 위 표를 보면 "공통 추상화" + "provider specific config JSON" 전략이 왜 필요한지 명확해진다. 세 provider 의 HTTP body 구조가 상당히 다르기 때문에 단순 공통 테이블로는 담기 어렵다.
+
+### 17.2 기능 확장
+
+- **Reconciliation job** — 매일 새벽 GDT 와 일치 여부 cross-check. 불일치 시 SuperAdmin 알림
+- **월간 인보이스 요약 PDF** — ACCEPTED 후 corporate 에게 raw PDF 외에 "한 장 요약" PDF 자동 생성 (로고 포함)
+- **임직원 증빙 조회** — 임직원이 본인 결제 건이 어떤 통합 인보이스에 포함되었는지 모바일 앱에서 조회 (read-only drill-down)
+- **분기/연간 집계 인보이스** — 월 단위 외에 분기 / 연간 통합 인보이스 발급 옵션 (베트남 세무 법규 허용 시)
+- **국가별 발행기관 확장** — 베트남 외 국가 (한국 / 인도네시아 / 태국) 의 e-Invoice 발급 기관 연동
+
+### 17.3 품질 / 자동화 확장
+
+- **자동 검증 rules** — 발행 전 자동 품질 검증 (총액 이상치 / 중복 의심 / 카테고리 누락 / VAT 오류) → 이상 건은 `DISPUTED` 자동 생성
+- **ML 기반 이상 탐지** — 임직원별 / 가맹점별 평소 패턴 대비 이상 거래 자동 발견 → 발행 전 Corporate 에 사전 알림
+- **Self-service preview** — Corporate 가 월중 어느 시점에든 "현재 기준 임시 인보이스 미리보기" 를 생성 (실제 발행 아님, 예산 추적용)
+- **자동 승인 정책 (Phase 5+)** — 신뢰도 높은 corporate (장기 계약 + 이상 건수 0) 는 DRAFT → REQUESTED → 자동 SUBMITTING 까지 SuperAdmin 개입 없이 진행 (옵트인)
 
 ---
 

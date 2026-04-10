@@ -5,11 +5,11 @@
  * Role/Permission/Assignment CRUD 와 effective permissions 조회를 모두 노출한다.
  */
 import type { GraphQLOperation } from '../types.js';
-export declare const RbacListPermissionsDocument = "\n  query RbacListPermissions {\n    rbacPermissions {\n      success { code message requestId data {\n        id\n      permissionKey\n      domain\n      description\n      isSystem\n      } }\n      error { code message requestId details }\n    }\n  }\n";
+export declare const RbacListPermissionsDocument = "\n  query RbacListPermissions {\n    rbacPermissions {\n      success { code message requestId data {\n        id\n      permissionKey\n      domain\n      name\n      nameKo\n      nameEn\n      description\n      descriptionKo\n      descriptionEn\n      isSystem\n      } }\n      error { code message requestId details }\n    }\n  }\n";
 export declare const RbacListPermissions: GraphQLOperation<unknown, Record<string, never>>;
-export declare const RbacListRolesDocument = "\n  query RbacListRoles {\n    rbacRoles {\n      success { code message requestId data {\n        id\n      roleCode\n      roleName\n      scope\n      hierarchyLevel\n      isSystem\n      description\n      } }\n      error { code message requestId details }\n    }\n  }\n";
+export declare const RbacListRolesDocument = "\n  query RbacListRoles {\n    rbacRoles {\n      success { code message requestId data {\n        id\n      roleCode\n      roleName\n      nameKo\n      nameEn\n      scope\n      hierarchyLevel\n      isSystem\n      description\n      descriptionKo\n      descriptionEn\n      } }\n      error { code message requestId details }\n    }\n  }\n";
 export declare const RbacListRoles: GraphQLOperation<unknown, Record<string, never>>;
-export declare const RbacRolePermissionsDocument = "\n  query RbacRolePermissions($roleId: ID!) {\n    rbacRolePermissions(roleId: $roleId) {\n      success { code message requestId data {\n        id\n      permissionKey\n      domain\n      description\n      } }\n      error { code message requestId details }\n    }\n  }\n";
+export declare const RbacRolePermissionsDocument = "\n  query RbacRolePermissions($roleId: ID!) {\n    rbacRolePermissions(roleId: $roleId) {\n      success { code message requestId data {\n        id\n      permissionKey\n      domain\n      name\n      nameKo\n      nameEn\n      description\n      descriptionKo\n      descriptionEn\n      } }\n      error { code message requestId details }\n    }\n  }\n";
 export declare const RbacRolePermissions: GraphQLOperation<unknown, {
     roleId: string;
 }>;
@@ -26,25 +26,82 @@ export declare const RbacUserAssignments: GraphQLOperation<unknown, {
     userType: string;
     userId: string;
 }>;
-export declare const RbacCreateRoleDocument = "\n  mutation RbacCreateRole(\n    $roleCode: String!\n    $roleName: String!\n    $scope: String!\n    $hierarchyLevel: Int\n    $description: String\n  ) {\n    rbacCreateRole(\n      roleCode: $roleCode\n      roleName: $roleName\n      scope: $scope\n      hierarchyLevel: $hierarchyLevel\n      description: $description\n    ) {\n      success { code message requestId data {\n        id\n      roleCode\n      roleName\n      scope\n      hierarchyLevel\n      isSystem\n      } }\n      error { code message requestId details }\n    }\n  }\n";
-export declare const RbacCreateRole: GraphQLOperation<unknown, {
-    roleCode: string;
-    roleName: string;
-    scope: string;
-    hierarchyLevel?: number | null;
-    description?: string | null;
-}>;
-export declare const RbacUpdateRoleDocument = "\n  mutation RbacUpdateRole(\n    $id: ID!\n    $roleName: String\n    $scope: String\n    $hierarchyLevel: Int\n    $description: String\n  ) {\n    rbacUpdateRole(\n      id: $id\n      roleName: $roleName\n      scope: $scope\n      hierarchyLevel: $hierarchyLevel\n      description: $description\n    ) {\n      success { code message requestId data {\n        id\n      roleCode\n      roleName\n      scope\n      hierarchyLevel\n      } }\n      error { code message requestId details }\n    }\n  }\n";
-export declare const RbacUpdateRole: GraphQLOperation<unknown, {
-    id: string;
+export interface RbacRoleInputShared {
+    roleCode?: string;
     roleName?: string | null;
+    nameKo?: string | null;
+    nameEn?: string | null;
     scope?: string | null;
     hierarchyLevel?: number | null;
     description?: string | null;
+    descriptionKo?: string | null;
+    descriptionEn?: string | null;
+}
+export interface RbacCreateRoleInput {
+    roleCode: string;
+    roleName: string;
+    scope: string;
+    nameKo?: string | null;
+    nameEn?: string | null;
+    hierarchyLevel?: number | null;
+    description?: string | null;
+    descriptionKo?: string | null;
+    descriptionEn?: string | null;
+}
+export interface RbacUpdateRoleInput {
+    roleId: string;
+    roleName?: string | null;
+    nameKo?: string | null;
+    nameEn?: string | null;
+    scope?: string | null;
+    hierarchyLevel?: number | null;
+    description?: string | null;
+    descriptionKo?: string | null;
+    descriptionEn?: string | null;
+}
+export declare const RbacCreateRoleDocument = "\n  mutation RbacCreateRole($input: CreateRoleInput!) {\n    rbacCreateRole(input: $input) {\n      success { code message requestId data {\n        \n  id\n  roleCode\n  roleName\n  nameKo\n  nameEn\n  scope\n  hierarchyLevel\n  isSystem\n  description\n  descriptionKo\n  descriptionEn\n\n      } }\n      error { code message requestId details }\n    }\n  }\n";
+export declare const RbacCreateRole: GraphQLOperation<unknown, {
+    input: RbacCreateRoleInput;
 }>;
-export declare const RbacDeleteRoleDocument = "\n  mutation RbacDeleteRole($id: ID!) {\n    rbacDeleteRole(id: $id) {\n      success { code message requestId data }\n      error { code message requestId details }\n    }\n  }\n";
+export declare const RbacUpdateRoleDocument = "\n  mutation RbacUpdateRole($input: UpdateRoleInput!) {\n    rbacUpdateRole(input: $input) {\n      success { code message requestId data {\n        \n  id\n  roleCode\n  roleName\n  nameKo\n  nameEn\n  scope\n  hierarchyLevel\n  isSystem\n  description\n  descriptionKo\n  descriptionEn\n\n      } }\n      error { code message requestId details }\n    }\n  }\n";
+export declare const RbacUpdateRole: GraphQLOperation<unknown, {
+    input: RbacUpdateRoleInput;
+}>;
+export declare const RbacDeleteRoleDocument = "\n  mutation RbacDeleteRole($roleId: ID!) {\n    rbacDeleteRole(roleId: $roleId) {\n      success { code message requestId data }\n      error { code message requestId details }\n    }\n  }\n";
 export declare const RbacDeleteRole: GraphQLOperation<unknown, {
-    id: string;
+    roleId: string;
+}>;
+export interface RbacCreatePermissionInput {
+    permissionKey: string;
+    domain: string;
+    name?: string | null;
+    nameKo?: string | null;
+    nameEn?: string | null;
+    description?: string | null;
+    descriptionKo?: string | null;
+    descriptionEn?: string | null;
+}
+export interface RbacUpdatePermissionInput {
+    permissionId: string;
+    domain?: string | null;
+    name?: string | null;
+    nameKo?: string | null;
+    nameEn?: string | null;
+    description?: string | null;
+    descriptionKo?: string | null;
+    descriptionEn?: string | null;
+}
+export declare const RbacCreatePermissionDocument = "\n  mutation RbacCreatePermission($input: CreatePermissionInput!) {\n    rbacCreatePermission(input: $input) {\n      success { code message requestId data {\n        \n  id\n  permissionKey\n  domain\n  name\n  nameKo\n  nameEn\n  description\n  descriptionKo\n  descriptionEn\n  isSystem\n\n      } }\n      error { code message requestId details }\n    }\n  }\n";
+export declare const RbacCreatePermission: GraphQLOperation<unknown, {
+    input: RbacCreatePermissionInput;
+}>;
+export declare const RbacUpdatePermissionDocument = "\n  mutation RbacUpdatePermission($input: UpdatePermissionInput!) {\n    rbacUpdatePermission(input: $input) {\n      success { code message requestId data {\n        \n  id\n  permissionKey\n  domain\n  name\n  nameKo\n  nameEn\n  description\n  descriptionKo\n  descriptionEn\n  isSystem\n\n      } }\n      error { code message requestId details }\n    }\n  }\n";
+export declare const RbacUpdatePermission: GraphQLOperation<unknown, {
+    input: RbacUpdatePermissionInput;
+}>;
+export declare const RbacDeletePermissionDocument = "\n  mutation RbacDeletePermission($permissionId: ID!) {\n    rbacDeletePermission(permissionId: $permissionId) {\n      success { code message requestId data }\n      error { code message requestId details }\n    }\n  }\n";
+export declare const RbacDeletePermission: GraphQLOperation<unknown, {
+    permissionId: string;
 }>;
 export declare const RbacAddPermissionToRoleDocument = "\n  mutation RbacAddPermissionToRole($roleId: ID!, $permissionKey: String!) {\n    rbacAddPermissionToRole(roleId: $roleId, permissionKey: $permissionKey) {\n      success { code message requestId data }\n      error { code message requestId details }\n    }\n  }\n";
 export declare const RbacAddPermissionToRole: GraphQLOperation<unknown, {

@@ -197,6 +197,18 @@ export class PermissionService {
     });
   }
 
+  /**
+   * 한국어: 주어진 scope 에 속하는 모든 Role 의 (roleId, permissionId) pair 를 한 번에
+   *   로드한다. Matrix 탭 초기 상태 bulk fetch 용.
+   * Tiếng Việt: Nạp hàng loạt cặp (roleId, permissionId) cho toàn bộ Role trong scope.
+   */
+  async getRolePermissionsMatrix(scope: string) {
+    return this.prisma.rolePermission.findMany({
+      where: { role: { scope } },
+      select: { roleId: true, permissionId: true },
+    });
+  }
+
   async listUserAssignments(userType: string, userId: string) {
     return this.prisma.userRoleAssignment.findMany({
       where: { userType, userId },
@@ -213,8 +225,12 @@ export class PermissionService {
       roleCode: string;
       roleName: string;
       scope: string;
-      hierarchyLevel?: number;
+      hierarchyLevel?: number | null;
+      nameKo?: string | null;
+      nameEn?: string | null;
       description?: string | null;
+      descriptionKo?: string | null;
+      descriptionEn?: string | null;
     },
   ) {
     const created = await this.prisma.role.create({
@@ -223,7 +239,11 @@ export class PermissionService {
         roleName: input.roleName,
         scope: input.scope,
         hierarchyLevel: input.hierarchyLevel ?? 0,
+        nameKo: input.nameKo ?? null,
+        nameEn: input.nameEn ?? null,
         description: input.description ?? null,
+        descriptionKo: input.descriptionKo ?? null,
+        descriptionEn: input.descriptionEn ?? null,
         isSystem: false,
       },
     });
@@ -242,40 +262,31 @@ export class PermissionService {
     actor: { userType: string; userId: string },
     id: string,
     input: {
-      roleName?: string;
-      scope?: string;
-      hierarchyLevel?: number;
+      roleName?: string | null;
+      scope?: string | null;
+      hierarchyLevel?: number | null;
+      nameKo?: string | null;
+      nameEn?: string | null;
       description?: string | null;
+      descriptionKo?: string | null;
+      descriptionEn?: string | null;
     },
   ) {
     const before = await this.findRoleById(id);
     if (before.isSystem) {
-      // 시스템 역할은 hierarchyLevel/description 만 변경 허용
-      const updated = await this.prisma.role.update({
-        where: { id },
-        data: {
-          ...(input.hierarchyLevel !== undefined && { hierarchyLevel: input.hierarchyLevel }),
-          ...(input.description !== undefined && { description: input.description }),
-        },
-      });
-      await this.audit.log({
-        actorType: actor.userType,
-        actorId: actor.userId,
-        actionType: 'RBAC_ROLE_UPDATE',
-        targetType: 'Role',
-        targetId: id,
-        beforeDataJson: before as unknown as Record<string, unknown>,
-        afterDataJson: updated as unknown as Record<string, unknown>,
-      });
-      return updated;
+      throw new DomainError({ code: 'SYSTEM_ROLE_READONLY', params: { roleCode: before.roleCode } });
     }
     const updated = await this.prisma.role.update({
       where: { id },
       data: {
-        ...(input.roleName !== undefined && { roleName: input.roleName }),
-        ...(input.scope !== undefined && { scope: input.scope }),
-        ...(input.hierarchyLevel !== undefined && { hierarchyLevel: input.hierarchyLevel }),
+        ...(input.roleName !== undefined && input.roleName !== null && { roleName: input.roleName }),
+        ...(input.scope !== undefined && input.scope !== null && { scope: input.scope }),
+        ...(input.hierarchyLevel !== undefined && input.hierarchyLevel !== null && { hierarchyLevel: input.hierarchyLevel }),
+        ...(input.nameKo !== undefined && { nameKo: input.nameKo }),
+        ...(input.nameEn !== undefined && { nameEn: input.nameEn }),
         ...(input.description !== undefined && { description: input.description }),
+        ...(input.descriptionKo !== undefined && { descriptionKo: input.descriptionKo }),
+        ...(input.descriptionEn !== undefined && { descriptionEn: input.descriptionEn }),
       },
     });
     await this.invalidateRoleAssignedUsers(id);
@@ -294,7 +305,7 @@ export class PermissionService {
   async deleteRole(actor: { userType: string; userId: string }, id: string) {
     const before = await this.findRoleById(id);
     if (before.isSystem) {
-      throw new DomainError({ code: 'SYSTEM_ROLE_DELETE_DENIED', params: { roleCode: before.roleCode } });
+      throw new DomainError({ code: 'SYSTEM_ROLE_READONLY', params: { roleCode: before.roleCode } });
     }
     // 활성 assignment 가 남아 있으면 거절
     const active = await this.prisma.userRoleAssignment.count({
@@ -419,6 +430,35 @@ export class PermissionService {
       throw new DomainError({ code: 'SCOPE_AXIS_CONFLICT', params: { detail: 'corporate scope cannot be combined with distributor/brand/branch scope' } });
     }
 
+    // 한국어: Role.scope 와 실제로 전달된 scope 축이 일치하는지 검증한다.
+    //   예) scope='CORPORATE' 인 Role 에 scopeBrandHqId 만 주는 것을 거절.
+    //   PLATFORM scope 는 축을 전혀 받지 않는다 (전역 Role).
+    // Tiếng Việt: Kiểm tra trục scope khớp với Role.scope.
+    const providedAxis: 'DISTRIBUTOR' | 'BRAND_HQ' | 'BRANCH' | 'CORPORATE' | 'PLATFORM' = input.scopeBranchId
+      ? 'BRANCH'
+      : input.scopeBrandHqId
+        ? 'BRAND_HQ'
+        : input.scopeDistributorId
+          ? 'DISTRIBUTOR'
+          : input.scopeCorporateId
+            ? 'CORPORATE'
+            : 'PLATFORM';
+    const roleScope = role.scope as 'PLATFORM' | 'DISTRIBUTOR' | 'BRAND_HQ' | 'BRANCH' | 'CORPORATE';
+    const axisAllowedByRoleScope: Record<typeof roleScope, ReadonlyArray<typeof providedAxis>> = {
+      PLATFORM: ['PLATFORM'],
+      DISTRIBUTOR: ['DISTRIBUTOR'],
+      BRAND_HQ: ['BRAND_HQ', 'BRANCH'],
+      BRANCH: ['BRANCH'],
+      CORPORATE: ['CORPORATE'],
+    };
+    const allowed = axisAllowedByRoleScope[roleScope];
+    if (!allowed || !allowed.includes(providedAxis)) {
+      throw new DomainError({
+        code: 'SCOPE_AXIS_MISMATCH',
+        params: { roleScope, providedAxis },
+      });
+    }
+
     // 중복 검사 — 동일 (user, role, 4축 scope) 조합만 거절.
     const existing = await this.prisma.userRoleAssignment.findFirst({
       where: {
@@ -494,6 +534,116 @@ export class PermissionService {
     });
 
     return updated;
+  }
+
+  // ───────────────────────────────────────── Permission CRUD
+
+  async findPermissionById(id: string) {
+    const p = await this.prisma.permission.findUnique({ where: { id } });
+    if (!p) throw new DomainError({ code: 'PERMISSION_NOT_FOUND', params: { permissionId: id } });
+    return p;
+  }
+
+  async createPermission(
+    actor: { userType: string; userId: string },
+    input: {
+      permissionKey: string;
+      domain: string;
+      name?: string | null;
+      nameKo?: string | null;
+      nameEn?: string | null;
+      description?: string | null;
+      descriptionKo?: string | null;
+      descriptionEn?: string | null;
+    },
+  ) {
+    const created = await this.prisma.permission.create({
+      data: {
+        permissionKey: input.permissionKey,
+        domain: input.domain,
+        name: input.name ?? null,
+        nameKo: input.nameKo ?? null,
+        nameEn: input.nameEn ?? null,
+        description: input.description ?? null,
+        descriptionKo: input.descriptionKo ?? null,
+        descriptionEn: input.descriptionEn ?? null,
+        isSystem: false,
+      },
+    });
+    await this.audit.log({
+      actorType: actor.userType,
+      actorId: actor.userId,
+      actionType: 'RBAC_PERMISSION_CREATE',
+      targetType: 'Permission',
+      targetId: created.id,
+      afterDataJson: created as unknown as Record<string, unknown>,
+    });
+    return created;
+  }
+
+  async updatePermission(
+    actor: { userType: string; userId: string },
+    id: string,
+    input: {
+      domain?: string | null;
+      name?: string | null;
+      nameKo?: string | null;
+      nameEn?: string | null;
+      description?: string | null;
+      descriptionKo?: string | null;
+      descriptionEn?: string | null;
+    },
+  ) {
+    const before = await this.findPermissionById(id);
+    if (before.isSystem) {
+      throw new DomainError({ code: 'SYSTEM_PERMISSION_READONLY', params: { permissionKey: before.permissionKey } });
+    }
+    const updated = await this.prisma.permission.update({
+      where: { id },
+      data: {
+        ...(input.domain !== undefined && input.domain !== null && { domain: input.domain }),
+        ...(input.name !== undefined && { name: input.name }),
+        ...(input.nameKo !== undefined && { nameKo: input.nameKo }),
+        ...(input.nameEn !== undefined && { nameEn: input.nameEn }),
+        ...(input.description !== undefined && { description: input.description }),
+        ...(input.descriptionKo !== undefined && { descriptionKo: input.descriptionKo }),
+        ...(input.descriptionEn !== undefined && { descriptionEn: input.descriptionEn }),
+      },
+    });
+    await this.audit.log({
+      actorType: actor.userType,
+      actorId: actor.userId,
+      actionType: 'RBAC_PERMISSION_UPDATE',
+      targetType: 'Permission',
+      targetId: id,
+      beforeDataJson: before as unknown as Record<string, unknown>,
+      afterDataJson: updated as unknown as Record<string, unknown>,
+    });
+    return updated;
+  }
+
+  async deletePermission(
+    actor: { userType: string; userId: string },
+    id: string,
+  ) {
+    const before = await this.findPermissionById(id);
+    if (before.isSystem) {
+      throw new DomainError({ code: 'SYSTEM_PERMISSION_READONLY', params: { permissionKey: before.permissionKey } });
+    }
+    const refCount = await this.prisma.rolePermission.count({ where: { permissionId: id } });
+    if (refCount > 0) {
+      throw new DomainError({ code: 'RESOURCE_CONFLICT', params: { resource: 'Permission', refCount } });
+    }
+    await this.prisma.permission.delete({ where: { id } });
+    await this.audit.log({
+      actorType: actor.userType,
+      actorId: actor.userId,
+      actionType: 'RBAC_PERMISSION_DELETE',
+      targetType: 'Permission',
+      targetId: id,
+      beforeDataJson: before as unknown as Record<string, unknown>,
+    });
+    return true;
   }
 
 }

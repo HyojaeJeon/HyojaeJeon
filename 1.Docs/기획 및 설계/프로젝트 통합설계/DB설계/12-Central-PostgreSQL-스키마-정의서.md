@@ -23,6 +23,34 @@
 | RegionalDistributor Channel Governance | DistributorProfile, Territory, DistributorContract, BrandAssignment, DeploymentScope, DistributorUser | Central PostgreSQL |
 | BrandHQ Master Data | BrandProfile, Branch, BrandMenuCategory, BrandMenuItem, PricePolicy, Promotion, BranchOverride, OperatorTemplate | Central PostgreSQL |
 
+## Tenant User Management (화면 `SA-TENANT-USER-001`)
+
+### RBAC 다국어 라벨 컬럼 (Slice A)
+
+- `Role` 에 다음 컬럼을 추가한다. 물리 컬럼명은 `camelCase`.
+  - `name` (varchar, nullable) — 베트남어 기본 라벨. Prisma field 는 기존 `roleName` 을 유지하며 `@map("name")` 으로 매핑된다. (레거시 호환 유지)
+  - `nameKo` (varchar, nullable) — 한국어 라벨
+  - `nameEn` (varchar, nullable) — 영어 라벨
+  - `descriptionKo` (varchar, nullable)
+  - `descriptionEn` (varchar, nullable)
+- `Permission` 에 다음 컬럼을 추가한다.
+  - `name` (varchar, nullable) — 베트남어 기본 라벨
+  - `nameKo` (varchar, nullable)
+  - `nameEn` (varchar, nullable)
+  - `descriptionKo` (varchar, nullable)
+  - `descriptionEn` (varchar, nullable)
+- seed (`SuperAdmin/CentralApi/prisma/seed.ts`) 가 8 Role + 42 Permission 에 대해 ko / en / vi 3언어 라벨을 upsert 한다.
+- Portal UI 는 현재 locale 을 기준으로 `pickLabel(locale, {name, nameKo, nameEn}, fallback)` 헬퍼로 선택하여 기존의 raw permission-key (예: `platform.rbac.write`) 가 사용자에게 노출되던 버그를 해결한다.
+- `isSystem === true` 인 Role / Permission 은 수정·삭제가 금지되며 Portal UI 에서도 버튼이 disabled 된다 (서버 가드: `SYSTEM_ROLE_READONLY`, `SYSTEM_PERMISSION_READONLY`).
+
+### 기존 내용 (DB 변경 없음)
+
+- `/governance/tenant-users` 3탭 통합 화면은 기존 4개 User 테이블 (`SuperAdminUser`, `DistributorUser`, `BrandAdminUser`, `CorporateAdminUser`) 과 RBAC 4테이블 (`Role`, `Permission`, `RolePermission`, `UserRoleAssignment`) 조합만 사용한다.
+- **신규 테이블/컬럼/migration 은 추가되지 않는다.** `suspendAuthAccount` 는 기존 `status` 컬럼 (`ACTIVE | SUSPENDED | ...`) 만 토글하며, `resetAuthAccountPassword` 는 기존 `passwordHash` / `passwordChangedAt` 을 업데이트한다.
+- `UserRoleAssignment.scopeDistributorId / scopeBrandHqId / scopeCorporateId / scopeBranchId` 네 축 중 `Role.scope` 와 매칭되는 축만 채워지도록 서비스 레이어에서 invariant 가 강제된다 (`PermissionService.assignRole`).
+- `AuditLog.targetType` 은 Prisma 모델 명을 그대로 미러링하므로 `PascalCase` 예외에 해당한다: `SuperAdminUser | DistributorUser | BrandAdminUser | CorporateAdminUser`.
+- `AuditLog.actionType` 은 `UPPER_SNAKE_CASE`: `USER_CREATE | USER_UPDATE | USER_DELETE | USER_SUSPEND | USER_REACTIVATE | USER_PASSWORD_RESET | RBAC_ROLE_ASSIGN | RBAC_ROLE_REVOKE | ...`.
+
 ## Relationship Summary
 - `DistributorProfile` is the parent for `Territory`, `DistributorContract`, `BrandAssignment`, `DeploymentScope`, and `DistributorUser`.
 - `BrandProfile` is the parent for `Branch`, `BrandMenuCategory`, `BrandMenuItem`, `PricePolicy`, `Promotion`, `BranchOverride`, and `OperatorTemplate`.

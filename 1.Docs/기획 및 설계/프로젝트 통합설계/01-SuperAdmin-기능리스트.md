@@ -395,11 +395,48 @@ Brand C            ACTIVE           —
 
 | ID | Route | Title | 권한 | Operations |
 |---|---|---|---|---|
-| `SA-USER-001` | `/governance/users` | 사용자 목록 | `platform.user.read` | `authAccounts(userType?, skip, take)` |
-| `SA-USER-002` | `/governance/users/:id` | 사용자 상세 | `platform.user.read` | `authAccount(id)` |
-| `SA-USER-003` | `/governance/users/new` | 사용자 신규 | `platform.user.write` | `createAuthAccount` |
+| `SA-USER-001` | `/governance/users` | 사용자 목록 (**DEPRECATED** — 후속 PR 에서 제거) | `platform.user.read` | `authAccounts(userType?, skip, take)` |
+| `SA-USER-002` | `/governance/users/:id` | 사용자 상세 (**DEPRECATED**) | `platform.user.read` | `authAccount(id)` |
+| `SA-USER-003` | `/governance/users/new` | 사용자 신규 (**DEPRECATED**) | `platform.user.write` | `createAuthAccount` |
 
 userType 필터로 SUPER_ADMIN / DISTRIBUTOR_USER / BRAND_ADMIN / CORPORATE_ADMIN 4 가지 모두 통합 관리.
+
+> **DEPRECATED 안내**: `SA-USER-001~003` 과 `SA-RBAC-ROLE-001~003` / `SA-RBAC-PERM-001` / `SA-RBAC-ASSIGN-001` 은 신규 `SA-TENANT-USER-001` 통합 화면으로 대체되었다. 본 PR 에서는 canonical 은 `SA-TENANT-USER-001`, 기존 화면은 그대로 두고 "DEPRECATED" 표기만 추가한다. 실제 파일 삭제/라우트 제거는 후속 PR.
+
+#### 2.5.4 Tenant User Management (통합) — `SA-TENANT-USER-*`
+
+| ID | Route | Title | 권한 | Operations |
+|---|---|---|---|---|
+| `SA-TENANT-USER-001` | `/governance/tenant-users?platform=&scopeId=&tab=` | 플랫폼별 계정·역할·권한 통합 관리 (3탭) | `platform.user.read/write`, `platform.rbac.read/write` | 1P1Q 탭 규칙: `TenantUserScreenBootstrap` (페이지 진입 시 1회, platform/scope 선택기 옵션), `TenantUserScreenRoles` (Roles 탭), `TenantUserScreenMatrix` (Matrix 탭), `TenantUserScreenUsers` (Users 탭), `rbacAddPermissionToRole`, `rbacRemovePermissionFromRole`, `rbacAssignRole`, `rbacRevokeRoleAssignment`, `rbacCreateRole`, `rbacUpdateRole`, `rbacDeleteRole`, `rbacCreatePermission`, `rbacUpdatePermission`, `rbacDeletePermission`, `createAuthAccount`, `updateAuthAccount`, `suspendAuthAccount`, `resetAuthAccountPassword`, `deleteAuthAccount` |
+| `SA-TENANT-USER-002` | (모달/패널) | 사용자 상세 + 역할 grant/revoke | `platform.user.read/write`, `platform.rbac.write` | `rbacUserAssignmentsLazy`, `rbacAssignRole`, `rbacRevokeRoleAssignment` |
+
+추가 능력 (Slice A+B+C):
+- Role / Permission CRUD 가능 (isSystem 인 row 는 수정·삭제 불가, 서버에서 `SYSTEM_ROLE_READONLY` / `SYSTEM_PERMISSION_READONLY` 가드).
+- Role · Permission 의 다국어 라벨 (`name` (VI default) / `nameKo` / `nameEn`) 과 다국어 설명 (`description` / `descriptionKo` / `descriptionEn`) 지원. Portal UI 는 현재 locale 을 기준으로 `pickLabel` / `pickDescription` 헬퍼를 통해 적절한 문자열을 선택하여 raw permission-key 가 사용자에게 노출되던 문제를 해결한다.
+- 사용자 상세 모달에서 ConfirmModal 기반의 정지/재활성화/비밀번호 재설정/삭제/역할 회수 확인 플로우 제공.
+
+- **플랫폼 선택기** (SegmentedControl): `SUPER_ADMIN | DISTRIBUTOR | BRAND_HQ | CORPORATE` → `userType` 과 `Role.scope` 를 동시에 필터.
+- **3탭** (Tabs `pill` variant):
+  - `roles` — 선택 플랫폼의 `Role.scope` 와 일치하는 Role 목록.
+  - `matrix` — Role × Permission 체크박스 매트릭스 (Permission 은 플랫폼 domain prefix 로 필터).
+  - `users` — 선택 플랫폼 `userType` + `scope*Id` 와 일치하는 User 목록 + CRUD.
+- **1P1Q**: 화면 로드 시 단일 `TenantUserOverview` operation 으로 `rbacRoles + rbacPermissions + authAccounts(userType)` 를 한 번에 가져온다. mutation 은 별개.
+- **DB 변경 없음**: 기존 `SuperAdminUser / DistributorUser / BrandAdminUser / CorporateAdminUser` + `Role / Permission / RolePermission / UserRoleAssignment` 4+4 테이블 조합을 그대로 사용한다.
+- **신규 mutation (기존 `auth` leaf 확장)**:
+  - `suspendAuthAccount(userType, id, nextStatus: 'ACTIVE' | 'SUSPENDED', reason)` — 상태 전환 + AuditLog (`USER_SUSPEND` / `USER_REACTIVATE`).
+  - `resetAuthAccountPassword(userType, id, newPassword)` — 관리자 강제 비밀번호 재설정 + AuditLog (`USER_PASSWORD_RESET`, 해시/평문 미기록).
+- **권한 어휘**: 기존 `platform.user.read/write`, `platform.rbac.read/write` 4개를 재사용한다 (신규 permission 추가 없음). Permission 카탈로그 확장이 필요하면 후속 PR 에서 `platform.tenant-user.suspend` 등을 별도 도입.
+- **플랫폼 ↔ userType ↔ Role.scope 매핑**:
+
+| platform (UI) | userType | User 테이블 | 필수 scope 필드 | Role.scope |
+|---|---|---|---|---|
+| `SUPER_ADMIN` | `SUPER_ADMIN` | `SuperAdminUser` | 없음 | `PLATFORM` |
+| `DISTRIBUTOR` | `DISTRIBUTOR_USER` | `DistributorUser` | `scopeDistributorId` | `DISTRIBUTOR` |
+| `BRAND_HQ` | `BRAND_ADMIN` | `BrandAdminUser` | `scopeBrandHqId` | `BRAND_HQ` |
+| `CORPORATE` | `CORPORATE_ADMIN` | `CorporateAdminUser` | `scopeCorporateId` | `CORPORATE` |
+
+- **scope axis invariant**: `rbacAssignRole` 호출 시 `Role.scope` 와 전달된 `scope*Id` 축의 정합성은 `PermissionService.assignRole` 에서 검증된다. 현재 구현은 중복 검사(`userType+userId+roleId+scope*Id`) + 존재 검증 중심이며, 축 불일치에 대한 명시적 `SCOPE_AXIS_MISMATCH` 코드는 후속 PR 에서 보강한다. (TODO)
+- **디스크리미네이터 문자열**: `platform`, `userType`, `status`, `Role.scope`, `actionType` 모두 `UPPER_SNAKE_CASE`. `AuditLog.targetType` 만 PascalCase 예외 (`SuperAdminUser` / `DistributorUser` / `BrandAdminUser` / `CorporateAdminUser`).
 
 ---
 

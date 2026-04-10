@@ -1,17 +1,37 @@
+/**
+ * SharedUI Design Tokens v2 — "Friendly Operator Console"
+ *
+ * 소비자 앱 (Portal) 의 globals.css 가 다음 CSS 변수를 정의한다고 가정:
+ *   --surface-0~4, --border, --border-strong
+ *   --fg, --fg-muted, --fg-subtle, --fg-inverse
+ *   --primary, --primary-hover, --primary-fg, --primary-soft
+ *   --success(-soft), --warn(-soft), --danger(-soft), --info(-soft), --ring
+ *   --shadow-xs, --shadow-sm, --shadow-md, --shadow-lg
+ */
 export const sharedUiTokens = {
   colors: {
-    page: '#f8fafc',
-    surface: '#ffffff',
-    surfaceMuted: '#f1f5f9',
-    surfaceSoft: '#e2e8f0',
-    text: '#0f172a',
-    textMuted: '#475569',
-    border: '#dbe2ea',
-    brand: '#0f766e',
-    brandSoft: '#ccfbf1',
-    success: '#047857',
-    warning: '#b45309',
-    danger: '#b91c1c',
+    page: 'var(--surface-0)',
+    surface: 'var(--surface-1)',
+    surfaceMuted: 'var(--surface-2)',
+    surfaceSoft: 'var(--surface-4)',
+    text: 'var(--fg)',
+    textMuted: 'var(--fg-muted)',
+    textSubtle: 'var(--fg-subtle)',
+    border: 'var(--border)',
+    borderStrong: 'var(--border-strong)',
+    brand: 'var(--primary)',
+    brandHover: 'var(--primary-hover)',
+    brandFg: 'var(--primary-fg)',
+    brandSoft: 'var(--primary-soft)',
+    success: 'var(--success)',
+    successSoft: 'var(--success-soft)',
+    warning: 'var(--warn)',
+    warningSoft: 'var(--warn-soft)',
+    danger: 'var(--danger)',
+    dangerSoft: 'var(--danger-soft)',
+    info: 'var(--info)',
+    infoSoft: 'var(--info-soft)',
+    ring: 'var(--ring)',
   },
   spacing: {
     xs: '4px',
@@ -21,24 +41,42 @@ export const sharedUiTokens = {
     xl: '24px',
     '2xl': '32px',
     '3xl': '40px',
+    '4xl': '56px',
   },
   radius: {
+    xs: '6px',
     sm: '10px',
     md: '14px',
     lg: '18px',
     xl: '24px',
+    '2xl': '32px',
+    full: '999px',
   },
   shadow: {
-    sm: '0 1px 2px rgba(15, 23, 42, 0.05)',
-    md: '0 10px 30px rgba(15, 23, 42, 0.08)',
+    xs: 'var(--shadow-xs, 0 1px 2px rgb(16 24 40 / 0.04))',
+    sm: 'var(--shadow-sm, 0 1px 3px rgb(16 24 40 / 0.06))',
+    md: 'var(--shadow-md, 0 4px 16px rgb(16 24 40 / 0.06))',
+    lg: 'var(--shadow-lg, 0 16px 40px rgb(16 24 40 / 0.08))',
   },
   typography: {
     fontFamily:
-      'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      "'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif",
+    fontMono:
+      "'Pretendard', ui-monospace, SFMono-Regular, Menlo, monospace",
+    /** 플랫폼 규정: 헤드라인은 Pretendard Black (900) */
+    headlineWeight: 900,
+    /** 본문 기본 500 */
+    bodyWeight: 500,
+    /** 강조 semibold 600~700 */
+    emphasisWeight: 700,
   },
   layout: {
-    contentWidth: '1200px',
-    pageWidth: '1440px',
+    contentWidth: '1280px',
+    pageWidth: '1600px',
+    navRailWidth: '240px',
+    navRailCollapsedWidth: '72px',
+    topBarHeight: '64px',
   },
 } as const;
 
+export type SharedUiTokens = typeof sharedUiTokens;

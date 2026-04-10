@@ -1,0 +1,299 @@
+@import 'tailwindcss';
+
+/* ==========================================================================
+   SuperAdmin Portal — Design System v2
+   "Friendly Operator Console" — 참조 이미지(clenanier-building) 기반
+   - Pretendard Black / Bold / Regular 본문
+   - 큰 rounded 카드, 차분한 soft shadow
+   - 블루 포인트 (#3955FF 계열) + 흰 배경
+   - 친근한 dashboard 톤 (날카로운 엔터프라이즈 X)
+   ========================================================================== */
+
+/* ───── Pretendard font family ───── */
+
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/pretendard/Pretendard-Thin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/pretendard/Pretendard-ExtraLight.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/pretendard/Pretendard-Light.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/pretendard/Pretendard-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/pretendard/Pretendard-Medium.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/pretendard/Pretendard-SemiBold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/pretendard/Pretendard-Bold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/pretendard/Pretendard-ExtraBold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/pretendard/Pretendard-Black.woff2') format('woff2');
+}
+
+@theme {
+  --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: 'Pretendard', ui-monospace, SFMono-Regular, monospace;
+
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+}
+
+:root {
+  /* surfaces — 흰색 기반, 부드럽게 계조 */
+  --surface-0: #f6f8fb;       /* app bg (아주 옅은 blue-gray) */
+  --surface-1: #ffffff;       /* card / raised */
+  --surface-2: #f2f4f9;       /* sunken (filter bar, hover) */
+  --surface-3: #ffffff;       /* panel */
+  --surface-4: #e8ecf4;       /* subdued divider 배경 */
+
+  /* borders */
+  --border: #e6ebf2;
+  --border-strong: #d2d9e5;
+
+  /* text */
+  --fg: #0f1a2e;              /* headline — 진한 네이비 */
+  --fg-muted: #5a6478;        /* body muted */
+  --fg-subtle: #8a94a8;       /* caption */
+  --fg-inverse: #ffffff;
+
+  /* brand — friendly blue (이미지 톤 기반) */
+  --primary: #3955ff;         /* main accent */
+  --primary-hover: #2941e8;
+  --primary-fg: #ffffff;
+  --primary-soft: #ebefff;    /* chip / hover bg */
+
+  /* status */
+  --success: #16a34a;
+  --success-soft: #e7f7ed;
+  --warn: #f59e0b;
+  --warn-soft: #fff4e0;
+  --danger: #e11d48;
+  --danger-soft: #fde6ea;
+  --info: #0ea5e9;
+  --info-soft: #e0f4fd;
+
+  /* chart palette */
+  --chart-1: #3955ff;
+  --chart-2: #16a34a;
+  --chart-3: #f59e0b;
+  --chart-4: #e11d48;
+  --chart-5: #7c3aed;
+
+  --ring: rgb(57 85 255 / 0.35);
+
+  /* shadows — BrandPosApp/PosUi 'shadow-pos-*' 100% 복제
+     출처: BrandPosApp/PosUi/src/styles/globals.css:167~172 */
+  --shadow-pos-none: none;
+  --shadow-pos-soft: 0 1px 3px rgb(0 0 0 / 0.04);
+  --shadow-pos-card: 0 2px 12px rgb(0 0 0 / 0.05);
+  --shadow-pos-hover: 0 6px 24px rgb(0 0 0 / 0.07);
+  --shadow-pos-modal: 0 16px 48px rgb(0 0 0 / 0.1);
+  --shadow-pos-sidebar: 2px 0 16px rgb(0 0 0 / 0.04);
+
+  /* semantic alias — 공용 컴포넌트 사용 */
+  --shadow-xs: var(--shadow-pos-soft);
+  --shadow-sm: var(--shadow-pos-card);
+  --shadow-md: var(--shadow-pos-hover);
+  --shadow-lg: var(--shadow-pos-modal);
+}
+
+.dark {
+  --surface-0: #0a0f1d;
+  --surface-1: #111827;
+  --surface-2: #1a2236;
+  --surface-3: #111827;
+  --surface-4: #1e2636;
+
+  --border: #1f2a3d;
+  --border-strong: #2b3650;
+
+  --fg: #f1f5f9;
+  --fg-muted: #9aa6bc;
+  --fg-subtle: #6b7590;
+  --fg-inverse: #0a0f1d;
+
+  --primary: #6a84ff;
+  --primary-hover: #87a0ff;
+  --primary-fg: #0a0f1d;
+  --primary-soft: #1c2648;
+
+  --success: #34d399;
+  --success-soft: #0f2e23;
+  --warn: #fbbf24;
+  --warn-soft: #2f2412;
+  --danger: #fb7185;
+  --danger-soft: #2f1520;
+  --info: #38bdf8;
+  --info-soft: #0f2333;
+
+  --ring: rgb(106 132 255 / 0.5);
+
+  /* dark mode — PosUi shadow 를 진한 검정으로 강도만 상향 */
+  --shadow-pos-soft: 0 1px 3px rgb(0 0 0 / 0.35);
+  --shadow-pos-card: 0 2px 12px rgb(0 0 0 / 0.45);
+  --shadow-pos-hover: 0 6px 24px rgb(0 0 0 / 0.55);
+  --shadow-pos-modal: 0 16px 48px rgb(0 0 0 / 0.65);
+  --shadow-pos-sidebar: 2px 0 16px rgb(0 0 0 / 0.4);
+
+  --shadow-xs: var(--shadow-pos-soft);
+  --shadow-sm: var(--shadow-pos-card);
+  --shadow-md: var(--shadow-pos-hover);
+  --shadow-lg: var(--shadow-pos-modal);
+}
+
+@theme inline {
+  --color-surface-0: var(--surface-0);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-surface-4: var(--surface-4);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-fg-inverse: var(--fg-inverse);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-fg: var(--primary-fg);
+  --color-primary-soft: var(--primary-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-ring: var(--ring);
+}
+
+html,
+body {
+  background: var(--surface-0);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-feature-settings: 'ss01', 'ss02';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
+}
+
+/* 전체적으로 더 굵은 본문 무게감 (Pretendard Black 전체 웹 플랫폼 공통 규정) */
+body {
+  font-weight: 500;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 900;  /* Pretendard Black 헤드라인 */
+  letter-spacing: -0.025em;
+  color: var(--fg);
+}
+
+*,
+*::before,
+*::after {
+  border-color: var(--border);
+}
+
+button,
+[role='button'] {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* 숫자: tabular-nums */
+.num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+/* scrollbar — 친근한 슬림 */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
+  border: 2px solid var(--surface-0);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--fg-subtle); }
+
+/* native select 기본 화살표 숨김 (Select 컴포넌트가 아닌 경우에만 사용할 때) */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3e%3cpath fill='%238a94a8' d='M5 6L0 0h10z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+
+/* number input spinner 제거 (native fallback) */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* 부드러운 card-in-card 그림자 */
+.card-shadow { box-shadow: var(--shadow-sm); }
+.card-shadow-hover:hover { box-shadow: var(--shadow-md); transition: box-shadow 160ms ease; }

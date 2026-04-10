@@ -237,102 +237,232 @@ async function main() {
  *   3. 역할별 sensible default 매핑
  */
 async function seedRbac() {
+  // 한국어: name = 베트남어 기본, nameKo / nameEn 은 선택 라벨. description 도 3쌍.
+  // Tiếng Việt: name là tiếng Việt mặc định, nameKo / nameEn là nhãn bổ sung.
   const legacyRoles: Array<{
     code: string;
-    name: string;
+    name: string; // vi
+    nameKo: string;
+    nameEn: string;
     scope: string;
     level: number;
+    description: string; // vi
+    descriptionKo: string;
+    descriptionEn: string;
   }> = [
-    { code: 'PLATFORM_SUPER_ADMIN', name: '플랫폼 최고 관리자', scope: 'PLATFORM', level: 100 },
-    { code: 'PLATFORM_SUPPORT_ENGINEER', name: '플랫폼 기술 지원 엔지니어', scope: 'PLATFORM', level: 90 },
-    { code: 'REGIONAL_DISTRIBUTOR_ADMIN', name: '지역 대리점 관리자', scope: 'PLATFORM', level: 80 },
-    { code: 'BRAND_OWNER', name: '브랜드 소유자', scope: 'BRAND_HQ', level: 70 },
-    { code: 'BRAND_HQ_ADMIN', name: '브랜드 본사 관리자', scope: 'BRAND_HQ', level: 60 },
-    { code: 'BRAND_HQ_OPERATOR', name: '브랜드 본사 운영자', scope: 'BRAND_HQ', level: 50 },
-    { code: 'BRANCH_MANAGER', name: '지점 매니저', scope: 'BRANCH', level: 40 },
-    { code: 'STORE_OPERATOR', name: '매장 운영자', scope: 'BRANCH', level: 30 },
+    {
+      code: 'PLATFORM_SUPER_ADMIN',
+      name: 'Quản trị viên tối cao nền tảng',
+      nameKo: '플랫폼 최고 관리자',
+      nameEn: 'Platform Super Admin',
+      scope: 'PLATFORM',
+      level: 100,
+      description: 'Toàn quyền trên toàn bộ nền tảng.',
+      descriptionKo: '플랫폼 전체에 대한 최상위 권한.',
+      descriptionEn: 'Full authority across the entire platform.',
+    },
+    {
+      code: 'PLATFORM_SUPPORT_ENGINEER',
+      name: 'Kỹ sư hỗ trợ nền tảng',
+      nameKo: '플랫폼 기술 지원 엔지니어',
+      nameEn: 'Platform Support Engineer',
+      scope: 'PLATFORM',
+      level: 90,
+      description: 'Quyền chỉ đọc để hỗ trợ vận hành.',
+      descriptionKo: '운영 지원을 위한 읽기 전용 권한.',
+      descriptionEn: 'Read-only access for operational support.',
+    },
+    {
+      code: 'REGIONAL_DISTRIBUTOR_ADMIN',
+      name: 'Quản trị viên nhà phân phối khu vực',
+      nameKo: '지역 대리점 관리자',
+      nameEn: 'Regional Distributor Admin',
+      scope: 'PLATFORM',
+      level: 80,
+      description: 'Quản lý các thương hiệu thuộc khu vực phân phối.',
+      descriptionKo: '담당 지역의 브랜드를 관리.',
+      descriptionEn: 'Manages brands within an assigned distribution region.',
+    },
+    {
+      code: 'BRAND_OWNER',
+      name: 'Chủ thương hiệu',
+      nameKo: '브랜드 소유자',
+      nameEn: 'Brand Owner',
+      scope: 'BRAND_HQ',
+      level: 70,
+      description: 'Toàn quyền trên một thương hiệu.',
+      descriptionKo: '단일 브랜드에 대한 전체 권한.',
+      descriptionEn: 'Full ownership of a single brand.',
+    },
+    {
+      code: 'BRAND_HQ_ADMIN',
+      name: 'Quản trị viên trụ sở thương hiệu',
+      nameKo: '브랜드 본사 관리자',
+      nameEn: 'Brand HQ Admin',
+      scope: 'BRAND_HQ',
+      level: 60,
+      description: 'Quản lý vận hành trụ sở thương hiệu.',
+      descriptionKo: '브랜드 본사의 운영을 관리.',
+      descriptionEn: 'Administers brand headquarters operations.',
+    },
+    {
+      code: 'BRAND_HQ_OPERATOR',
+      name: 'Nhân viên vận hành trụ sở thương hiệu',
+      nameKo: '브랜드 본사 운영자',
+      nameEn: 'Brand HQ Operator',
+      scope: 'BRAND_HQ',
+      level: 50,
+      description: 'Vận hành danh mục và báo cáo hàng ngày của thương hiệu.',
+      descriptionKo: '브랜드 카탈로그와 리포트 일상 운영.',
+      descriptionEn: 'Day-to-day brand catalog and reporting operations.',
+    },
+    {
+      code: 'BRANCH_MANAGER',
+      name: 'Quản lý chi nhánh',
+      nameKo: '지점 매니저',
+      nameEn: 'Branch Manager',
+      scope: 'BRANCH',
+      level: 40,
+      description: 'Quản lý vận hành tại chi nhánh đơn lẻ.',
+      descriptionKo: '단일 지점의 운영 관리.',
+      descriptionEn: 'Manages operations at a single branch.',
+    },
+    {
+      code: 'STORE_OPERATOR',
+      name: 'Nhân viên cửa hàng',
+      nameKo: '매장 운영자',
+      nameEn: 'Store Operator',
+      scope: 'BRANCH',
+      level: 30,
+      description: 'Vận hành POS tại cửa hàng.',
+      descriptionKo: '매장 POS 운영.',
+      descriptionEn: 'Operates in-store POS.',
+    },
   ];
 
   for (const r of legacyRoles) {
     await prisma.role.upsert({
       where: { roleCode: r.code },
-      update: { roleName: r.name, scope: r.scope, hierarchyLevel: r.level, isSystem: true },
-      create: {
-        roleCode: r.code,
+      update: {
         roleName: r.name,
+        nameKo: r.nameKo,
+        nameEn: r.nameEn,
         scope: r.scope,
         hierarchyLevel: r.level,
         isSystem: true,
+        description: r.description,
+        descriptionKo: r.descriptionKo,
+        descriptionEn: r.descriptionEn,
+      },
+      create: {
+        roleCode: r.code,
+        roleName: r.name,
+        nameKo: r.nameKo,
+        nameEn: r.nameEn,
+        scope: r.scope,
+        hierarchyLevel: r.level,
+        isSystem: true,
+        description: r.description,
+        descriptionKo: r.descriptionKo,
+        descriptionEn: r.descriptionEn,
       },
     });
   }
 
-  const SYSTEM_PERMISSIONS: Array<{ key: string; domain: string; desc: string }> = [
+  // 한국어: 다국어 라벨. name(vi) / nameKo / nameEn + description 3쌍.
+  // Tiếng Việt: Nhãn đa ngôn ngữ cho từ vựng quyền.
+  type PermSeed = {
+    key: string;
+    domain: string;
+    name: string;
+    nameKo: string;
+    nameEn: string;
+    desc: string;
+    descKo: string;
+    descEn: string;
+  };
+  const SYSTEM_PERMISSIONS: Array<PermSeed> = [
     // platform 네임스페이스 — SuperAdmin 운영
-    { key: 'platform.user.read', domain: 'platform', desc: '플랫폼 사용자 조회' },
-    { key: 'platform.user.write', domain: 'platform', desc: '플랫폼 사용자 생성/수정/삭제' },
-    { key: 'platform.rbac.read', domain: 'platform', desc: 'Role/Permission/UserRoleAssignment 조회' },
-    { key: 'platform.rbac.write', domain: 'platform', desc: 'Role/Permission/UserRoleAssignment 변경' },
-    { key: 'platform.audit.read', domain: 'platform', desc: '감사 로그 조회' },
-    { key: 'platform.policy.read', domain: 'platform', desc: 'PlatformPolicy 조회' },
-    { key: 'platform.policy.write', domain: 'platform', desc: 'PlatformPolicy 변경' },
-    { key: 'platform.license.read', domain: 'platform', desc: 'PlatformLicense 조회' },
-    { key: 'platform.license.write', domain: 'platform', desc: 'PlatformLicense 변경' },
-    { key: 'platform.deploy.read', domain: 'platform', desc: '배포 패키지/릴리스 조회' },
-    { key: 'platform.deploy.write', domain: 'platform', desc: '배포 패키지/릴리스 관리' },
-    { key: 'platform.entitlement.read', domain: 'platform', desc: 'BrandHQ entitlement 조회' },
-    { key: 'platform.entitlement.write', domain: 'platform', desc: 'BrandHQ entitlement grant/revoke' },
+    { key: 'platform.user.read',        domain: 'platform', name: 'Xem người dùng nền tảng',              nameKo: '플랫폼 사용자 조회',            nameEn: 'Read platform users',          desc: 'Xem danh sách và chi tiết người dùng nền tảng.',       descKo: '플랫폼 사용자 목록 및 상세 조회.',               descEn: 'Read platform user list and details.' },
+    { key: 'platform.user.write',       domain: 'platform', name: 'Quản lý người dùng nền tảng',          nameKo: '플랫폼 사용자 생성/수정/삭제',     nameEn: 'Manage platform users',        desc: 'Tạo, sửa, xóa người dùng nền tảng.',                   descKo: '플랫폼 사용자 생성·수정·삭제.',                  descEn: 'Create, update, delete platform users.' },
+    { key: 'platform.rbac.read',        domain: 'platform', name: 'Xem RBAC',                              nameKo: 'RBAC 조회',                    nameEn: 'Read RBAC',                    desc: 'Xem Role, Permission, UserRoleAssignment.',            descKo: 'Role/Permission/UserRoleAssignment 조회.',        descEn: 'Read Role, Permission, UserRoleAssignment.' },
+    { key: 'platform.rbac.write',       domain: 'platform', name: 'Quản lý RBAC',                          nameKo: 'RBAC 변경',                    nameEn: 'Manage RBAC',                  desc: 'Tạo, sửa, xóa Role / Permission và gán vai trò.',      descKo: 'Role/Permission 변경 및 역할 부여/회수.',        descEn: 'Create, update, delete Role/Permission and assignments.' },
+    { key: 'platform.audit.read',       domain: 'platform', name: 'Xem nhật ký audit',                    nameKo: '감사 로그 조회',                nameEn: 'Read audit log',               desc: 'Xem nhật ký audit của nền tảng.',                      descKo: '플랫폼 감사 로그 조회.',                          descEn: 'Read platform audit log.' },
+    { key: 'platform.policy.read',      domain: 'platform', name: 'Xem chính sách nền tảng',              nameKo: '플랫폼 정책 조회',              nameEn: 'Read platform policy',         desc: 'Xem PlatformPolicy.',                                  descKo: 'PlatformPolicy 조회.',                            descEn: 'Read PlatformPolicy.' },
+    { key: 'platform.policy.write',     domain: 'platform', name: 'Quản lý chính sách nền tảng',          nameKo: '플랫폼 정책 변경',              nameEn: 'Manage platform policy',       desc: 'Tạo, sửa PlatformPolicy.',                             descKo: 'PlatformPolicy 변경.',                            descEn: 'Update PlatformPolicy.' },
+    { key: 'platform.license.read',     domain: 'platform', name: 'Xem giấy phép nền tảng',               nameKo: '플랫폼 라이선스 조회',          nameEn: 'Read platform license',        desc: 'Xem PlatformLicense.',                                 descKo: 'PlatformLicense 조회.',                           descEn: 'Read PlatformLicense.' },
+    { key: 'platform.license.write',    domain: 'platform', name: 'Quản lý giấy phép nền tảng',           nameKo: '플랫폼 라이선스 변경',          nameEn: 'Manage platform license',      desc: 'Cấp phát / thu hồi PlatformLicense.',                  descKo: 'PlatformLicense 변경.',                           descEn: 'Issue / revoke PlatformLicense.' },
+    { key: 'platform.deploy.read',      domain: 'platform', name: 'Xem bản triển khai',                   nameKo: '배포 패키지/릴리스 조회',         nameEn: 'Read deployment packages',     desc: 'Xem gói triển khai và bản phát hành.',                 descKo: '배포 패키지/릴리스 조회.',                        descEn: 'Read deployment packages and releases.' },
+    { key: 'platform.deploy.write',     domain: 'platform', name: 'Quản lý bản triển khai',               nameKo: '배포 패키지/릴리스 관리',         nameEn: 'Manage deployment packages',   desc: 'Tạo / phát hành gói triển khai.',                      descKo: '배포 패키지/릴리스 생성 및 배포.',                descEn: 'Create and publish deployment packages.' },
+    { key: 'platform.entitlement.read', domain: 'platform', name: 'Xem entitlement của BrandHQ',          nameKo: 'BrandHQ entitlement 조회',       nameEn: 'Read BrandHQ entitlement',     desc: 'Xem entitlement được cấp cho BrandHQ.',                descKo: 'BrandHQ 권한(entitlement) 조회.',                descEn: 'Read BrandHQ entitlements.' },
+    { key: 'platform.entitlement.write',domain: 'platform', name: 'Cấp phát entitlement của BrandHQ',     nameKo: 'BrandHQ entitlement 변경',       nameEn: 'Manage BrandHQ entitlement',   desc: 'Cấp / thu hồi entitlement BrandHQ.',                   descKo: 'BrandHQ 권한 부여/회수.',                         descEn: 'Grant / revoke BrandHQ entitlements.' },
     // distributor 네임스페이스 — RegionalDistributor 축
-    { key: 'distributor.profile.read', domain: 'distributor', desc: 'Distributor 조회' },
-    { key: 'distributor.profile.write', domain: 'distributor', desc: 'Distributor 생성/수정/삭제' },
+    { key: 'distributor.profile.read',  domain: 'distributor', name: 'Xem nhà phân phối',          nameKo: '대리점 조회',            nameEn: 'Read distributor',            desc: 'Xem thông tin nhà phân phối khu vực.',  descKo: '지역 대리점 조회.',             descEn: 'Read regional distributor info.' },
+    { key: 'distributor.profile.write', domain: 'distributor', name: 'Quản lý nhà phân phối',      nameKo: '대리점 생성/수정/삭제',    nameEn: 'Manage distributor',          desc: 'Tạo, sửa, xóa nhà phân phối khu vực.',  descKo: '지역 대리점 생성·수정·삭제.',    descEn: 'Create, update, delete distributor.' },
     // brand 네임스페이스 — BrandHQ 트리
-    { key: 'brand.profile.read', domain: 'brand', desc: 'Brand 조회' },
-    { key: 'brand.profile.write', domain: 'brand', desc: 'Brand 생성/수정/삭제' },
-    { key: 'brand.branch.read', domain: 'brand', desc: 'Branch 조회' },
-    { key: 'brand.branch.write', domain: 'brand', desc: 'Branch 생성/수정/삭제' },
-    { key: 'brand.catalog.read', domain: 'brand', desc: '메뉴/가격/프로모션 조회' },
-    { key: 'brand.catalog.write', domain: 'brand', desc: '메뉴/가격/프로모션 생성/수정/삭제' },
-    { key: 'brand.catalog.publish', domain: 'brand', desc: '카탈로그 배포' },
+    { key: 'brand.profile.read',    domain: 'brand', name: 'Xem thương hiệu',         nameKo: '브랜드 조회',            nameEn: 'Read brand',                desc: 'Xem thông tin thương hiệu.',                        descKo: '브랜드 조회.',                  descEn: 'Read brand info.' },
+    { key: 'brand.profile.write',   domain: 'brand', name: 'Quản lý thương hiệu',     nameKo: '브랜드 생성/수정/삭제',    nameEn: 'Manage brand',              desc: 'Tạo, sửa, xóa thương hiệu.',                        descKo: '브랜드 생성·수정·삭제.',         descEn: 'Create, update, delete brand.' },
+    { key: 'brand.branch.read',     domain: 'brand', name: 'Xem chi nhánh',           nameKo: '지점 조회',              nameEn: 'Read branch',               desc: 'Xem danh sách chi nhánh của thương hiệu.',         descKo: '브랜드 지점 조회.',              descEn: 'Read brand branches.' },
+    { key: 'brand.branch.write',    domain: 'brand', name: 'Quản lý chi nhánh',       nameKo: '지점 생성/수정/삭제',     nameEn: 'Manage branch',             desc: 'Tạo, sửa, xóa chi nhánh.',                          descKo: '지점 생성·수정·삭제.',           descEn: 'Create, update, delete branch.' },
+    { key: 'brand.catalog.read',    domain: 'brand', name: 'Xem catalog',             nameKo: '메뉴/가격/프로모션 조회',    nameEn: 'Read catalog',              desc: 'Xem menu, giá và khuyến mãi.',                      descKo: '메뉴/가격/프로모션 조회.',       descEn: 'Read menu, pricing, promotions.' },
+    { key: 'brand.catalog.write',   domain: 'brand', name: 'Quản lý catalog',         nameKo: '메뉴/가격/프로모션 관리',    nameEn: 'Manage catalog',            desc: 'Tạo, sửa, xóa menu / giá / khuyến mãi.',            descKo: '메뉴/가격/프로모션 생성·수정·삭제.', descEn: 'Create, update, delete catalog items.' },
+    { key: 'brand.catalog.publish', domain: 'brand', name: 'Phát hành catalog',       nameKo: '카탈로그 배포',           nameEn: 'Publish catalog',           desc: 'Phát hành catalog tới POS.',                        descKo: '카탈로그 배포.',                descEn: 'Publish catalog to POS.' },
     // edge-pos 네임스페이스 — EdgePos 단말
-    { key: 'edgepos.terminal.read', domain: 'edgepos', desc: 'Edge POS 단말 조회' },
-    { key: 'edgepos.terminal.write', domain: 'edgepos', desc: 'Edge POS 단말 등록/상태/삭제' },
-    { key: 'edgepos.report.read', domain: 'edgepos', desc: 'POS 리포트 조회' },
-    { key: 'edgepos.refund.write', domain: 'edgepos', desc: 'POS 환불 처리' },
+    { key: 'edgepos.terminal.read',  domain: 'edgepos', name: 'Xem thiết bị POS',        nameKo: 'POS 단말 조회',         nameEn: 'Read POS terminal',   desc: 'Xem danh sách thiết bị Edge POS.',      descKo: 'Edge POS 단말 조회.',      descEn: 'Read Edge POS terminals.' },
+    { key: 'edgepos.terminal.write', domain: 'edgepos', name: 'Quản lý thiết bị POS',    nameKo: 'POS 단말 관리',         nameEn: 'Manage POS terminal', desc: 'Đăng ký / đổi trạng thái / xóa thiết bị POS.', descKo: 'POS 단말 등록·상태·삭제.', descEn: 'Register / update / delete POS terminals.' },
+    { key: 'edgepos.report.read',    domain: 'edgepos', name: 'Xem báo cáo POS',         nameKo: 'POS 리포트 조회',        nameEn: 'Read POS reports',    desc: 'Xem báo cáo bán hàng POS.',              descKo: 'POS 매출 리포트 조회.',      descEn: 'Read POS sales reports.' },
+    { key: 'edgepos.refund.write',   domain: 'edgepos', name: 'Hoàn tiền POS',           nameKo: 'POS 환불 처리',          nameEn: 'Process POS refund',  desc: 'Thực hiện hoàn tiền POS.',               descKo: 'POS 환불 처리.',             descEn: 'Process POS refunds.' },
     // corporate 네임스페이스 — CorporatePortal (식권관리)
-    { key: 'corporate.profile.read', domain: 'corporate', desc: 'Corporate 조회' },
-    { key: 'corporate.profile.write', domain: 'corporate', desc: 'Corporate 생성/수정/삭제' },
-    { key: 'corporate.department.read', domain: 'corporate', desc: '부서 조회' },
-    { key: 'corporate.department.write', domain: 'corporate', desc: '부서 생성/수정' },
-    { key: 'corporate.employee.read', domain: 'corporate', desc: '임직원 조회' },
-    { key: 'corporate.employee.write', domain: 'corporate', desc: '임직원 생성/수정/회수' },
-    { key: 'corporate.wallet.read', domain: 'corporate', desc: '식권 계정 조회' },
-    { key: 'corporate.wallet.write', domain: 'corporate', desc: '식권 계정 생성' },
-    { key: 'corporate.wallet.fund', domain: 'corporate', desc: '회사지원금 적립' },
-    { key: 'corporate.wallet.topup', domain: 'corporate', desc: '개인 충전' },
-    { key: 'corporate.policy.read', domain: 'corporate', desc: '정책 조회' },
-    { key: 'corporate.policy.write', domain: 'corporate', desc: '정책 빌더' },
-    { key: 'corporate.transaction.read', domain: 'corporate', desc: '결제 트랜잭션 조회' },
-    { key: 'corporate.transaction.authorize', domain: 'corporate', desc: '결제 승인' },
-    { key: 'corporate.transaction.reverse', domain: 'corporate', desc: '결제 취소' },
-    { key: 'corporate.settlement.read', domain: 'corporate', desc: '정산 조회' },
-    { key: 'corporate.settlement.run', domain: 'corporate', desc: '정산 배치 실행' },
-    { key: 'corporate.merchant.read', domain: 'corporate', desc: 'Merchant enrollment 조회' },
-    { key: 'corporate.merchant.enroll', domain: 'corporate', desc: '식권 가입 신청' },
-    { key: 'corporate.merchant.activate', domain: 'corporate', desc: '식권 활성/비활성' },
-    { key: 'corporate.merchant.commission.write', domain: 'corporate', desc: '수수료율 설정' },
-    { key: 'corporate.merchant.account.write', domain: 'corporate', desc: '정산 계좌 관리' },
-    { key: 'corporate.invoice.read', domain: 'corporate', desc: '통합 세금계산서 조회' },
-    { key: 'corporate.invoice.write', domain: 'corporate', desc: '통합 세금계산서 생성/서명' },
+    { key: 'corporate.profile.read',             domain: 'corporate', name: 'Xem công ty',                    nameKo: '기업 조회',              nameEn: 'Read corporate',              desc: 'Xem hồ sơ công ty.',                          descKo: '기업 프로필 조회.',          descEn: 'Read corporate profile.' },
+    { key: 'corporate.profile.write',            domain: 'corporate', name: 'Quản lý công ty',                nameKo: '기업 생성/수정/삭제',     nameEn: 'Manage corporate',            desc: 'Tạo, sửa, xóa hồ sơ công ty.',                descKo: '기업 생성·수정·삭제.',       descEn: 'Create, update, delete corporate.' },
+    { key: 'corporate.department.read',          domain: 'corporate', name: 'Xem phòng ban',                  nameKo: '부서 조회',              nameEn: 'Read department',             desc: 'Xem danh sách phòng ban công ty.',            descKo: '기업 부서 조회.',            descEn: 'Read corporate departments.' },
+    { key: 'corporate.department.write',         domain: 'corporate', name: 'Quản lý phòng ban',              nameKo: '부서 생성/수정',          nameEn: 'Manage department',           desc: 'Tạo, sửa phòng ban.',                         descKo: '부서 생성·수정.',            descEn: 'Create, update departments.' },
+    { key: 'corporate.employee.read',            domain: 'corporate', name: 'Xem nhân viên',                  nameKo: '임직원 조회',             nameEn: 'Read employee',               desc: 'Xem danh sách nhân viên công ty.',            descKo: '임직원 조회.',               descEn: 'Read corporate employees.' },
+    { key: 'corporate.employee.write',           domain: 'corporate', name: 'Quản lý nhân viên',              nameKo: '임직원 생성/수정/회수',    nameEn: 'Manage employee',             desc: 'Tạo, sửa, thu hồi nhân viên.',                descKo: '임직원 생성·수정·회수.',      descEn: 'Create, update, revoke employees.' },
+    { key: 'corporate.wallet.read',              domain: 'corporate', name: 'Xem ví bữa ăn',                  nameKo: '식권 지갑 조회',           nameEn: 'Read meal wallet',            desc: 'Xem ví voucher bữa ăn.',                      descKo: '식권 지갑 조회.',            descEn: 'Read meal voucher wallet.' },
+    { key: 'corporate.wallet.write',             domain: 'corporate', name: 'Tạo ví bữa ăn',                  nameKo: '식권 지갑 생성',           nameEn: 'Create meal wallet',          desc: 'Tạo ví voucher bữa ăn cho nhân viên.',        descKo: '식권 지갑 생성.',            descEn: 'Create meal wallet for employee.' },
+    { key: 'corporate.wallet.fund',              domain: 'corporate', name: 'Nạp trợ cấp công ty',            nameKo: '회사 지원금 적립',         nameEn: 'Fund company allowance',      desc: 'Nạp trợ cấp công ty vào ví bữa ăn.',          descKo: '회사 지원금 적립.',          descEn: 'Fund company allowance to wallet.' },
+    { key: 'corporate.wallet.topup',             domain: 'corporate', name: 'Nạp tiền cá nhân',               nameKo: '개인 충전',               nameEn: 'Personal top-up',             desc: 'Nhân viên nạp tiền cá nhân vào ví.',          descKo: '개인 식권 충전.',            descEn: 'Employee personal wallet top-up.' },
+    { key: 'corporate.policy.read',              domain: 'corporate', name: 'Xem chính sách bữa ăn',          nameKo: '식권 정책 조회',           nameEn: 'Read meal policy',            desc: 'Xem chính sách voucher bữa ăn.',              descKo: '식권 정책 조회.',            descEn: 'Read meal voucher policy.' },
+    { key: 'corporate.policy.write',             domain: 'corporate', name: 'Quản lý chính sách bữa ăn',      nameKo: '식권 정책 빌더',           nameEn: 'Manage meal policy',          desc: 'Tạo, sửa chính sách voucher bữa ăn.',         descKo: '식권 정책 생성·수정.',        descEn: 'Create, update meal voucher policy.' },
+    { key: 'corporate.transaction.read',         domain: 'corporate', name: 'Xem giao dịch',                  nameKo: '결제 트랜잭션 조회',        nameEn: 'Read transaction',            desc: 'Xem giao dịch thanh toán bữa ăn.',            descKo: '결제 트랜잭션 조회.',         descEn: 'Read meal payment transactions.' },
+    { key: 'corporate.transaction.authorize',    domain: 'corporate', name: 'Duyệt thanh toán',               nameKo: '결제 승인',               nameEn: 'Authorize transaction',       desc: 'Duyệt giao dịch thanh toán bữa ăn.',          descKo: '결제 승인.',                descEn: 'Authorize meal payment.' },
+    { key: 'corporate.transaction.reverse',      domain: 'corporate', name: 'Hủy thanh toán',                 nameKo: '결제 취소',               nameEn: 'Reverse transaction',         desc: 'Hủy giao dịch thanh toán bữa ăn.',            descKo: '결제 취소.',                descEn: 'Reverse meal payment.' },
+    { key: 'corporate.settlement.read',          domain: 'corporate', name: 'Xem đối soát',                   nameKo: '정산 조회',               nameEn: 'Read settlement',             desc: 'Xem kết quả đối soát.',                       descKo: '정산 조회.',                descEn: 'Read settlement results.' },
+    { key: 'corporate.settlement.run',           domain: 'corporate', name: 'Chạy đối soát',                  nameKo: '정산 배치 실행',           nameEn: 'Run settlement',              desc: 'Thực thi batch đối soát.',                    descKo: '정산 배치 실행.',            descEn: 'Run settlement batch.' },
+    { key: 'corporate.merchant.read',            domain: 'corporate', name: 'Xem đăng ký gian hàng',          nameKo: '가맹점 신청 조회',          nameEn: 'Read merchant enrollment',    desc: 'Xem đăng ký gian hàng voucher bữa ăn.',       descKo: '가맹점 신청 조회.',           descEn: 'Read meal merchant enrollments.' },
+    { key: 'corporate.merchant.enroll',          domain: 'corporate', name: 'Đăng ký gian hàng',              nameKo: '가맹점 가입 신청',          nameEn: 'Enroll merchant',             desc: 'Đăng ký gian hàng voucher bữa ăn.',           descKo: '가맹점 가입 신청.',           descEn: 'Enroll meal voucher merchant.' },
+    { key: 'corporate.merchant.activate',        domain: 'corporate', name: 'Kích hoạt gian hàng',            nameKo: '가맹점 활성/비활성',        nameEn: 'Activate merchant',           desc: 'Kích hoạt / vô hiệu hóa gian hàng.',          descKo: '가맹점 활성·비활성.',         descEn: 'Activate / deactivate merchant.' },
+    { key: 'corporate.merchant.commission.write',domain: 'corporate', name: 'Thiết lập phí hoa hồng',         nameKo: '수수료율 설정',            nameEn: 'Set commission rate',         desc: 'Thiết lập tỉ lệ phí hoa hồng gian hàng.',     descKo: '가맹점 수수료율 설정.',        descEn: 'Set merchant commission rate.' },
+    { key: 'corporate.merchant.account.write',   domain: 'corporate', name: 'Quản lý tài khoản đối soát',     nameKo: '정산 계좌 관리',           nameEn: 'Manage settlement account',   desc: 'Quản lý tài khoản đối soát gian hàng.',        descKo: '가맹점 정산 계좌 관리.',       descEn: 'Manage merchant settlement account.' },
+    { key: 'corporate.invoice.read',             domain: 'corporate', name: 'Xem hóa đơn điện tử',            nameKo: '통합 세금계산서 조회',       nameEn: 'Read e-invoice',              desc: 'Xem hóa đơn điện tử hợp nhất.',                descKo: '통합 전자세금계산서 조회.',     descEn: 'Read consolidated e-invoices.' },
+    { key: 'corporate.invoice.write',            domain: 'corporate', name: 'Phát hành hóa đơn điện tử',      nameKo: '통합 세금계산서 발급',       nameEn: 'Issue e-invoice',             desc: 'Tạo và phát hành hóa đơn điện tử (SuperAdmin).', descKo: '통합 전자세금계산서 생성/발급(SuperAdmin).', descEn: 'Create and issue e-invoices (SuperAdmin).' },
+    { key: 'corporate.invoice.request',          domain: 'corporate', name: 'Yêu cầu phát hành hóa đơn',      nameKo: '세금계산서 발행 요청',       nameEn: 'Request e-invoice',           desc: 'Công ty yêu cầu phát hành hóa đơn điện tử.',   descKo: '기업의 세금계산서 발행 요청.',   descEn: 'Corporate requests e-invoice issuance.' },
+    { key: 'corporate.invoice.dispute',          domain: 'corporate', name: 'Khiếu nại hóa đơn',              nameKo: '세금계산서 이의 제기',       nameEn: 'Dispute e-invoice',           desc: 'Công ty khiếu nại hóa đơn điện tử.',           descKo: '기업의 세금계산서 이의 제기.',   descEn: 'Corporate disputes e-invoice.' },
   ];
 
   for (const p of SYSTEM_PERMISSIONS) {
     await prisma.permission.upsert({
       where: { permissionKey: p.key },
-      update: { domain: p.domain, description: p.desc, isSystem: true },
+      update: {
+        domain: p.domain,
+        name: p.name,
+        nameKo: p.nameKo,
+        nameEn: p.nameEn,
+        description: p.desc,
+        descriptionKo: p.descKo,
+        descriptionEn: p.descEn,
+        isSystem: true,
+      },
       create: {
         permissionKey: p.key,
         domain: p.domain,
+        name: p.name,
+        nameKo: p.nameKo,
+        nameEn: p.nameEn,
         description: p.desc,
+        descriptionKo: p.descKo,
+        descriptionEn: p.descEn,
         isSystem: true,
       },
     });

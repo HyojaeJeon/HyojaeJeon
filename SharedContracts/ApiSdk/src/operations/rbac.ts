@@ -15,7 +15,12 @@ export const RbacListPermissionsDocument = /* GraphQL */ `
         id
       permissionKey
       domain
+      name
+      nameKo
+      nameEn
       description
+      descriptionKo
+      descriptionEn
       isSystem
       } }
       error { code message requestId details }
@@ -34,10 +39,14 @@ export const RbacListRolesDocument = /* GraphQL */ `
         id
       roleCode
       roleName
+      nameKo
+      nameEn
       scope
       hierarchyLevel
       isSystem
       description
+      descriptionKo
+      descriptionEn
       } }
       error { code message requestId details }
     }
@@ -55,7 +64,12 @@ export const RbacRolePermissionsDocument = /* GraphQL */ `
         id
       permissionKey
       domain
+      name
+      nameKo
+      nameEn
       description
+      descriptionKo
+      descriptionEn
       } }
       error { code message requestId details }
     }
@@ -132,92 +146,177 @@ export const RbacUserAssignments: GraphQLOperation<
 
 // ─────────── Mutations — Role CRUD
 
+const ROLE_SELECTION = /* GraphQL */ `
+  id
+  roleCode
+  roleName
+  nameKo
+  nameEn
+  scope
+  hierarchyLevel
+  isSystem
+  description
+  descriptionKo
+  descriptionEn
+`;
+
+export interface RbacRoleInputShared {
+  roleCode?: string;
+  roleName?: string | null;
+  nameKo?: string | null;
+  nameEn?: string | null;
+  scope?: string | null;
+  hierarchyLevel?: number | null;
+  description?: string | null;
+  descriptionKo?: string | null;
+  descriptionEn?: string | null;
+}
+
+export interface RbacCreateRoleInput {
+  roleCode: string;
+  roleName: string;
+  scope: string;
+  nameKo?: string | null;
+  nameEn?: string | null;
+  hierarchyLevel?: number | null;
+  description?: string | null;
+  descriptionKo?: string | null;
+  descriptionEn?: string | null;
+}
+
+export interface RbacUpdateRoleInput {
+  roleId: string;
+  roleName?: string | null;
+  nameKo?: string | null;
+  nameEn?: string | null;
+  scope?: string | null;
+  hierarchyLevel?: number | null;
+  description?: string | null;
+  descriptionKo?: string | null;
+  descriptionEn?: string | null;
+}
+
 export const RbacCreateRoleDocument = /* GraphQL */ `
-  mutation RbacCreateRole(
-    $roleCode: String!
-    $roleName: String!
-    $scope: String!
-    $hierarchyLevel: Int
-    $description: String
-  ) {
-    rbacCreateRole(
-      roleCode: $roleCode
-      roleName: $roleName
-      scope: $scope
-      hierarchyLevel: $hierarchyLevel
-      description: $description
-    ) {
+  mutation RbacCreateRole($input: CreateRoleInput!) {
+    rbacCreateRole(input: $input) {
       success { code message requestId data {
-        id
-      roleCode
-      roleName
-      scope
-      hierarchyLevel
-      isSystem
+        ${ROLE_SELECTION}
       } }
       error { code message requestId details }
     }
   }
 `;
-export const RbacCreateRole: GraphQLOperation<
-  unknown,
-  {
-    roleCode: string;
-    roleName: string;
-    scope: string;
-    hierarchyLevel?: number | null;
-    description?: string | null;
-  }
-> = { operationName: 'RbacCreateRole', document: RbacCreateRoleDocument };
+export const RbacCreateRole: GraphQLOperation<unknown, { input: RbacCreateRoleInput }> = {
+  operationName: 'RbacCreateRole',
+  document: RbacCreateRoleDocument,
+};
 
 export const RbacUpdateRoleDocument = /* GraphQL */ `
-  mutation RbacUpdateRole(
-    $id: ID!
-    $roleName: String
-    $scope: String
-    $hierarchyLevel: Int
-    $description: String
-  ) {
-    rbacUpdateRole(
-      id: $id
-      roleName: $roleName
-      scope: $scope
-      hierarchyLevel: $hierarchyLevel
-      description: $description
-    ) {
+  mutation RbacUpdateRole($input: UpdateRoleInput!) {
+    rbacUpdateRole(input: $input) {
       success { code message requestId data {
-        id
-      roleCode
-      roleName
-      scope
-      hierarchyLevel
+        ${ROLE_SELECTION}
       } }
       error { code message requestId details }
     }
   }
 `;
-export const RbacUpdateRole: GraphQLOperation<
-  unknown,
-  {
-    id: string;
-    roleName?: string | null;
-    scope?: string | null;
-    hierarchyLevel?: number | null;
-    description?: string | null;
-  }
-> = { operationName: 'RbacUpdateRole', document: RbacUpdateRoleDocument };
+export const RbacUpdateRole: GraphQLOperation<unknown, { input: RbacUpdateRoleInput }> = {
+  operationName: 'RbacUpdateRole',
+  document: RbacUpdateRoleDocument,
+};
 
 export const RbacDeleteRoleDocument = /* GraphQL */ `
-  mutation RbacDeleteRole($id: ID!) {
-    rbacDeleteRole(id: $id) {
+  mutation RbacDeleteRole($roleId: ID!) {
+    rbacDeleteRole(roleId: $roleId) {
       success { code message requestId data }
       error { code message requestId details }
     }
   }
 `;
-export const RbacDeleteRole: GraphQLOperation<unknown, { id: string }> = {
+export const RbacDeleteRole: GraphQLOperation<unknown, { roleId: string }> = {
   operationName: 'RbacDeleteRole',
   document: RbacDeleteRoleDocument,
+};
+
+// ─────────── Mutations — Permission CRUD
+
+const PERMISSION_SELECTION = /* GraphQL */ `
+  id
+  permissionKey
+  domain
+  name
+  nameKo
+  nameEn
+  description
+  descriptionKo
+  descriptionEn
+  isSystem
+`;
+
+export interface RbacCreatePermissionInput {
+  permissionKey: string;
+  domain: string;
+  name?: string | null;
+  nameKo?: string | null;
+  nameEn?: string | null;
+  description?: string | null;
+  descriptionKo?: string | null;
+  descriptionEn?: string | null;
+}
+
+export interface RbacUpdatePermissionInput {
+  permissionId: string;
+  domain?: string | null;
+  name?: string | null;
+  nameKo?: string | null;
+  nameEn?: string | null;
+  description?: string | null;
+  descriptionKo?: string | null;
+  descriptionEn?: string | null;
+}
+
+export const RbacCreatePermissionDocument = /* GraphQL */ `
+  mutation RbacCreatePermission($input: CreatePermissionInput!) {
+    rbacCreatePermission(input: $input) {
+      success { code message requestId data {
+        ${PERMISSION_SELECTION}
+      } }
+      error { code message requestId details }
+    }
+  }
+`;
+export const RbacCreatePermission: GraphQLOperation<unknown, { input: RbacCreatePermissionInput }> = {
+  operationName: 'RbacCreatePermission',
+  document: RbacCreatePermissionDocument,
+};
+
+export const RbacUpdatePermissionDocument = /* GraphQL */ `
+  mutation RbacUpdatePermission($input: UpdatePermissionInput!) {
+    rbacUpdatePermission(input: $input) {
+      success { code message requestId data {
+        ${PERMISSION_SELECTION}
+      } }
+      error { code message requestId details }
+    }
+  }
+`;
+export const RbacUpdatePermission: GraphQLOperation<unknown, { input: RbacUpdatePermissionInput }> = {
+  operationName: 'RbacUpdatePermission',
+  document: RbacUpdatePermissionDocument,
+};
+
+export const RbacDeletePermissionDocument = /* GraphQL */ `
+  mutation RbacDeletePermission($permissionId: ID!) {
+    rbacDeletePermission(permissionId: $permissionId) {
+      success { code message requestId data }
+      error { code message requestId details }
+    }
+  }
+`;
+export const RbacDeletePermission: GraphQLOperation<unknown, { permissionId: string }> = {
+  operationName: 'RbacDeletePermission',
+  document: RbacDeletePermissionDocument,
 };
 
 // ─────────── Mutations — Role ↔ Permission
