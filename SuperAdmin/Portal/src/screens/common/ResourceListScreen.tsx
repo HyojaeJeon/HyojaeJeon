@@ -108,7 +108,7 @@ export function ResourceListScreen<Row extends { id: string }>({
             <button
               type="button"
               onClick={() => refetch()}
-              className="flex h-9 items-center gap-1.5 rounded-md border bg-surface-1 px-3 text-[12.5px] font-medium text-fg transition-colors hover:bg-surface-2"
+              className="flex h-10 items-center gap-1.5 rounded-[10px] border bg-surface-1 px-4 text-[13.5px] font-semibold text-fg transition-colors hover:bg-surface-2"
               style={{ borderColor: 'var(--border)' }}
             >
               <RefreshCw size={13} />

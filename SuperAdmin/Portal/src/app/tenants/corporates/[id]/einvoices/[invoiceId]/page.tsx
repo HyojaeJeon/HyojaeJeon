@@ -1,2 +1,2 @@
-import { CorporateEInvoiceDetailScreen } from '@screens/corporate-e-invoice-detail-screen';
+import { CorporateEInvoiceDetailScreen } from '@screens/corporateEInvoiceDetailScreen';
 export default function Page() { return <CorporateEInvoiceDetailScreen />; }

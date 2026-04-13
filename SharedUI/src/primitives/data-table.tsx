@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { sharedUiTokens as T } from '../foundation/tokens';
 import type { DataTableProps } from '../types';
 
@@ -11,6 +12,8 @@ export function DataTable<Row>({
   caption,
   compact = false,
   onRowClick,
+  expandedRowKey,
+  renderExpandedRow,
 }: DataTableProps<Row>) {
   if (rows.length === 0) {
     return (
@@ -90,38 +93,51 @@ export function DataTable<Row>({
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, index) => (
-            <tr
-              key={rowKey(row, index)}
-              onClick={onRowClick ? () => onRowClick(row, index) : undefined}
-              style={{
-                cursor: onRowClick ? 'pointer' : 'default',
-                transition: 'background 120ms ease',
-              }}
-              onMouseEnter={(e) => {
-                if (onRowClick) e.currentTarget.style.background = T.colors.surfaceMuted;
-              }}
-              onMouseLeave={(e) => {
-                if (onRowClick) e.currentTarget.style.background = 'transparent';
-              }}
-            >
-              {columns.map((column) => (
-                <td
-                  key={column.key}
+          {rows.map((row, index) => {
+            const key = rowKey(row, index);
+            const isExpanded = expandedRowKey != null && key === expandedRowKey;
+            return (
+              <React.Fragment key={key}>
+                <tr
+                  onClick={onRowClick ? () => onRowClick(row, index) : undefined}
                   style={{
-                    padding: `${cellPaddingY} ${cellPaddingX}`,
-                    borderTop: `1px solid rgb(0 0 0 / 0.04)`,
-                    textAlign: column.align ?? 'left',
-                    verticalAlign: 'middle',
-                    color: T.colors.text,
-                    fontSize: 13,
+                    cursor: onRowClick ? 'pointer' : 'default',
+                    transition: 'background 120ms ease',
+                    background: isExpanded ? T.colors.surfaceMuted : undefined,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (onRowClick && !isExpanded) e.currentTarget.style.background = T.colors.surfaceMuted;
+                  }}
+                  onMouseLeave={(e) => {
+                    if (onRowClick && !isExpanded) e.currentTarget.style.background = 'transparent';
                   }}
                 >
-                  {column.render(row, index)}
-                </td>
-              ))}
-            </tr>
-          ))}
+                  {columns.map((column) => (
+                    <td
+                      key={column.key}
+                      style={{
+                        padding: `${cellPaddingY} ${cellPaddingX}`,
+                        borderTop: `1px solid rgb(0 0 0 / 0.04)`,
+                        textAlign: column.align ?? 'left',
+                        verticalAlign: 'middle',
+                        color: T.colors.text,
+                        fontSize: 13,
+                      }}
+                    >
+                      {column.render(row, index)}
+                    </td>
+                  ))}
+                </tr>
+                {isExpanded && renderExpandedRow && (
+                  <tr>
+                    <td colSpan={columns.length} style={{ padding: 0 }}>
+                      {renderExpandedRow(row, index)}
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
+            );
+          })}
         </tbody>
       </table>
     </div>

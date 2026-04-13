@@ -1,2 +1,2 @@
-import { CorporatePoliciesScreen } from '@screens/corporate-policies-screen';
+import { CorporatePoliciesScreen } from '@screens/corporatePoliciesScreen';
 export default function Page() { return <CorporatePoliciesScreen />; }

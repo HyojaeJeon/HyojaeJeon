@@ -106,6 +106,8 @@ export interface AuthAccount {
 export interface AuthPayload {
     accessToken: string;
     expiresIn: string;
+    accessTokenExpiresAt: string;
+    sessionExpiresAt: string;
     user: AuthAccount;
 }
 export type SuperAdminUser = AuthAccount;

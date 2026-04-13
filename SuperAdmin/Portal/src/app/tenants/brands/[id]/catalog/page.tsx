@@ -1,2 +1,2 @@
-import { BrandCatalogScreen } from '@screens/brand-catalog-screen';
+import { BrandCatalogScreen } from '@screens/brandCatalogScreen';
 export default function Page() { return <BrandCatalogScreen />; }

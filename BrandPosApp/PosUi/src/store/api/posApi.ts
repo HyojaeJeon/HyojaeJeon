@@ -52,6 +52,6 @@ const posBaseQuery = () => async (arg: BridgeArg) => {
 export const posApi = createApi({
   reducerPath: 'posApi',
   baseQuery: posBaseQuery(),
-  tagTypes: ['TableList', 'Table', 'Floor', 'Order', 'Payment', 'Sync', 'System', 'Config'],
+  tagTypes: ['TableList', 'Table', 'Floor', 'Order', 'Payment', 'Sync', 'System', 'Config', 'MealTicket'],
   endpoints: () => ({}),
 });

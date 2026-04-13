@@ -1,0 +1,134 @@
+// ─────────────────────────────────────────────
+// Contract Management (계약 관리)
+// 한국어: 가맹점/대리점/기업 3종 계약의 lifecycle 관리.
+//   shared 도메인 — polymorphic subjectType 패턴 (einvoice와 동일).
+// Tiếng Việt: Quản lý vòng đời hợp đồng cho 3 loại: merchant/distributor/corporate.
+// ─────────────────────────────────────────────
+
+// 한국어: 계약 — polymorphic 당사자 (MERCHANT / DISTRIBUTOR / CORPORATE).
+// Tiếng Việt: Hợp đồng — bên đối tác đa hình (MERCHANT / DISTRIBUTOR / CORPORATE).
+model Contract {
+  id                String    @id @default(uuid()) @db.Uuid
+  contractCode      String    @unique @db.VarChar(60)
+  contractType      String    @db.VarChar(30) // MERCHANT | DISTRIBUTOR | CORPORATE
+  partyAType        String    @db.VarChar(30) // PLATFORM
+  partyAId          String    @db.Uuid        // PlatformLegalEntity.id
+  partyBType        String    @db.VarChar(30) // BRAND_HQ | DISTRIBUTOR | CORPORATE
+  partyBId          String    @db.Uuid
+  templateId        String?   @db.Uuid
+
+  title             String    @db.VarChar(500)
+  titleKo           String?   @db.VarChar(500)
+  titleEn           String?   @db.VarChar(500)
+
+  // 계약서 원문 — 언어별 HTML + Text
+  bodyJson          Json      @default("{}") // { vi: { html, text }, ko: { html, text }, en: { html, text } }
+  // 계약 조건 구조화 데이터
+  termsJson         Json      @default("{}")
+
+  status            String    @default("REQUESTED") @db.VarChar(30)
+  version           Int       @default(1)
+  parentContractId  String?   @db.Uuid
+  effectiveFrom     DateTime? @db.Date
+  effectiveTo       DateTime? @db.Date
+  reviewDeadlineAt  DateTime? @db.Timestamptz()
+  signedAt          DateTime? @db.Timestamptz()
+  terminatedAt      DateTime? @db.Timestamptz()
+  terminationReason String?   @db.Text
+  createdBy         String    @db.Uuid
+  createdAt         DateTime  @default(now()) @db.Timestamptz()
+  updatedAt         DateTime  @updatedAt @db.Timestamptz()
+
+  revisions  ContractRevision[]
+  files      ContractFile[]
+  activities ContractActivity[]
+
+  @@index([contractType, status])
+  @@index([partyBType, partyBId])
+  @@index([status, effectiveTo])
+  @@index([createdBy])
+}
+
+// 한국어: 계약 수정 이력 — field-level diff 추적.
+// Tiếng Việt: Lịch sử sửa đổi hợp đồng — theo dõi diff cấp trường.
+model ContractRevision {
+  id             String    @id @default(uuid()) @db.Uuid
+  contractId     String    @db.Uuid
+  revisionNo     Int
+  modifiedBy     String    @db.Uuid
+  modifiedByType String    @db.VarChar(30)
+  locale         String    @db.VarChar(5)  // vi | ko | en
+  changeType     String    @db.VarChar(30) // CLAUSE_EDIT | TERM_CHANGE | AMOUNT_CHANGE | BODY_EDIT
+  fieldPath      String    @db.VarChar(200)
+  beforeValue    Json?
+  afterValue     Json?
+  reason         String?   @db.Text
+  ackBy          String?   @db.Uuid
+  ackAt          DateTime? @db.Timestamptz()
+  createdAt      DateTime  @default(now()) @db.Timestamptz()
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([contractId, revisionNo])
+  @@index([contractId, ackAt])
+}
+
+// 한국어: 계약 첨부/스캔 파일 — 언어별 관리.
+// Tiếng Việt: File đính kèm/scan hợp đồng — quản lý theo ngôn ngữ.
+model ContractFile {
+  id          String   @id @default(uuid()) @db.Uuid
+  contractId  String   @db.Uuid
+  fileType    String   @db.VarChar(30) // DRAFT | AGREED | SIGNED_A | SIGNED_B | SIGNED_COMPLETE | EXPORT_DOCX | EXPORT_PDF
+  locale      String   @db.VarChar(5)  // vi | ko | en
+  filePath    String   @db.VarChar(500)
+  fileName    String   @db.VarChar(255)
+  fileSize    Int
+  mimeType    String   @db.VarChar(100)
+  uploadedBy  String   @db.Uuid
+  uploadedAt  DateTime @default(now()) @db.Timestamptz()
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([contractId, fileType, locale])
+}
+
+// 한국어: 계약 활동 로그 — 타임라인 UI용.
+// Tiếng Việt: Log hoạt động hợp đồng — dùng cho timeline UI.
+model ContractActivity {
+  id           String   @id @default(uuid()) @db.Uuid
+  contractId   String   @db.Uuid
+  activityType String   @db.VarChar(50)
+  fromStatus   String?  @db.VarChar(30)
+  toStatus     String?  @db.VarChar(30)
+  actorId      String   @db.Uuid
+  actorType    String   @db.VarChar(30) // SUPER_ADMIN | BRAND_ADMIN | CORPORATE_ADMIN | DISTRIBUTOR_USER | SYSTEM
+  summary      String   @db.VarChar(500)
+  summaryKo    String?  @db.VarChar(500)
+  summaryEn    String?  @db.VarChar(500)
+  metadata     Json?
+  createdAt    DateTime @default(now()) @db.Timestamptz()
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([contractId, createdAt(sort: Desc)])
+  @@index([actorId, actorType])
+}
+
+// 한국어: 계약 템플릿 — 3개 언어 본문 + 변수 치환.
+// Tiếng Việt: Mẫu hợp đồng — nội dung 3 ngôn ngữ + thay thế biến.
+model ContractTemplate {
+  id           String   @id @default(uuid()) @db.Uuid
+  templateCode String   @unique @db.VarChar(60)
+  contractType String   @db.VarChar(30) // MERCHANT | DISTRIBUTOR | CORPORATE
+  title        String   @db.VarChar(500)
+  titleKo      String?  @db.VarChar(500)
+  titleEn      String?  @db.VarChar(500)
+  bodyJson     Json     @default("{}") // { vi: { html }, ko: { html }, en: { html } }
+  clausesJson  Json     @default("{}")
+  version      Int      @default(1)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now()) @db.Timestamptz()
+  updatedAt    DateTime @updatedAt @db.Timestamptz()
+
+  @@index([contractType, isActive])
+}

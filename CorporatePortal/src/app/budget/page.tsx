@@ -1,2 +1,2 @@
-import { BudgetOverviewScreen } from '@screens/budget-overview-screen';
+import { BudgetOverviewScreen } from '@screens/budgetOverviewScreen';
 export default function Page() { return <BudgetOverviewScreen />; }

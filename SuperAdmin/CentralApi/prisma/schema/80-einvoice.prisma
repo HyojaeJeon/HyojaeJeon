@@ -199,6 +199,7 @@ model EInvoiceProviderConfig {
   environment          String   @db.VarChar(20)
   baseUrl              String   @db.VarChar(255)
   credentialsVaultRef  String   @db.VarChar(500)
+  credentialsEncrypted String?  @db.Text // AES-256-GCM 암호화된 JSON (username, password, appId 등)
   defaultSerialPrefix  String   @default("C") @db.VarChar(2)
   defaultFormNo        String   @default("1") @db.VarChar(10)
   defaultSerialType    String   @default("TKT") @db.VarChar(10)

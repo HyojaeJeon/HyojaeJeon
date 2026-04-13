@@ -1,2 +1,2 @@
-import { SettingsSessionScreen } from '@screens/settings-session-screen';
+import { SettingsSessionScreen } from '@screens/settingsSessionScreen';
 export default function Page() { return <SettingsSessionScreen />; }

@@ -1,2 +1,2 @@
-import { SettingsAdminsScreen } from '@screens/settings-admins-screen';
+import { SettingsAdminsScreen } from '@screens/settingsAdminsScreen';
 export default function Page() { return <SettingsAdminsScreen />; }

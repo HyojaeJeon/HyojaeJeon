@@ -1,4 +1,4 @@
-import { DeployReleaseListScreen } from '@screens/deploy-release-list-screen';
+import { DeployReleaseListScreen } from '@screens/deployReleaseListScreen';
 
 export default function Page() {
   return <DeployReleaseListScreen />;

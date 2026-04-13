@@ -1,11 +1,10 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  transpilePackages: ['@platform/shared-ui'],
   reactStrictMode: true,
   reactCompiler: true,
-  experimental: {
-    typedRoutes: false,
-  },
+  typedRoutes: false,
   env: {
     NEXT_PUBLIC_CENTRAL_API_HTTP:
       process.env.NEXT_PUBLIC_CENTRAL_API_HTTP ?? 'http://localhost:4000/graphql',

@@ -1,4 +1,4 @@
-import { RegionListScreen } from '@screens/region-list-screen';
+import { RegionListScreen } from '@screens/regionListScreen';
 
 export default function Page() {
   return <RegionListScreen />;

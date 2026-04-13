@@ -1,2 +1,2 @@
-import { OperationsRealtimeScreen } from '@screens/operations-sub-screens';
+import { OperationsRealtimeScreen } from '@screens/operationsSubScreens';
 export default function Page() { return <OperationsRealtimeScreen />; }

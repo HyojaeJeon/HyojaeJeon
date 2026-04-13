@@ -1,4 +1,4 @@
-import { SystemHealthScreen } from '@screens/system-health-screen';
+import { SystemHealthScreen } from '@screens/systemHealthScreen';
 
 export default function Page() {
   return <SystemHealthScreen />;

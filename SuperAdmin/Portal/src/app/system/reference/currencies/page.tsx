@@ -1,4 +1,4 @@
-import { CurrencyListScreen } from '@screens/currency-list-screen';
+import { CurrencyListScreen } from '@screens/currencyListScreen';
 
 export default function Page() {
   return <CurrencyListScreen />;

@@ -1,2 +1,2 @@
-import { EmployeeListScreen } from '@screens/employee-list-screen';
+import { EmployeeListScreen } from '@screens/employeeListScreen';
 export default function Page() { return <EmployeeListScreen />; }

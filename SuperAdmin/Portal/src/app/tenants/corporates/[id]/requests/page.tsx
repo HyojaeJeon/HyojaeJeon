@@ -1,2 +1,2 @@
-import { CorporateRequestsScreen } from '@screens/corporate-requests-screen';
+import { CorporateRequestsScreen } from '@screens/corporateRequestsScreen';
 export default function Page() { return <CorporateRequestsScreen />; }

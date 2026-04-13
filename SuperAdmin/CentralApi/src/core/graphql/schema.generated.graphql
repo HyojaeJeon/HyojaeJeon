@@ -51,6 +51,7 @@ type AuditLogModelListResponseSuccess {
   data: [AuditLogModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type AuditLogModelResponse {
@@ -76,6 +77,7 @@ type AuthAccountModel {
   lastLoginAt: DateTime
   loginId: String!
   passwordChangedAt: DateTime
+  permissions: [String!]
   phone: String
   status: String!
   updatedAt: DateTime!
@@ -92,6 +94,7 @@ type AuthAccountModelListResponseSuccess {
   data: [AuthAccountModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type AuthAccountModelResponse {
@@ -108,7 +111,9 @@ type AuthAccountModelResponseSuccess {
 
 type AuthPayload {
   accessToken: String!
+  accessTokenExpiresAt: DateTime!
   expiresIn: String!
+  sessionExpiresAt: DateTime!
   user: AuthAccountModel!
 }
 
@@ -163,7 +168,7 @@ type BranchModel {
   countryCode: String!
   createdAt: DateTime!
   defaultLanguageCode: String!
-  distributorId: String!
+  distributorId: String
   edgePosTerminals: [EdgePosTerminalModel!]!
   id: ID!
   openingDate: DateTime
@@ -184,6 +189,7 @@ type BranchModelListResponseSuccess {
   data: [BranchModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type BranchModelResponse {
@@ -224,6 +230,7 @@ type BrandHqEntitlementModelListResponseSuccess {
   data: [BrandHqEntitlementModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type BrandHqEntitlementModelResponse {
@@ -260,6 +267,7 @@ type BrandMenuCategoryModelListResponseSuccess {
   data: [BrandMenuCategoryModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type BrandMenuCategoryModelResponse {
@@ -302,6 +310,7 @@ type BrandMenuItemModelListResponseSuccess {
   data: [BrandMenuItemModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type BrandMenuItemModelResponse {
@@ -327,7 +336,7 @@ type BrandProfileModel {
   countryCode: String!
   createdAt: DateTime!
   defaultLanguageCode: String!
-  distributorId: String!
+  distributorId: String
   id: ID!
   menuCategories: [BrandMenuCategoryModel!]!
   menuItems: [BrandMenuItemModel!]!
@@ -347,6 +356,7 @@ type BrandProfileModelListResponseSuccess {
   data: [BrandProfileModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type BrandProfileModelResponse {
@@ -357,6 +367,181 @@ type BrandProfileModelResponse {
 type BrandProfileModelResponseSuccess {
   code: String!
   data: BrandProfileModel!
+  message: String!
+  requestId: String
+}
+
+type ContractActivityModel {
+  activityType: String!
+  actorId: String!
+  actorType: String!
+  contractId: String!
+  createdAt: DateTime!
+  fromStatus: String
+  id: ID!
+  metadata: JSON
+  summary: String!
+  summaryEn: String
+  summaryKo: String
+  toStatus: String
+}
+
+type ContractActivityModelListResponse {
+  error: ErrorPayload
+  success: ContractActivityModelListResponseSuccess
+}
+
+type ContractActivityModelListResponseSuccess {
+  code: String!
+  data: [ContractActivityModel!]!
+  message: String!
+  requestId: String
+  totalCount: Int
+}
+
+type ContractFileModel {
+  contractId: String!
+  fileName: String!
+  filePath: String!
+  fileSize: Int!
+  fileType: String!
+  id: ID!
+  locale: String!
+  mimeType: String!
+  uploadedAt: DateTime!
+  uploadedBy: String!
+}
+
+type ContractFileModelResponse {
+  error: ErrorPayload
+  success: ContractFileModelResponseSuccess
+}
+
+type ContractFileModelResponseSuccess {
+  code: String!
+  data: ContractFileModel!
+  message: String!
+  requestId: String
+}
+
+type ContractModel {
+  bodyJson: JSON!
+  contractCode: String!
+  contractType: String!
+  createdAt: DateTime!
+  createdBy: String!
+  effectiveFrom: DateTime
+  effectiveTo: DateTime
+  id: ID!
+  parentContractId: String
+  partyAId: String!
+  partyAType: String!
+  partyBId: String!
+  partyBType: String!
+  reviewDeadlineAt: DateTime
+  signedAt: DateTime
+  status: String!
+  templateId: String
+  terminatedAt: DateTime
+  terminationReason: String
+  termsJson: JSON!
+  title: String!
+  titleEn: String
+  titleKo: String
+  updatedAt: DateTime!
+  version: Int!
+}
+
+type ContractModelListResponse {
+  error: ErrorPayload
+  success: ContractModelListResponseSuccess
+}
+
+type ContractModelListResponseSuccess {
+  code: String!
+  data: [ContractModel!]!
+  message: String!
+  requestId: String
+  totalCount: Int
+}
+
+type ContractModelResponse {
+  error: ErrorPayload
+  success: ContractModelResponseSuccess
+}
+
+type ContractModelResponseSuccess {
+  code: String!
+  data: ContractModel!
+  message: String!
+  requestId: String
+}
+
+type ContractRevisionModel {
+  ackAt: DateTime
+  ackBy: String
+  afterValue: JSON
+  beforeValue: JSON
+  changeType: String!
+  contractId: String!
+  createdAt: DateTime!
+  fieldPath: String!
+  id: ID!
+  locale: String!
+  modifiedBy: String!
+  modifiedByType: String!
+  reason: String
+  revisionNo: Int!
+}
+
+type ContractRevisionModelResponse {
+  error: ErrorPayload
+  success: ContractRevisionModelResponseSuccess
+}
+
+type ContractRevisionModelResponseSuccess {
+  code: String!
+  data: ContractRevisionModel!
+  message: String!
+  requestId: String
+}
+
+type ContractTemplateModel {
+  bodyJson: JSON!
+  clausesJson: JSON!
+  contractType: String!
+  createdAt: DateTime!
+  id: ID!
+  isActive: Boolean!
+  templateCode: String!
+  title: String!
+  titleEn: String
+  titleKo: String
+  updatedAt: DateTime!
+  version: Int!
+}
+
+type ContractTemplateModelListResponse {
+  error: ErrorPayload
+  success: ContractTemplateModelListResponseSuccess
+}
+
+type ContractTemplateModelListResponseSuccess {
+  code: String!
+  data: [ContractTemplateModel!]!
+  message: String!
+  requestId: String
+  totalCount: Int
+}
+
+type ContractTemplateModelResponse {
+  error: ErrorPayload
+  success: ContractTemplateModelResponseSuccess
+}
+
+type ContractTemplateModelResponseSuccess {
+  code: String!
+  data: ContractTemplateModel!
   message: String!
   requestId: String
 }
@@ -401,6 +586,29 @@ input CreateBrandInput {
   distributorId: String!
 }
 
+input CreateContractInput {
+  contractType: String!
+  effectiveFrom: DateTime
+  effectiveTo: DateTime
+  partyBId: ID!
+  partyBType: String!
+  templateId: ID
+  termsJson: JSON
+  title: String!
+  titleEn: String
+  titleKo: String
+}
+
+input CreateContractTemplateInput {
+  bodyJson: JSON!
+  clausesJson: JSON
+  contractType: String!
+  templateCode: String!
+  title: String!
+  titleEn: String
+  titleKo: String
+}
+
 input CreateCurrencyInput {
   currencyCode: String!
   currencyName: String!
@@ -429,6 +637,18 @@ input CreateLanguageInput {
   isDefault: Boolean = false
   languageCode: String!
   nativeName: String!
+}
+
+input CreateLicenseInput {
+  allowedCountryCode: String
+  effectiveFrom: DateTime!
+  effectiveTo: DateTime
+  licensePayloadJson: JSON
+  licenseType: String!
+  maxBranchCount: Int! = 0
+  maxTerminalCount: Int! = 0
+  scopeId: ID!
+  scopeType: String!
 }
 
 input CreateMealCorporateInput {
@@ -462,6 +682,10 @@ input CreateMealEmployeeInput {
 
 input CreateMealPolicyInput {
   allowSplitPayment: Boolean! = true
+  allowedDayOfWeek: [Int!]! = [1, 2, 3, 4, 5]
+  allowedMealTypes: [String!]! = []
+  allowedTimeEnd: String! = "22:00"
+  allowedTimeStart: String! = "06:00"
   appliesToDepartmentIds: [String!]! = []
   appliesToRoleCodes: [String!]! = []
   corporateId: ID!
@@ -469,6 +693,7 @@ input CreateMealPolicyInput {
   effectiveFrom: DateTime!
   effectiveTo: DateTime
   maxPerTransactionVnd: BigInt! = 0
+  merchantCategoryRestrictions: [String!]! = []
   policyCode: String!
   policyName: String!
 }
@@ -510,6 +735,13 @@ input CreatePermissionInput {
   permissionKey: String!
 }
 
+input CreatePlatformPolicyInput {
+  policyKey: String!
+  policyValueJson: JSON
+  scopeId: ID
+  scopeType: String!
+}
+
 input CreateRegionInput {
   countryCode: String!
   currencyCode: String!
@@ -522,11 +754,9 @@ input CreateRoleInput {
   description: String
   descriptionEn: String
   descriptionKo: String
-  hierarchyLevel: Int
-  nameEn: String
-  nameKo: String
-  roleCode: String!
   roleName: String!
+  roleNameEn: String
+  roleNameKo: String
   scope: String!
 }
 
@@ -553,6 +783,7 @@ type CurrencyModelListResponseSuccess {
   data: [CurrencyModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type CurrencyModelResponse {
@@ -594,6 +825,7 @@ type DeployPackageModelListResponseSuccess {
   data: [DeployPackageModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type DeployPackageModelResponse {
@@ -632,6 +864,7 @@ type DeployReleaseModelListResponseSuccess {
   data: [DeployReleaseModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type DeployReleaseModelResponse {
@@ -674,6 +907,7 @@ type DistributorProfileModelListResponseSuccess {
   data: [DistributorProfileModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type DistributorProfileModelResponse {
@@ -684,6 +918,24 @@ type DistributorProfileModelResponse {
 type DistributorProfileModelResponseSuccess {
   code: String!
   data: DistributorProfileModel!
+  message: String!
+  requestId: String
+}
+
+type EInvoiceDownloadModel {
+  expiresAt: String!
+  fileName: String!
+  url: String!
+}
+
+type EInvoiceDownloadModelResponse {
+  error: ErrorPayload
+  success: EInvoiceDownloadModelResponseSuccess
+}
+
+type EInvoiceDownloadModelResponseSuccess {
+  code: String!
+  data: EInvoiceDownloadModel!
   message: String!
   requestId: String
 }
@@ -783,6 +1035,7 @@ type EInvoiceModelListResponseSuccess {
   data: [EInvoiceModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type EInvoiceModelResponse {
@@ -795,6 +1048,59 @@ type EInvoiceModelResponseSuccess {
   data: EInvoiceModel!
   message: String!
   requestId: String
+}
+
+type EInvoiceProviderConfigModel {
+  baseUrl: String!
+  createdAt: DateTime!
+  credentialsVaultRef: String!
+  defaultCurrencyCode: String!
+  defaultFormNo: String!
+  defaultPaymentMethod: String!
+  defaultSerialPrefix: String!
+  defaultSerialType: String!
+  environment: String!
+  failoverProviderId: String
+  id: ID!
+  isActive: Boolean!
+  providerId: String!
+  updatedAt: DateTime!
+}
+
+type EInvoiceProviderConfigModelResponse {
+  error: ErrorPayload
+  success: EInvoiceProviderConfigModelResponseSuccess
+}
+
+type EInvoiceProviderConfigModelResponseSuccess {
+  code: String!
+  data: EInvoiceProviderConfigModel!
+  message: String!
+  requestId: String
+}
+
+type EInvoiceProviderModel {
+  configs: [EInvoiceProviderConfigModel!]!
+  createdAt: DateTime!
+  description: String
+  displayName: String!
+  id: ID!
+  isActive: Boolean!
+  providerType: String!
+  updatedAt: DateTime!
+}
+
+type EInvoiceProviderModelListResponse {
+  error: ErrorPayload
+  success: EInvoiceProviderModelListResponseSuccess
+}
+
+type EInvoiceProviderModelListResponseSuccess {
+  code: String!
+  data: [EInvoiceProviderModel!]!
+  message: String!
+  requestId: String
+  totalCount: Int
 }
 
 type EInvoiceSubmissionLogModel {
@@ -837,6 +1143,7 @@ type EdgePosTerminalModelListResponseSuccess {
   data: [EdgePosTerminalModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type EdgePosTerminalModelResponse {
@@ -917,6 +1224,7 @@ type LanguageModelListResponseSuccess {
   data: [LanguageModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type LanguageModelResponse {
@@ -945,8 +1253,10 @@ type MealCorporateDepartmentModel {
   createdAt: DateTime!
   departmentCode: String!
   departmentName: String!
+  employeeCount: Int
   id: ID!
   parentDepartmentId: String
+  parentDepartmentName: String
   updatedAt: DateTime!
 }
 
@@ -960,6 +1270,7 @@ type MealCorporateDepartmentModelListResponseSuccess {
   data: [MealCorporateDepartmentModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type MealCorporateDepartmentModelResponse {
@@ -1001,6 +1312,7 @@ type MealCorporateModelListResponseSuccess {
   data: [MealCorporateModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type MealCorporateModelResponse {
@@ -1039,6 +1351,7 @@ type MealEmployeeModelListResponseSuccess {
   data: [MealEmployeeModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type MealEmployeeModelResponse {
@@ -1049,6 +1362,33 @@ type MealEmployeeModelResponse {
 type MealEmployeeModelResponseSuccess {
   code: String!
   data: MealEmployeeModel!
+  message: String!
+  requestId: String
+}
+
+type MealFundingAccountModel {
+  balanceVnd: BigInt!
+  bankAccountNo: String
+  bankCode: String
+  corporateId: String!
+  createdAt: DateTime!
+  creditLimitVnd: BigInt!
+  fundingModel: String!
+  id: ID!
+  status: String!
+  updatedAt: DateTime!
+  virtualAccountNo: String
+  virtualBankCode: String
+}
+
+type MealFundingAccountModelResponse {
+  error: ErrorPayload
+  success: MealFundingAccountModelResponseSuccess
+}
+
+type MealFundingAccountModelResponseSuccess {
+  code: String!
+  data: MealFundingAccountModel!
   message: String!
   requestId: String
 }
@@ -1078,6 +1418,7 @@ type MealMerchantCommissionRateModelResponseSuccess {
 
 type MealMerchantEnrollmentModel {
   brandHqId: String!
+  brandName: String
   contractEndsAt: DateTime
   createdAt: DateTime!
   enrolledAt: DateTime!
@@ -1097,6 +1438,7 @@ type MealMerchantEnrollmentModelListResponseSuccess {
   data: [MealMerchantEnrollmentModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type MealMerchantEnrollmentModelResponse {
@@ -1137,6 +1479,10 @@ type MealMerchantSettlementAccountModelResponseSuccess {
 
 type MealPolicyModel {
   allowSplitPayment: Boolean!
+  allowedDayOfWeek: [Int!]
+  allowedMealTypes: [String!]
+  allowedTimeEnd: String
+  allowedTimeStart: String
   appliesToDepartmentIds: [String!]!
   appliesToRoleCodes: [String!]!
   corporateId: String!
@@ -1146,6 +1492,7 @@ type MealPolicyModel {
   effectiveTo: DateTime
   id: ID!
   maxPerTransactionVnd: BigInt!
+  merchantCategoryRestrictions: [String!]
   policyCode: String!
   policyName: String!
   status: String!
@@ -1162,6 +1509,7 @@ type MealPolicyModelListResponseSuccess {
   data: [MealPolicyModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type MealPolicyModelResponse {
@@ -1177,12 +1525,20 @@ type MealPolicyModelResponseSuccess {
 }
 
 type MealSettlementBatchModel {
+  approvalMemo: String
+  approvedAt: DateTime
+  approvedBy: String
   brandHqId: String!
+  brandName: String
   commissionAmountVnd: BigInt!
   createdAt: DateTime!
   grossAmountVnd: BigInt!
   id: ID!
   netPayableVnd: BigInt!
+  payoutCompletedAt: DateTime
+  payoutReference: String
+  payoutRequestedAt: DateTime
+  payoutStatus: String
   periodEnd: DateTime!
   periodStart: DateTime!
   status: String!
@@ -1200,6 +1556,7 @@ type MealSettlementBatchModelListResponseSuccess {
   data: [MealSettlementBatchModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type MealSettlementBatchModelResponse {
@@ -1214,6 +1571,28 @@ type MealSettlementBatchModelResponseSuccess {
   requestId: String
 }
 
+type MealSettlementBatchRef {
+  approvalMemo: String
+  approvedAt: DateTime
+  approvedBy: String
+  brandHqId: String!
+  brandName: String
+  commissionAmountVnd: BigInt!
+  createdAt: DateTime!
+  grossAmountVnd: BigInt!
+  id: ID!
+  netPayableVnd: BigInt!
+  payoutCompletedAt: DateTime
+  payoutReference: String
+  payoutRequestedAt: DateTime
+  payoutStatus: String
+  periodEnd: DateTime!
+  periodStart: DateTime!
+  status: String!
+  threeWayMismatchCount: Int!
+  updatedAt: DateTime!
+}
+
 type MealTransactionModel {
   approvedAmountVnd: BigInt!
   authMethod: String!
@@ -1224,6 +1603,8 @@ type MealTransactionModel {
   corporateId: String!
   createdAt: DateTime!
   declineReason: String
+  departmentName: String
+  employeeName: String
   employeeShareVnd: BigInt!
   id: ID!
   idempotencyKey: String!
@@ -1245,6 +1626,7 @@ type MealTransactionModelListResponseSuccess {
   data: [MealTransactionModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type MealTransactionModelResponse {
@@ -1283,6 +1665,7 @@ type MealWalletFundingEntryModelListResponseSuccess {
   data: [MealWalletFundingEntryModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type MealWalletModel {
@@ -1308,6 +1691,7 @@ type MealWalletModelListResponseSuccess {
   data: [MealWalletModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type MealWalletModelResponse {
@@ -1322,16 +1706,33 @@ type MealWalletModelResponseSuccess {
   requestId: String
 }
 
+type MenuPermissionNodeModel {
+  categories: [String!]
+  children: [MenuPermissionNodeModel!]
+  icon: String
+  id: String!
+  labelKey: String!
+}
+
 type Mutation {
   changePassword(currentPassword: String!, newPassword: String!): BooleanResponse!
+  contractAckRevision(revisionId: ID!): ContractRevisionModelResponse!
+  contractCreate(input: CreateContractInput!): ContractModelResponse!
+  contractTemplateCreate(input: CreateContractTemplateInput!): ContractTemplateModelResponse!
+  contractTransitionStatus(id: ID!, memo: String, toStatus: String!): ContractModelResponse!
+  contractUpdateBody(html: String!, id: ID!, locale: String!, text: String!): ContractModelResponse!
+  contractUpdateTerms(id: ID!, termsJson: JSON!): ContractModelResponse!
+  contractUploadFile(fileName: String!, filePath: String!, fileSize: Int!, fileType: String!, id: ID!, locale: String!, mimeType: String!): ContractFileModelResponse!
   createAuthAccount(input: CreateAuthAccountInput!): AuthAccountModelResponse!
   createBranch(input: CreateBranchInput!): BranchModelResponse!
   createBrand(input: CreateBrandInput!): BrandProfileModelResponse!
   createCurrency(input: CreateCurrencyInput!): CurrencyModelResponse!
   createDistributor(input: CreateDistributorInput!): DistributorProfileModelResponse!
   createLanguage(input: CreateLanguageInput!): LanguageModelResponse!
+  createLicense(input: CreateLicenseInput!): PlatformLicenseModelResponse!
   createMenuCategory(input: CreateMenuCategoryInput!): BrandMenuCategoryModelResponse!
   createMenuItem(input: CreateMenuItemInput!): BrandMenuItemModelResponse!
+  createPlatformPolicy(input: CreatePlatformPolicyInput!): PlatformPolicyModelResponse!
   createRegion(input: CreateRegionInput!): RegionModelResponse!
   deleteAuthAccount(id: ID!, userType: String!): BooleanResponse!
   deleteBranch(id: ID!): BooleanResponse!
@@ -1341,6 +1742,7 @@ type Mutation {
   deleteLicense(id: ID!): BooleanResponse!
   deleteMenuCategory(id: ID!): BooleanResponse!
   deleteMenuItem(id: ID!): BooleanResponse!
+  deleteNotificationChannel(channelType: String!): BooleanResponse!
   deletePricePolicy(id: ID!): BooleanResponse!
   deletePromotion(id: ID!): BooleanResponse!
   eInvoiceDispute(id: ID!, reason: String!): EInvoiceModelResponse!
@@ -1349,10 +1751,14 @@ type Mutation {
   eInvoiceSubmitForIssuance(id: ID!): EInvoiceModelResponse!
   grantBrandHqCapability(input: GrantBrandHqCapabilityInput!): BrandHqEntitlementModelResponse!
   login(input: LoginInput!): AuthPayloadResponse!
+  logout: BooleanResponse!
+  logoutAllSessions: BooleanResponse!
   mealCorporateCreate(input: CreateMealCorporateInput!): MealCorporateModelResponse!
   mealCorporateDelete(id: ID!): BooleanResponse!
   mealCorporateUpdate(id: ID!, input: UpdateMealCorporateInput!): MealCorporateModelResponse!
+  mealCorporateUpdateInvoiceSchedule(autoGenerate: Boolean, autoSubmit: Boolean, corporateId: ID!, notifyEmail: String, scheduleDay: Int, scheduleType: String!): MealCorporateModelResponse!
   mealDepartmentCreate(input: CreateMealDepartmentInput!): MealCorporateDepartmentModelResponse!
+  mealDepositConfirm(amountVnd: BigInt!, corporateId: ID!, referenceNo: String!): MealFundingAccountModelResponse!
   mealEmployeeCreate(input: CreateMealEmployeeInput!): MealEmployeeModelResponse!
   mealMerchantActivate(enrollmentId: ID!): MealMerchantEnrollmentModelResponse!
   mealMerchantDeactivate(enrollmentId: ID!): MealMerchantEnrollmentModelResponse!
@@ -1360,8 +1766,15 @@ type Mutation {
   mealMerchantSetCommission(input: SetMealMerchantCommissionInput!): MealMerchantCommissionRateModelResponse!
   mealMerchantSetSettlementAccount(input: SetMealMerchantSettlementAccountInput!): MealMerchantSettlementAccountModelResponse!
   mealPolicyCreate(input: CreateMealPolicyInput!): MealPolicyModelResponse!
+  mealPolicyDeactivate(id: ID!): MealPolicyModelResponse!
   mealPolicyDelete(id: ID!): BooleanResponse!
+  mealPolicyPause(id: ID!): MealPolicyModelResponse!
+  mealPolicyPublish(id: ID!): MealPolicyModelResponse!
+  mealPolicyUpdate(id: ID!, input: UpdateMealPolicyInput!): MealPolicyModelResponse!
+  mealSettlementApprove(batchId: ID!, memo: String): MealSettlementBatchModelResponse!
   mealSettlementMarkPaid(id: ID!): MealSettlementBatchModelResponse!
+  mealSettlementRequestPayout(batchId: ID!): MealSettlementBatchModelResponse!
+  mealSettlementResolveException(batchId: ID!, memo: String!): MealSettlementBatchModelResponse!
   mealSettlementRunBatch(input: RunMealSettlementBatchInput!): MealSettlementBatchModelResponse!
   mealTransactionAuthorize(input: AuthorizeMealTransactionInput!): MealTransactionModelResponse!
   mealTransactionReverse(id: ID!): MealTransactionModelResponse!
@@ -1378,22 +1791,102 @@ type Mutation {
   rbacRevokeRoleAssignment(assignmentId: ID!, reason: String!): UserRoleAssignmentModelResponse!
   rbacUpdatePermission(input: UpdatePermissionInput!): PermissionModelResponse!
   rbacUpdateRole(input: UpdateRoleInput!): RoleModelResponse!
+  refreshSession: AuthPayloadResponse!
   registerEdgePos(input: RegisterEdgePosInput!): EdgePosTerminalModelResponse!
   resetAuthAccountPassword(id: ID!, newPassword: String!, userType: String!): BooleanResponse!
   resumeBrandHqCapability(entitlementId: ID!): BrandHqEntitlementModelResponse!
   revokeBrandHqCapability(entitlementId: ID!, reason: String!): BrandHqEntitlementModelResponse!
   suspendAuthAccount(id: ID!, nextStatus: String!, reason: String, userType: String!): AuthAccountModelResponse!
   suspendBrandHqCapability(entitlementId: ID!, reason: String!): BrandHqEntitlementModelResponse!
+  toggleEinvoiceProvider(id: ID!, isActive: Boolean!): BooleanResponse!
   updateAuthAccount(id: ID!, input: UpdateAuthAccountInput!, userType: String!): AuthAccountModelResponse!
   updateBranch(id: ID!, input: UpdateBranchInput!): BranchModelResponse!
   updateBrand(id: ID!, input: UpdateBrandInput!): BrandProfileModelResponse!
   updateCurrency(id: ID!, input: CreateCurrencyInput!): CurrencyModelResponse!
   updateDistributor(id: ID!, input: UpdateDistributorInput!): DistributorProfileModelResponse!
   updateEdgePosStatus(id: ID!, status: String!): EdgePosTerminalModelResponse!
+  updateEinvoiceProviderConfig(input: UpdateEInvoiceProviderConfigInput!): EInvoiceProviderConfigModelResponse!
+  updateEinvoiceProviderCredentials(configId: ID!, credentials: String!): BooleanResponse!
   updateLanguage(id: ID!, input: CreateLanguageInput!): LanguageModelResponse!
+  updateLicenseStatus(id: ID!, status: String!): PlatformLicenseModelResponse!
   updateMenuCategory(id: ID!, input: UpdateMenuCategoryInput!): BrandMenuCategoryModelResponse!
   updateMenuItem(id: ID!, input: UpdateMenuItemInput!): BrandMenuItemModelResponse!
   updateRegion(id: ID!, input: CreateRegionInput!): RegionModelResponse!
+  updateRolePermissions(permissions: [String!]!, roleId: ID!): RoleModelResponse!
+  upsertNotificationChannel(input: UpsertNotificationChannelInput!): NotificationChannelResponse!
+  upsertNotificationPreference(input: UpsertNotificationPreferenceInput!): NotificationPreferenceResponse!
+}
+
+type NotificationChannelListResponse {
+  error: ErrorPayload
+  success: NotificationChannelListResponseSuccess
+}
+
+type NotificationChannelListResponseSuccess {
+  code: String!
+  data: [NotificationChannelModel!]!
+  message: String!
+  requestId: String
+  totalCount: Int
+}
+
+type NotificationChannelModel {
+  channelType: String!
+  config: JSON!
+  createdAt: DateTime!
+  id: ID!
+  isActive: Boolean!
+  updatedAt: DateTime!
+  userId: String!
+  userType: String!
+}
+
+type NotificationChannelResponse {
+  error: ErrorPayload
+  success: NotificationChannelResponseSuccess
+}
+
+type NotificationChannelResponseSuccess {
+  code: String!
+  data: NotificationChannelModel!
+  message: String!
+  requestId: String
+}
+
+type NotificationPreferenceListResponse {
+  error: ErrorPayload
+  success: NotificationPreferenceListResponseSuccess
+}
+
+type NotificationPreferenceListResponseSuccess {
+  code: String!
+  data: [NotificationPreferenceModel!]!
+  message: String!
+  requestId: String
+  totalCount: Int
+}
+
+type NotificationPreferenceModel {
+  channels: [String!]!
+  createdAt: DateTime!
+  eventType: String!
+  id: ID!
+  isEnabled: Boolean!
+  updatedAt: DateTime!
+  userId: String!
+  userType: String!
+}
+
+type NotificationPreferenceResponse {
+  error: ErrorPayload
+  success: NotificationPreferenceResponseSuccess
+}
+
+type NotificationPreferenceResponseSuccess {
+  code: String!
+  data: NotificationPreferenceModel!
+  message: String!
+  requestId: String
 }
 
 type PageInfoModel {
@@ -1401,6 +1894,40 @@ type PageInfoModel {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
   startCursor: String
+}
+
+type PermissionCatalogModel {
+  categories: [PermissionCategoryModel!]!
+  menuStructure: [MenuPermissionNodeModel!]!
+}
+
+type PermissionCatalogResponse {
+  error: ErrorPayload
+  success: PermissionCatalogResponseSuccess
+}
+
+type PermissionCatalogResponseSuccess {
+  code: String!
+  data: PermissionCatalogModel!
+  message: String!
+  requestId: String
+}
+
+type PermissionCategoryModel {
+  category: String!
+  label: PermissionLabelModel!
+  permissions: [PermissionDefinitionModel!]!
+}
+
+type PermissionDefinitionModel {
+  key: String!
+  label: PermissionLabelModel!
+}
+
+type PermissionLabelModel {
+  en: String!
+  ko: String!
+  vi: String!
 }
 
 type PermissionModel {
@@ -1428,6 +1955,7 @@ type PermissionModelListResponseSuccess {
   data: [PermissionModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type PermissionModelResponse {
@@ -1438,6 +1966,27 @@ type PermissionModelResponse {
 type PermissionModelResponseSuccess {
   code: String!
   data: PermissionModel!
+  message: String!
+  requestId: String
+}
+
+type PlatformInfoModel {
+  environment: String!
+  nodeVersion: String!
+  services: PlatformServiceStatusModel!
+  timestamp: String!
+  uptimeSeconds: Int!
+  version: String!
+}
+
+type PlatformInfoModelResponse {
+  error: ErrorPayload
+  success: PlatformInfoModelResponseSuccess
+}
+
+type PlatformInfoModelResponseSuccess {
+  code: String!
+  data: PlatformInfoModel!
   message: String!
   requestId: String
 }
@@ -1469,6 +2018,7 @@ type PlatformLicenseModelListResponseSuccess {
   data: [PlatformLicenseModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type PlatformLicenseModelResponse {
@@ -1505,6 +2055,7 @@ type PlatformPolicyModelListResponseSuccess {
   data: [PlatformPolicyModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type PlatformPolicyModelResponse {
@@ -1517,6 +2068,11 @@ type PlatformPolicyModelResponseSuccess {
   data: PlatformPolicyModel!
   message: String!
   requestId: String
+}
+
+type PlatformServiceStatusModel {
+  database: String!
+  redis: String!
 }
 
 type PricePolicyModel {
@@ -1543,6 +2099,7 @@ type PricePolicyModelListResponseSuccess {
   data: [PricePolicyModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type PricePolicyModelResponse {
@@ -1581,6 +2138,7 @@ type PromotionModelListResponseSuccess {
   data: [PromotionModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type PromotionModelResponse {
@@ -1602,11 +2160,15 @@ type Query {
   authAccount(id: ID!, userType: String!): AuthAccountModelResponse
   authAccounts(skip: Int! = 0, take: Int! = 20, userType: String): AuthAccountModelListResponse!
   branch(id: ID!): BranchModelResponse
-  branches(brandHQId: ID!, skip: Int! = 0, take: Int! = 20): BranchModelListResponse!
+  branches(brandHQId: ID, skip: Int! = 0, take: Int! = 20): BranchModelListResponse!
   brand(id: ID!): BrandProfileModelResponse
   brandHqActiveCapabilities(brandHqId: ID!): StringListResponse!
   brandHqEntitlements(brandHqId: ID!): BrandHqEntitlementModelListResponse!
   brands(distributorId: ID, skip: Int! = 0, take: Int! = 20): BrandProfileModelListResponse!
+  contract(id: ID!): ContractModelResponse!
+  contractActivities(contractId: ID!, skip: Int! = 0, take: Int! = 20): ContractActivityModelListResponse!
+  contractTemplates(contractType: String): ContractTemplateModelListResponse!
+  contracts(contractType: String, partyBId: ID, partyBType: String, skip: Int! = 0, status: String, take: Int! = 20): ContractModelListResponse!
   currencies(skip: Int! = 0, take: Int! = 20): CurrencyModelListResponse!
   currency(id: ID!): CurrencyModelResponse
   deployPackage(id: ID!): DeployPackageModelResponse
@@ -1616,29 +2178,39 @@ type Query {
   distributor(id: ID!): DistributorProfileModelResponse
   distributors(skip: Int! = 0, take: Int! = 20): DistributorProfileModelListResponse!
   eInvoice(id: ID!): EInvoiceModelResponse!
-  eInvoicesByCorporate(corporateId: ID!): EInvoiceModelListResponse!
+  eInvoiceDownloadPdf(id: ID!): EInvoiceDownloadModelResponse!
+  eInvoiceDownloadXml(id: ID!): EInvoiceDownloadModelResponse!
+  eInvoicesByCorporate(corporateId: ID!, skip: Int! = 0, status: String, take: Int! = 20): EInvoiceModelListResponse!
   edgePosTerminal(id: ID!): EdgePosTerminalModelResponse
   edgePosTerminals(branchId: ID!, skip: Int! = 0, take: Int! = 20): EdgePosTerminalModelListResponse!
   effectivePolicy(policyKey: String!, scopeChainJson: String = "{}", startScope: String!): PlatformPolicyModelResponse
+  einvoiceProviderConfig(id: ID!): EInvoiceProviderConfigModelResponse
+  einvoiceProviders: EInvoiceProviderModelListResponse!
   language(id: ID!): LanguageModelResponse
   languages(skip: Int! = 0, take: Int! = 20): LanguageModelListResponse!
   license(id: ID!): PlatformLicenseModelResponse
   licenses(skip: Int! = 0, take: Int! = 20): PlatformLicenseModelListResponse!
   licensesByScope(scopeId: ID!, scopeType: String!): PlatformLicenseModelListResponse!
+  licensesByScopeType(scopeType: String!, skip: Int! = 0, take: Int! = 20): PlatformLicenseModelListResponse!
   me: AuthAccountModelResponse!
   mealCorporate(id: ID!): MealCorporateModelResponse!
   mealCorporates(skip: Int! = 0, take: Int! = 20): MealCorporateModelListResponse!
+  mealDepartment(id: ID!): MealCorporateDepartmentModelResponse!
   mealDepartments(corporateId: ID!): MealCorporateDepartmentModelListResponse!
+  mealEmployee(id: ID!): MealEmployeeModelResponse!
   mealEmployees(corporateId: ID!, skip: Int! = 0, take: Int! = 20): MealEmployeeModelListResponse!
   mealMerchantEnrollment(brandHqId: ID!): MealMerchantEnrollmentModelResponse
   mealMerchantEnrollments(skip: Int! = 0, take: Int! = 20): MealMerchantEnrollmentModelListResponse!
   mealPoliciesByCorporate(corporateId: ID!): MealPolicyModelListResponse!
   mealPolicy(id: ID!): MealPolicyModelResponse!
   mealSettlementBatch(id: ID!): MealSettlementBatchModelResponse!
+  mealSettlementBatches(periodEnd: String, periodStart: String, skip: Int = 0, status: String, take: Int = 50): MealSettlementBatchModelListResponse!
   mealSettlementBatchesByBrand(brandHqId: ID!): MealSettlementBatchModelListResponse!
+  mealSettlementDashboard(batchSkip: Int = 0, batchStatus: String, batchTake: Int = 50, periodEnd: String!, periodStart: String!): SettlementDashboardResponse!
   mealTransaction(id: ID!): MealTransactionModelResponse!
-  mealTransactionsByBrand(brandHqId: ID!, skip: Int! = 0, take: Int! = 20): MealTransactionModelListResponse!
+  mealTransactionsByBrand(brandHqId: ID!, periodEnd: String, periodStart: String, skip: Int! = 0, status: String, take: Int! = 20): MealTransactionModelListResponse!
   mealTransactionsByCorporate(corporateId: ID!, skip: Int! = 0, take: Int! = 20): MealTransactionModelListResponse!
+  mealUnsettledByBrand(periodEnd: String!, periodStart: String!): UnsettledBrandSummaryListResponse!
   mealWallet(id: ID!): MealWalletModelResponse
   mealWalletFundingEntriesByWallet(skip: Int! = 0, take: Int! = 20, walletId: ID!): MealWalletFundingEntryModelListResponse!
   mealWalletsByCorporate(corporateId: ID!, skip: Int! = 0, take: Int! = 20): MealWalletModelListResponse!
@@ -1646,6 +2218,10 @@ type Query {
   menuCategory(id: ID!): BrandMenuCategoryModelResponse
   menuItem(id: ID!): BrandMenuItemModelResponse
   menuItems(brandHQId: ID!, skip: Int! = 0, take: Int! = 20): BrandMenuItemModelListResponse!
+  myNotificationChannels: NotificationChannelListResponse!
+  myNotificationPreferences: NotificationPreferenceListResponse!
+  permissionCatalog: PermissionCatalogResponse!
+  platformInfo: PlatformInfoModelResponse!
   policies(scopeId: ID, scopeType: String!, skip: Int! = 0, take: Int! = 20): PlatformPolicyModelListResponse!
   policy(id: ID!): PlatformPolicyModelResponse
   pricePolicies(brandHQId: ID!, skip: Int! = 0, take: Int! = 20): PricePolicyModelListResponse!
@@ -1660,6 +2236,7 @@ type Query {
   rbacUserAssignments(userId: ID!, userType: String!): UserRoleAssignmentModelListResponse!
   region(id: ID!): RegionModelResponse
   regions(skip: Int! = 0, take: Int! = 20): RegionModelListResponse!
+  revenueSummary(periodEnd: String!, periodStart: String!): RevenueSummaryModelResponse!
   syncEventConnection(after: String, dateFrom: DateTime, dateTo: DateTime, edgePosId: String, eventType: String, first: Int! = 50): SyncEventConnectionModelResponse!
   syncStatus(edgePosId: ID!): SyncStatusModelResponse!
 }
@@ -1686,6 +2263,7 @@ type RegionModelListResponseSuccess {
   data: [RegionModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type RegionModelResponse {
@@ -1709,18 +2287,46 @@ input RegisterEdgePosInput {
   terminalRole: String
 }
 
+type RevenueSummaryModel {
+  estimatedCommissionVnd: BigInt!
+  overdueCreditVnd: BigInt!
+  pendingBatchCount: Int!
+  pendingSettlementVnd: BigInt!
+  periodEnd: String!
+  periodStart: String!
+  settledCommissionVnd: BigInt!
+  totalCommissionVnd: BigInt!
+  totalTransactionCount: Int!
+  totalTransactionVnd: BigInt!
+  unsettledTransactionCount: Int!
+  unsettledTransactionVnd: BigInt!
+}
+
+type RevenueSummaryModelResponse {
+  error: ErrorPayload
+  success: RevenueSummaryModelResponseSuccess
+}
+
+type RevenueSummaryModelResponseSuccess {
+  code: String!
+  data: RevenueSummaryModel!
+  message: String!
+  requestId: String
+}
+
 type RoleModel {
   createdAt: DateTime!
   description: String
   descriptionEn: String
   descriptionKo: String
-  hierarchyLevel: Int!
   id: ID!
   isSystem: Boolean!
-  nameEn: String
-  nameKo: String
+  permissionVersion: Int!
+  permissions: JSON!
   roleCode: String!
   roleName: String!
+  roleNameEn: String
+  roleNameKo: String
   scope: String!
   updatedAt: DateTime!
 }
@@ -1735,6 +2341,7 @@ type RoleModelListResponseSuccess {
   data: [RoleModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type RoleModelResponse {
@@ -1764,6 +2371,7 @@ type RolePermissionPairModelListResponseSuccess {
   data: [RolePermissionPairModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 input RunMealSettlementBatchInput {
@@ -1787,6 +2395,25 @@ input SetMealMerchantSettlementAccountInput {
   bankCode: String!
   enrollmentId: ID!
   taxCode: String!
+}
+
+type SettlementDashboardModel {
+  batchTotalCount: Int!
+  batches: [MealSettlementBatchRef!]!
+  revenue: RevenueSummaryModel!
+  unsettledBrands: [UnsettledBrandSummaryModel!]!
+}
+
+type SettlementDashboardResponse {
+  error: ErrorPayload
+  success: SettlementDashboardResponseSuccess
+}
+
+type SettlementDashboardResponseSuccess {
+  code: String!
+  data: SettlementDashboardModel!
+  message: String!
+  requestId: String
 }
 
 type StringListResponse {
@@ -1870,6 +2497,27 @@ input TopUpMealWalletInput {
   walletId: ID!
 }
 
+type UnsettledBrandSummaryListResponse {
+  error: ErrorPayload
+  success: UnsettledBrandSummaryListResponseSuccess
+}
+
+type UnsettledBrandSummaryListResponseSuccess {
+  code: String!
+  data: [UnsettledBrandSummaryModel!]!
+  message: String!
+  requestId: String
+  totalCount: Int
+}
+
+type UnsettledBrandSummaryModel {
+  brandHqId: ID!
+  brandName: String
+  count: Int!
+  oldestTransactionDate: String
+  totalVnd: BigInt!
+}
+
 input UpdateAuthAccountInput {
   displayName: String
   email: String
@@ -1917,6 +2565,19 @@ input UpdateDistributorInput {
   territoryName: String
 }
 
+input UpdateEInvoiceProviderConfigInput {
+  baseUrl: String
+  credentialsVaultRef: String
+  defaultCurrencyCode: String
+  defaultFormNo: String
+  defaultPaymentMethod: String
+  defaultSerialPrefix: String
+  defaultSerialType: String
+  failoverProviderId: ID
+  id: ID!
+  isActive: Boolean
+}
+
 input UpdateMealCorporateInput {
   companyName: String
   creditLimitVnd: BigInt
@@ -1924,6 +2585,22 @@ input UpdateMealCorporateInput {
   monthlyBudgetVnd: BigInt
   status: String
   taxCode: String
+}
+
+input UpdateMealPolicyInput {
+  allowSplitPayment: Boolean
+  allowedDayOfWeek: [Int!]
+  allowedMealTypes: [String!]
+  allowedTimeEnd: String
+  allowedTimeStart: String
+  appliesToDepartmentIds: [String!]
+  appliesToRoleCodes: [String!]
+  dailyLimitVnd: BigInt
+  effectiveFrom: DateTime
+  effectiveTo: DateTime
+  maxPerTransactionVnd: BigInt
+  merchantCategoryRestrictions: [String!]
+  policyName: String
 }
 
 input UpdateMenuCategoryInput {
@@ -1961,12 +2638,23 @@ input UpdateRoleInput {
   description: String
   descriptionEn: String
   descriptionKo: String
-  hierarchyLevel: Int
-  nameEn: String
-  nameKo: String
   roleId: ID!
   roleName: String
+  roleNameEn: String
+  roleNameKo: String
   scope: String
+}
+
+input UpsertNotificationChannelInput {
+  channelType: String!
+  config: JSON
+  isActive: Boolean
+}
+
+input UpsertNotificationPreferenceInput {
+  channels: [String!]!
+  eventType: String!
+  isEnabled: Boolean
 }
 
 type UserRoleAssignmentModel {
@@ -1995,6 +2683,7 @@ type UserRoleAssignmentModelListResponseSuccess {
   data: [UserRoleAssignmentModel!]!
   message: String!
   requestId: String
+  totalCount: Int
 }
 
 type UserRoleAssignmentModelResponse {

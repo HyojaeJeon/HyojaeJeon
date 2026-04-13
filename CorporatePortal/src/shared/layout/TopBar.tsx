@@ -1,22 +1,24 @@
 'use client';
 
 import { Search, Sun, Moon, Monitor, Languages, Bell, LogOut, User as UserIcon, Shield } from 'lucide-react';
-import { useTheme } from 'next-themes';
-import { useEffect, useRef, useState } from 'react';
+import { useTheme } from '@providers/ThemeProvider';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input } from '@platform/shared-ui';
 import { useI18n } from '@i18n/I18nProvider';
 import { SUPPORTED_LOCALES, type Locale } from '@i18n/messages';
 import { cn } from '@shared/utils/cn';
-import { useAppDispatch, useAppSelector } from '@store/index';
-import { clearSession } from '@store/slices/authSlice';
-import { setAuthToken } from '@graphql/client';
+import { logoutSession } from '@auth/session';
+import { useAppSelector } from '@store/index';
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const mounted = useSyncExternalStore(
+    () => () => undefined,
+    () => true,
+    () => false,
+  );
   const current = mounted ? theme ?? 'system' : 'system';
   const icon = !mounted ? (
     <Monitor size={15} />
@@ -114,7 +116,6 @@ function LocaleToggle() {
 function ProfileMenu() {
   const { t } = useI18n();
   const router = useRouter();
-  const dispatch = useAppDispatch();
   const user = useAppSelector((s) => s.auth.user);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
@@ -133,10 +134,8 @@ function ProfileMenu() {
   const initials = (displayName || 'CP').slice(0, 2).toUpperCase();
 
   const handleLogout = () => {
-    setAuthToken(null);
-    dispatch(clearSession());
     setOpen(false);
-    router.push('/login');
+    void logoutSession();
   };
 
   const handleLogin = () => {

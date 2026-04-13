@@ -1,4 +1,4 @@
-import { DeployPackageListScreen } from '@screens/deploy-package-list-screen';
+import { DeployPackageListScreen } from '@screens/deployPackageListScreen';
 
 export default function Page() {
   return <DeployPackageListScreen />;

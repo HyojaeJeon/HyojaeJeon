@@ -1,2 +1,2 @@
-import { LicenseDetailScreen } from '@screens/license-detail-screen';
+import { LicenseDetailScreen } from '@screens/licenseDetailScreen';
 export default function Page() { return <LicenseDetailScreen />; }

@@ -20,11 +20,14 @@ export const PERMISSIONS = {
   SETTLEMENT_READ: 'corporate.settlement.read',
   SETTLEMENT_RUN: 'corporate.settlement.run',
   MERCHANT_READ: 'corporate.merchant.read',
-  MERCHANT_WRITE: 'corporate.merchant.write',
+  MERCHANT_ALLOW_WRITE: 'corporate.merchant.allow.write',
   INVOICE_READ: 'corporate.invoice.read',
-  INVOICE_WRITE: 'corporate.invoice.write',
   INVOICE_REQUEST: 'corporate.invoice.request',
   INVOICE_DISPUTE: 'corporate.invoice.dispute',
+  REPORT_READ: 'corporate.report.read',
+  AUDIT_READ: 'corporate.audit.read',
+  ADMIN_MANAGE: 'corporate.admin.manage',
+  FUNDING_READ_LIMIT: 'corporate.funding.read.limit',
 } as const;
 
 export type PermissionKey = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

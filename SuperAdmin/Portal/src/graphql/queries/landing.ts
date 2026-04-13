@@ -52,7 +52,7 @@ export interface DeployOverviewData {
 export const GOVERNANCE_OVERVIEW_QUERY = gql`
   query GovernanceOverview {
     licenses(skip: 0, take: 10) {
-      success { data { id licenseCode licenseType status scopeType effectiveTo } }
+      success { data { id licenseCode licenseType status scopeType effectiveTo } totalCount }
     }
     rbacRoles {
       success { data { id roleCode scope } }
@@ -61,7 +61,7 @@ export const GOVERNANCE_OVERVIEW_QUERY = gql`
       success { data { id permissionKey domain } }
     }
     authAccounts(skip: 0, take: 10) {
-      success { data { id loginId userType status } }
+      success { data { id loginId userType status } totalCount }
     }
   }
 `;

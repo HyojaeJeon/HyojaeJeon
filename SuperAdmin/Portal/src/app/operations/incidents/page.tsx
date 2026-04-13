@@ -1,2 +1,2 @@
-import { OperationsIncidentsScreen } from '@screens/operations-sub-screens';
+import { OperationsIncidentsScreen } from '@screens/operationsSubScreens';
 export default function Page() { return <OperationsIncidentsScreen />; }

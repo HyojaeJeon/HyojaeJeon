@@ -1,2 +1,2 @@
-import { CorporateCreateScreen } from '@screens/corporate-create-screen';
+import { CorporateCreateScreen } from '@screens/corporateCreateScreen';
 export default function Page() { return <CorporateCreateScreen />; }

@@ -20,6 +20,7 @@ export function useHasPermission(
   mode: 'all' | 'any' = 'all',
 ): boolean {
   const user = useAppSelector((s) => s.auth.user);
+  // React Compiler로 대체 불가: Redux selector 결과의 참조 안정성이 보장되지 않아 수동 메모이제이션 필요
   return useMemo(() => {
     const list = Array.isArray(keys) ? keys : [keys];
     if (list.length === 0) return true;

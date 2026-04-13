@@ -226,6 +226,7 @@ async function main() {
   // 기존 hardcoded RoleCode enum(8개)을 DB Role 로 이전.
   // ─────────────────────────────────────────────
   await seedRbac();
+  await seedGovernanceMock();
 
   console.log('Seed completed.');
 }
@@ -237,134 +238,175 @@ async function main() {
  *   3. 역할별 sensible default 매핑
  */
 async function seedRbac() {
-  // 한국어: name = 베트남어 기본, nameKo / nameEn 은 선택 라벨. description 도 3쌍.
-  // Tiếng Việt: name là tiếng Việt mặc định, nameKo / nameEn là nhãn bổ sung.
   const legacyRoles: Array<{
     code: string;
-    name: string; // vi
-    nameKo: string;
-    nameEn: string;
+    roleName: string;
+    roleNameKo: string;
+    roleNameEn: string;
     scope: string;
-    level: number;
-    description: string; // vi
+    description: string;
     descriptionKo: string;
     descriptionEn: string;
   }> = [
     {
       code: 'PLATFORM_SUPER_ADMIN',
-      name: 'Quản trị viên tối cao nền tảng',
-      nameKo: '플랫폼 최고 관리자',
-      nameEn: 'Platform Super Admin',
+      roleName: 'Quản trị viên tối cao nền tảng',
+      roleNameKo: '플랫폼 최고 관리자',
+      roleNameEn: 'Platform Super Admin',
       scope: 'PLATFORM',
-      level: 100,
       description: 'Toàn quyền trên toàn bộ nền tảng.',
       descriptionKo: '플랫폼 전체에 대한 최상위 권한.',
       descriptionEn: 'Full authority across the entire platform.',
     },
     {
       code: 'PLATFORM_SUPPORT_ENGINEER',
-      name: 'Kỹ sư hỗ trợ nền tảng',
-      nameKo: '플랫폼 기술 지원 엔지니어',
-      nameEn: 'Platform Support Engineer',
+      roleName: 'Kỹ sư hỗ trợ nền tảng',
+      roleNameKo: '플랫폼 기술 지원 엔지니어',
+      roleNameEn: 'Platform Support Engineer',
       scope: 'PLATFORM',
-      level: 90,
       description: 'Quyền chỉ đọc để hỗ trợ vận hành.',
       descriptionKo: '운영 지원을 위한 읽기 전용 권한.',
       descriptionEn: 'Read-only access for operational support.',
     },
     {
       code: 'REGIONAL_DISTRIBUTOR_ADMIN',
-      name: 'Quản trị viên nhà phân phối khu vực',
-      nameKo: '지역 대리점 관리자',
-      nameEn: 'Regional Distributor Admin',
+      roleName: 'Quản trị viên nhà phân phối khu vực',
+      roleNameKo: '지역 대리점 관리자',
+      roleNameEn: 'Regional Distributor Admin',
       scope: 'PLATFORM',
-      level: 80,
       description: 'Quản lý các thương hiệu thuộc khu vực phân phối.',
       descriptionKo: '담당 지역의 브랜드를 관리.',
       descriptionEn: 'Manages brands within an assigned distribution region.',
     },
     {
       code: 'BRAND_OWNER',
-      name: 'Chủ thương hiệu',
-      nameKo: '브랜드 소유자',
-      nameEn: 'Brand Owner',
+      roleName: 'Chủ thương hiệu',
+      roleNameKo: '브랜드 소유자',
+      roleNameEn: 'Brand Owner',
       scope: 'BRAND_HQ',
-      level: 70,
       description: 'Toàn quyền trên một thương hiệu.',
       descriptionKo: '단일 브랜드에 대한 전체 권한.',
       descriptionEn: 'Full ownership of a single brand.',
     },
     {
       code: 'BRAND_HQ_ADMIN',
-      name: 'Quản trị viên trụ sở thương hiệu',
-      nameKo: '브랜드 본사 관리자',
-      nameEn: 'Brand HQ Admin',
+      roleName: 'Quản trị viên trụ sở thương hiệu',
+      roleNameKo: '브랜드 본사 관리자',
+      roleNameEn: 'Brand HQ Admin',
       scope: 'BRAND_HQ',
-      level: 60,
       description: 'Quản lý vận hành trụ sở thương hiệu.',
       descriptionKo: '브랜드 본사의 운영을 관리.',
       descriptionEn: 'Administers brand headquarters operations.',
     },
     {
       code: 'BRAND_HQ_OPERATOR',
-      name: 'Nhân viên vận hành trụ sở thương hiệu',
-      nameKo: '브랜드 본사 운영자',
-      nameEn: 'Brand HQ Operator',
+      roleName: 'Nhân viên vận hành trụ sở thương hiệu',
+      roleNameKo: '브랜드 본사 운영자',
+      roleNameEn: 'Brand HQ Operator',
       scope: 'BRAND_HQ',
-      level: 50,
       description: 'Vận hành danh mục và báo cáo hàng ngày của thương hiệu.',
       descriptionKo: '브랜드 카탈로그와 리포트 일상 운영.',
       descriptionEn: 'Day-to-day brand catalog and reporting operations.',
     },
     {
       code: 'BRANCH_MANAGER',
-      name: 'Quản lý chi nhánh',
-      nameKo: '지점 매니저',
-      nameEn: 'Branch Manager',
+      roleName: 'Quản lý chi nhánh',
+      roleNameKo: '지점 매니저',
+      roleNameEn: 'Branch Manager',
       scope: 'BRANCH',
-      level: 40,
       description: 'Quản lý vận hành tại chi nhánh đơn lẻ.',
       descriptionKo: '단일 지점의 운영 관리.',
       descriptionEn: 'Manages operations at a single branch.',
     },
     {
       code: 'STORE_OPERATOR',
-      name: 'Nhân viên cửa hàng',
-      nameKo: '매장 운영자',
-      nameEn: 'Store Operator',
+      roleName: 'Nhân viên cửa hàng',
+      roleNameKo: '매장 운영자',
+      roleNameEn: 'Store Operator',
       scope: 'BRANCH',
-      level: 30,
       description: 'Vận hành POS tại cửa hàng.',
       descriptionKo: '매장 POS 운영.',
       descriptionEn: 'Operates in-store POS.',
     },
+    // SP-B3: Corporate Role Templates
+    {
+      code: 'CORPORATE_OWNER',
+      roleName: 'Chủ sở hữu công ty',
+      roleNameKo: '기업 소유자',
+      roleNameEn: 'Corporate Owner',
+      scope: 'CORPORATE',
+      description: 'Toàn quyền quản trị công ty.',
+      descriptionKo: '기업 전체 관리 권한.',
+      descriptionEn: 'Full corporate authority.',
+    },
+    {
+      code: 'CORPORATE_HR_ADMIN',
+      roleName: 'Quản trị nhân sự công ty',
+      roleNameKo: '기업 인사 관리자',
+      roleNameEn: 'Corporate HR Admin',
+      scope: 'CORPORATE',
+      description: 'Quản lý nhân viên và phòng ban.',
+      descriptionKo: '임직원 및 부서 관리.',
+      descriptionEn: 'HR management for employees and departments.',
+    },
+    {
+      code: 'CORPORATE_FINANCE_ADMIN',
+      roleName: 'Quản trị tài chính công ty',
+      roleNameKo: '기업 재무 관리자',
+      roleNameEn: 'Corporate Finance Admin',
+      scope: 'CORPORATE',
+      description: 'Quản lý ví, giao dịch và đối soát.',
+      descriptionKo: '지갑, 거래, 정산 관리.',
+      descriptionEn: 'Finance management for wallets, transactions, and settlements.',
+    },
+    {
+      code: 'CORPORATE_VIEWER',
+      roleName: 'Người xem công ty',
+      roleNameKo: '기업 뷰어',
+      roleNameEn: 'Corporate Viewer',
+      scope: 'CORPORATE',
+      description: 'Quyền chỉ đọc dữ liệu công ty.',
+      descriptionKo: '기업 데이터 읽기 전용.',
+      descriptionEn: 'Read-only access to corporate data.',
+    },
   ];
 
+  // Role.permissions JSON — 와일드카드 기반 빠른 권한 확인
+  const rolePermissionsJson: Record<string, string[]> = {
+    PLATFORM_SUPER_ADMIN: ['*'],
+    PLATFORM_SUPPORT_ENGINEER: ['platform:*'],
+    CORPORATE_OWNER: ['corporate:*', 'corp_policies:*', 'corp_employees:*', 'corp_wallets:*', 'settlements:*', 'einvoices:*', 'transactions:*', 'einvoice_providers:read'],
+    CORPORATE_HR_ADMIN: ['corp_employees:*', 'corp_policies:read'],
+    CORPORATE_FINANCE_ADMIN: ['corp_wallets:*', 'settlements:*', 'einvoices:*', 'transactions:read'],
+    CORPORATE_VIEWER: ['corporate:read', 'corp_employees:read', 'corp_policies:read', 'corp_wallets:read', 'transactions:read'],
+  };
+
   for (const r of legacyRoles) {
+    const jsonPerms = rolePermissionsJson[r.code] ?? [];
     await prisma.role.upsert({
       where: { roleCode: r.code },
       update: {
-        roleName: r.name,
-        nameKo: r.nameKo,
-        nameEn: r.nameEn,
+        roleName: r.roleName,
+        roleNameKo: r.roleNameKo,
+        roleNameEn: r.roleNameEn,
         scope: r.scope,
-        hierarchyLevel: r.level,
         isSystem: true,
         description: r.description,
         descriptionKo: r.descriptionKo,
         descriptionEn: r.descriptionEn,
+        permissions: jsonPerms,
       },
       create: {
         roleCode: r.code,
-        roleName: r.name,
-        nameKo: r.nameKo,
-        nameEn: r.nameEn,
+        roleName: r.roleName,
+        roleNameKo: r.roleNameKo,
+        roleNameEn: r.roleNameEn,
         scope: r.scope,
-        hierarchyLevel: r.level,
         isSystem: true,
         description: r.description,
         descriptionKo: r.descriptionKo,
         descriptionEn: r.descriptionEn,
+        permissions: jsonPerms,
       },
     });
   }
@@ -439,6 +481,16 @@ async function seedRbac() {
     { key: 'corporate.invoice.write',            domain: 'corporate', name: 'Phát hành hóa đơn điện tử',      nameKo: '통합 세금계산서 발급',       nameEn: 'Issue e-invoice',             desc: 'Tạo và phát hành hóa đơn điện tử (SuperAdmin).', descKo: '통합 전자세금계산서 생성/발급(SuperAdmin).', descEn: 'Create and issue e-invoices (SuperAdmin).' },
     { key: 'corporate.invoice.request',          domain: 'corporate', name: 'Yêu cầu phát hành hóa đơn',      nameKo: '세금계산서 발행 요청',       nameEn: 'Request e-invoice',           desc: 'Công ty yêu cầu phát hành hóa đơn điện tử.',   descKo: '기업의 세금계산서 발행 요청.',   descEn: 'Corporate requests e-invoice issuance.' },
     { key: 'corporate.invoice.dispute',          domain: 'corporate', name: 'Khiếu nại hóa đơn',              nameKo: '세금계산서 이의 제기',       nameEn: 'Dispute e-invoice',           desc: 'Công ty khiếu nại hóa đơn điện tử.',           descKo: '기업의 세금계산서 이의 제기.',   descEn: 'Corporate disputes e-invoice.' },
+    // SP-B1: 추가 Corporate 권한
+    { key: 'corporate.merchant.allow.write',     domain: 'corporate', name: 'Kiểm soát phê duyệt gian hàng',    nameKo: '가맹점 승인 제어',            nameEn: 'Merchant approval control',   desc: 'Cho phép / từ chối gian hàng tham gia chương trình voucher.', descKo: '가맹점 식권 프로그램 참여 승인/거절.', descEn: 'Allow / deny merchant participation in voucher program.' },
+    { key: 'corporate.report.read',              domain: 'corporate', name: 'Xem báo cáo',                      nameKo: '리포트 조회',                 nameEn: 'Read reports',                desc: 'Xem báo cáo sử dụng voucher bữa ăn.',         descKo: '식권 사용 리포트 조회.',        descEn: 'Read meal voucher usage reports.' },
+    { key: 'corporate.audit.read',               domain: 'corporate', name: 'Xem nhật ký kiểm toán nội bộ',     nameKo: '내부 감사 로그 조회',          nameEn: 'Read internal audit log',     desc: 'Xem nhật ký kiểm toán nội bộ công ty.',        descKo: '기업 내부 감사 로그 조회.',      descEn: 'Read corporate internal audit log.' },
+    { key: 'corporate.admin.manage',             domain: 'corporate', name: 'Quản lý quản trị viên công ty',     nameKo: '기업 관리자 관리',            nameEn: 'Manage corporate admins',     desc: 'Thêm / sửa / xóa quản trị viên công ty.',      descKo: '기업 관리자 추가·수정·삭제.',    descEn: 'Add, update, delete corporate admin users.' },
+    { key: 'corporate.funding.read.limit',       domain: 'corporate', name: 'Xem hạn mức',                      nameKo: '한도 조회',                   nameEn: 'Read funding limit',          desc: 'Xem hạn mức tài trợ / tín dụng.',              descKo: '펀딩/신용 한도 조회.',          descEn: 'Read funding and credit limits.' },
+    // SP-B8: SA-only 펀딩 권한 (platform 네임스페이스)
+    { key: 'platform.corporate.fundingpolicy.write', domain: 'platform', name: 'Gán mô hình tài trợ',           nameKo: '펀딩 모델 할당',              nameEn: 'Assign funding model',        desc: 'Gán hoặc thay đổi mô hình tài trợ cho công ty.', descKo: '기업 펀딩 모델 할당/변경.',     descEn: 'Assign or change corporate funding model.' },
+    { key: 'platform.corporate.credit.assess.write', domain: 'platform', name: 'Đánh giá tín dụng',             nameKo: '신용 평가 갱신',              nameEn: 'Update credit assessment',    desc: 'Cập nhật đánh giá tín dụng cho công ty.',       descKo: '기업 신용 평가 갱신.',          descEn: 'Update corporate credit assessment.' },
+    { key: 'platform.corporate.deposit.approve',     domain: 'platform', name: 'Duyệt nạp tiền ký quỹ',         nameKo: '선불 예치금 승인',            nameEn: 'Approve prepaid deposit',     desc: 'Duyệt yêu cầu nạp tiền ký quỹ của công ty.',   descKo: '기업 선불 예치금 입금 승인.',    descEn: 'Approve corporate prepaid deposit request.' },
   ];
 
   for (const p of SYSTEM_PERMISSIONS) {
@@ -493,6 +545,10 @@ async function seedRbac() {
       'corporate.transaction.read',
       'corporate.settlement.read',
       'corporate.merchant.read',
+      // SP-B9: SA-only 펀딩 권한 (Support Engineer에게도 부여)
+      'platform.corporate.fundingpolicy.write',
+      'platform.corporate.credit.assess.write',
+      'platform.corporate.deposit.approve',
     ],
     REGIONAL_DISTRIBUTOR_ADMIN: [
       'distributor.profile.read',
@@ -536,6 +592,62 @@ async function seedRbac() {
       'brand.catalog.read',
       'edgepos.terminal.read',
       'corporate.transaction.authorize',
+    ],
+    // ────────────────────────────────────────────────────────
+    // SP-B4: Corporate Role → Permission 매핑
+    // SP-B10: CORPORATE_OWNER / CORPORATE_HR_ADMIN / CORPORATE_FINANCE_ADMIN / CORPORATE_VIEWER 는
+    //         절대로 platform.corporate.* 권한 (SP-B8 의 3개) 을 받아서는 안 된다.
+    //         platform.corporate.fundingpolicy.write, platform.corporate.credit.assess.write,
+    //         platform.corporate.deposit.approve 는 PLATFORM_SUPER_ADMIN / PLATFORM_SUPPORT_ENGINEER 전용이다.
+    // ────────────────────────────────────────────────────────
+    CORPORATE_OWNER: [
+      'corporate.profile.read', 'corporate.profile.write',
+      'corporate.department.read', 'corporate.department.write',
+      'corporate.employee.read', 'corporate.employee.write',
+      'corporate.wallet.read', 'corporate.wallet.write', 'corporate.wallet.fund', 'corporate.wallet.topup',
+      'corporate.policy.read', 'corporate.policy.write',
+      'corporate.transaction.read', 'corporate.transaction.authorize', 'corporate.transaction.reverse',
+      'corporate.settlement.read', 'corporate.settlement.run',
+      'corporate.merchant.read', 'corporate.merchant.enroll', 'corporate.merchant.activate',
+      'corporate.merchant.commission.write', 'corporate.merchant.account.write',
+      'corporate.merchant.allow.write',
+      'corporate.invoice.read', 'corporate.invoice.request', 'corporate.invoice.dispute',
+      'corporate.report.read',
+      'corporate.audit.read',
+      'corporate.admin.manage',
+      'corporate.funding.read.limit',
+    ],
+    CORPORATE_HR_ADMIN: [
+      'corporate.profile.read',
+      'corporate.department.read', 'corporate.department.write',
+      'corporate.employee.read', 'corporate.employee.write',
+      'corporate.wallet.read', 'corporate.wallet.write', 'corporate.wallet.fund',
+      'corporate.policy.read',
+      'corporate.report.read',
+      'corporate.audit.read',
+    ],
+    CORPORATE_FINANCE_ADMIN: [
+      'corporate.profile.read',
+      'corporate.wallet.read', 'corporate.wallet.fund', 'corporate.wallet.topup',
+      'corporate.transaction.read', 'corporate.transaction.authorize', 'corporate.transaction.reverse',
+      'corporate.settlement.read', 'corporate.settlement.run',
+      'corporate.merchant.read', 'corporate.merchant.commission.write', 'corporate.merchant.account.write',
+      'corporate.invoice.read', 'corporate.invoice.request', 'corporate.invoice.dispute',
+      'corporate.report.read',
+      'corporate.funding.read.limit',
+    ],
+    CORPORATE_VIEWER: [
+      'corporate.profile.read',
+      'corporate.department.read',
+      'corporate.employee.read',
+      'corporate.wallet.read',
+      'corporate.policy.read',
+      'corporate.transaction.read',
+      'corporate.settlement.read',
+      'corporate.merchant.read',
+      'corporate.invoice.read',
+      'corporate.report.read',
+      'corporate.funding.read.limit',
     ],
   };
 
@@ -587,6 +699,698 @@ async function seedRbac() {
   console.log(
     `RBAC seed: ${legacyRoles.length} roles, ${SYSTEM_PERMISSIONS.length} permissions, ${Object.values(grants).reduce((a, b) => a + b.length, 0)} role-permission links, ${seedAssignments.length} bootstrap assignments`,
   );
+}
+
+// ─────────────────────────────────────────────
+// Governance Hub 테스트용 Mock 데이터
+// ─────────────────────────────────────────────
+async function seedGovernanceMock() {
+  const passwordHash = await bcrypt.hash('test1234!', 12);
+
+  // ── Distributors ──
+  const dist1 = await prisma.distributorProfile.upsert({
+    where: { uq_distributor_country_code: { countryCode: 'VN', distributorCode: 'DIST-VN-001' } },
+    update: {},
+    create: {
+      distributorCode: 'DIST-VN-001',
+      companyName: 'Saigon Distribution Co.',
+      legalName: 'Saigon Distribution Co., Ltd.',
+      businessNumber: 'VN-BIZ-0001',
+      countryCode: 'VN',
+      territoryName: 'Ho Chi Minh City',
+      defaultLanguageCode: 'vi-VN',
+      status: 'ACTIVE',
+      contactName: 'Nguyen Van A',
+      contactEmail: 'contact@saigondist.vn',
+      contactPhone: '+84-28-1234-5678',
+    },
+  });
+
+  const dist2 = await prisma.distributorProfile.upsert({
+    where: { uq_distributor_country_code: { countryCode: 'KR', distributorCode: 'DIST-KR-001' } },
+    update: {},
+    create: {
+      distributorCode: 'DIST-KR-001',
+      companyName: '서울유통 주식회사',
+      legalName: '서울유통 주식회사',
+      businessNumber: 'KR-BIZ-0001',
+      countryCode: 'KR',
+      territoryName: 'Seoul Metropolitan',
+      defaultLanguageCode: 'ko-KR',
+      status: 'ACTIVE',
+      contactName: '김유통',
+      contactEmail: 'contact@seouldist.kr',
+      contactPhone: '+82-2-1234-5678',
+    },
+  });
+
+  const dist3 = await prisma.distributorProfile.upsert({
+    where: { uq_distributor_country_code: { countryCode: 'VN', distributorCode: 'DIST-VN-002' } },
+    update: {},
+    create: {
+      distributorCode: 'DIST-VN-002',
+      companyName: 'Hanoi Foods Distribution',
+      countryCode: 'VN',
+      territoryName: 'Hanoi',
+      defaultLanguageCode: 'vi-VN',
+      status: 'SUSPENDED',
+      contactName: 'Tran Van B',
+      contactEmail: 'contact@hanoidist.vn',
+    },
+  });
+
+  // ── Brands ──
+  const brand1 = await prisma.brandProfile.upsert({
+    where: { brandCode: 'BRD-TASTY-001' },
+    update: {},
+    create: {
+      distributorId: dist1.id,
+      brandCode: 'BRD-TASTY-001',
+      brandName: 'Tasty Burger Vietnam',
+      countryCode: 'VN',
+      defaultLanguageCode: 'vi-VN',
+      contactName: 'Le Thi C',
+      contactEmail: 'admin@tastyburger.vn',
+      status: 'ACTIVE',
+    },
+  });
+
+  const brand2 = await prisma.brandProfile.upsert({
+    where: { brandCode: 'BRD-HAPPY-001' },
+    update: {},
+    create: {
+      distributorId: dist1.id,
+      brandCode: 'BRD-HAPPY-001',
+      brandName: 'Happy Pizza Saigon',
+      countryCode: 'VN',
+      defaultLanguageCode: 'vi-VN',
+      contactName: 'Pham Van D',
+      contactEmail: 'admin@happypizza.vn',
+      status: 'ACTIVE',
+    },
+  });
+
+  const brand3 = await prisma.brandProfile.upsert({
+    where: { brandCode: 'BRD-GREEN-001' },
+    update: {},
+    create: {
+      distributorId: dist2.id,
+      brandCode: 'BRD-GREEN-001',
+      brandName: '그린샐러드 코리아',
+      countryCode: 'KR',
+      defaultLanguageCode: 'ko-KR',
+      contactName: '박샐러드',
+      contactEmail: 'admin@greensalad.kr',
+      status: 'ACTIVE',
+    },
+  });
+
+  const brand4 = await prisma.brandProfile.upsert({
+    where: { brandCode: 'BRD-PHO-001' },
+    update: {},
+    create: {
+      distributorId: dist1.id,
+      brandCode: 'BRD-PHO-001',
+      brandName: 'Pho Viet Express',
+      countryCode: 'VN',
+      defaultLanguageCode: 'vi-VN',
+      status: 'SUSPENDED',
+    },
+  });
+
+  // ── Corporates ──
+  const corp1 = await prisma.mealCorporate.upsert({
+    where: { tenantCode: 'CORP-SAMSUNG-VN' },
+    update: {},
+    create: {
+      tenantCode: 'CORP-SAMSUNG-VN',
+      companyName: 'Samsung Vietnam Co., Ltd.',
+      taxCode: '0301234567',
+      fundingModel: 'PREPAID_DEPOSIT',
+      monthlyBudgetVnd: BigInt(500000000),
+      depositBalanceVnd: BigInt(200000000),
+      contactName: 'Kim Samsung',
+      contactEmail: 'hr@samsung.vn',
+      contactPhone: '+84-28-9999-0001',
+      status: 'ACTIVE',
+    },
+  });
+
+  const corp2 = await prisma.mealCorporate.upsert({
+    where: { tenantCode: 'CORP-VINGROUP' },
+    update: {},
+    create: {
+      tenantCode: 'CORP-VINGROUP',
+      companyName: 'Vingroup Joint Stock Company',
+      taxCode: '0100100111',
+      fundingModel: 'POSTPAID_INVOICE',
+      monthlyBudgetVnd: BigInt(1000000000),
+      creditLimitVnd: BigInt(2000000000),
+      contactName: 'Nguyen Vingroup',
+      contactEmail: 'hr@vingroup.net',
+      status: 'ACTIVE',
+    },
+  });
+
+  const corp3 = await prisma.mealCorporate.upsert({
+    where: { tenantCode: 'CORP-FPT' },
+    update: {},
+    create: {
+      tenantCode: 'CORP-FPT',
+      companyName: 'FPT Corporation',
+      taxCode: '0101010101',
+      fundingModel: 'HYBRID',
+      monthlyBudgetVnd: BigInt(300000000),
+      depositBalanceVnd: BigInt(50000000),
+      creditLimitVnd: BigInt(100000000),
+      contactName: 'Tran FPT',
+      contactEmail: 'hr@fpt.com.vn',
+      status: 'SUSPENDED',
+    },
+  });
+
+  // ── Licenses ──
+  const now = new Date();
+  const oneYearLater = new Date(now.getFullYear() + 1, now.getMonth(), now.getDate());
+  const twoYearsLater = new Date(now.getFullYear() + 2, now.getMonth(), now.getDate());
+  const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+
+  const lic1 = await prisma.platformLicense.upsert({
+    where: { licenseCode: 'LIC-RD-DIST1' },
+    update: {},
+    create: {
+      scopeType: 'REGIONAL_DISTRIBUTOR',
+      scopeId: dist1.id,
+      licenseCode: 'LIC-RD-DIST1',
+      licenseType: 'SUBSCRIPTION',
+      status: 'ACTIVE',
+      effectiveFrom: threeMonthsAgo,
+      effectiveTo: oneYearLater,
+      maxBranchCount: 50,
+      maxTerminalCount: 200,
+      allowedCountryCode: 'VN',
+      licensePayloadJson: { tier: 'ENTERPRISE', features: ['ADVANCED_ANALYTICS', 'MULTI_LANGUAGE'] },
+    },
+  });
+
+  const lic2 = await prisma.platformLicense.upsert({
+    where: { licenseCode: 'LIC-RD-DIST2' },
+    update: {},
+    create: {
+      scopeType: 'REGIONAL_DISTRIBUTOR',
+      scopeId: dist2.id,
+      licenseCode: 'LIC-RD-DIST2',
+      licenseType: 'PERPETUAL',
+      status: 'ACTIVE',
+      effectiveFrom: threeMonthsAgo,
+      maxBranchCount: 0,
+      maxTerminalCount: 0,
+      allowedCountryCode: 'KR',
+    },
+  });
+
+  const licBrand1 = await prisma.platformLicense.upsert({
+    where: { licenseCode: 'LIC-BHQ-TASTY' },
+    update: {},
+    create: {
+      scopeType: 'BRAND_HQ',
+      scopeId: brand1.id,
+      licenseCode: 'LIC-BHQ-TASTY',
+      licenseType: 'SUBSCRIPTION',
+      status: 'ACTIVE',
+      effectiveFrom: threeMonthsAgo,
+      effectiveTo: twoYearsLater,
+      maxBranchCount: 10,
+      maxTerminalCount: 20,
+      allowedCountryCode: 'VN',
+      licensePayloadJson: { tier: 'STANDARD' },
+    },
+  });
+
+  const licBrand2 = await prisma.platformLicense.upsert({
+    where: { licenseCode: 'LIC-BHQ-HAPPY' },
+    update: {},
+    create: {
+      scopeType: 'BRAND_HQ',
+      scopeId: brand2.id,
+      licenseCode: 'LIC-BHQ-HAPPY',
+      licenseType: 'TRIAL',
+      status: 'ACTIVE',
+      effectiveFrom: now,
+      effectiveTo: new Date(now.getFullYear(), now.getMonth() + 3, now.getDate()),
+      maxBranchCount: 3,
+      maxTerminalCount: 5,
+      allowedCountryCode: 'VN',
+    },
+  });
+
+  const licBrand3 = await prisma.platformLicense.upsert({
+    where: { licenseCode: 'LIC-BHQ-GREEN' },
+    update: {},
+    create: {
+      scopeType: 'BRAND_HQ',
+      scopeId: brand3.id,
+      licenseCode: 'LIC-BHQ-GREEN',
+      licenseType: 'SUBSCRIPTION',
+      status: 'SUSPENDED',
+      effectiveFrom: threeMonthsAgo,
+      effectiveTo: oneYearLater,
+      maxBranchCount: 5,
+      maxTerminalCount: 10,
+      allowedCountryCode: 'KR',
+    },
+  });
+
+  await prisma.platformLicense.upsert({
+    where: { licenseCode: 'LIC-GLB-PLATFORM' },
+    update: {},
+    create: {
+      scopeType: 'GLOBAL',
+      scopeId: '00000000-0000-0000-0000-000000000000',
+      licenseCode: 'LIC-GLB-PLATFORM',
+      licenseType: 'PERPETUAL',
+      status: 'ACTIVE',
+      effectiveFrom: threeMonthsAgo,
+      maxBranchCount: 0,
+      maxTerminalCount: 0,
+      licensePayloadJson: { platformEdition: 'ENTERPRISE', maxDistributors: 100 },
+    },
+  });
+
+  // ── Entitlements (findFirst + create 패턴) ──
+  const saUser = await prisma.superAdminUser.findFirst({ where: { loginId: 'superadmin' } });
+  const saId = saUser?.id ?? '00000000-0000-0000-0000-000000000000';
+
+  const entitlementSeeds = [
+    { brandHqId: brand1.id, capability: 'POS', status: 'ACTIVE', licenseId: licBrand1.id, contractRef: 'CTR-TASTY-2024-001', expiresAt: null as Date | null },
+    { brandHqId: brand1.id, capability: 'MEAL_TICKET', status: 'TRIAL', licenseId: licBrand1.id, contractRef: null as string | null, expiresAt: oneYearLater },
+    { brandHqId: brand2.id, capability: 'POS', status: 'ACTIVE', licenseId: licBrand2.id, contractRef: null as string | null, expiresAt: null as Date | null },
+    { brandHqId: brand3.id, capability: 'POS', status: 'SUSPENDED', licenseId: licBrand3.id, contractRef: null as string | null, expiresAt: null as Date | null },
+  ];
+  for (const e of entitlementSeeds) {
+    const exists = await prisma.brandHqEntitlement.findFirst({ where: { brandHqId: e.brandHqId, capability: e.capability } });
+    if (!exists) {
+      await prisma.brandHqEntitlement.create({
+        data: {
+          brandHqId: e.brandHqId,
+          capability: e.capability,
+          status: e.status,
+          grantedBySuperAdminId: saId,
+          licenseId: e.licenseId,
+          contractRef: e.contractRef,
+          expiresAt: e.expiresAt,
+        },
+      });
+    }
+  }
+
+  // ── Branches (라이선스 제한 테스트용) ──
+  const branchSeeds = [
+    // brand1 (Tasty Burger) — 3개 지점
+    { brandHQ: brand1, dist: dist1, code: 'BR-TASTY-001', name: 'Tasty Burger Quận 1', type: 'STORE', country: 'VN', tz: 'Asia/Ho_Chi_Minh', lang: 'vi-VN' },
+    { brandHQ: brand1, dist: dist1, code: 'BR-TASTY-002', name: 'Tasty Burger Quận 7', type: 'STORE', country: 'VN', tz: 'Asia/Ho_Chi_Minh', lang: 'vi-VN' },
+    { brandHQ: brand1, dist: dist1, code: 'BR-TASTY-003', name: 'Tasty Burger Thủ Đức', type: 'STORE', country: 'VN', tz: 'Asia/Ho_Chi_Minh', lang: 'vi-VN' },
+    // brand2 (Happy Pizza) — 2개 지점
+    { brandHQ: brand2, dist: dist1, code: 'BR-HAPPY-001', name: 'Happy Pizza Bình Thạnh', type: 'STORE', country: 'VN', tz: 'Asia/Ho_Chi_Minh', lang: 'vi-VN' },
+    { brandHQ: brand2, dist: dist1, code: 'BR-HAPPY-002', name: 'Happy Pizza Tân Bình', type: 'STORE', country: 'VN', tz: 'Asia/Ho_Chi_Minh', lang: 'vi-VN' },
+    // brand3 (그린샐러드) — 2개 지점
+    { brandHQ: brand3, dist: dist2, code: 'BR-GREEN-001', name: '그린샐러드 강남점', type: 'STORE', country: 'KR', tz: 'Asia/Seoul', lang: 'ko-KR' },
+    { brandHQ: brand3, dist: dist2, code: 'BR-GREEN-002', name: '그린샐러드 홍대점', type: 'STORE', country: 'KR', tz: 'Asia/Seoul', lang: 'ko-KR' },
+  ];
+  for (const b of branchSeeds) {
+    await prisma.branch.upsert({
+      where: { branchCode: b.code },
+      update: {},
+      create: {
+        brandHQId: b.brandHQ.id,
+        distributorId: b.dist.id,
+        branchCode: b.code,
+        branchName: b.name,
+        branchType: b.type,
+        countryCode: b.country,
+        timeZoneCode: b.tz,
+        defaultLanguageCode: b.lang,
+        status: 'ACTIVE',
+      },
+    });
+  }
+
+  // ── EdgePos Terminals ──
+  const branches = await prisma.branch.findMany({ where: { brandHQId: brand1.id, deletedAt: null }, take: 2 });
+  for (const br of branches) {
+    for (let t = 1; t <= 2; t++) {
+      const code = `POS-${br.branchCode}-T${t}`;
+      await prisma.edgePosTerminal.upsert({
+        where: { terminalCode: code },
+        update: {},
+        create: {
+          branchId: br.id,
+          terminalCode: code,
+          terminalName: `Terminal ${t} @ ${br.branchName}`,
+          terminalRole: t === 1 ? 'MAIN' : 'SUB',
+          appVersion: '1.0.0',
+          dbVersion: '1.0.0',
+          status: 'ACTIVE',
+        },
+      });
+    }
+  }
+
+  // ── Distributor Users (findFirst + create 패턴 — compound unique) ──
+  const distUsers = [
+    { distributorId: dist1.id, loginId: 'dist-admin-vn', displayName: 'Nguyen Distributor Admin', email: 'admin@saigondist.vn' },
+    { distributorId: dist2.id, loginId: 'dist-admin-kr', displayName: '김유통 관리자', email: 'admin@seouldist.kr' },
+  ];
+  for (const u of distUsers) {
+    const exists = await prisma.distributorUser.findFirst({ where: { distributorId: u.distributorId, loginId: u.loginId } });
+    if (!exists) {
+      await prisma.distributorUser.create({ data: { ...u, passwordHash, status: 'ACTIVE' } });
+    }
+  }
+
+  // ── Brand Admin Users ──
+  const brandUsers = [
+    { brandHQId: brand1.id, loginId: 'brand-tasty-admin', displayName: 'Tasty Burger Admin', email: 'admin@tastyburger.vn' },
+    { brandHQId: brand1.id, loginId: 'brand-tasty-ops', displayName: 'Tasty Ops Manager', email: 'ops@tastyburger.vn' },
+    { brandHQId: brand2.id, loginId: 'brand-happy-admin', displayName: 'Happy Pizza Admin', email: 'admin@happypizza.vn' },
+    { brandHQId: brand3.id, loginId: 'brand-green-admin', displayName: '그린샐러드 관리자', email: 'admin@greensalad.kr' },
+  ];
+  for (const u of brandUsers) {
+    const exists = await prisma.brandAdminUser.findFirst({ where: { brandHQId: u.brandHQId, loginId: u.loginId } });
+    if (!exists) {
+      await prisma.brandAdminUser.create({ data: { ...u, passwordHash, status: 'ACTIVE' } });
+    }
+  }
+
+  // ── Corporate Admin Users ──
+  const corpUsers = [
+    { corporateId: corp1.id, loginId: 'corp-samsung-admin', displayName: 'Samsung HR Admin', email: 'hr-admin@samsung.vn' },
+    { corporateId: corp2.id, loginId: 'corp-vingroup-admin', displayName: 'Vingroup HR Manager', email: 'hr@vingroup.net' },
+  ];
+  for (const u of corpUsers) {
+    const exists = await prisma.corporateAdminUser.findFirst({ where: { corporateId: u.corporateId, loginId: u.loginId } });
+    if (!exists) {
+      await prisma.corporateAdminUser.create({ data: { ...u, passwordHash, status: 'ACTIVE' } });
+    }
+  }
+
+  // ── Corporate Admin UserRoleAssignment (SP-B4: CORPORATE_OWNER 역할 부여) ──
+  const allRolesGov = await prisma.role.findMany();
+  const roleByCodeGov = new Map(allRolesGov.map((r) => [r.roleCode, r.id]));
+  const corporateOwnerRoleId = roleByCodeGov.get('CORPORATE_OWNER');
+
+  if (corporateOwnerRoleId) {
+    const corpRoleAssignments: Array<{ loginId: string; corporateId: string }> = [
+      { loginId: 'corp-samsung-admin', corporateId: corp1.id },
+      { loginId: 'corp-vingroup-admin', corporateId: corp2.id },
+    ];
+    for (const ca of corpRoleAssignments) {
+      const user = await prisma.corporateAdminUser.findFirst({
+        where: { loginId: ca.loginId, corporateId: ca.corporateId },
+      });
+      if (!user) continue;
+      const existing = await prisma.userRoleAssignment.findFirst({
+        where: {
+          userType: 'CORPORATE_ADMIN',
+          userId: user.id,
+          roleId: corporateOwnerRoleId,
+          status: 'ACTIVE',
+          scopeCorporateId: ca.corporateId,
+        },
+      });
+      if (!existing) {
+        await prisma.userRoleAssignment.create({
+          data: {
+            userType: 'CORPORATE_ADMIN',
+            userId: user.id,
+            roleId: corporateOwnerRoleId,
+            scopeCorporateId: ca.corporateId,
+          },
+        });
+      }
+    }
+  }
+
+  // ── Platform Policies ──
+  const policySeeds = [
+    { policyKey: 'auth.max_login_attempts', scopeType: 'GLOBAL', scopeId: null, value: { value: 5 } },
+    { policyKey: 'auth.login_window_seconds', scopeType: 'GLOBAL', scopeId: null, value: { value: 1800 } },
+    { policyKey: 'graphql.max_complexity', scopeType: 'GLOBAL', scopeId: null, value: { value: 1000, maxDepth: 10 } },
+    { policyKey: 'realtime.hmac_required', scopeType: 'GLOBAL', scopeId: null, value: { value: true, algorithm: 'sha256' } },
+    { policyKey: 'sync.batch_size', scopeType: 'REGIONAL_DISTRIBUTOR', scopeId: dist1.id, value: { batchSize: 100, intervalMs: 5000 } },
+    { policyKey: 'sync.batch_size', scopeType: 'REGIONAL_DISTRIBUTOR', scopeId: dist2.id, value: { batchSize: 50, intervalMs: 10000 } },
+    { policyKey: 'pos.receipt_template', scopeType: 'BRAND_HQ', scopeId: brand1.id, value: { template: 'STANDARD_VN', showLogo: true, footerText: 'Thank you!' } },
+    { policyKey: 'pos.receipt_template', scopeType: 'BRAND_HQ', scopeId: brand2.id, value: { template: 'COMPACT_VN', showLogo: false } },
+    { policyKey: 'meal.daily_limit', scopeType: 'BRAND_HQ', scopeId: brand1.id, value: { dailyLimitVnd: 200000, maxPerTxn: 100000 } },
+  ];
+
+  for (const p of policySeeds) {
+    const existing = await prisma.platformPolicy.findFirst({
+      where: { policyKey: p.policyKey, scopeType: p.scopeType, scopeId: p.scopeId, version: 1 },
+    });
+    if (!existing) {
+      await prisma.platformPolicy.create({
+        data: {
+          policyKey: p.policyKey,
+          scopeType: p.scopeType,
+          scopeId: p.scopeId,
+          policyValueJson: p.value,
+          version: 1,
+          isActive: true,
+        },
+      });
+    }
+  }
+
+  // ── brand4 (Pho Viet Express) 전용 Mock 데이터 — 모든 필드 채움 ──
+
+  // License
+  const licBrand4 = await prisma.platformLicense.upsert({
+    where: { licenseCode: 'LIC-BHQ-PHO' },
+    update: {},
+    create: {
+      scopeType: 'BRAND_HQ',
+      scopeId: brand4.id,
+      licenseCode: 'LIC-BHQ-PHO',
+      licenseType: 'SUBSCRIPTION',
+      status: 'ACTIVE',
+      effectiveFrom: threeMonthsAgo,
+      effectiveTo: twoYearsLater,
+      maxBranchCount: 15,
+      maxTerminalCount: 30,
+      allowedCountryCode: 'VN',
+      licensePayloadJson: { tier: 'PROFESSIONAL', features: ['MULTI_LANGUAGE', 'LOYALTY', 'DELIVERY_INTEGRATION'] },
+    },
+  });
+
+  // Entitlements
+  const phoEntSeeds = [
+    { capability: 'POS', status: 'ACTIVE', contractRef: 'CTR-PHO-2025-001', expiresAt: null as Date | null },
+    { capability: 'MEAL_TICKET', status: 'ACTIVE', contractRef: 'CTR-PHO-2025-002', expiresAt: twoYearsLater },
+  ];
+  for (const e of phoEntSeeds) {
+    const exists = await prisma.brandHqEntitlement.findFirst({ where: { brandHqId: brand4.id, capability: e.capability } });
+    if (!exists) {
+      await prisma.brandHqEntitlement.create({
+        data: {
+          brandHqId: brand4.id,
+          capability: e.capability,
+          status: e.status,
+          grantedBySuperAdminId: saId,
+          licenseId: licBrand4.id,
+          contractRef: e.contractRef,
+          expiresAt: e.expiresAt,
+        },
+      });
+    }
+  }
+
+  // Branches
+  const phoBranches = [
+    { code: 'BR-PHO-001', name: 'Phở Việt Quận 1', type: 'STORE' },
+    { code: 'BR-PHO-002', name: 'Phở Việt Quận 3', type: 'STORE' },
+    { code: 'BR-PHO-003', name: 'Phở Việt Bình Thạnh', type: 'STORE' },
+    { code: 'BR-PHO-004', name: 'Phở Việt Central Kitchen', type: 'KITCHEN' },
+  ];
+  for (const b of phoBranches) {
+    await prisma.branch.upsert({
+      where: { branchCode: b.code },
+      update: {},
+      create: {
+        brandHQId: brand4.id,
+        distributorId: dist1.id,
+        branchCode: b.code,
+        branchName: b.name,
+        branchType: b.type,
+        countryCode: 'VN',
+        timeZoneCode: 'Asia/Ho_Chi_Minh',
+        defaultLanguageCode: 'vi-VN',
+        status: 'ACTIVE',
+      },
+    });
+  }
+
+  // EdgePos Terminals for Pho branches
+  const phoBranchRows = await prisma.branch.findMany({ where: { brandHQId: brand4.id, deletedAt: null }, take: 3 });
+  for (const br of phoBranchRows) {
+    for (let ti = 1; ti <= 2; ti++) {
+      const tcode = `POS-${br.branchCode}-T${ti}`;
+      await prisma.edgePosTerminal.upsert({
+        where: { terminalCode: tcode },
+        update: {},
+        create: {
+          branchId: br.id,
+          terminalCode: tcode,
+          terminalName: `Terminal ${ti} @ ${br.branchName}`,
+          terminalRole: ti === 1 ? 'MAIN' : 'SUB',
+          appVersion: '2.1.0',
+          dbVersion: '2.1.0',
+          status: 'ACTIVE',
+        },
+      });
+    }
+  }
+
+  // Brand Admin Users
+  const phoUsers = [
+    { loginId: 'brand-pho-owner', displayName: 'Nguyen Pho Owner', email: 'owner@phoviet.vn' },
+    { loginId: 'brand-pho-admin', displayName: 'Tran Pho Admin', email: 'admin@phoviet.vn' },
+    { loginId: 'brand-pho-ops', displayName: 'Le Pho Operator', email: 'ops@phoviet.vn' },
+  ];
+  for (const u of phoUsers) {
+    const exists = await prisma.brandAdminUser.findFirst({ where: { brandHQId: brand4.id, loginId: u.loginId } });
+    if (!exists) {
+      await prisma.brandAdminUser.create({
+        data: { brandHQId: brand4.id, loginId: u.loginId, passwordHash, displayName: u.displayName, email: u.email, status: 'ACTIVE' },
+      });
+    }
+  }
+
+  // Platform Policies for Pho brand
+  const phoPolicies = [
+    { policyKey: 'pos.receipt_template', value: { template: 'FULL_VN', showLogo: true, showQr: true, footerText: 'Cảm ơn quý khách!' } },
+    { policyKey: 'meal.daily_limit', value: { dailyLimitVnd: 150000, maxPerTxn: 80000, allowSplit: true } },
+    { policyKey: 'pos.kitchen_display', value: { enabled: true, autoConfirmSeconds: 30, showPriority: true } },
+    { policyKey: 'delivery.integration', value: { grabEnabled: true, beFoodEnabled: false, maxRadius: 5000 } },
+  ];
+  for (const pp of phoPolicies) {
+    const exists = await prisma.platformPolicy.findFirst({
+      where: { policyKey: pp.policyKey, scopeType: 'BRAND_HQ', scopeId: brand4.id, version: 1 },
+    });
+    if (!exists) {
+      await prisma.platformPolicy.create({
+        data: { policyKey: pp.policyKey, scopeType: 'BRAND_HQ', scopeId: brand4.id, policyValueJson: pp.value, version: 1, isActive: true },
+      });
+    }
+  }
+
+  console.log('Governance mock data seeded successfully.');
+
+  // ─────────────────────────────────────────────
+  // 한국어: E-Invoice Provider 시드 데이터
+  // Tiếng Việt: Dữ liệu gốc E-Invoice Provider
+  // ─────────────────────────────────────────────
+  const einvoiceProviders = [
+    {
+      providerType: 'WETAX',
+      displayName: 'WeTax (Softdreams)',
+      description: 'WeTax e-Invoice provider — Softdreams solution. Supports GDT submission, automated serial numbering, and XML/PDF generation.',
+      isActive: true,
+      configs: [
+        {
+          environment: 'SANDBOX',
+          baseUrl: 'https://sandboxapi.wetax.com.vn/v1',
+          credentialsVaultRef: 'secret/einvoice/wetax/sandbox',
+          defaultSerialPrefix: 'C',
+          defaultFormNo: '1',
+          defaultCurrencyCode: 'VND',
+          defaultPaymentMethod: 'TM/CK',
+          isActive: true,
+        },
+        {
+          environment: 'PRODUCTION',
+          baseUrl: 'https://api.wetax.com.vn/v1',
+          credentialsVaultRef: 'secret/einvoice/wetax/production',
+          defaultSerialPrefix: 'C',
+          defaultFormNo: '1',
+          defaultCurrencyCode: 'VND',
+          defaultPaymentMethod: 'TM/CK',
+          isActive: false,
+        },
+      ],
+    },
+    {
+      providerType: 'VIETTEL',
+      displayName: 'Viettel S-Invoice',
+      description: 'Viettel S-Invoice provider — Vietnam top telecom e-Invoice solution. Direct GDT CQT integration.',
+      isActive: false,
+      configs: [
+        {
+          environment: 'SANDBOX',
+          baseUrl: 'https://demo-sinvoice.viettel.vn/services/einvoiceapplication/api',
+          credentialsVaultRef: 'secret/einvoice/viettel/sandbox',
+          defaultSerialPrefix: 'K',
+          defaultFormNo: '1',
+          defaultCurrencyCode: 'VND',
+          defaultPaymentMethod: 'TM/CK',
+          isActive: true,
+        },
+      ],
+    },
+    {
+      providerType: 'MISA',
+      displayName: 'MISA meInvoice',
+      description: 'MISA meInvoice provider — popular Vietnamese accounting/invoice platform. REST API integration.',
+      isActive: false,
+      configs: [
+        {
+          environment: 'SANDBOX',
+          baseUrl: 'https://testapi.meinvoice.vn/api/v2',
+          credentialsVaultRef: 'secret/einvoice/misa/sandbox',
+          defaultSerialPrefix: 'C',
+          defaultFormNo: '1',
+          defaultCurrencyCode: 'VND',
+          defaultPaymentMethod: 'TM/CK',
+          isActive: true,
+        },
+      ],
+    },
+  ];
+
+  for (const ep of einvoiceProviders) {
+    const existing = await prisma.eInvoiceProvider.findUnique({
+      where: { providerType: ep.providerType },
+    });
+    if (!existing) {
+      const provider = await prisma.eInvoiceProvider.create({
+        data: {
+          providerType: ep.providerType,
+          displayName: ep.displayName,
+          description: ep.description,
+          isActive: ep.isActive,
+        },
+      });
+      for (const cfg of ep.configs) {
+        await prisma.eInvoiceProviderConfig.create({
+          data: {
+            providerId: provider.id,
+            environment: cfg.environment,
+            baseUrl: cfg.baseUrl,
+            credentialsVaultRef: cfg.credentialsVaultRef,
+            defaultSerialPrefix: cfg.defaultSerialPrefix,
+            defaultFormNo: cfg.defaultFormNo,
+            defaultCurrencyCode: cfg.defaultCurrencyCode,
+            defaultPaymentMethod: cfg.defaultPaymentMethod,
+            isActive: cfg.isActive,
+          },
+        });
+      }
+      console.log(`  EInvoiceProvider '${ep.providerType}' seeded with ${ep.configs.length} config(s).`);
+    } else {
+      console.log(`  EInvoiceProvider '${ep.providerType}' already exists, skipping.`);
+    }
+  }
+  console.log('E-Invoice provider seed completed.');
 }
 
 // 한국어: 시드 실행 및 에러 처리.

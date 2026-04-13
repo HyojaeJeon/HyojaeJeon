@@ -1,4 +1,4 @@
-import { DistributorListScreen } from '@screens/distributor-list-screen';
+import { DistributorListScreen } from '@screens/distributorListScreen';
 
 export default function Page() {
   return <DistributorListScreen />;

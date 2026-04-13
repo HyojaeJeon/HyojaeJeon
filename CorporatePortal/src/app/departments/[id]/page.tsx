@@ -1,2 +1,2 @@
-import { DepartmentDetailScreen } from '@screens/department-detail-screen';
+import { DepartmentDetailScreen } from '@screens/departmentDetailScreen';
 export default function Page() { return <DepartmentDetailScreen />; }

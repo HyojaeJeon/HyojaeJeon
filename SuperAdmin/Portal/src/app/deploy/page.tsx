@@ -1,2 +1,2 @@
-import { DeployOverviewScreen } from '@screens/deploy-overview-screen';
+import { DeployOverviewScreen } from '@screens/deployOverviewScreen';
 export default function Page() { return <DeployOverviewScreen />; }

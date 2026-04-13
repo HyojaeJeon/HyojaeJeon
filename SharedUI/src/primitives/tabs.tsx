@@ -59,8 +59,12 @@ export function Tabs({ items, value, onChange, variant = 'underline' }: TabsProp
               boxShadow: active ? T.shadow.sm : 'none',
               transition: 'color 140ms ease, background 140ms ease',
               opacity: item.disabled ? 0.5 : 1,
+              whiteSpace: 'nowrap' as const,
             }
           : {
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
               padding: isSegment ? '6px 12px' : '10px 2px',
               fontSize: 13,
               fontWeight: active ? 650 : 500,
@@ -75,6 +79,7 @@ export function Tabs({ items, value, onChange, variant = 'underline' }: TabsProp
               marginBottom: !isSegment ? -1 : 0,
               transition: 'color 140ms ease, background 140ms ease',
               opacity: item.disabled ? 0.5 : 1,
+              whiteSpace: 'nowrap' as const,
             };
         return (
           <button

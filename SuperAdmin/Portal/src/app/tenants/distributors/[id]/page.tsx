@@ -1,4 +1,4 @@
-import { DistributorDetailScreen } from '@screens/distributor-detail-screen';
+import { DistributorDetailScreen } from '@screens/distributorDetailScreen';
 
 export default function Page() {
   return <DistributorDetailScreen />;

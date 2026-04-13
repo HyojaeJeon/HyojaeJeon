@@ -21,3 +21,4 @@
 - 대량 조회는 cursor pagination을 우선한다.
 - write 이후 cache invalidation 규칙을 명시적으로 유지한다.
 - CentralApi는 EdgePos 로컬 거래 원본을 대체하지 않는다.
+- `CREDENTIAL_ENCRYPTION_KEY`는 64-char hex 32-byte 키가 반드시 필요하다. refresh session 암호화에 사용된다.

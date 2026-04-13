@@ -6,11 +6,17 @@ import { gql } from '@apollo/client';
  */
 export const DASHBOARD_OVERVIEW_QUERY = gql`
   query DashboardOverview {
-    distributors(skip: 0, take: 50) {
-      success { data { id } }
+    distributors(skip: 0, take: 5) {
+      success { data { id } totalCount }
     }
-    brands(skip: 0, take: 50) {
-      success { data { id } }
+    brands(skip: 0, take: 5) {
+      success { data { id } totalCount }
+    }
+    branches(skip: 0, take: 1) {
+      success { data { id } totalCount }
+    }
+    mealCorporates(skip: 0, take: 1) {
+      success { data { id } totalCount }
     }
     licenses(skip: 0, take: 5) {
       success {
@@ -23,6 +29,7 @@ export const DASHBOARD_OVERVIEW_QUERY = gql`
           effectiveFrom
           effectiveTo
         }
+        totalCount
       }
     }
     auditLogConnection(first: 5) {
@@ -47,12 +54,14 @@ export const DASHBOARD_OVERVIEW_QUERY = gql`
 `;
 
 interface EnvelopeList<T> {
-  success: { data: T[] } | null;
+  success: { data: T[]; totalCount?: number } | null;
 }
 
 export interface DashboardOverviewData {
   distributors: EnvelopeList<{ id: string }>;
   brands: EnvelopeList<{ id: string }>;
+  branches: EnvelopeList<{ id: string }>;
+  mealCorporates: EnvelopeList<{ id: string }>;
   licenses: EnvelopeList<{
     id: string;
     licenseCode: string;

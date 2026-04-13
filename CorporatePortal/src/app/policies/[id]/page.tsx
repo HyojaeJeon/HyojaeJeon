@@ -1,2 +1,2 @@
-import { PolicyBuilderScreen } from '@screens/policy-builder-screen';
+import { PolicyBuilderScreen } from '@screens/policyBuilderScreen';
 export default function Page() { return <PolicyBuilderScreen />; }

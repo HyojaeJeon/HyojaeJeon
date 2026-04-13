@@ -36,7 +36,7 @@ export function Modal({ open, onClose, title, description, footer, children, wid
         width: typeof width === 'number' ? `${width}px` : width,
         maxWidth: '100%',
         maxHeight: '90vh',
-        overflow: 'auto',
+        overflow: 'hidden',
         background: T.colors.surface,
         borderRadius: T.radius.md,
         boxShadow: T.shadow.lg,
@@ -48,10 +48,12 @@ export function Modal({ open, onClose, title, description, footer, children, wid
     const header = {
         padding: '18px 20px 8px',
         borderBottom: `1px solid ${T.colors.border}`,
+        flexShrink: 0,
     };
     const body = {
         padding: '16px 20px',
         flex: 1,
+        overflowY: 'auto',
     };
     const foot = {
         padding: '12px 20px 16px',
@@ -59,6 +61,7 @@ export function Modal({ open, onClose, title, description, footer, children, wid
         display: 'flex',
         gap: 8,
         justifyContent: 'flex-end',
+        flexShrink: 0,
     };
     return createPortal(_jsx("div", { style: overlay, onMouseDown: (e) => {
             if (closeOnOverlayClick && e.target === e.currentTarget)

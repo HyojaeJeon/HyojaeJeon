@@ -1,5 +1,11 @@
-import { LoginScreen } from '@screens/login-screen';
+import { Suspense } from 'react';
+import { LoginScreen } from '@screens/loginScreen';
+import { LoginRouteClient } from './LoginRouteClient';
 
 export default function LoginPage() {
-  return <LoginScreen />;
+  return (
+    <Suspense fallback={<LoginScreen notice={null} />}>
+      <LoginRouteClient />
+    </Suspense>
+  );
 }

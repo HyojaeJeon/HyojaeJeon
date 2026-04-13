@@ -15,7 +15,7 @@
 //   Edge POS đồng bộ dữ liệu này và cache vào SQLite cục bộ.
 model BrandProfile {
   id                  String    @id @default(uuid()) @db.Uuid
-  distributorId       String    @db.Uuid // 한국어: 소속 대리점 FK / Tiếng Việt: FK đại lý sở hữu
+  distributorId       String?   @db.Uuid // 한국어: 소속 대리점 FK (가맹점 시드는 null) / Tiếng Việt: FK đại lý sở hữu (nullable cho seed)
   brandCode           String    @unique @db.VarChar(50) // 한국어: 브랜드 코드 (고유) / Tiếng Việt: Mã thương hiệu (duy nhất)
   brandName           String    @db.VarChar(200) // 한국어: 브랜드 이름 / Tiếng Việt: Tên thương hiệu
   countryCode         String    @db.VarChar(10) // 한국어: 국가 코드 / Tiếng Việt: Mã quốc gia
@@ -24,13 +24,17 @@ model BrandProfile {
   contactName         String?   @db.VarChar(120) // 한국어: 담당자 이름 / Tiếng Việt: Tên người liên hệ
   contactEmail        String?   @db.VarChar(200) // 한국어: 담당자 이메일 / Tiếng Việt: Email người liên hệ
   contactPhone        String?   @db.VarChar(30) // 한국어: 담당자 전화번호 / Tiếng Việt: Số điện thoại người liên hệ
+  brandNameKo         String?   @db.VarChar(200) // 한국어: 브랜드명 (한국어) / Tiếng Việt: Tên thương hiệu (Hàn)
+  brandNameEn         String?   @db.VarChar(200) // 한국어: 브랜드명 (영어) / Tiếng Việt: Tên thương hiệu (Anh)
+  cuisineType         String?   @db.VarChar(100) // 한국어: 요리 카테고리 / Tiếng Việt: Loại ẩm thực
+  externalSourceId    String?   @db.VarChar(100) // 한국어: 외부 원본 ID / Tiếng Việt: ID nguồn bên ngoài
   status              String    @default("ACTIVE") @db.VarChar(20)
   createdAt           DateTime  @default(now()) @db.Timestamptz()
   updatedAt           DateTime  @updatedAt @db.Timestamptz()
   deletedAt           DateTime? @db.Timestamptz()
 
   // P0-2: soft-delete 브랜드 트리. 상위(DistributorProfile) 삭제 전 자식(Brand) 정리 필요.
-  distributor       DistributorProfile  @relation(fields: [distributorId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  distributor       DistributorProfile? @relation(fields: [distributorId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   assignments       BrandAssignment[]
   branches          Branch[]
   menuCategories    BrandMenuCategory[]
@@ -95,7 +99,7 @@ model BrandAdminUser {
 model Branch {
   id                  String    @id @default(uuid()) @db.Uuid
   brandHQId           String    @db.Uuid // 한국어: 브랜드 본사 FK / Tiếng Việt: FK trụ sở thương hiệu
-  distributorId       String    @db.Uuid // 한국어: 대리점 FK — BrandProfile.distributorId 의 denormalization (P2-5 정책 참조) / Tiếng Việt: FK đại lý (denormalization)
+  distributorId       String?   @db.Uuid // 한국어: 대리점 FK — BrandProfile.distributorId 의 denormalization (P2-5 정책 참조). 가맹점 시드는 null 허용. / Tiếng Việt: FK đại lý (denormalization). Nullable cho seed merchant.
   branchCode          String    @unique @db.VarChar(50) // 한국어: 지점 코드 (고유) / Tiếng Việt: Mã chi nhánh (duy nhất)
   branchName          String    @db.VarChar(200) // 한국어: 지점 이름 / Tiếng Việt: Tên chi nhánh
   branchType          String    @default("STORE") @db.VarChar(30) // 한국어: 지점 유형 (Store/Warehouse/Office) / Tiếng Việt: Loại chi nhánh
@@ -110,6 +114,23 @@ model Branch {
   status              String    @default("ACTIVE") @db.VarChar(20)
   openingDate         DateTime? @db.Date // 한국어: 개점일 / Tiếng Việt: Ngày khai trương
   closingDate         DateTime? @db.Date // 한국어: 폐점일 / Tiếng Việt: Ngày đóng cửa
+  // ── 가맹점 상세 확장 필드 ──
+  phone               String?   @db.VarChar(30) // 한국어: 전화번호 (E.164) / Tiếng Việt: Số điện thoại (E.164)
+  latitude            Decimal?  @db.Decimal(10, 8) // 한국어: 위도 / Tiếng Việt: Vĩ độ
+  longitude           Decimal?  @db.Decimal(11, 8) // 한국어: 경도 / Tiếng Việt: Kinh độ
+  cuisineType         String?   @db.VarChar(100) // 한국어: 요리 카테고리 / Tiếng Việt: Loại ẩm thực
+  logoUrl             String?   @db.VarChar(500) // 한국어: 로고 이미지 URL / Tiếng Việt: URL logo
+  profileImageUrl     String?   @db.VarChar(500) // 한국어: 대표 이미지 URL / Tiếng Việt: URL ảnh đại diện
+  bannerImageUrl      String?   @db.VarChar(500) // 한국어: 배너 이미지 URL / Tiếng Việt: URL ảnh banner
+  deliveryFeeVnd      Int?      // 한국어: 배달비 (VND) / Tiếng Việt: Phí giao hàng (VND)
+  minOrderAmountVnd   Int?      // 한국어: 최소 주문 금액 (VND) / Tiếng Việt: Giá trị đơn tối thiểu (VND)
+  rating              Decimal?  @db.Decimal(2, 1) // 한국어: 평점 0.0~5.0 / Tiếng Việt: Điểm đánh giá
+  reviewCount         Int       @default(0) // 한국어: 리뷰 수 / Tiếng Việt: Số đánh giá
+  description         String?   @db.Text // 한국어: 가맹점 소개 (vi) / Tiếng Việt: Giới thiệu
+  descriptionKo       String?   @db.Text
+  descriptionEn       String?   @db.Text
+  paymentMethodsJson  Json?     // 한국어: 결제 수단 JSON / Tiếng Việt: Phương thức thanh toán JSON
+  externalSourceId    String?   @db.VarChar(100) // 한국어: 외부 시스템 원본 ID / Tiếng Việt: ID nguồn bên ngoài
   createdAt           DateTime  @default(now()) @db.Timestamptz()
   updatedAt           DateTime  @updatedAt @db.Timestamptz()
   deletedAt           DateTime? @db.Timestamptz()
@@ -117,11 +138,14 @@ model Branch {
   brand     BrandProfile      @relation(fields: [brandHQId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   overrides BranchOverride[]
   terminals EdgePosTerminal[]
+  images    BranchImage[]
 
   @@index([brandHQId, status], name: "idx_branch_brand_status")
   // 한국어: 대리점+지역 인덱스 - 대리점이 관리하는 지역별 지점 조회 최적화
   // Tiếng Việt: Chỉ mục đại lý+khu vực - tối ưu truy vấn chi nhánh theo khu vực do đại lý quản lý
   @@index([distributorId, regionCode], name: "idx_branch_distributor")
+  @@index([cuisineType, status], name: "idx_branch_cuisine_status")
+  @@index([externalSourceId], name: "idx_branch_external_source")
 }
 
 // 한국어: 브랜드 메뉴 카테고리 테이블.
@@ -180,12 +204,28 @@ model BrandMenuItem {
   displayOrder   Int       @default(0) // 한국어: 표시 순서 / Tiếng Việt: Thứ tự hiển thị
   searchKeywords String? // 한국어: 검색용 키워드 / Tiếng Việt: Từ khóa tìm kiếm
   isActive       Boolean   @default(true)
-  createdAt      DateTime  @default(now()) @db.Timestamptz()
-  updatedAt      DateTime  @updatedAt @db.Timestamptz()
-  deletedAt      DateTime? @db.Timestamptz()
+  // ── 가맹점 메뉴 확장 필드 ──
+  itemNameKo        String?   @db.VarChar(200) // 한국어: 상품명 (한국어) / Tiếng Việt: Tên (Hàn)
+  itemNameEn        String?   @db.VarChar(200) // 한국어: 상품명 (영어) / Tiếng Việt: Tên (Anh)
+  description       String?   @db.Text // 한국어: 상품 설명 (vi) / Tiếng Việt: Mô tả
+  descriptionKo     String?   @db.Text
+  descriptionEn     String?   @db.Text
+  profileImageUrl   String?   @db.VarChar(500) // 한국어: 메뉴 이미지 URL / Tiếng Việt: URL ảnh menu
+  discountPriceVnd  BigInt?   // 한국어: 할인가 (VND) / Tiếng Việt: Giá giảm (VND)
+  discountPct       Int?      // 한국어: 할인율 0~100 / Tiếng Việt: Phần trăm giảm giá
+  calories          Int?      // 한국어: 칼로리 / Tiếng Việt: Calo
+  preparationTime   Int?      // 한국어: 조리 시간 (분) / Tiếng Việt: Thời gian chế biến (phút)
+  spicyLevel        Int       @default(0) // 한국어: 매운맛 0~5 / Tiếng Việt: Độ cay
+  tags              Json?     // 한국어: 태그 배열 / Tiếng Việt: Mảng thẻ
+  isFeatured        Boolean   @default(false) // 한국어: 추천 메뉴 / Tiếng Việt: Nổi bật
+  isBestSeller      Boolean   @default(false) // 한국어: 인기 메뉴 / Tiếng Việt: Bán chạy
+  createdAt         DateTime  @default(now()) @db.Timestamptz()
+  updatedAt         DateTime  @updatedAt @db.Timestamptz()
+  deletedAt         DateTime? @db.Timestamptz()
 
-  brand    BrandProfile      @relation(fields: [brandHQId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  category BrandMenuCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  brand        BrandProfile          @relation(fields: [brandHQId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  category     BrandMenuCategory     @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  optionGroups BrandMenuOptionGroup[]
 
   @@unique([brandHQId, itemCode], name: "uq_menu_item_brand")
   @@index([brandHQId, categoryId, displayOrder], name: "idx_menu_item_brand_category")
@@ -302,4 +342,67 @@ model OperatorTemplate {
 
   @@unique([brandHQId, templateCode], name: "uq_operator_template_brand")
   @@index([brandHQId, roleCode, status], name: "idx_operator_template_brand")
+}
+
+// ─────────────────────────────────────────────
+// 가맹점 메뉴 옵션 + 지점 이미지
+// 한국어: 메뉴 옵션 그룹/옵션 + 지점별 이미지 갤러리.
+// Tiếng Việt: Nhóm tùy chọn menu/tùy chọn + thư viện ảnh chi nhánh.
+// ─────────────────────────────────────────────
+
+// 한국어: 메뉴 옵션 그룹 — 메뉴 아이템에 붙는 옵션 그룹 (예: "사이즈", "토핑").
+// Tiếng Việt: Nhóm tùy chọn menu — nhóm tùy chọn gắn với mặt hàng (vd: "Kích cỡ", "Topping").
+model BrandMenuOptionGroup {
+  id            String   @id @default(uuid()) @db.Uuid
+  menuItemId    String   @db.Uuid // 한국어: 메뉴 아이템 FK / Tiếng Việt: FK mặt hàng menu
+  name          String   @db.VarChar(200)
+  nameKo        String?  @db.VarChar(200)
+  nameEn        String?  @db.VarChar(200)
+  isRequired    Boolean  @default(false) // 한국어: 필수 선택 여부 / Tiếng Việt: Bắt buộc chọn
+  maxSelections Int?     // 한국어: 최대 선택 수 (null = 무제한) / Tiếng Việt: Số chọn tối đa
+  displayOrder  Int      @default(0)
+  createdAt     DateTime @default(now()) @db.Timestamptz()
+  updatedAt     DateTime @updatedAt @db.Timestamptz()
+
+  menuItem BrandMenuItem     @relation(fields: [menuItemId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  options  BrandMenuOption[]
+
+  @@index([menuItemId, displayOrder], name: "idx_menu_option_group_item")
+}
+
+// 한국어: 메뉴 옵션 — 옵션 그룹 내 개별 선택지 (예: "Large +10,000₫").
+// Tiếng Việt: Tùy chọn menu — lựa chọn riêng lẻ trong nhóm (vd: "Lớn +10.000₫").
+model BrandMenuOption {
+  id           String   @id @default(uuid()) @db.Uuid
+  groupId      String   @db.Uuid // 한국어: 옵션 그룹 FK / Tiếng Việt: FK nhóm tùy chọn
+  name         String   @db.VarChar(200)
+  nameKo       String?  @db.VarChar(200)
+  nameEn       String?  @db.VarChar(200)
+  priceVnd     BigInt   @default(0) // 한국어: 추가 가격 (VND) / Tiếng Việt: Giá thêm (VND)
+  isDefault    Boolean  @default(false) // 한국어: 기본 선택 여부 / Tiếng Việt: Mặc định
+  isAvailable  Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now()) @db.Timestamptz()
+  updatedAt    DateTime @updatedAt @db.Timestamptz()
+
+  group BrandMenuOptionGroup @relation(fields: [groupId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([groupId, displayOrder], name: "idx_menu_option_group")
+}
+
+// 한국어: 지점 이미지 갤러리 — 로고, 배너, 메뉴, 인테리어/외관 사진.
+// Tiếng Việt: Thư viện ảnh chi nhánh — logo, banner, menu, ảnh nội/ngoại thất.
+model BranchImage {
+  id           String   @id @default(uuid()) @db.Uuid
+  branchId     String   @db.Uuid
+  imageType    String   @db.VarChar(30) // LOGO | PROFILE | BANNER | MENU | INTERIOR | EXTERIOR | FOOD | OTHER
+  url          String   @db.VarChar(500) // 한국어: 절대 URL / Tiếng Việt: URL tuyệt đối
+  displayOrder Int      @default(0)
+  isPrimary    Boolean  @default(false)
+  createdAt    DateTime @default(now()) @db.Timestamptz()
+  updatedAt    DateTime @updatedAt @db.Timestamptz()
+
+  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([branchId, imageType], name: "idx_branch_image_type")
 }

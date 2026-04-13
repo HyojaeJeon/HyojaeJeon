@@ -1,2 +1,2 @@
-import { EntitlementsOverviewScreen } from '@screens/entitlements-overview-screen';
-export default function Page() { return <EntitlementsOverviewScreen />; }
+import { redirect } from 'next/navigation';
+export default function Page() { redirect('/governance?tab=brand'); }

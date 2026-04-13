@@ -218,6 +218,41 @@ export const DISPUTE_MUTATION = gql`
   }
 `;
 
+export const UPDATE_INVOICE_SCHEDULE_MUTATION = gql`
+  mutation UpdateInvoiceSchedule(
+    $corporateId: ID!
+    $scheduleType: String!
+    $scheduleDay: Int
+    $autoGenerate: Boolean
+    $autoSubmit: Boolean
+    $notifyEmail: String
+  ) {
+    mealCorporateUpdateInvoiceSchedule(
+      corporateId: $corporateId
+      scheduleType: $scheduleType
+      scheduleDay: $scheduleDay
+      autoGenerate: $autoGenerate
+      autoSubmit: $autoSubmit
+      notifyEmail: $notifyEmail
+    ) {
+      success {
+        data {
+          id
+          invoiceScheduleType
+          invoiceScheduleDay
+          invoiceAutoGenerate
+          invoiceAutoSubmit
+          invoiceNotifyEmail
+        }
+      }
+      error {
+        code
+        message
+      }
+    }
+  }
+`;
+
 /* ─────────────────────────── Type interfaces ─────────────────────────── */
 
 export interface InvoiceRow {
@@ -373,6 +408,22 @@ export interface DisputeInvoiceData {
         disputeReason: string;
       };
     } | null;
+    error: { code: string; message: string } | null;
+  };
+}
+
+export interface InvoiceScheduleData {
+  id: string;
+  invoiceScheduleType: string;
+  invoiceScheduleDay: number | null;
+  invoiceAutoGenerate: boolean;
+  invoiceAutoSubmit: boolean;
+  invoiceNotifyEmail: string | null;
+}
+
+export interface UpdateInvoiceScheduleData {
+  mealCorporateUpdateInvoiceSchedule: {
+    success: { data: InvoiceScheduleData } | null;
     error: { code: string; message: string } | null;
   };
 }

@@ -20,24 +20,75 @@ export const loginOperation: GraphQLOperation<LoginMutationData, LoginMutationVa
       login(input: $input) {
         success { code message requestId data {
           accessToken
-        expiresIn
-        user {
-          id
-          loginId
-          displayName
-          email
-          phone
-          userType
-          distributorId
-          brandHQId
-          corporateId
-          status
-          lastLoginAt
-          passwordChangedAt
-          createdAt
-          updatedAt
-        }
+          expiresIn
+          accessTokenExpiresAt
+          sessionExpiresAt
+          user {
+            id
+            loginId
+            displayName
+            email
+            phone
+            userType
+            distributorId
+            brandHQId
+            corporateId
+            status
+            lastLoginAt
+            passwordChangedAt
+            createdAt
+            updatedAt
+          }
         } }
+        error { code message requestId details }
+      }
+    }
+  `,
+};
+
+export type RefreshSessionMutationData = AuthPayload;
+
+export const refreshSessionOperation: GraphQLOperation<RefreshSessionMutationData, Record<string, never>> = {
+  operationName: 'RefreshSession',
+  document: `
+    mutation RefreshSession {
+      refreshSession {
+        success { code message requestId data {
+          accessToken
+          expiresIn
+          accessTokenExpiresAt
+          sessionExpiresAt
+          user {
+            id
+            loginId
+            displayName
+            email
+            phone
+            userType
+            distributorId
+            brandHQId
+            corporateId
+            status
+            lastLoginAt
+            passwordChangedAt
+            createdAt
+            updatedAt
+          }
+        } }
+        error { code message requestId details }
+      }
+    }
+  `,
+};
+
+export type LogoutMutationData = boolean;
+
+export const logoutOperation: GraphQLOperation<LogoutMutationData, Record<string, never>> = {
+  operationName: 'Logout',
+  document: `
+    mutation Logout {
+      logout {
+        success { code message requestId data }
         error { code message requestId details }
       }
     }

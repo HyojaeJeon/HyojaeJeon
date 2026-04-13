@@ -1,2 +1,2 @@
-import { CorporateMerchantsScreen } from '@screens/corporate-merchants-screen';
+import { CorporateMerchantsScreen } from '@screens/corporateMerchantsScreen';
 export default function Page() { return <CorporateMerchantsScreen />; }

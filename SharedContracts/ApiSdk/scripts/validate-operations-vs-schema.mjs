@@ -64,15 +64,34 @@ async function loadSdkOperations() {
   const mod = await import(SDK_DIST_INDEX);
   const ops = [];
   for (const [key, value] of Object.entries(mod)) {
-    if (
-      value &&
-      typeof value === 'object' &&
-      typeof value.name === 'string' &&
-      typeof value.document === 'string' &&
-      (value.kind === 'query' || value.kind === 'mutation' || value.kind === 'subscription')
-    ) {
-      ops.push({ exportName: key, ...value });
+    if (!value || typeof value !== 'object' || typeof value.document !== 'string') continue;
+
+    const operationName =
+      typeof value.operationName === 'string'
+        ? value.operationName
+        : typeof value.name === 'string'
+          ? value.name
+          : null;
+    if (!operationName) continue;
+
+    let kind = value.kind;
+    if (kind !== 'query' && kind !== 'mutation' && kind !== 'subscription') {
+      try {
+        const doc = parseGraphql(value.document);
+        const operationDef = doc.definitions.find((def) => def.kind === Kind.OPERATION_DEFINITION);
+        kind = operationDef?.operation;
+      } catch {
+        kind = null;
+      }
     }
+    if (kind !== 'query' && kind !== 'mutation' && kind !== 'subscription') continue;
+
+    ops.push({
+      exportName: key,
+      name: operationName,
+      kind,
+      document: value.document,
+    });
   }
   return ops;
 }
@@ -87,49 +106,27 @@ function checkOperation(op, schemaFields) {
     return errors;
   }
 
-  // Track what type we're currently selecting from. Walk the AST with a type stack.
-  const typeStack = [];
-  visit(doc, {
-    OperationDefinition: {
-      enter(node) {
-        const rootType =
-          node.operation === 'query'
-            ? 'Query'
-            : node.operation === 'mutation'
-              ? 'Mutation'
-              : 'Subscription';
-        typeStack.push(rootType);
-      },
-      leave() {
-        typeStack.pop();
-      },
-    },
-    Field: {
-      enter(node) {
-        const current = typeStack[typeStack.length - 1];
-        if (!current) return;
-        const defFields = schemaFields.get(current);
-        if (!defFields) {
-          errors.push(
-            `${op.exportName}: type '${current}' not found in schema (field '${node.name.value}')`,
-          );
-          typeStack.push(null);
-          return;
-        }
-        if (!defFields.has(node.name.value)) {
-          errors.push(
-            `${op.exportName}: field '${node.name.value}' not found on type '${current}'`,
-          );
-        }
-        // 다음 선택 단계의 타입은 schema 없이는 정확히 추적 불가 (타입 정보 부족).
-        // 여기서는 1-depth 검증만 수행. 깊은 검증은 full codegen 이 필요.
-        typeStack.push(null);
-      },
-      leave() {
-        typeStack.pop();
-      },
-    },
-  });
+  for (const definition of doc.definitions) {
+    if (definition.kind !== Kind.OPERATION_DEFINITION) continue;
+    const rootType =
+      definition.operation === 'query'
+        ? 'Query'
+        : definition.operation === 'mutation'
+          ? 'Mutation'
+          : 'Subscription';
+    const defFields = schemaFields.get(rootType);
+    if (!defFields) {
+      errors.push(`${op.exportName}: root type '${rootType}' not found in schema`);
+      continue;
+    }
+
+    for (const selection of definition.selectionSet.selections) {
+      if (selection.kind !== Kind.FIELD) continue;
+      if (!defFields.has(selection.name.value)) {
+        errors.push(`${op.exportName}: field '${selection.name.value}' not found on type '${rootType}'`);
+      }
+    }
+  }
 
   return errors;
 }
@@ -146,6 +143,10 @@ async function main() {
 
   const schemaFields = await loadSchemaFieldMap(schemaPath);
   const ops = await loadSdkOperations();
+  if (ops.length === 0) {
+    console.error('✗ No GraphQL operations detected in ApiSdk dist export surface.');
+    process.exit(1);
+  }
 
   let totalErrors = 0;
   for (const op of ops) {

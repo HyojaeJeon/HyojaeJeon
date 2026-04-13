@@ -185,6 +185,90 @@ export interface BrandCatalogData {
   promotions: { success: { data: Array<{ id: string }> } | null };
 }
 
+/* ─────────────────────────── Entitlement Mutations ─────────────────────────── */
+
+export const GRANT_CAPABILITY_MUTATION = gql`
+  mutation GrantBrandHqCapability($input: GrantBrandHqCapabilityInput!) {
+    grantBrandHqCapability(input: $input) {
+      success {
+        data {
+          id
+          brandHqId
+          capability
+          status
+          activatedAt
+          expiresAt
+          contractRef
+        }
+      }
+      error { code message }
+    }
+  }
+`;
+
+export interface GrantBrandHqCapabilityInput {
+  brandHqId: string;
+  capability: string;
+  startAsTrial?: boolean;
+  expiresAt?: string | null;
+  contractRef?: string | null;
+  licenseId?: string | null;
+}
+
+export const SUSPEND_CAPABILITY_MUTATION = gql`
+  mutation SuspendBrandHqCapability($entitlementId: ID!, $reason: String!) {
+    suspendBrandHqCapability(entitlementId: $entitlementId, reason: $reason) {
+      success {
+        data {
+          id
+          brandHqId
+          capability
+          status
+          activatedAt
+          expiresAt
+        }
+      }
+      error { code message }
+    }
+  }
+`;
+
+export const RESUME_CAPABILITY_MUTATION = gql`
+  mutation ResumeBrandHqCapability($entitlementId: ID!) {
+    resumeBrandHqCapability(entitlementId: $entitlementId) {
+      success {
+        data {
+          id
+          brandHqId
+          capability
+          status
+          activatedAt
+          expiresAt
+        }
+      }
+      error { code message }
+    }
+  }
+`;
+
+export const REVOKE_CAPABILITY_MUTATION = gql`
+  mutation RevokeBrandHqCapability($entitlementId: ID!, $reason: String!) {
+    revokeBrandHqCapability(entitlementId: $entitlementId, reason: $reason) {
+      success {
+        data {
+          id
+          brandHqId
+          capability
+          status
+          activatedAt
+          expiresAt
+        }
+      }
+      error { code message }
+    }
+  }
+`;
+
 /* ─────────────────────────── Branch Detail (with EdgePos) ─────────────────────────── */
 
 export const BRANCH_DETAIL_QUERY = gql`

@@ -50,11 +50,12 @@ model Role {
   // 한국어: 다국어 라벨. 물리 컬럼 name(vi 기본) 은 호환성을 위해 Prisma 필드 roleName 으로 노출. nameKo / nameEn 은 신규 선택 필드.
   // Tiếng Việt: Nhãn đa ngôn ngữ. Cột vật lý "name" được map sang trường Prisma "roleName" để giữ tương thích.
   roleName       String   @map("name") @db.VarChar(200)
-  nameKo         String?  @db.VarChar(200)
-  nameEn         String?  @db.VarChar(200)
+  roleNameKo     String?  @map("nameKo") @db.VarChar(200)
+  roleNameEn     String?  @map("nameEn") @db.VarChar(200)
   scope          String   @default("PLATFORM") @db.VarChar(30) // PLATFORM | DISTRIBUTOR | BRAND_HQ | BRANCH | CORPORATE
-  hierarchyLevel Int      @default(0) // RolesGuard 호환용 계층 등급
   isSystem       Boolean  @default(false)
+  permissions       Json     @default("[]") // 권한 키 배열: ["dashboard:view", "distributors:*"]
+  permissionVersion Int      @default(0)    // 클라이언트 캐시 무효화 트리거
   description    String?  @db.VarChar(500)
   descriptionKo  String?  @db.VarChar(500)
   descriptionEn  String?  @db.VarChar(500)

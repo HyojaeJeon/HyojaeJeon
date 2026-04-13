@@ -3,8 +3,8 @@ import { gql } from '@apollo/client';
 /* ─────────────────────────── Queries ─────────────────────────── */
 
 export const EMPLOYEES_QUERY = gql`
-  query Employees($corporateId: ID!, $skip: Int!, $take: Int!, $filter: MealEmployeeFilter) {
-    mealEmployees(corporateId: $corporateId, skip: $skip, take: $take, filter: $filter) {
+  query Employees($corporateId: ID!, $skip: Int! = 0, $take: Int! = 20) {
+    mealEmployees(corporateId: $corporateId, skip: $skip, take: $take) {
       success {
         data {
           id
@@ -13,13 +13,13 @@ export const EMPLOYEES_QUERY = gql`
           email
           phone
           departmentId
-          departmentName
-          employmentType
-          walletStatus
           badgeRfid
-          isExternalSync
           status
+          corporateId
+          createdAt
+          updatedAt
         }
+        totalCount
       }
       error {
         code
@@ -40,29 +40,11 @@ export const EMPLOYEE_DETAIL_QUERY = gql`
           email
           phone
           departmentId
-          departmentName
-          employmentType
-          walletStatus
           badgeRfid
-          isExternalSync
           status
+          corporateId
           createdAt
           updatedAt
-          wallet {
-            id
-            balanceVnd
-            companyAllowanceVnd
-            personalTopUpVnd
-            dailyLimitVnd
-            status
-          }
-          fundingEntries {
-            id
-            amountVnd
-            sourceType
-            memo
-            createdAt
-          }
         }
       }
       error {
@@ -156,41 +138,18 @@ export interface EmployeeRow {
   email: string | null;
   phone: string | null;
   departmentId: string | null;
-  departmentName: string | null;
-  employmentType: string | null;
-  walletStatus: string | null;
   badgeRfid: string | null;
-  isExternalSync: boolean;
   status: string;
-}
-
-export interface EmployeeWallet {
-  id: string;
-  balanceVnd: string;
-  companyAllowanceVnd: string;
-  personalTopUpVnd: string;
-  dailyLimitVnd: string | null;
-  status: string;
-}
-
-export interface EmployeeFundingEntry {
-  id: string;
-  amountVnd: string;
-  sourceType: string;
-  memo: string | null;
-  createdAt: string;
-}
-
-export interface EmployeeDetail extends EmployeeRow {
+  corporateId: string;
   createdAt: string;
   updatedAt: string;
-  wallet: EmployeeWallet | null;
-  fundingEntries: EmployeeFundingEntry[];
 }
+
+export interface EmployeeDetail extends EmployeeRow {}
 
 export interface EmployeesData {
   mealEmployees: {
-    success: { data: EmployeeRow[] } | null;
+    success: { data: EmployeeRow[]; totalCount?: number | null } | null;
     error: { code: string; message: string } | null;
   };
 }

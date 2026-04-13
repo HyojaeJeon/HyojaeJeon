@@ -4,51 +4,119 @@ import {
   HttpLink,
   from,
   split,
+  Observable,
   type NormalizedCacheObject,
+  type FetchResult,
 } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
+import { toast } from 'sonner';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { createClient as createWsClient } from 'graphql-ws';
+import {
+  getAccessToken,
+  refreshSessionWithOutcome,
+  handleAuthFailure,
+} from '@auth/session';
 
 const HTTP_URL = process.env.NEXT_PUBLIC_CENTRAL_API_HTTP ?? 'http://localhost:4000/graphql';
 const WS_URL = process.env.NEXT_PUBLIC_CENTRAL_API_WS ?? 'ws://localhost:4000/graphql';
 
-const TOKEN_KEY = 'superadmin-portal.token';
-
-export function getAuthToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return window.localStorage.getItem(TOKEN_KEY);
+/** GraphQL 이 아닌 REST 엔드포인트 base URL (health check 등) */
+export function getRestBaseUrl(): string {
+  return HTTP_URL.replace(/\/graphql$/, '');
 }
 
-export function setAuthToken(token: string | null) {
-  if (typeof window === 'undefined') return;
-  if (token) window.localStorage.setItem(TOKEN_KEY, token);
-  else window.localStorage.removeItem(TOKEN_KEY);
+function isSessionOperation(operationName?: string): boolean {
+  return (
+    operationName === 'PortalLogin' ||
+    operationName === 'PortalRefreshSession' ||
+    operationName === 'PortalLogout'
+  );
+}
+
+function getClientLocale(): string {
+  if (typeof window === 'undefined') return 'ko';
+  return window.localStorage.getItem('superadmin-portal.locale') || 'ko';
 }
 
 const httpLink = new HttpLink({ uri: HTTP_URL, credentials: 'include' });
 
-const authLink = setContext((_op, { headers }) => {
-  const token = getAuthToken();
-  return {
-    headers: {
-      ...headers,
-      ...(token ? { authorization: `Bearer ${token}` } : {}),
-    },
-  };
-});
+/**
+ * Auth link: HttpOnly cookie handles authentication automatically via credentials: 'include'.
+ * No Bearer token injection needed for HTTP requests. Only sets accept-language header.
+ */
+const authLink = setContext(async (_operation, { headers }) => ({
+  headers: {
+    ...headers,
+    'accept-language': getClientLocale(),
+  },
+}));
 
-const errorLink = onError(({ graphQLErrors, networkError }) => {
+/**
+ * Error link: UNAUTHENTICATED/SESSION_REVOKED triggers session refresh + retry.
+ * - Session operations (login/refresh/logout) are not retried
+ * - Each operation is retried at most ONCE to prevent infinite refresh loops
+ * - Cookie-based: refresh sets new cookies server-side, no header update needed on retry
+ * - Network errors are logged only — never trigger logout
+ * - Server 500 / rate limit errors — never trigger logout
+ */
+const REFRESH_RETRIED_KEY = '__refreshRetried';
+
+const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
   if (graphQLErrors) {
     for (const err of graphQLErrors) {
-      // eslint-disable-next-line no-console
+      const code = err.extensions?.code as string | undefined;
+
+      if (code === 'UNAUTHENTICATED' || code === 'SESSION_REVOKED') {
+        if (isSessionOperation(operation.operationName)) {
+          handleAuthFailure();
+          return;
+        }
+
+        // Guard: 이미 refresh+retry 한 operation이면 무한 루프 방지 → 즉시 에러 전파
+        const context = operation.getContext();
+        if (context[REFRESH_RETRIED_KEY]) {
+          // 이미 1회 retry 했는데 또 UNAUTHENTICATED → 세션 완전 만료
+          handleAuthFailure();
+          return;
+        }
+
+        // Mark this operation as retried
+        operation.setContext({ ...context, [REFRESH_RETRIED_KEY]: true });
+
+        return new Observable<FetchResult>((observer) => {
+          refreshSessionWithOutcome().then((outcome) => {
+            switch (outcome.kind) {
+              case 'renewed':
+                // Retry ONCE — cookies are updated automatically
+                forward(operation).subscribe({
+                  next: observer.next.bind(observer),
+                  error: observer.error.bind(observer),
+                  complete: observer.complete.bind(observer),
+                });
+                break;
+              case 'auth_expired':
+                handleAuthFailure();
+                observer.error(err);
+                break;
+              case 'server_error':
+                // 서버 에러 (500, rate limit 등) → 로그아웃하지 않고 에러만 전파
+                observer.error(err);
+                break;
+            }
+          });
+        });
+      }
+
       console.error('[GraphQL error]', err.message, err.path);
+      if (typeof window !== 'undefined') {
+        toast.error(`[${operation.operationName}] ${err.message}`, { duration: 5000 });
+      }
     }
   }
   if (networkError) {
-    // eslint-disable-next-line no-console
     console.error('[Network error]', networkError);
   }
 });
@@ -59,7 +127,7 @@ function makeWsLink(): GraphQLWsLink | null {
     createWsClient({
       url: WS_URL,
       connectionParams: () => {
-        const token = getAuthToken();
+        const token = getAccessToken();
         return token ? { authorization: `Bearer ${token}` } : {};
       },
       lazy: true,

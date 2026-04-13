@@ -11,6 +11,10 @@ export interface LoginMutationVariables {
 }
 export type LoginMutationData = AuthPayload;
 export declare const loginOperation: GraphQLOperation<LoginMutationData, LoginMutationVariables>;
+export type RefreshSessionMutationData = AuthPayload;
+export declare const refreshSessionOperation: GraphQLOperation<RefreshSessionMutationData, Record<string, never>>;
+export type LogoutMutationData = boolean;
+export declare const logoutOperation: GraphQLOperation<LogoutMutationData, Record<string, never>>;
 export interface AuthAccountsQueryVariables {
     userType?: AuthUserType | null;
     skip?: number;

@@ -2,21 +2,18 @@ import { gql } from '@apollo/client';
 
 /* ─────────────────────────── Queries ─────────────────────────── */
 
-export const FUNDING_ACCOUNT_QUERY = gql`
-  query FundingAccount($corporateId: ID!) {
-    mealFundingAccount(corporateId: $corporateId) {
+export const WALLETS_QUERY = gql`
+  query Wallets($corporateId: ID!, $skip: Int!, $take: Int!) {
+    mealWalletsByCorporate(corporateId: $corporateId, skip: $skip, take: $take) {
       success {
         data {
           id
+          employeeId
           corporateId
-          fundingModel
-          depositBalanceVnd
-          creditLimitVnd
-          creditOutstandingVnd
-          monthlyBudgetVnd
-          monthlySpentVnd
-          lastDepositAt
-          lastDepositAmountVnd
+          balanceVnd
+          companyAllowanceVnd
+          personalTopUpVnd
+          dailyLimitVnd
           status
           createdAt
           updatedAt
@@ -30,27 +27,21 @@ export const FUNDING_ACCOUNT_QUERY = gql`
   }
 `;
 
-export const BUDGET_SUMMARY_QUERY = gql`
-  query BudgetSummary($corporateId: ID!, $periodStart: String!, $periodEnd: String!) {
-    mealBudgetSummary(corporateId: $corporateId, periodStart: $periodStart, periodEnd: $periodEnd) {
+export const WALLET_DETAIL_QUERY = gql`
+  query WalletDetail($id: ID!) {
+    mealWallet(id: $id) {
       success {
         data {
+          id
+          employeeId
           corporateId
-          periodStart
-          periodEnd
-          totalBudgetVnd
-          totalAllocatedVnd
-          totalSpentVnd
-          totalRemainingVnd
-          employeeCount
-          departmentBreakdown {
-            departmentId
-            departmentName
-            allocatedVnd
-            spentVnd
-            remainingVnd
-            employeeCount
-          }
+          balanceVnd
+          companyAllowanceVnd
+          personalTopUpVnd
+          dailyLimitVnd
+          status
+          createdAt
+          updatedAt
         }
       }
       error {
@@ -61,20 +52,20 @@ export const BUDGET_SUMMARY_QUERY = gql`
   }
 `;
 
-export const ALLOWANCE_LOAD_BATCHES_QUERY = gql`
-  query AllowanceLoadBatches($corporateId: ID!, $skip: Int!, $take: Int!) {
-    mealAllowanceLoadBatches(corporateId: $corporateId, skip: $skip, take: $take) {
+export const WALLET_FUNDING_ENTRIES_QUERY = gql`
+  query WalletFundingEntries($walletId: ID!, $skip: Int!, $take: Int!) {
+    mealWalletFundingEntriesByWallet(walletId: $walletId, skip: $skip, take: $take) {
       success {
         data {
           id
-          corporateId
-          batchCode
-          totalAmountVnd
-          employeeCount
           sourceType
-          memo
+          sourceReferenceId
+          sourceBatchId
+          amountVnd
           status
-          processedAt
+          note
+          postedAt
+          reversedAt
           createdAt
         }
       }
@@ -86,24 +77,86 @@ export const ALLOWANCE_LOAD_BATCHES_QUERY = gql`
   }
 `;
 
-/* ─────────────────────────── Mutations ─────────────────────────── */
-
-export const COMPANY_ALLOWANCE_LOAD_MUTATION = gql`
-  mutation CompanyAllowanceLoad($input: CompanyAllowanceLoadInput!) {
-    mealCompanyAllowanceLoad(input: $input) {
+export const TRANSACTIONS_QUERY = gql`
+  query Transactions($corporateId: ID!, $skip: Int!, $take: Int!) {
+    mealTransactionsByCorporate(corporateId: $corporateId, skip: $skip, take: $take) {
       success {
         data {
           id
-          batchCode
-          totalAmountVnd
-          employeeCount
+          walletId
+          corporateId
+          brandHqId
+          branchId
+          terminalId
+          loopType
+          authMethod
+          requestedAmountVnd
+          approvedAmountVnd
+          companyShareVnd
+          employeeShareVnd
           status
+          declineReason
+          idempotencyKey
+          authorizedAt
+          settledAt
+          createdAt
         }
       }
       error {
         code
         message
-        details
+      }
+    }
+  }
+`;
+
+export const TRANSACTIONS_FILTERED_QUERY = gql`
+  query TransactionsFiltered(
+    $corporateId: ID!
+    $skip: Int!
+    $take: Int!
+    $dateFrom: String
+    $dateTo: String
+    $merchantId: String
+    $employeeId: String
+    $statuses: [String!]
+  ) {
+    mealTransactionsByCorporate(
+      corporateId: $corporateId
+      skip: $skip
+      take: $take
+      dateFrom: $dateFrom
+      dateTo: $dateTo
+      merchantId: $merchantId
+      employeeId: $employeeId
+      statuses: $statuses
+    ) {
+      success {
+        data {
+          id
+          walletId
+          corporateId
+          brandHqId
+          branchId
+          terminalId
+          loopType
+          authMethod
+          requestedAmountVnd
+          approvedAmountVnd
+          companyShareVnd
+          employeeShareVnd
+          status
+          declineReason
+          idempotencyKey
+          authorizedAt
+          settledAt
+          createdAt
+        }
+        totalCount
+      }
+      error {
+        code
+        message
       }
     }
   }
@@ -111,88 +164,84 @@ export const COMPANY_ALLOWANCE_LOAD_MUTATION = gql`
 
 /* ─────────────────────────── Type interfaces ─────────────────────────── */
 
-export interface FundingAccount {
+export interface WalletRow {
   id: string;
+  employeeId: string;
   corporateId: string;
-  fundingModel: string;
-  depositBalanceVnd: string | null;
-  creditLimitVnd: string | null;
-  creditOutstandingVnd: string | null;
-  monthlyBudgetVnd: string | null;
-  monthlySpentVnd: string | null;
-  lastDepositAt: string | null;
-  lastDepositAmountVnd: string | null;
+  balanceVnd: string;
+  companyAllowanceVnd: string;
+  personalTopUpVnd: string;
+  dailyLimitVnd: string | null;
   status: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface DepartmentBudgetBreakdown {
-  departmentId: string;
-  departmentName: string;
-  allocatedVnd: string;
-  spentVnd: string;
-  remainingVnd: string;
-  employeeCount: number;
-}
-
-export interface BudgetSummary {
-  corporateId: string;
-  periodStart: string;
-  periodEnd: string;
-  totalBudgetVnd: string;
-  totalAllocatedVnd: string;
-  totalSpentVnd: string;
-  totalRemainingVnd: string;
-  employeeCount: number;
-  departmentBreakdown: DepartmentBudgetBreakdown[];
-}
-
-export interface AllowanceLoadBatch {
+export interface WalletFundingEntry {
   id: string;
-  corporateId: string;
-  batchCode: string;
-  totalAmountVnd: string;
-  employeeCount: number;
   sourceType: string;
-  memo: string | null;
+  sourceReferenceId: string | null;
+  sourceBatchId: string | null;
+  amountVnd: string;
   status: string;
-  processedAt: string | null;
+  note: string | null;
+  postedAt: string | null;
+  reversedAt: string | null;
   createdAt: string;
 }
 
-export interface FundingAccountData {
-  mealFundingAccount: {
-    success: { data: FundingAccount } | null;
+export interface TransactionRow {
+  id: string;
+  walletId: string;
+  corporateId: string;
+  brandHqId: string | null;
+  branchId: string | null;
+  terminalId: string | null;
+  loopType: string;
+  authMethod: string;
+  requestedAmountVnd: string;
+  approvedAmountVnd: string;
+  companyShareVnd: string;
+  employeeShareVnd: string;
+  status: string;
+  declineReason: string | null;
+  idempotencyKey: string;
+  authorizedAt: string | null;
+  settledAt: string | null;
+  createdAt: string;
+}
+
+export interface WalletsData {
+  mealWalletsByCorporate: {
+    success: { data: WalletRow[] } | null;
     error: { code: string; message: string } | null;
   };
 }
 
-export interface BudgetSummaryData {
-  mealBudgetSummary: {
-    success: { data: BudgetSummary } | null;
+export interface WalletDetailData {
+  mealWallet: {
+    success: { data: WalletRow } | null;
     error: { code: string; message: string } | null;
   };
 }
 
-export interface AllowanceLoadBatchesData {
-  mealAllowanceLoadBatches: {
-    success: { data: AllowanceLoadBatch[] } | null;
+export interface WalletFundingEntriesData {
+  mealWalletFundingEntriesByWallet: {
+    success: { data: WalletFundingEntry[] } | null;
     error: { code: string; message: string } | null;
   };
 }
 
-export interface CompanyAllowanceLoadData {
-  mealCompanyAllowanceLoad: {
-    success: {
-      data: {
-        id: string;
-        batchCode: string;
-        totalAmountVnd: string;
-        employeeCount: number;
-        status: string;
-      };
-    } | null;
-    error: { code: string; message: string; details?: unknown } | null;
+export interface TransactionsData {
+  mealTransactionsByCorporate: {
+    success: { data: TransactionRow[] } | null;
+    error: { code: string; message: string } | null;
+  };
+}
+
+export interface TransactionsFilteredData {
+  mealTransactionsByCorporate: {
+    success: { data: TransactionRow[]; totalCount: number } | null;
+    error: { code: string; message: string } | null;
   };
 }

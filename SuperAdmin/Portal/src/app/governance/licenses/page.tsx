@@ -1,5 +1,2 @@
-import { LicenseListScreen } from '@screens/license-list-screen';
-
-export default function Page() {
-  return <LicenseListScreen />;
-}
+import { redirect } from 'next/navigation';
+export default function Page() { redirect('/governance?tab=distributor'); }

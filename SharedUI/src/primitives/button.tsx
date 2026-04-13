@@ -77,6 +77,7 @@ export function Button({
     opacity: disabled || loading ? 0.5 : 1,
     transition: 'background 160ms ease, border-color 160ms ease, transform 120ms ease, box-shadow 160ms ease',
     whiteSpace: 'nowrap',
+    flexShrink: 0,
     ...style,
   };
 

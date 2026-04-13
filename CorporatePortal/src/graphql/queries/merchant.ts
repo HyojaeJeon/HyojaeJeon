@@ -2,20 +2,22 @@ import { gql } from '@apollo/client';
 
 /* ─────────────────────────── Queries ─────────────────────────── */
 
-export const ENROLLED_MERCHANTS_QUERY = gql`
-  query EnrolledMerchants($corporateId: ID!, $skip: Int!, $take: Int!, $filter: MerchantAllowlistFilter) {
-    mealEnrolledMerchants(corporateId: $corporateId, skip: $skip, take: $take, filter: $filter) {
+export const MERCHANT_ENROLLMENTS_QUERY = gql`
+  query MerchantEnrollments($skip: Int!, $take: Int!) {
+    mealMerchantEnrollments(skip: $skip, take: $take) {
       success {
         data {
           id
+          brandHqId
           brandName
-          branchName
-          category
+          isActive
           loopType
-          isAllowed
-          monthlyUsageCount
-          monthlyUsageAmountVnd
+          enrolledAt
+          contractEndsAt
+          createdAt
+          updatedAt
         }
+        totalCount
       }
       error {
         code
@@ -27,13 +29,13 @@ export const ENROLLED_MERCHANTS_QUERY = gql`
 
 /* ─────────────────────────── Mutations ─────────────────────────── */
 
-export const MERCHANT_ALLOW_TOGGLE_MUTATION = gql`
-  mutation MerchantAllowToggle($corporateId: ID!, $merchantId: ID!, $isAllowed: Boolean!) {
-    mealMerchantAllowToggle(corporateId: $corporateId, merchantId: $merchantId, isAllowed: $isAllowed) {
+export const MERCHANT_ACTIVATE_MUTATION = gql`
+  mutation MerchantActivate($enrollmentId: ID!) {
+    mealMerchantActivate(enrollmentId: $enrollmentId) {
       success {
         data {
           id
-          isAllowed
+          isActive
         }
       }
       error {
@@ -44,28 +46,13 @@ export const MERCHANT_ALLOW_TOGGLE_MUTATION = gql`
   }
 `;
 
-export const MERCHANT_BULK_TOGGLE_MUTATION = gql`
-  mutation MerchantBulkToggle($corporateId: ID!, $merchantIds: [ID!]!, $isAllowed: Boolean!) {
-    mealMerchantBulkToggle(corporateId: $corporateId, merchantIds: $merchantIds, isAllowed: $isAllowed) {
+export const MERCHANT_DEACTIVATE_MUTATION = gql`
+  mutation MerchantDeactivate($enrollmentId: ID!) {
+    mealMerchantDeactivate(enrollmentId: $enrollmentId) {
       success {
         data {
-          updatedCount
-        }
-      }
-      error {
-        code
-        message
-      }
-    }
-  }
-`;
-
-export const MERCHANT_CATEGORY_BULK_TOGGLE_MUTATION = gql`
-  mutation MerchantCategoryBulkToggle($corporateId: ID!, $category: String!, $isAllowed: Boolean!) {
-    mealMerchantCategoryBulkToggle(corporateId: $corporateId, category: $category, isAllowed: $isAllowed) {
-      success {
-        data {
-          updatedCount
+          id
+          isActive
         }
       }
       error {
@@ -78,41 +65,28 @@ export const MERCHANT_CATEGORY_BULK_TOGGLE_MUTATION = gql`
 
 /* ─────────────────────────── Type interfaces ─────────────────────────── */
 
-export interface MerchantRow {
+export interface MerchantEnrollmentRow {
   id: string;
-  brandName: string;
-  branchName: string | null;
-  category: string | null;
+  brandHqId: string;
+  brandName: string | null;
+  isActive: boolean;
   loopType: string;
-  isAllowed: boolean;
-  monthlyUsageCount: number;
-  monthlyUsageAmountVnd: string;
+  enrolledAt: string | null;
+  contractEndsAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface EnrolledMerchantsData {
-  mealEnrolledMerchants: {
-    success: { data: MerchantRow[] } | null;
+export interface MerchantEnrollmentsData {
+  mealMerchantEnrollments: {
+    success: { data: MerchantEnrollmentRow[]; totalCount: number } | null;
     error: { code: string; message: string } | null;
   };
 }
 
 export interface MerchantAllowToggleData {
   mealMerchantAllowToggle: {
-    success: { data: { id: string; isAllowed: boolean } } | null;
-    error: { code: string; message: string } | null;
-  };
-}
-
-export interface MerchantBulkToggleData {
-  mealMerchantBulkToggle: {
-    success: { data: { updatedCount: number } } | null;
-    error: { code: string; message: string } | null;
-  };
-}
-
-export interface MerchantCategoryBulkToggleData {
-  mealMerchantCategoryBulkToggle: {
-    success: { data: { updatedCount: number } } | null;
+    success: { data: { id: string; isActive: boolean } } | null;
     error: { code: string; message: string } | null;
   };
 }

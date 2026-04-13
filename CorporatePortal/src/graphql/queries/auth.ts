@@ -8,11 +8,14 @@ export const LOGIN_MUTATION = gql`
         data {
           accessToken
           expiresIn
+          accessTokenExpiresAt
+          sessionExpiresAt
           user {
             id
             loginId
             displayName
             userType
+            corporateId
           }
         }
       }
@@ -21,6 +24,43 @@ export const LOGIN_MUTATION = gql`
         message
         details
       }
+    }
+  }
+`;
+
+export const REFRESH_SESSION_MUTATION = gql`
+  mutation CorporateRefreshSession {
+    refreshSession {
+      success {
+        code
+        data {
+          accessToken
+          expiresIn
+          accessTokenExpiresAt
+          sessionExpiresAt
+          user {
+            id
+            loginId
+            displayName
+            userType
+            corporateId
+          }
+        }
+      }
+      error {
+        code
+        message
+        details
+      }
+    }
+  }
+`;
+
+export const LOGOUT_MUTATION = gql`
+  mutation CorporateLogout {
+    logout {
+      success { data }
+      error { code message details }
     }
   }
 `;
@@ -34,7 +74,9 @@ export const ME_QUERY = gql`
           loginId
           displayName
           userType
+          corporateId
           status
+          permissions
         }
       }
       error {
@@ -52,14 +94,28 @@ export interface LoginResult {
       data: {
         accessToken: string;
         expiresIn: string;
+        accessTokenExpiresAt: string;
+        sessionExpiresAt: string;
         user: {
           id: string;
           loginId: string;
           displayName: string;
           userType: string;
+          corporateId: string | null;
         };
       };
     } | null;
+    error: { code: string; message: string; details?: unknown } | null;
+  };
+}
+
+export interface RefreshSessionResult {
+  refreshSession: LoginResult['login'];
+}
+
+export interface LogoutResult {
+  logout: {
+    success: { data: boolean } | null;
     error: { code: string; message: string; details?: unknown } | null;
   };
 }

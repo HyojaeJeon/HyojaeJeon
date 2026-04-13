@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Skeleton } from '@platform/shared-ui';
 import {
   LayoutDashboard,
   Building2,
@@ -20,7 +21,7 @@ import {
   ChevronRight,
   type LucideIcon,
 } from 'lucide-react';
-import { NAV_ITEMS, type NavItem } from './nav-items';
+import { NAV_ITEMS, type NavItem } from './navItems';
 import { cn } from '@shared/utils/cn';
 import { useI18n } from '@i18n/I18nProvider';
 import { useHasPermission } from '@rbac/useHasPermission';
@@ -98,9 +99,11 @@ function NavLink({
   const hasChildInPath = !!item.children?.some((c) => isPathInItem(c, pathname));
 
   const [open, setOpen] = useState<boolean>(hasChildInPath);
-  if (hasChildInPath && !open) {
-    queueMicrotask(() => setOpen(true));
-  }
+  useEffect(() => {
+    if (hasChildInPath && !open) {
+      setOpen(true);
+    }
+  }, [hasChildInPath, open]);
 
   if (!allowed) return null;
 
@@ -144,8 +147,23 @@ function NavLink({
   );
 }
 
+function NavSkeleton({ collapsed }: { collapsed: boolean }) {
+  const SKELETON_COUNT = NAV_ITEMS.length;
+  return (
+    <div className="flex flex-col gap-1">
+      {Array.from({ length: SKELETON_COUNT }, (_, i) => (
+        <div key={i} className="flex items-center gap-3 rounded-xl px-3.5 py-2.5">
+          <Skeleton width={18} height={18} radius={6} />
+          {!collapsed && <Skeleton width={100 + (i % 3) * 20} height={14} radius={6} />}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function NavigationRail() {
   const collapsed = useAppSelector((s) => s.navigation.navCollapsed);
+  const hydrated = useAppSelector((s) => s.auth.hydrated);
   const dispatch = useAppDispatch();
   const { t } = useI18n();
 
@@ -172,11 +190,15 @@ export function NavigationRail() {
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 pb-3">
-        <div className="flex flex-col gap-1">
-          {NAV_ITEMS.map((item) => (
-            <NavLink key={item.key} item={item} collapsed={collapsed} />
-          ))}
-        </div>
+        {!hydrated ? (
+          <NavSkeleton collapsed={collapsed} />
+        ) : (
+          <div className="flex flex-col gap-1">
+            {NAV_ITEMS.map((item) => (
+              <NavLink key={item.key} item={item} collapsed={collapsed} />
+            ))}
+          </div>
+        )}
       </nav>
 
       <button

@@ -2,3 +2,4 @@
 export { Pager } from './Pager';
 export { FilterBar } from './FilterBar';
 export { StatusBadge } from './StatusBadge';
+export { HtmlEditor } from './HtmlEditor';

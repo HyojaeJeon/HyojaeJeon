@@ -40,8 +40,12 @@ export function Tabs({ items, value, onChange, variant = 'underline' }) {
                     boxShadow: active ? T.shadow.sm : 'none',
                     transition: 'color 140ms ease, background 140ms ease',
                     opacity: item.disabled ? 0.5 : 1,
+                    whiteSpace: 'nowrap',
                 }
                 : {
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
                     padding: isSegment ? '6px 12px' : '10px 2px',
                     fontSize: 13,
                     fontWeight: active ? 650 : 500,
@@ -56,6 +60,7 @@ export function Tabs({ items, value, onChange, variant = 'underline' }) {
                     marginBottom: !isSegment ? -1 : 0,
                     transition: 'color 140ms ease, background 140ms ease',
                     opacity: item.disabled ? 0.5 : 1,
+                    whiteSpace: 'nowrap',
                 };
             return (_jsxs("button", { role: "tab", "aria-selected": active, disabled: item.disabled, type: "button", onClick: () => onChange(item.key), style: base, children: [item.icon ? _jsx("span", { "aria-hidden": true, children: item.icon }) : null, item.label] }, item.key));
         }) }));

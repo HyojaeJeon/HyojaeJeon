@@ -20,5 +20,20 @@
   "INVALID_USER_TYPE": "Invalid user type",
   "INVALID_CREDENTIALS": "Invalid credentials",
   "ACCOUNT_INACTIVE": "Account is inactive",
-  "TOO_MANY_LOGIN_ATTEMPTS": "Too many login attempts. Please try again later"
+  "TOO_MANY_LOGIN_ATTEMPTS": "Too many login attempts. Please try again later",
+  "INVALID_REFRESH_SESSION": "Refresh session is invalid",
+  "REFRESH_SESSION_EXPIRED": "Refresh session has expired",
+  "REFRESH_SESSION_REUSED": "Refresh session was reused and has been revoked",
+  "SESSION_REVOKED": "Session has been revoked",
+  "SCOPE_REQUIRED": "{{scope}} is required",
+  "ROLE_NOT_FOUND": "Role not found: {{roleCode}}",
+  "USER_NOT_FOUND": "User not found",
+  "SYSTEM_ROLE_READONLY": "System role cannot be modified",
+  "SYSTEM_PERMISSION_READONLY": "System permission cannot be modified",
+  "SCOPE_AXIS_MISMATCH": "Role scope ({{roleScope}}) does not match the provided scope axis ({{providedAxis}})",
+  "SCOPE_AXIS_CONFLICT": "Corporate scope cannot be combined with distributor/brand/branch scope",
+  "ROLE_ALREADY_ASSIGNED": "This role is already assigned to the user",
+  "ROLE_HAS_ACTIVE_ASSIGNMENTS": "Cannot delete role with {{count}} active assignment(s)",
+  "PERMISSION_NOT_FOUND": "Permission not found",
+  "TENANT_NOT_FOUND": "Tenant not found"
 }

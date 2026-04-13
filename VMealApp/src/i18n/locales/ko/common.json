@@ -1,0 +1,34 @@
+{
+  "app": { "name": "VMeal" },
+  "tab": { "home": "홈", "explore": "탐색", "activity": "거래", "account": "계정" },
+  "common": {
+    "back": "뒤로", "continue": "계속", "confirm": "확인", "cancel": "취소", "close": "닫기",
+    "loading": "로딩 중...", "search": "검색", "viewAll": "모두 보기", "save": "저장", "share": "공유",
+    "yes": "예", "no": "아니오", "total": "합계", "filter": "필터", "retry": "다시 시도",
+    "today": "오늘", "tomorrow": "내일", "companyPercent": "({{pct}}%)",
+    "error": "오류가 발생했습니다", "offline": "오프라인"
+  },
+  "splash": { "tagline": "기업 식권 서비스", "loading": "시작하는 중..." },
+  "onboarding": { "welcome": "VMeal에 오신 것을 환영합니다", "enterCode": "회사 코드 입력", "codePlaceholder": "예: TECHCORP", "codeHelper": "회사 코드는 인사팀에서 제공합니다", "orScanQR": "이메일에서 QR코드 스캔", "version": "버전" },
+  "auth": {
+    "step": "{{current}}/{{total}} 단계",
+    "tabs": { "phone": "전화번호", "info": "정보", "permission": "권한" },
+    "phoneVerify": { "title": "전화번호 인증", "resendAfter": "재전송까지" },
+    "companyBind": { "title": "정보 확인", "name": "이름", "employeeCode": "사원번호", "department": "부서", "company": "회사", "matchSuccess": "정보가 일치합니다" },
+    "permission": { "title": "앱 권한 설정", "location": "위치", "locationDesc": "주변 식당 검색 및 위치 확인", "notification": "알림", "notificationDesc": "주문 상태 업데이트", "biometric": "생체인증", "biometricDesc": "빠른 잠금 해제 및 결제 확인", "allow": "허용", "setup": "설정", "laterNote": "나중에 설정에서 변경할 수 있습니다" }
+  },
+  "wallet": { "greeting": "안녕하세요,", "balance": "잔액", "companyFund": "회사", "personalFund": "개인", "todaySpent": "오늘", "order": "주문하기", "topUp": "충전하기", "groupPay": "같이 결제", "recentTxn": "최근 거래", "nearbyMerchants": "주변 식당", "map": "지도", "personalTopUp": "개인 충전" },
+  "order": { "menu": "메뉴", "allCategories": "전체", "timeSlot": "도착 시간", "paymentDetails": "결제 상세", "companyPay": "회사 부담", "personalPay": "개인 부담", "gpsVerified": "위치 확인됨", "orderBtn": "주문하기", "dineIn": "매장", "takeout": "포장", "table": "테이블", "scheduledAt": "예약 시간", "popular": "인기", "submit": "주문 및 결제", "cancel": "주문 취소", "cancelPolicy": "취소 정책", "cancelFreeUntilAccepted": "매장 확인 전까지 취소 가능", "cancelFreeUntilDeadline": "{{minutes}}분 전까지 취소 가능", "cancelNotAllowed": "결제 후 취소 불가" },
+  "orderStatus": { "success": "주문 완료!", "paid": "결제 완료", "accepted": "주문 접수", "preparing": "조리 중", "ready": "준비 완료", "completed": "완료", "orderDetails": "주문 상세", "goHome": "홈으로", "shareReceipt": "영수증 공유", "orderCode": "주문번호" },
+  "status": { "PAID_PENDING_ACCEPT": "확인 대기중...", "ACCEPTED": "주문 확인됨", "PREPARING": "조리 중...", "READY": "준비 완료!", "COMPLETED": "완료", "CANCELLED_BY_USER": "취소됨", "REJECTED": "매장 거절", "EXPIRED": "만료" },
+  "merchant": { "whatToEat": "오늘 뭐 먹지?", "searchPlaceholder": "식당, 메뉴 검색...", "open": "영업중", "closed": "영업종료", "listView": "목록", "mapView": "지도", "nearby": "주변 식당", "companyPolicy": "회사 정책", "limit": "한도", "timeApplied": "적용 시간", "hybridPayment": "복합 결제", "popularItems": "인기 메뉴", "congestion": "혼잡도", "busiest": "가장 혼잡", "navigate": "길안내", "rating": "평점", "perTransaction": "/건", "appliedPolicy": "{{name}} 적용", "call": "전화" },
+  "dailyMenu": { "title": "오늘의 메뉴", "morning": "아침", "lunch": "점심", "dinner": "저녁", "subscribe": "메뉴 알림 구독", "subscribed": "구독중", "dailySpecial": "점심 특선 메뉴" },
+  "transaction": { "monthlyTotal": "월 지출 합계", "company": "회사", "personal": "개인", "all": "전체", "payment": "결제", "topUp": "충전", "refund": "환불", "declined": "거절", "companyFull": "100% 회사", "detail": { "title": "거래 상세", "success": "거래 성공", "restaurant": "식당", "address": "주소", "type": "유형", "status": "상태", "approved": "승인됨", "policy": "정책", "transactionId": "거래번호", "orderId": "주문번호", "saveImage": "이미지 저장", "reportIssue": "문제 신고" } },
+  "topUp": { "title": "충전", "personalBalance": "개인 잔액", "personalInfo": "회사 한도 초과 시 개인 잔액에서 차감됩니다", "selectAmount": "금액 선택", "orEnterCustom": "직접 금액 입력", "paymentMethod": "결제 수단", "available": "사용가능", "linked": "연결됨", "notLinked": "미연결", "linkNow": "연결하기", "topUpBtn": "{{amount}} 충전" },
+  "settings": { "mealManagement": "식권 관리", "policyView": "적용 정책", "badgeLink": "RFID 카드 연동", "eWallet": "전자지갑", "appSettings": "앱 설정", "notification": "알림", "language": "언어", "languageVi": "Tiếng Việt", "biometric": "생체인증", "other": "기타", "support": "고객센터", "appInfo": "앱 정보", "logout": "로그아웃", "version": "버전 {{ver}} (빌드 {{build}})", "activeAccount": "활성 계정", "momoLinked": "MoMo 연결됨" },
+  "badge": { "title": "RFID 카드 연동", "linked": "카드 연동 완료", "active": "RFID 카드가 정상 작동 중입니다", "badgeId": "카드 번호", "status": "상태", "statusActive": "활성", "linkedDate": "연동일", "howToUse": "RFID 카드 사용법", "step1": "식당 POS 기기에 카드를 태그하세요", "step2": "POS 화면에서 주문을 확인하세요", "step3": "VMeal 계정에서 자동 결제됩니다", "adminInfo": "RFID 카드 발급 및 연동은 회사 관리자가 진행합니다. 변경이 필요하면 인사팀에 문의하세요.", "reportLost": "분실 신고", "lostWarning": "카드가 즉시 비활성화됩니다" },
+  "policy": { "title": "적용 정책", "banner": "{{company}}에서 적용한 정책입니다", "active": "적용중", "limitPerTxn": "건당 한도", "dailyLimit": "일일 한도", "timeApplied": "적용 시간", "daysApplied": "적용 요일", "monFri": "월–금", "mealType": "식사", "hybridPayment": "개인 결합", "merchantCategories": "식당 유형", "validity": "유효기간", "contactAdmin": "정책 변경은 관리자에게 문의하세요", "breakfast": "아침", "lunch": "점심", "dinner": "저녁" },
+  "preOrder": { "title": "사전 주문", "selectMeal": "식사 선택", "menuDate": "{{date}} 메뉴", "sideDishes": "사이드", "drinks": "음료", "summary": "주문 요약", "pickupAt": "수령 시간", "preOrderBtn": "사전 주문", "morningSlot": "아침 06:00–09:00", "lunchSlot": "점심 11:00–14:00", "dinnerSlot": "저녁 17:00–21:00" },
+  "myPreOrders": { "title": "사전 주문 내역", "upcoming": "예정", "completed": "완료", "cancelled": "취소됨", "confirmed": "확정", "pending": "대기중", "cancelOrder": "주문 취소" },
+  "groupPay": { "title": "같이 결제", "totalBill": "총 금액", "splitMethod": "분할 방식", "equalSplit": "균등 분할", "equalDesc": "모두 같은 금액", "custom": "직접 입력", "customDesc": "각자 금액 지정", "members": "참여자", "add": "추가", "yourShare": "내 부담금", "startPayment": "결제 시작", "you": "나", "waiting": "대기", "todayAt": "오늘" }
+}

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-04-09T10:18:53.504Z",
-  "operationCount": 47,
+  "generatedAt": "2026-04-12T09:42:36.964Z",
+  "operationCount": 49,
   "operations": [
     {
       "operationName": "AuditLogConnection",
@@ -80,7 +80,11 @@
     },
     {
       "operationName": "Login",
-      "sha256Hash": "857b03e929ad39639e4020f535387461d6eed7e4a379d818c979e44e55dfc2f8"
+      "sha256Hash": "51e008b8e9e3598841c242f377f2012fafe43f182ac02f70ffe709661aaa5aed"
+    },
+    {
+      "operationName": "Logout",
+      "sha256Hash": "4cf2c5fa6eb10a7e3e2193796c1d852a1c027bc2913814ba3f488d3d120f6450"
     },
     {
       "operationName": "MealWallet",
@@ -153,6 +157,10 @@
     {
       "operationName": "RbacUserAssignments",
       "sha256Hash": "d73cb12858583cc55716a287f328ccbb387514955b9e3058d08343ef0329622c"
+    },
+    {
+      "operationName": "RefreshSession",
+      "sha256Hash": "bff8248d46b432cc3d0aa5b665e15ce9ee3100fe45222b3acbc8f1c56a3d7e1a"
     },
     {
       "operationName": "ResetAuthAccountPassword",

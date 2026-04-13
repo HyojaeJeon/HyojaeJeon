@@ -20,5 +20,20 @@
   "INVALID_USER_TYPE": "Loại người dùng không hợp lệ",
   "INVALID_CREDENTIALS": "Thông tin đăng nhập không hợp lệ",
   "ACCOUNT_INACTIVE": "Tài khoản không hoạt động",
-  "TOO_MANY_LOGIN_ATTEMPTS": "Đăng nhập quá nhiều lần. Vui lòng thử lại sau"
+  "TOO_MANY_LOGIN_ATTEMPTS": "Đăng nhập quá nhiều lần. Vui lòng thử lại sau",
+  "INVALID_REFRESH_SESSION": "Session refresh không hợp lệ",
+  "REFRESH_SESSION_EXPIRED": "Session refresh đã hết hạn",
+  "REFRESH_SESSION_REUSED": "Refresh token đã bị tái sử dụng và session đã bị thu hồi",
+  "SESSION_REVOKED": "Session đã bị thu hồi",
+  "SCOPE_REQUIRED": "Cần có thông tin {{scope}}",
+  "ROLE_NOT_FOUND": "Không tìm thấy vai trò: {{roleCode}}",
+  "USER_NOT_FOUND": "Không tìm thấy người dùng",
+  "SYSTEM_ROLE_READONLY": "Không thể sửa vai trò hệ thống",
+  "SYSTEM_PERMISSION_READONLY": "Không thể sửa quyền hệ thống",
+  "SCOPE_AXIS_MISMATCH": "Phạm vi vai trò ({{roleScope}}) không khớp với trục phạm vi được cung cấp ({{providedAxis}})",
+  "SCOPE_AXIS_CONFLICT": "Không thể kết hợp phạm vi doanh nghiệp với phạm vi nhà phân phối/thương hiệu/chi nhánh",
+  "ROLE_ALREADY_ASSIGNED": "Vai trò này đã được gán cho người dùng",
+  "ROLE_HAS_ACTIVE_ASSIGNMENTS": "Không thể xoá vai trò có {{count}} phân công đang hoạt động",
+  "PERMISSION_NOT_FOUND": "Không tìm thấy quyền",
+  "TENANT_NOT_FOUND": "Không tìm thấy thuê bao"
 }

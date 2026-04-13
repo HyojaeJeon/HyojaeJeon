@@ -1,2 +1,2 @@
-import { InvoiceDetailScreen } from '@screens/invoice-detail-screen';
+import { InvoiceDetailScreen } from '@screens/invoiceDetailScreen';
 export default function Page() { return <InvoiceDetailScreen />; }

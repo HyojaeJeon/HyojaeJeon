@@ -29,7 +29,7 @@ BrandPosApp/Presentation/CEF/SDK/libcef_dll_wrapper/
 x64/
 x86/
 Debug/
-Release/
+/Release/
 ipch/
 *.pch
 *.pdb
@@ -78,8 +78,6 @@ service-account*.json
 .claude/
 .gstack/
 
-# 한국어: 각 개발자가 로컬에서 자신의 언어로 번역해 둔 CLAUDE.md.
-#   원본은 CLAUDE.ko.md (Korean source of truth) 를 git 에 둔다.
-# Tiếng Việt: CLAUDE.md là bản dịch local của từng máy (Hàn cho owner, Việt cho LTV).
-#   Bản gốc tiếng Hàn nằm trong CLAUDE.ko.md (commit vào git).
-CLAUDE.md
+# CLAUDE.md 는 한국어 원본으로 git 에 추적한다.
+# CLAUDE.ko.md 는 더 이상 사용하지 않는다 (CLAUDE.md 로 통합).
+CLAUDE.ko.md

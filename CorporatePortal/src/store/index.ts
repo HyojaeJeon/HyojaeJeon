@@ -5,7 +5,9 @@ import { rootReducer, type RootState } from './rootReducer';
 export function makeStore() {
   return configureStore({
     reducer: rootReducer,
-    devTools: process.env.NODE_ENV !== 'production',
+    // Redux DevTools extension 는 Symbol.observable 경고를 유발할 수 있어
+    // 운영/개발 모두에서 비활성화한다. 디버깅은 Redux state slice 직접 확인으로 충분하다.
+    devTools: false,
   });
 }
 

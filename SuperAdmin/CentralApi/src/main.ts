@@ -11,12 +11,31 @@ import { ValidationPipe, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import helmet from '@fastify/helmet';
 import compress from '@fastify/compress';
-import { AppModule } from './app.module';
+import cookie from '@fastify/cookie';
+import multipart from '@fastify/multipart';
+import { AppModule } from './App.module';
+import {
+  decodeQueuedCookiesHeader,
+  GRAPHQL_COOKIE_BATCH_HEADER,
+} from '@core/graphql/plugins/GraphqlCookie.plugin';
+import { clearResponseCookies, getResponseCookies } from '@core/graphql/responseCookiesRegistry';
 
 function readIntEnv(name: string, fallback: number): number {
   const raw = process.env[name];
   const parsed = raw ? Number(raw) : NaN;
   return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function normalizeSetCookieHeader(
+  value: string | string[] | number | undefined,
+): string[] {
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === 'string' && item.length > 0);
+  }
+  if (typeof value === 'string' && value.length > 0) {
+    return [value];
+  }
+  return [];
 }
 
 async function bootstrap() {
@@ -47,6 +66,50 @@ async function bootstrap() {
     encodings: ['gzip', 'deflate'],
   });
 
+  await app.register(cookie);
+
+  /**
+   * 한국어: GraphQL 쿠키 flush 의 최종 safety-net.
+   *   표준 경로는 GraphqlCookie.plugin → reply.raw.setHeader 이지만,
+   *   비표준 응답 경로에서도 responseCookies 버퍼를 잃지 않도록 onSend 에서 한 번 더 확인한다.
+   * Tiếng Việt: Safety-net cuối cùng cho flush cookie GraphQL.
+   */
+  const fastify = app.getHttpAdapter().getInstance();
+  fastify.addHook('onSend', (request, reply, _payload, done) => {
+    const requestId = (request as { id?: string }).id;
+    const batchHeader =
+      (reply.getHeader?.(GRAPHQL_COOKIE_BATCH_HEADER) as string | undefined) ??
+      (reply.raw.getHeader?.(GRAPHQL_COOKIE_BATCH_HEADER) as string | undefined);
+    const cookies =
+      decodeQueuedCookiesHeader(batchHeader) ??
+      (requestId ? getResponseCookies(requestId) : undefined) ??
+      (reply.raw as unknown as { __responseCookies?: string[] }).__responseCookies ??
+      (request.raw as unknown as { __responseCookies?: string[] }).__responseCookies ??
+      (request as unknown as { __responseCookies?: string[] }).__responseCookies;
+    if (cookies?.length) {
+      const existingCookies = normalizeSetCookieHeader(reply.raw.getHeader?.('set-cookie'));
+      const mergedCookies = Array.from(new Set([...existingCookies, ...cookies]));
+      reply.removeHeader('set-cookie');
+      reply.header('set-cookie', mergedCookies);
+    }
+    reply.removeHeader?.(GRAPHQL_COOKIE_BATCH_HEADER);
+    reply.raw.removeHeader?.(GRAPHQL_COOKIE_BATCH_HEADER);
+    if (requestId) {
+      clearResponseCookies(requestId);
+    }
+    done();
+  });
+
+  /**
+   * 한국어: Fastify multipart 등록 — 파일 업로드용 (REST 예외 엔드포인트).
+   *         최대 파일 크기 10MB. Upload.controller.ts 에서 사용한다.
+   * Tiếng Việt: Đăng ký Fastify multipart — dùng cho upload file (endpoint REST ngoại lệ).
+   *             Kích thước file tối đa 10MB. Được sử dụng trong Upload.controller.ts.
+   */
+  await app.register(multipart, {
+    limits: { fileSize: 10 * 1024 * 1024 },
+  });
+
   /**
    * 한국어: REST 엔드포인트에만 'api/v1' 접두사 적용.
    *         GraphQL(/graphql)과 health(/health)는 접두사에서 제외한다.
@@ -67,7 +130,7 @@ async function bootstrap() {
     new ValidationPipe({
       transform: true,
       whitelist: true,
-      forbidNonWhitelisted: true,
+      forbidNonWhitelisted: false,
     }),
   );
 
@@ -77,15 +140,23 @@ async function bootstrap() {
    * Tiếng Việt: Cấu hình CORS — đọc danh sách domain được phép từ biến môi trường ALLOWED_ORIGINS.
    *             Trong môi trường sản xuất, chỉ cho phép URL Portal (yêu cầu bảo mật).
    */
-  const allowedOrigins = configService
-    .get<string>('ALLOWED_ORIGINS', 'http://localhost:3000')
-    .split(',');
+  const allowedOriginsRaw = configService
+    .get<string>('ALLOWED_ORIGINS', '')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+
+  const corsOrigin: (string | RegExp)[] = [
+    /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/,
+    'app://pos',
+    ...allowedOriginsRaw,
+  ];
 
   app.enableCors({
-    origin: allowedOrigins,
+    origin: corsOrigin,
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders: 'Content-Type,Authorization',
+    allowedHeaders: 'Content-Type,Authorization,Accept-Language',
   });
 
   const port = configService.get<number>('PORT', 4000);

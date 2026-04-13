@@ -1,0 +1,51 @@
+# OSX
+.DS_Store
+
+# Xcode
+build/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xcuserstate
+project.xcworkspace/
+xcuserdata/
+ios/Pods/
+
+# Android
+*.iml
+.gradle/
+local.properties
+android/app/build/
+android/.gradle/
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Metro
+.metro-health-check*
+
+# Env
+.env.local
+.env.production
+
+# Build
+*.jsbundle
+*.jsbundle.map
+
+# TypeScript
+*.tsbuildinfo
+
+# Coverage
+coverage/
+
+# Ruby vendor bundle
+vendor/
+
+# Gemfile lock (generated)
+Gemfile.lock
+
+# Codegen
+src/graphql/generated/

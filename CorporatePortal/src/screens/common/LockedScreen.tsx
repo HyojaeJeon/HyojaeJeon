@@ -12,7 +12,7 @@ export function LockedScreen() {
       </div>
       <h2 className="text-lg font-bold text-fg">{t('common.error')}</h2>
       <p className="max-w-md text-center text-sm text-fg-muted">
-        이 페이지에 접근할 권한이 없습니다.
+        {t('common.permissionDenied')}
       </p>
     </div>
   );

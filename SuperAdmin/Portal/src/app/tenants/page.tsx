@@ -1,2 +1,2 @@
-import { TenantsOverviewScreen } from '@screens/tenants-overview-screen';
+import { TenantsOverviewScreen } from '@screens/tenantsOverviewScreen';
 export default function Page() { return <TenantsOverviewScreen />; }

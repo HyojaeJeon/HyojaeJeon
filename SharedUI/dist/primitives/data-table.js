@@ -1,7 +1,8 @@
 'use client';
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import React from 'react';
 import { sharedUiTokens as T } from '../foundation/tokens';
-export function DataTable({ columns, rows, rowKey, emptyState, caption, compact = false, onRowClick, }) {
+export function DataTable({ columns, rows, rowKey, emptyState, caption, compact = false, onRowClick, expandedRowKey, renderExpandedRow, }) {
     if (rows.length === 0) {
         return (_jsx("div", { style: {
                 display: 'flex',
@@ -45,21 +46,26 @@ export function DataTable({ columns, rows, rowKey, emptyState, caption, compact 
                                     width: column.width,
                                     position: 'sticky',
                                     top: 0,
-                                }, children: column.header }, column.key))) }) }), _jsx("tbody", { children: rows.map((row, index) => (_jsx("tr", { onClick: onRowClick ? () => onRowClick(row, index) : undefined, style: {
-                                cursor: onRowClick ? 'pointer' : 'default',
-                                transition: 'background 120ms ease',
-                            }, onMouseEnter: (e) => {
-                                if (onRowClick)
-                                    e.currentTarget.style.background = T.colors.surfaceMuted;
-                            }, onMouseLeave: (e) => {
-                                if (onRowClick)
-                                    e.currentTarget.style.background = 'transparent';
-                            }, children: columns.map((column) => (_jsx("td", { style: {
-                                    padding: `${cellPaddingY} ${cellPaddingX}`,
-                                    borderTop: `1px solid rgb(0 0 0 / 0.04)`,
-                                    textAlign: column.align ?? 'left',
-                                    verticalAlign: 'middle',
-                                    color: T.colors.text,
-                                    fontSize: 13,
-                                }, children: column.render(row, index) }, column.key))) }, rowKey(row, index)))) })] })] }));
+                                }, children: column.header }, column.key))) }) }), _jsx("tbody", { children: rows.map((row, index) => {
+                            const key = rowKey(row, index);
+                            const isExpanded = expandedRowKey != null && key === expandedRowKey;
+                            return (_jsxs(React.Fragment, { children: [_jsx("tr", { onClick: onRowClick ? () => onRowClick(row, index) : undefined, style: {
+                                            cursor: onRowClick ? 'pointer' : 'default',
+                                            transition: 'background 120ms ease',
+                                            background: isExpanded ? T.colors.surfaceMuted : undefined,
+                                        }, onMouseEnter: (e) => {
+                                            if (onRowClick && !isExpanded)
+                                                e.currentTarget.style.background = T.colors.surfaceMuted;
+                                        }, onMouseLeave: (e) => {
+                                            if (onRowClick && !isExpanded)
+                                                e.currentTarget.style.background = 'transparent';
+                                        }, children: columns.map((column) => (_jsx("td", { style: {
+                                                padding: `${cellPaddingY} ${cellPaddingX}`,
+                                                borderTop: `1px solid rgb(0 0 0 / 0.04)`,
+                                                textAlign: column.align ?? 'left',
+                                                verticalAlign: 'middle',
+                                                color: T.colors.text,
+                                                fontSize: 13,
+                                            }, children: column.render(row, index) }, column.key))) }), isExpanded && renderExpandedRow && (_jsx("tr", { children: _jsx("td", { colSpan: columns.length, style: { padding: 0 }, children: renderExpandedRow(row, index) }) }))] }, key));
+                        }) })] })] }));
 }

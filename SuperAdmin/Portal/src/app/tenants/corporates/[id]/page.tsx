@@ -1,2 +1,2 @@
-import { CorporateDetailScreen } from '@screens/corporate-detail-screen';
+import { CorporateDetailScreen } from '@screens/corporateDetailScreen';
 export default function Page() { return <CorporateDetailScreen />; }

@@ -51,6 +51,7 @@ export function Button({ variant = 'primary', size = 'md', startIcon, endIcon, l
         opacity: disabled || loading ? 0.5 : 1,
         transition: 'background 160ms ease, border-color 160ms ease, transform 120ms ease, box-shadow 160ms ease',
         whiteSpace: 'nowrap',
+        flexShrink: 0,
         ...style,
     };
     return (_jsxs("button", { type: type, disabled: disabled || loading, "aria-busy": loading || undefined, style: merged, ...props, children: [startIcon, _jsx("span", { children: loading ? '…' : children }), endIcon] }));

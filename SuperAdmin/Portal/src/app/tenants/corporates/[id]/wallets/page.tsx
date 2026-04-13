@@ -1,2 +1,2 @@
-import { CorporateWalletsScreen } from '@screens/corporate-wallets-screen';
+import { CorporateWalletsScreen } from '@screens/corporateWalletsScreen';
 export default function Page() { return <CorporateWalletsScreen />; }

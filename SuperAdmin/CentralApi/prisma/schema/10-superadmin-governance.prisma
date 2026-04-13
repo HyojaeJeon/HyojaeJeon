@@ -28,6 +28,39 @@ model SuperAdminUser {
   @@index([status], name: "idx_superadmin_status")
 }
 
+// 한국어: 인증 refresh 세션 테이블.
+//   브라우저 기반 웹 클라이언트의 rotating refresh token 세션을 서버 권위로 관리한다.
+//   current/previous token hash 를 함께 보관해 짧은 중복 요청 grace 를 허용하고,
+//   revoke / reuse detection / idle expiration / absolute expiration 을 지원한다.
+//
+// Tiếng Việt: Bảng session refresh token.
+//   Quản lý session refresh token quay vòng cho web client ở phía server.
+//   Lưu current/previous token hash để cho phép grace ngắn cho request trùng,
+//   hỗ trợ revoke / phát hiện tái sử dụng / hết hạn idle / hết hạn tuyệt đối.
+model AuthRefreshSession {
+  id                     String    @id @default(uuid()) @db.Uuid
+  userType               String    @db.VarChar(30)
+  userId                 String    @db.Uuid
+  currentTokenHash       String    @db.VarChar(128)
+  currentTokenCiphertext String
+  previousTokenHash      String?   @db.VarChar(128)
+  previousTokenGraceUntil DateTime? @db.Timestamptz()
+  absoluteExpiresAt      DateTime  @db.Timestamptz()
+  idleExpiresAt          DateTime  @db.Timestamptz()
+  lastUsedAt             DateTime  @default(now()) @db.Timestamptz()
+  ipAddress              String?   @db.VarChar(45)
+  userAgent              String?
+  revokedAt              DateTime? @db.Timestamptz()
+  revokeReason           String?   @db.VarChar(120)
+  createdAt              DateTime  @default(now()) @db.Timestamptz()
+  updatedAt              DateTime  @updatedAt @db.Timestamptz()
+
+  @@index([userType, userId], name: "idx_auth_refresh_session_user")
+  @@index([idleExpiresAt], name: "idx_auth_refresh_session_idle")
+  @@index([absoluteExpiresAt], name: "idx_auth_refresh_session_absolute")
+  @@index([revokedAt], name: "idx_auth_refresh_session_revoked")
+}
+
 // 한국어: 플랫폼 라이선스 테이블.
 //   대리점, 브랜드, 지점 등 다양한 범위(scope)에 대한 라이선스를 관리한다.
 //   최대 지점 수, 최대 단말기 수, 허용 국가 코드 등의 라이선스 조건을 포함한다.
@@ -213,4 +246,39 @@ model DeployRelease {
   // 한국어: 범위+상태 인덱스 - 특정 대상의 배포 상태 조회 최적화
   // Tiếng Việt: Chỉ mục phạm vi+trạng thái - tối ưu truy vấn trạng thái triển khai của đối tượng cụ thể
   @@index([scopeType, scopeId, releaseStatus], name: "idx_deploy_release_scope")
+}
+
+// ─── Notification ───────────────────────────────────────────────────────
+// 한국어: 알림 채널 — 사용자별 알림 수신 채널 (EMAIL, WEB_PUSH, SLACK, WEBHOOK)
+// Tiếng Việt: Kênh thông báo — kênh nhận thông báo theo người dùng
+
+model NotificationChannel {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @db.Uuid
+  userType    String   @db.VarChar(30) // SUPER_ADMIN, DISTRIBUTOR_USER, BRAND_ADMIN, CORPORATE_ADMIN
+  channelType String   @db.VarChar(30) // EMAIL, WEB_PUSH, SLACK, WEBHOOK
+  config      Json     @default("{}") // 채널별 설정 (email 주소, webhook URL 등)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now()) @db.Timestamptz()
+  updatedAt   DateTime @updatedAt @db.Timestamptz()
+
+  @@unique([userId, userType, channelType], name: "uq_notification_channel")
+  @@index([userId, userType], name: "idx_notification_channel_user")
+}
+
+// 한국어: 알림 선호 설정 — 이벤트 타입별 수신 채널 매핑
+// Tiếng Việt: Tuỳ chọn thông báo — ánh xạ kênh nhận theo loại sự kiện
+
+model NotificationPreference {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  userType  String   @db.VarChar(30)
+  eventType String   @db.VarChar(60) // SYNC_FAILED, LICENSE_EXPIRING, DEPLOY_COMPLETED 등
+  channels  String[] @db.VarChar(30) // ["EMAIL", "WEB_PUSH"]
+  isEnabled Boolean  @default(true)
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+
+  @@unique([userId, userType, eventType], name: "uq_notification_preference")
+  @@index([userId, userType], name: "idx_notification_preference_user")
 }

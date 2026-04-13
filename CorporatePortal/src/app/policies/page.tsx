@@ -1,2 +1,2 @@
-import { PolicyListScreen } from '@screens/policy-list-screen';
+import { PolicyListScreen } from '@screens/policyListScreen';
 export default function Page() { return <PolicyListScreen />; }

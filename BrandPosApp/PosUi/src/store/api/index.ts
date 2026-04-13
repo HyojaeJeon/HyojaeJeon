@@ -14,3 +14,6 @@ export { useGetBootstrapDataQuery } from './systemApi';
 
 // Auth
 export { useLoginMutation, useLogoutMutation } from './authApi';
+
+// MealTicket (RFID 식권)
+export { useLookupBadgeMutation, useAuthorizeMealTicketMutation } from './mealTicketApi';

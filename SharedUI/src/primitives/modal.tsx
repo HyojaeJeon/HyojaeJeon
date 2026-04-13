@@ -56,7 +56,7 @@ export function Modal({
     width: typeof width === 'number' ? `${width}px` : width,
     maxWidth: '100%',
     maxHeight: '90vh',
-    overflow: 'auto',
+    overflow: 'hidden',
     background: T.colors.surface,
     borderRadius: T.radius.md,
     boxShadow: T.shadow.lg,
@@ -68,10 +68,12 @@ export function Modal({
   const header: CSSProperties = {
     padding: '18px 20px 8px',
     borderBottom: `1px solid ${T.colors.border}`,
+    flexShrink: 0,
   };
   const body: CSSProperties = {
     padding: '16px 20px',
     flex: 1,
+    overflowY: 'auto',
   };
   const foot: CSSProperties = {
     padding: '12px 20px 16px',
@@ -79,6 +81,7 @@ export function Modal({
     display: 'flex',
     gap: 8,
     justifyContent: 'flex-end',
+    flexShrink: 0,
   };
 
   return createPortal(

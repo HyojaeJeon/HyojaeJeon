@@ -21,6 +21,7 @@
       "@store/*": ["./src/store/*"],
       "@providers/*": ["./src/providers/*"],
       "@graphql/*": ["./src/graphql/*"],
+      "@auth/*": ["./src/auth/*"],
       "@i18n/*": ["./src/i18n/*"],
       "@rbac/*": ["./src/rbac/*"],
       "@styles/*": ["./src/styles/*"],

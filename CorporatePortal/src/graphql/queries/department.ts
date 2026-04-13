@@ -8,12 +8,14 @@ export const DEPARTMENTS_QUERY = gql`
       success {
         data {
           id
+          corporateId
           departmentCode
           departmentName
           parentDepartmentId
           parentDepartmentName
           employeeCount
-          isExternalSync
+          createdAt
+          updatedAt
         }
       }
       error {
@@ -30,12 +32,12 @@ export const DEPARTMENT_DETAIL_QUERY = gql`
       success {
         data {
           id
+          corporateId
           departmentCode
           departmentName
           parentDepartmentId
           parentDepartmentName
           employeeCount
-          isExternalSync
           createdAt
           updatedAt
         }
@@ -108,15 +110,12 @@ export const DEACTIVATE_DEPARTMENT_MUTATION = gql`
 
 export interface DepartmentRow {
   id: string;
+  corporateId: string;
   departmentCode: string;
   departmentName: string;
   parentDepartmentId: string | null;
   parentDepartmentName: string | null;
-  employeeCount: number;
-  isExternalSync: boolean;
-}
-
-export interface DepartmentDetail extends DepartmentRow {
+  employeeCount: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -130,7 +129,7 @@ export interface DepartmentsData {
 
 export interface DepartmentDetailData {
   mealDepartment: {
-    success: { data: DepartmentDetail } | null;
+    success: { data: DepartmentRow } | null;
     error: { code: string; message: string } | null;
   };
 }

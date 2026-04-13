@@ -12,3 +12,5 @@ export * from './operations/rbac.js';
 export * from './operations/governance.js';
 export * from './mealticket/index.js';
 export * from './entitlement/index.js';
+export * from './phone/index.js';
+export * from './upload/index.js';

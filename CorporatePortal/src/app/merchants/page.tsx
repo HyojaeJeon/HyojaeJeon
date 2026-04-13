@@ -1,2 +1,2 @@
-import { MerchantListScreen } from '@screens/merchant-list-screen';
+import { MerchantListScreen } from '@screens/merchantListScreen';
 export default function Page() { return <MerchantListScreen />; }

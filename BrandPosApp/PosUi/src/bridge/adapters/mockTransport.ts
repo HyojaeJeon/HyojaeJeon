@@ -144,6 +144,51 @@ export const mockTransport = async (envelope: Envelope): Promise<MockResponse> =
       });
     }
 
+    // ── 식권 RFID ──
+
+    case 'MEAL_TICKET:LOOKUP_BADGE': {
+      const rfid = params.badgeRfid as string;
+      // mock: 등록된 배지 시뮬레이션
+      if (!rfid || rfid === 'UNKNOWN') {
+        return makeError(v, requestId, 'NOT_FOUND', '미등록 배지입니다');
+      }
+      return makeSuccess(v, requestId, {
+        employeeId: 'emp-001',
+        employeeName: '김민수',
+        departmentName: '개발팀',
+        walletId: 'wallet-001',
+        balanceVnd: 500_000,
+        companyAllowanceVnd: 300_000,
+        personalTopUpVnd: 200_000,
+        dailyLimitVnd: 200_000,
+        walletStatus: 'ACTIVE',
+        policyName: '기본 식대 정책',
+      });
+    }
+
+    case 'MEAL_TICKET:AUTHORIZE': {
+      const amount = (params.requestedAmountVnd as number) || 0;
+      // mock: 30만 초과 시 잔액 부족 거절
+      if (amount > 300_000) {
+        return makeSuccess(v, requestId, {
+          transactionId: `txn-${Date.now()}`,
+          status: 'DECLINED',
+          approvedAmountVnd: 0,
+          companyShareVnd: 0,
+          employeeShareVnd: 0,
+          declineReason: 'INSUFFICIENT_BALANCE',
+        });
+      }
+      return makeSuccess(v, requestId, {
+        transactionId: `txn-${Date.now()}`,
+        status: 'APPROVED',
+        approvedAmountVnd: amount,
+        companyShareVnd: Math.min(amount, 200_000),
+        employeeShareVnd: Math.max(0, amount - 200_000),
+        declineReason: null,
+      });
+    }
+
     default:
       console.warn(`[MockTransport] Unhandled cmd: ${cmd}`);
       return makeSuccess(v, requestId, null);

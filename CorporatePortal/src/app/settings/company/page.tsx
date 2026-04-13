@@ -1,2 +1,2 @@
-import { SettingsCompanyScreen } from '@screens/settings-company-screen';
+import { SettingsCompanyScreen } from '@screens/settingsCompanyScreen';
 export default function Page() { return <SettingsCompanyScreen />; }

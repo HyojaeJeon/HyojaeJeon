@@ -11,7 +11,19 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./persisted-operation-manifest.json": "./dist/persisted-operation-manifest.json"
+    "./persisted-operation-manifest.json": "./dist/persisted-operation-manifest.json",
+    "./upload": {
+      "types": "./dist/upload/index.d.ts",
+      "default": "./dist/upload/index.js"
+    }
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
   },
   "files": [
     "dist"
@@ -20,5 +32,8 @@
     "build": "node ../../SuperAdmin/CentralApi/node_modules/typescript/bin/tsc -p tsconfig.json && npm run generate:persisted-manifest",
     "generate:persisted-manifest": "node ./scripts/generate-persisted-manifest.mjs",
     "validate:operations": "node ./scripts/validate-operations-vs-schema.mjs"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14"
   }
 }

@@ -33,11 +33,15 @@ import {
   Languages as LanguagesIcon,
   Globe2,
   Heart,
+  Settings,
+  FileText,
+  BellRing,
+  Info,
   ChevronLeft,
   ChevronRight,
   type LucideIcon,
 } from 'lucide-react';
-import { NAV_ITEMS, type NavItem } from './nav-items';
+import { NAV_ITEMS, type NavItem } from './navItems';
 import { cn } from '@shared/utils/cn';
 import { useI18n } from '@i18n/I18nProvider';
 import { useHasPermission } from '@rbac/useHasPermission';
@@ -74,6 +78,10 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Languages: LanguagesIcon,
   Globe2,
   Heart,
+  Settings,
+  FileText,
+  BellRing,
+  Info,
 };
 
 /** 현재 pathname 이 item 자신 또는 children 중 하나에 매칭되는지 */

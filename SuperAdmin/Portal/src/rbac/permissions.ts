@@ -1,66 +1,50 @@
 /**
- * CentralApi PermissionService 의 39 개 키와 1:1 매칭한다.
- * 실제 검증은 서버 PermissionGuard 가 수행하며, Portal 은 UI hide/disable 용으로만 사용한다.
+ * 권한 키의 진실의 원천(Source of Truth):
+ *   CentralApi `core/rbac/permissionDefinitions.ts`
+ *
+ * 이 파일은 화면에서 빌드 타임에 참조하는 별칭만 유지.
+ * 새 키 추가 시 CentralApi permissionDefinitions.ts 만 수정.
  */
 export const PERMISSIONS = {
   // Platform
-  PLATFORM_AUDIT_READ: 'platform.audit.read',
-  PLATFORM_USER_READ: 'platform.user.read',
-  PLATFORM_USER_WRITE: 'platform.user.write',
-  PLATFORM_RBAC_READ: 'platform.rbac.read',
-  PLATFORM_RBAC_WRITE: 'platform.rbac.write',
-  PLATFORM_POLICY_READ: 'platform.policy.read',
-  PLATFORM_POLICY_WRITE: 'platform.policy.write',
+  PLATFORM_AUDIT_READ: 'audit:read',
+  PLATFORM_USER_READ: 'users:list',
+  PLATFORM_USER_WRITE: 'users:update',
+  PLATFORM_RBAC_READ: 'roles:list',
+  PLATFORM_RBAC_WRITE: 'roles:update',
 
   // Distributor
-  DISTRIBUTOR_PROFILE_READ: 'distributor.profile.read',
-  DISTRIBUTOR_PROFILE_WRITE: 'distributor.profile.write',
+  DISTRIBUTOR_PROFILE_READ: 'distributors:read',
+  DISTRIBUTOR_PROFILE_WRITE: 'distributors:update',
 
   // Brand
-  BRAND_PROFILE_READ: 'brand.profile.read',
-  BRAND_PROFILE_WRITE: 'brand.profile.write',
-  BRAND_BRANCH_READ: 'brand.branch.read',
-  BRAND_BRANCH_WRITE: 'brand.branch.write',
-  BRAND_CATALOG_READ: 'brand.catalog.read',
-  BRAND_CATALOG_WRITE: 'brand.catalog.write',
+  BRAND_PROFILE_READ: 'brands:read',
+  BRAND_CATALOG_READ: 'catalog:read',
 
-  // EdgePos
-  EDGEPOS_TERMINAL_READ: 'edgepos.terminal.read',
-  EDGEPOS_TERMINAL_WRITE: 'edgepos.terminal.write',
+  // Corporate
+  CORPORATE_PROFILE_READ: 'corporates:read',
+  CORPORATE_PROFILE_WRITE: 'corporates:update',
+  CORPORATE_DEPARTMENT_READ: 'departments:read',
+  CORPORATE_DEPARTMENT_WRITE: 'departments:update',
+  CORPORATE_EMPLOYEE_READ: 'employees:read',
+  CORPORATE_EMPLOYEE_WRITE: 'employees:update',
+  CORPORATE_WALLET_READ: 'wallets:read',
+  CORPORATE_WALLET_WRITE: 'wallets:update',
+  CORPORATE_WALLET_FUND: 'wallets:fund',
+  CORPORATE_WALLET_TOPUP: 'wallets:topup',
+  CORPORATE_POLICY_READ: 'corp_policies:read',
+  CORPORATE_POLICY_WRITE: 'corp_policies:update',
+  CORPORATE_MERCHANT_READ: 'merchants:read',
+  CORPORATE_MERCHANT_WRITE: 'merchants:update',
+  CORPORATE_INVOICE_READ: 'einvoices:read',
+  CORPORATE_INVOICE_WRITE: 'einvoices:submit',
+  CORPORATE_INVOICE_REQUEST: 'einvoices:request',
+  CORPORATE_INVOICE_DISPUTE: 'einvoices:read',
 
-  // Corporate (식권)
-  CORPORATE_PROFILE_READ: 'corporate.profile.read',
-  CORPORATE_PROFILE_WRITE: 'corporate.profile.write',
-  CORPORATE_DEPARTMENT_READ: 'corporate.department.read',
-  CORPORATE_DEPARTMENT_WRITE: 'corporate.department.write',
-  CORPORATE_EMPLOYEE_READ: 'corporate.employee.read',
-  CORPORATE_EMPLOYEE_WRITE: 'corporate.employee.write',
-  CORPORATE_WALLET_READ: 'corporate.wallet.read',
-  CORPORATE_WALLET_WRITE: 'corporate.wallet.write',
-  CORPORATE_WALLET_FUND: 'corporate.wallet.fund',
-  CORPORATE_WALLET_TOPUP: 'corporate.wallet.topup',
-  CORPORATE_POLICY_READ: 'corporate.policy.read',
-  CORPORATE_POLICY_WRITE: 'corporate.policy.write',
-  CORPORATE_TRANSACTION_READ: 'corporate.transaction.read',
-  CORPORATE_TRANSACTION_REVERSE: 'corporate.transaction.reverse',
-  CORPORATE_SETTLEMENT_READ: 'corporate.settlement.read',
-  CORPORATE_SETTLEMENT_RUN: 'corporate.settlement.run',
-  CORPORATE_MERCHANT_READ: 'corporate.merchant.read',
-  CORPORATE_MERCHANT_WRITE: 'corporate.merchant.write',
-  CORPORATE_INVOICE_READ: 'corporate.invoice.read',
-  CORPORATE_INVOICE_WRITE: 'corporate.invoice.write',
-  CORPORATE_INVOICE_REQUEST: 'corporate.invoice.request',
-  CORPORATE_INVOICE_DISPUTE: 'corporate.invoice.dispute',
+  // Contracts
+  CONTRACT_READ: 'contracts:read',
+  CONTRACT_CREATE: 'contracts:create',
+  CONTRACT_UPDATE: 'contracts:update',
 } as const;
 
-export type PermissionKey = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
-
-/**
- * SuperAdmin 4 sub-role (CentralApi seed 와 대응)
- */
-export const SUPER_ADMIN_SUB_ROLES = {
-  PLATFORM_SUPER_ADMIN: 'PLATFORM_SUPER_ADMIN',
-  PLATFORM_OPS: 'PLATFORM_OPS',
-  PLATFORM_BILLING: 'PLATFORM_BILLING',
-  PLATFORM_SUPPORT: 'PLATFORM_SUPPORT',
-} as const;
+export type PermissionKey = string;

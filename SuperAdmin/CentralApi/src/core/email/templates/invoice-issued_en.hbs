@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invoice Issued</title>
+  <style>
+    body { margin: 0; padding: 0; background-color: #f4f5f7; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; }
+    .header { background-color: #1a73e8; padding: 24px 32px; text-align: center; }
+    .header h1 { color: #ffffff; font-size: 20px; margin: 12px 0 0; font-weight: 600; }
+    .body { padding: 32px; color: #333333; line-height: 1.6; }
+    .body h2 { color: #1a73e8; font-size: 18px; margin-top: 0; }
+    .info-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+    .info-table td { padding: 8px 12px; border-bottom: 1px solid #e8eaed; font-size: 14px; }
+    .info-table td:first-child { color: #666666; width: 40%; }
+    .info-table td:last-child { font-weight: 600; }
+    .amount { font-size: 24px; color: #1a73e8; font-weight: 700; text-align: center; padding: 16px; background-color: #f0f6ff; border-radius: 8px; margin: 16px 0; }
+    .footer { background-color: #f4f5f7; padding: 24px 32px; text-align: center; font-size: 12px; color: #999999; }
+    .footer a { color: #1a73e8; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div style="color: #ffffff; font-size: 24px; font-weight: 700;">Meal Ticket</div>
+      <h1>Invoice Issued</h1>
+    </div>
+    <div class="body">
+      <p>Dear <strong>{{recipientName}}</strong>,</p>
+      <p>Your invoice has been successfully issued. Please review the details below:</p>
+
+      <table class="info-table">
+        <tr>
+          <td>Invoice Number</td>
+          <td>{{invoiceNumber}}</td>
+        </tr>
+        <tr>
+          <td>Issue Date</td>
+          <td>{{issuedDate}}</td>
+        </tr>
+        <tr>
+          <td>Due Date</td>
+          <td>{{dueDate}}</td>
+        </tr>
+        <tr>
+          <td>Issued By</td>
+          <td>{{issuerName}}</td>
+        </tr>
+      </table>
+
+      <div class="amount">{{totalAmount}}</div>
+
+      {{#if notes}}
+      <p style="font-size: 14px; color: #666666;"><em>Notes: {{notes}}</em></p>
+      {{/if}}
+
+      <p>If you have any questions, please do not hesitate to contact us.</p>
+    </div>
+    <div class="footer">
+      <p>Meal Ticket Platform &mdash; Corporate Meal Management Solution</p>
+      <p>This is an automated email. Please do not reply directly.</p>
+      <p>&copy; {{currentYear}} Meal Ticket Vietnam Co., Ltd. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,4 +1,4 @@
-import { CorporateListScreen } from '@screens/corporate-list-screen';
+import { CorporateListScreen } from '@screens/corporateListScreen';
 
 export default function Page() {
   return <CorporateListScreen />;

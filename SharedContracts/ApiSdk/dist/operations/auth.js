@@ -5,24 +5,69 @@ export const loginOperation = {
       login(input: $input) {
         success { code message requestId data {
           accessToken
-        expiresIn
-        user {
-          id
-          loginId
-          displayName
-          email
-          phone
-          userType
-          distributorId
-          brandHQId
-          corporateId
-          status
-          lastLoginAt
-          passwordChangedAt
-          createdAt
-          updatedAt
-        }
+          expiresIn
+          accessTokenExpiresAt
+          sessionExpiresAt
+          user {
+            id
+            loginId
+            displayName
+            email
+            phone
+            userType
+            distributorId
+            brandHQId
+            corporateId
+            status
+            lastLoginAt
+            passwordChangedAt
+            createdAt
+            updatedAt
+          }
         } }
+        error { code message requestId details }
+      }
+    }
+  `,
+};
+export const refreshSessionOperation = {
+    operationName: 'RefreshSession',
+    document: `
+    mutation RefreshSession {
+      refreshSession {
+        success { code message requestId data {
+          accessToken
+          expiresIn
+          accessTokenExpiresAt
+          sessionExpiresAt
+          user {
+            id
+            loginId
+            displayName
+            email
+            phone
+            userType
+            distributorId
+            brandHQId
+            corporateId
+            status
+            lastLoginAt
+            passwordChangedAt
+            createdAt
+            updatedAt
+          }
+        } }
+        error { code message requestId details }
+      }
+    }
+  `,
+};
+export const logoutOperation = {
+    operationName: 'Logout',
+    document: `
+    mutation Logout {
+      logout {
+        success { code message requestId data }
         error { code message requestId details }
       }
     }

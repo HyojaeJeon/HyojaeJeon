@@ -42,6 +42,16 @@ model MealCorporate {
   // 통합 인보이스 라인 그룹화 전략 (사양서 §4.3.4).
   //   BY_MERCHANT (기본) / BY_DAY / BY_DEPARTMENT / BY_CATEGORY / SINGLE_LINE
   einvoiceConsolidationStrategy String    @default("BY_MERCHANT") @db.VarChar(30)
+  // 인보이스 발행 스케줄
+  invoiceScheduleType    String    @default("MONTHLY") @db.VarChar(20) // MONTHLY | BIWEEKLY | WEEKLY | CUSTOM
+  invoiceScheduleDay     Int?      // MONTHLY/CUSTOM: 1~28, BIWEEKLY: ignored, WEEKLY: ignored
+  invoiceAutoGenerate    Boolean   @default(true)
+  invoiceAutoSubmit      Boolean   @default(false)
+  invoiceNotifyEmail     String?   @db.VarChar(200)
+  // 크레딧 관리
+  creditOutstandingVnd   BigInt    @default(0)
+  lastPaymentAt          DateTime? @db.Timestamptz()
+  overdueCount           Int       @default(0)
   status                        String    @default("ACTIVE") @db.VarChar(20)
   createdAt                     DateTime  @default(now()) @db.Timestamptz()
   updatedAt                     DateTime  @updatedAt @db.Timestamptz()
@@ -54,6 +64,7 @@ model MealCorporate {
   corporateAdminUsers CorporateAdminUser[]
 
   @@index([status], name: "idx_meal_corporate_status")
+  @@index([invoiceScheduleType, invoiceScheduleDay], name: "idx_meal_corporate_invoice_schedule")
 }
 
 // 한국어: 기업 관리자(Corporate Admin) 테이블.
@@ -151,6 +162,7 @@ model MealWallet {
   fundingEntries MealWalletFundingEntry[]
 
   @@index([corporateId, status], name: "idx_meal_wallet_corp_status")
+  @@index([corporateId, createdAt(sort: Desc)], name: "idx_meal_wallet_corp_time")
 }
 
 // 한국어: Wallet Funding Entry — allowance ledger 원장.
@@ -210,9 +222,11 @@ model MealFundingAccount {
   fundingModel   String   @db.VarChar(30) // PREPAID_DEPOSIT | CREDIT_NET15 | CREDIT_NET30
   bankCode       String?  @db.VarChar(50)
   bankAccountNo  String?  @db.VarChar(50)
-  balanceVnd     BigInt   @default(0)
-  creditLimitVnd BigInt   @default(0)
-  status         String   @default("ACTIVE") @db.VarChar(20)
+  balanceVnd         BigInt   @default(0)
+  creditLimitVnd     BigInt   @default(0)
+  virtualAccountNo   String?  @db.VarChar(50) // 가상계좌 (Phase 2)
+  virtualBankCode    String?  @db.VarChar(50)
+  status             String   @default("ACTIVE") @db.VarChar(20)
   createdAt      DateTime @default(now()) @db.Timestamptz()
   updatedAt      DateTime @updatedAt @db.Timestamptz()
 
@@ -232,6 +246,9 @@ model MealMerchantEnrollment {
   loopType       String    @default("OPEN_LOOP") @db.VarChar(20) // OPEN_LOOP | CLOSED_LOOP
   enrolledAt     DateTime  @default(now()) @db.Timestamptz()
   contractEndsAt DateTime? @db.Timestamptz()
+  // 정산 인보이스 스케줄
+  settlementInvoiceScheduleType String  @default("MONTHLY") @db.VarChar(20)
+  settlementInvoiceScheduleDay  Int?
   createdAt      DateTime  @default(now()) @db.Timestamptz()
   updatedAt      DateTime  @updatedAt @db.Timestamptz()
 
@@ -323,11 +340,20 @@ model MealSettlementBatch {
   commissionAmountVnd   BigInt   @default(0)
   netPayableVnd         BigInt   @default(0)
   threeWayMismatchCount Int      @default(0)
+  // 승인 워크플로우 (기획서 §8.2 확장)
+  approvedBy            String?  @db.Uuid
+  approvedAt            DateTime? @db.Timestamptz()
+  approvalMemo          String?  @db.Text
+  payoutReference       String?  @db.VarChar(120) // 은행 이체 참조번호
+  payoutStatus          String?  @db.VarChar(30) // REQUESTED | COMPLETED | FAILED
+  payoutRequestedAt     DateTime? @db.Timestamptz()
+  payoutCompletedAt     DateTime? @db.Timestamptz()
   createdAt             DateTime @default(now()) @db.Timestamptz()
   updatedAt             DateTime @updatedAt @db.Timestamptz()
 
   @@unique([brandHqId, periodStart, periodEnd], name: "uq_meal_settlement_brand_period")
   @@index([brandHqId, status], name: "idx_meal_settlement_brand_status")
+  @@index([status, approvedAt], name: "idx_meal_settlement_status_approved")
 }
 
 // 한국어: 플랫폼 사업자 법인 정보 — 통합 인보이스의 seller (발급자) 매핑.
