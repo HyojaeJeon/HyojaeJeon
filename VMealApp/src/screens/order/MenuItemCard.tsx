@@ -1,74 +1,100 @@
 import { View, Text, Pressable } from 'react-native';
 import { Minus, Plus } from 'lucide-react-native';
-import { formatVnd } from '@shared/mock/mockData';
+import { formatVnd } from '@shared/utils/format';
+import { colors, typography, spacing, radius, components } from '@shared/ui/tokens';
 import { useTranslation } from 'react-i18next';
 import type { MockMenuItem } from '@shared/mock/types';
 
 interface MenuItemCardProps {
   item: MockMenuItem;
   quantity: number;
+  onQuantityChange?: (itemId: string, newQty: number) => void;
 }
 
-export function MenuItemCard({ item, quantity }: MenuItemCardProps) {
+export function MenuItemCard({ item, quantity, onQuantityChange }: MenuItemCardProps) {
   const { t } = useTranslation();
   const isDisabled = !item.isAvailable;
 
+  const handleDecrement = () => {
+    if (isDisabled || quantity <= 0) return;
+    // TODO: Add haptic feedback — ReactNativeHapticFeedback.trigger('impactLight')
+    onQuantityChange?.(item.id, quantity - 1);
+  };
+
+  const handleIncrement = () => {
+    if (isDisabled) return;
+    // TODO: Add haptic feedback — ReactNativeHapticFeedback.trigger('impactLight')
+    onQuantityChange?.(item.id, quantity + 1);
+  };
+
   return (
     <View
-      className={`flex-row items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm ${
-        isDisabled ? 'opacity-50' : ''
-      }`}
+      className="flex-row items-center justify-between"
+      style={{
+        ...components.card,
+        padding: spacing.cardPadding,
+        opacity: isDisabled ? 0.5 : 1,
+      }}
     >
       {/* Left: info */}
-      <View className="flex-1 pr-3">
-        <View className="flex-row items-center gap-2">
-          <Text className={`text-[15px] font-semibold ${isDisabled ? 'text-gray-400' : 'text-gray-900'}`}>
+      <View className="flex-1" style={{ paddingRight: spacing.elementGap }}>
+        <View className="flex-row items-center" style={{ gap: spacing.sm }}>
+          <Text style={{ ...typography.cardTitle, color: isDisabled ? colors.textTertiary : colors.textPrimary }}>
             {item.nameVi}
           </Text>
           {item.isPopular && !isDisabled && (
-            <View className="rounded-full bg-[#F59E0B]/10 px-2 py-0.5">
-              <Text className="text-[10px] font-medium text-[#F59E0B]">
+            <View style={{ borderRadius: radius.full, backgroundColor: `${colors.warning}1A`, paddingHorizontal: spacing.sm, paddingVertical: 2 }}>
+              <Text style={{ fontSize: 10, fontWeight: '500', color: colors.warning }}>
                 {t('order.popular')}
               </Text>
             </View>
           )}
         </View>
-        <Text className="mt-0.5 text-xs text-gray-400" numberOfLines={1}>{item.descriptionVi}</Text>
-        <Text className="mt-1 text-[14px] font-medium text-gray-900">
-          {item.priceVnd === 0 ? 'Miễn phí' : formatVnd(item.priceVnd)}
+        <Text style={{ ...typography.caption, marginTop: 2 }} numberOfLines={1}>{item.descriptionVi}</Text>
+        <Text style={{ ...typography.body, fontWeight: '500', color: colors.textPrimary, marginTop: spacing.xs }}>
+          {item.priceVnd === 0 ? 'Mien phi' : formatVnd(item.priceVnd)}
         </Text>
       </View>
 
       {/* Right: quantity controls */}
-      <View className="flex-row items-center gap-2">
+      <View className="flex-row items-center" style={{ gap: spacing.sm }}>
         {quantity > 0 ? (
           <>
             <Pressable
-              className="flex h-[32px] w-[32px] items-center justify-center rounded-lg border border-gray-200 bg-white"
+              onPress={handleDecrement}
+              className="flex items-center justify-center"
+              style={{ height: 32, width: 32, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bgWhite }}
               disabled={isDisabled}
             >
-              <Minus size={16} color="#4B5563" />
+              <Minus size={16} color={colors.textSecondary} />
             </Pressable>
-            <Text className="w-[24px] text-center text-[15px] font-semibold text-gray-900">
+            <Text style={{ width: 24, textAlign: 'center', ...typography.cardTitle }}>
               {quantity}
             </Text>
             <Pressable
-              className="flex h-[32px] w-[32px] items-center justify-center rounded-lg bg-[#3B82F6]"
+              onPress={handleIncrement}
+              className="flex items-center justify-center"
+              style={{ height: 32, width: 32, borderRadius: radius.sm, backgroundColor: colors.primary }}
               disabled={isDisabled}
             >
-              <Plus size={16} color="#FFFFFF" />
+              <Plus size={16} color={colors.textInverse} />
             </Pressable>
           </>
         ) : (
           <Pressable
-            className={`flex h-[32px] w-[32px] items-center justify-center rounded-lg ${
-              isDisabled
-                ? 'border border-gray-100 bg-gray-50'
-                : 'border border-gray-200 bg-white'
-            }`}
+            onPress={handleIncrement}
+            className="flex items-center justify-center"
+            style={{
+              height: 32,
+              width: 32,
+              borderRadius: radius.sm,
+              borderWidth: 1,
+              borderColor: isDisabled ? colors.borderLight : colors.border,
+              backgroundColor: isDisabled ? colors.bgInput : colors.bgWhite,
+            }}
             disabled={isDisabled}
           >
-            <Plus size={16} color={isDisabled ? '#D1D5DB' : '#4B5563'} />
+            <Plus size={16} color={isDisabled ? colors.textPlaceholder : colors.textSecondary} />
           </Pressable>
         )}
       </View>

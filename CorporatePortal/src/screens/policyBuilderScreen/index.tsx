@@ -11,6 +11,9 @@ import {
   Badge,
   Skeleton,
   DatePicker,
+  Tabs,
+  NumberInput,
+  Toggle,
 } from '@platform/shared-ui';
 import { useI18n } from '@i18n/I18nProvider';
 import { useHasPermission } from '@rbac/useHasPermission';
@@ -31,8 +34,14 @@ import {
   type PausePolicyData,
   type DeactivatePolicyData,
 } from '@graphql/queries/policy';
+import { DEPARTMENTS_QUERY, type DepartmentsData } from '@graphql/queries/department';
+import { Checkbox } from '@platform/shared-ui';
 
 const TAB_KEYS = ['basic', 'timeWindow', 'limits', 'target', 'merchant'] as const;
+const MERCHANT_CATEGORIES = [
+  'KOREAN', 'VIETNAMESE', 'CHINESE', 'JAPANESE', 'WESTERN',
+  'FAST_FOOD', 'CAFE', 'BAKERY', 'BUFFET', 'OTHER',
+] as const;
 
 export function PolicyBuilderScreen() {
   const { t } = useI18n();
@@ -41,13 +50,19 @@ export function PolicyBuilderScreen() {
   const canWrite = useHasPermission(PERMISSIONS.POLICY_WRITE);
   const corporateId = useCorporateId();
 
+  // Fetch departments for target scope
+  const { data: deptData } = useQuery<DepartmentsData>(DEPARTMENTS_QUERY, {
+    variables: { corporateId },
+    skip: !corporateId,
+  });
+  const departments = deptData?.mealDepartments?.success?.data ?? [];
+
   const isNew = params?.id === 'new' || !params?.id;
 
   const [activeTab, setActiveTab] = useState(0);
   const [actionError, setActionError] = useState<string | null>(null);
 
   // Form state -- Tab 1: 기본 정보
-  const [policyCode, setPolicyCode] = useState('');
   const [policyName, setPolicyName] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState(0);
@@ -73,7 +88,6 @@ export function PolicyBuilderScreen() {
 
   // Form state -- Tab 5: 머천트/카테고리
   const [merchantCategoryRestrictions, setMerchantCategoryRestrictions] = useState<string[]>([]);
-  const [merchantCategoryInput, setMerchantCategoryInput] = useState('');
 
   /* ── Queries ── */
   const { data: detailData, loading: detailLoading } = useQuery<PolicyDetailData>(POLICY_DETAIL_QUERY, {
@@ -86,7 +100,6 @@ export function PolicyBuilderScreen() {
   /* ── Prefill form when editing ── */
   useEffect(() => {
     if (!policy) return;
-    setPolicyCode(policy.policyCode ?? '');
     setPolicyName(policy.policyName ?? '');
     setDescription('');
     setPriority(0);
@@ -125,7 +138,6 @@ export function PolicyBuilderScreen() {
 
   const buildInput = () => ({
     corporateId,
-    policyCode,
     policyName,
     effectiveFrom: effectiveFrom || undefined,
     effectiveTo: effectiveTo || undefined,
@@ -234,16 +246,6 @@ export function PolicyBuilderScreen() {
           <SectionCard title={t('policy.tabs.basic')}>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="flex flex-col gap-1.5">
-                <label className="text-[12px] font-semibold text-fg-muted">{t('policy.codeLabel')} *</label>
-                <input
-                  className="rounded-lg border px-3 py-2 text-sm"
-                  style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}
-                  value={policyCode}
-                  onChange={(e) => setPolicyCode(e.target.value)}
-                  placeholder={t('policy.codePlaceholder')}
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
                 <label className="text-[12px] font-semibold text-fg-muted">{t('policy.nameLabel')} *</label>
                 <input
                   className="rounded-lg border px-3 py-2 text-sm"
@@ -316,12 +318,11 @@ export function PolicyBuilderScreen() {
                       key={idx}
                       type="button"
                       onClick={() => toggleDay(idx)}
-                      className="flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-semibold transition-colors"
-                      style={{
-                        borderColor: allowedDayOfWeek.includes(idx) ? 'var(--brand)' : 'var(--border)',
-                        background: allowedDayOfWeek.includes(idx) ? 'var(--brand)' : 'var(--surface-1)',
-                        color: allowedDayOfWeek.includes(idx) ? '#fff' : 'var(--fg-muted)',
-                      }}
+                      className={`flex h-10 w-10 items-center justify-center rounded-lg border-2 text-sm font-semibold transition-colors ${
+                        allowedDayOfWeek.includes(idx)
+                          ? 'border-primary bg-primary text-primary-fg shadow-sm'
+                          : 'border-border bg-surface-1 text-fg-muted hover:border-fg-muted'
+                      }`}
                     >
                       {label}
                     </button>
@@ -364,12 +365,11 @@ export function PolicyBuilderScreen() {
                             selected ? prev.filter((m) => m !== meal) : [...prev, meal],
                           );
                         }}
-                        className="rounded-lg border px-4 py-2 text-sm font-semibold transition-colors"
-                        style={{
-                          borderColor: selected ? 'var(--brand)' : 'var(--border)',
-                          background: selected ? 'var(--brand)' : 'var(--surface-1)',
-                          color: selected ? '#fff' : 'var(--fg-muted)',
-                        }}
+                        className={`rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-colors ${
+                          selected
+                            ? 'border-primary bg-primary text-primary-fg shadow-sm'
+                            : 'border-border bg-surface-1 text-fg-muted hover:border-fg-muted'
+                        }`}
                       >
                         {t(`policy.mealType.${meal}`)}
                       </button>
@@ -387,60 +387,42 @@ export function PolicyBuilderScreen() {
       case 2:
         return (
           <SectionCard title={t('policy.tabs.limits')}>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               <div className="flex flex-col gap-1.5">
                 <label className="text-[12px] font-semibold text-fg-muted">{t('policy.maxPerTransaction')}</label>
-                <input
-                  type="number"
-                  className="rounded-lg border px-3 py-2 text-sm"
-                  style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}
+                <NumberInput
                   value={maxPerTransactionVnd}
-                  onChange={(e) => setMaxPerTransactionVnd(e.target.value)}
-                  placeholder="50000"
+                  onValueChange={({ raw }) => setMaxPerTransactionVnd(raw)}
+                  locale="vi-VN"
+                  min={0}
+                  placeholder="50,000"
+                  style={{ width: '100%' }}
                 />
+                <p className="text-[11px] text-fg-subtle">{t('policy.limitHint')}</p>
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-[12px] font-semibold text-fg-muted">{t('policy.dailyLimit')}</label>
-                <input
-                  type="number"
-                  className="rounded-lg border px-3 py-2 text-sm"
-                  style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}
+                <NumberInput
                   value={dailyLimitVnd}
-                  onChange={(e) => setDailyLimitVnd(e.target.value)}
-                  placeholder="150000"
+                  onValueChange={({ raw }) => setDailyLimitVnd(raw)}
+                  locale="vi-VN"
+                  min={0}
+                  placeholder="150,000"
+                  style={{ width: '100%' }}
                 />
+                <p className="text-[11px] text-fg-subtle">{t('policy.limitHint')}</p>
               </div>
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={allowSplitPayment}
-                  onClick={() => setAllowSplitPayment((v) => !v)}
-                  className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors"
-                  style={{ background: allowSplitPayment ? 'var(--brand)' : 'var(--border)' }}
-                >
-                  <span
-                    className="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform"
-                    style={{ transform: allowSplitPayment ? 'translateX(20px)' : 'translateX(0)' }}
-                  />
-                </button>
-                <label className="text-sm font-semibold text-fg">{t('policy.splitPayment')}</label>
-              </div>
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={allowCarryover}
-                  onClick={() => setAllowCarryover((v) => !v)}
-                  className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors"
-                  style={{ background: allowCarryover ? 'var(--brand)' : 'var(--border)' }}
-                >
-                  <span
-                    className="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform"
-                    style={{ transform: allowCarryover ? 'translateX(20px)' : 'translateX(0)' }}
-                  />
-                </button>
-                <label className="text-sm font-semibold text-fg">{t('policy.carryover')}</label>
+              <div className="md:col-span-2 flex flex-col gap-4 rounded-lg border p-4" style={{ borderColor: 'var(--border)' }}>
+                <Toggle
+                  checked={allowSplitPayment}
+                  onChange={setAllowSplitPayment}
+                  label={t('policy.splitPayment')}
+                />
+                <Toggle
+                  checked={allowCarryover}
+                  onChange={setAllowCarryover}
+                  label={t('policy.carryover')}
+                />
               </div>
             </div>
           </SectionCard>
@@ -469,15 +451,46 @@ export function PolicyBuilderScreen() {
                 </label>
               ))}
             </div>
-            {targetScope !== 'ALL' && (
+            {targetScope === 'DEPARTMENT' && (
               <div className="mt-4">
-                <p className="text-sm text-fg-muted">
-                  {targetScope === 'DEPARTMENT' ? t('policy.deptSelectorHint') : t('policy.rankSelectorHint')}
-                </p>
-                <div className="mt-2 space-y-2">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <Skeleton key={i} height={32} />
-                  ))}
+                <p className="mb-2 text-sm text-fg-muted">{t('policy.deptSelectorHint')}</p>
+                <div className="flex flex-col gap-2 rounded-lg border p-3" style={{ borderColor: 'var(--border)' }}>
+                  {departments.length === 0 ? (
+                    <p className="text-[12px] text-fg-subtle">{t('common.empty')}</p>
+                  ) : departments.map((dept) => {
+                    const checked = selectedDepartmentIds.includes(dept.id);
+                    return (
+                      <label key={dept.id} className="flex items-center gap-3 cursor-pointer rounded-md px-2 py-1.5 hover:bg-surface-2">
+                        <Checkbox checked={checked} onChange={() => {
+                          setSelectedDepartmentIds((prev) =>
+                            checked ? prev.filter((d) => d !== dept.id) : [...prev, dept.id],
+                          );
+                        }} />
+                        <span className="text-sm text-fg">{dept.departmentName}</span>
+                        <span className="text-[11px] text-fg-muted font-mono">{dept.departmentCode}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            {targetScope === 'RANK' && (
+              <div className="mt-4">
+                <p className="mb-2 text-sm text-fg-muted">{t('policy.rankSelectorHint')}</p>
+                <div className="flex flex-col gap-2 rounded-lg border p-3" style={{ borderColor: 'var(--border)' }}>
+                  {['EXECUTIVE', 'MANAGER', 'STAFF', 'INTERN', 'CONTRACT', 'DISPATCH'].map((role) => {
+                    const checked = selectedRoleCodes.includes(role);
+                    return (
+                      <label key={role} className="flex items-center gap-3 cursor-pointer rounded-md px-2 py-1.5 hover:bg-surface-2">
+                        <Checkbox checked={checked} onChange={() => {
+                          setSelectedRoleCodes((prev) =>
+                            checked ? prev.filter((r) => r !== role) : [...prev, role],
+                          );
+                        }} />
+                        <span className="text-sm text-fg">{t(`policy.rank.${role}`)}</span>
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -491,60 +504,38 @@ export function PolicyBuilderScreen() {
             <p className="mb-4 text-sm text-fg-muted">
               {t('policy.merchantDescription')}
             </p>
-            <div className="space-y-3">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[12px] font-semibold text-fg-muted">{t('policy.categoryLabel')}</label>
-                <div className="flex gap-2">
-                  <input
-                    className="flex-1 rounded-lg border px-3 py-2 text-sm"
-                    style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}
-                    placeholder={t('policy.categoryPlaceholder')}
-                    value={merchantCategoryInput}
-                    onChange={(e) => setMerchantCategoryInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && merchantCategoryInput.trim()) {
-                        const val = merchantCategoryInput.trim();
-                        if (!merchantCategoryRestrictions.includes(val)) {
-                          setMerchantCategoryRestrictions((prev) => [...prev, val]);
-                        }
-                        setMerchantCategoryInput('');
-                      }
-                    }}
-                  />
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    disabled={!merchantCategoryInput.trim()}
-                    onClick={() => {
-                      const val = merchantCategoryInput.trim();
-                      if (val && !merchantCategoryRestrictions.includes(val)) {
-                        setMerchantCategoryRestrictions((prev) => [...prev, val]);
-                      }
-                      setMerchantCategoryInput('');
-                    }}
-                  >
-                    {t('policy.categoryAdd')}
-                  </Button>
-                </div>
+            <div className="flex flex-col gap-3">
+              <label className="text-[12px] font-semibold text-fg-muted">{t('policy.categoryLabel')}</label>
+              <div className="flex flex-wrap gap-2">
+                {MERCHANT_CATEGORIES.map((cat) => {
+                  const selected = merchantCategoryRestrictions.includes(cat);
+                  return (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => {
+                        setMerchantCategoryRestrictions((prev) =>
+                          selected ? prev.filter((c) => c !== cat) : [...prev, cat],
+                        );
+                      }}
+                      className={`rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-colors ${
+                        selected
+                          ? 'border-primary bg-primary text-primary-fg shadow-sm'
+                          : 'border-border bg-surface-1 text-fg-muted hover:border-fg-muted'
+                      }`}
+                    >
+                      {t(`policy.category.${cat}`)}
+                    </button>
+                  );
+                })}
               </div>
-              {merchantCategoryRestrictions.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {merchantCategoryRestrictions.map((cat) => (
-                    <Badge key={cat} tone="brand" size="sm">
-                      {cat}
-                      <button
-                        type="button"
-                        className="ml-1 text-[10px]"
-                        onClick={() => setMerchantCategoryRestrictions((prev) => prev.filter((c) => c !== cat))}
-                      >
-                        &times;
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              )}
               {merchantCategoryRestrictions.length === 0 && (
                 <p className="text-[11px] text-fg-subtle">{t('policy.categoryNoRestriction')}</p>
+              )}
+              {merchantCategoryRestrictions.length > 0 && (
+                <p className="text-[11px] text-fg-muted">
+                  {t('policy.categorySelected')}: {merchantCategoryRestrictions.map((c) => t(`policy.category.${c}`)).join(', ')}
+                </p>
               )}
             </div>
           </SectionCard>
@@ -646,25 +637,20 @@ export function PolicyBuilderScreen() {
       )}
 
       {/* Tab Bar */}
-      <div className="mb-4 flex gap-1 overflow-x-auto rounded-xl border p-1" style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}>
-        {TAB_KEYS.map((key, idx) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setActiveTab(idx)}
-            className="whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold transition-colors"
-            style={{
-              background: activeTab === idx ? 'var(--brand)' : 'transparent',
-              color: activeTab === idx ? '#fff' : 'var(--fg-muted)',
-            }}
-          >
-            {idx + 1}. {t(`policy.tabs.${key}`)}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        variant="segment"
+        items={TAB_KEYS.map((key, idx) => ({
+          key: String(idx),
+          label: `${idx + 1}. ${t(`policy.tabs.${key}`)}`,
+        }))}
+        value={String(activeTab)}
+        onChange={(k) => setActiveTab(Number(k))}
+      />
 
       {/* Tab Content */}
-      {renderTab()}
+      <div className="mt-4">
+        {renderTab()}
+      </div>
 
       {/* Navigation */}
       <div className="mt-4 flex justify-between">

@@ -12,7 +12,7 @@
  *   múi giờ, và ngôn ngữ mặc định.
  *   Có thể có nhiều Edge POS terminal bên dưới (quan hệ 1:N).
  */
-import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { ObjectType, Field, ID, Float, Int } from '@nestjs/graphql';
 import { EdgePosTerminalModel } from '@platform/edgePos/models/EdgePosTerminal.model';
 
 @ObjectType()
@@ -80,6 +80,30 @@ export class BranchModel {
   /** 한국어: 폐점일 (선택) / Tiếng Việt: Ngày đóng cửa (tùy chọn) */
   @Field(() => Date, { nullable: true })
   closingDate?: Date | null;
+
+  @Field(() => String, { nullable: true })
+  phone?: string | null;
+
+  @Field(() => Float, { nullable: true })
+  latitude?: number | null;
+
+  @Field(() => Float, { nullable: true })
+  longitude?: number | null;
+
+  @Field(() => String, { nullable: true })
+  logoUrl?: string | null;
+
+  @Field(() => String, { nullable: true })
+  profileImageUrl?: string | null;
+
+  @Field(() => String, { nullable: true })
+  description?: string | null;
+
+  @Field(() => Float, { nullable: true })
+  rating?: number | null;
+
+  @Field(() => Int, { nullable: true })
+  reviewCount?: number | null;
 
   /** 한국어: 레코드 생성 시각 / Tiếng Việt: Thời gian tạo bản ghi */
   @Field()

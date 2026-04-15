@@ -132,6 +132,31 @@ export const PERMISSION_CATEGORIES: PermissionCategory[] = [
   },
   { category: 'merchants', label: { ko: '제휴식당', en: 'Merchants', vi: 'Nhà hàng' }, permissions: crud('merchants', { ko: '제휴식당', en: 'Merchants', vi: 'Nhà hàng' }) },
   {
+    category: 'corp_orders',
+    label: { ko: '앱 주문', en: 'App Orders', vi: 'Đơn hàng ứng dụng' },
+    permissions: crud('corp_orders', { ko: '주문', en: 'Orders', vi: 'Đơn hàng' }),
+  },
+  {
+    category: 'corp_daily_menus',
+    label: { ko: '일일 메뉴', en: 'Daily Menus', vi: 'Thực đơn hàng ngày' },
+    permissions: [
+      { key: 'corp_daily_menus:list', label: { ko: '목록', en: 'List', vi: 'Danh sách' } },
+      { key: 'corp_daily_menus:read', label: { ko: '상세', en: 'Read', vi: 'Xem' } },
+      { key: 'corp_daily_menus:create', label: { ko: '생성', en: 'Create', vi: 'Tạo' } },
+      { key: 'corp_daily_menus:update', label: { ko: '수정', en: 'Update', vi: 'Sửa' } },
+    ],
+  },
+  {
+    category: 'corp_preorders',
+    label: { ko: '사전 주문', en: 'Pre-Orders', vi: 'Đặt trước' },
+    permissions: [
+      { key: 'corp_preorders:list', label: { ko: '목록', en: 'List', vi: 'Danh sách' } },
+      { key: 'corp_preorders:read', label: { ko: '상세', en: 'Read', vi: 'Xem' } },
+      { key: 'corp_preorders:create', label: { ko: '생성', en: 'Create', vi: 'Tạo' } },
+      { key: 'corp_preorders:update', label: { ko: '수정', en: 'Update', vi: 'Sửa' } },
+    ],
+  },
+  {
     category: 'einvoices',
     label: { ko: '전자세금계산서', en: 'E-Invoices', vi: 'Hoá đơn ĐT' },
     permissions: [
@@ -238,7 +263,7 @@ export const MENU_PERMISSION_STRUCTURE: MenuPermissionNode[] = [
     children: [
       { id: 'distributors', labelKey: 'nav.tenants.distributors', categories: ['distributors'] },
       { id: 'brands', labelKey: 'nav.tenants.brands', categories: ['brands', 'branches', 'edgepos', 'catalog'] },
-      { id: 'corporates', labelKey: 'nav.tenants.corporates', categories: ['corporates', 'departments', 'employees', 'wallets', 'corp_wallets', 'corp_policies', 'transactions', 'settlements', 'merchants', 'einvoices', 'corporate_portal'] },
+      { id: 'corporates', labelKey: 'nav.tenants.corporates', categories: ['corporates', 'departments', 'employees', 'wallets', 'corp_wallets', 'corp_policies', 'corp_orders', 'corp_daily_menus', 'corp_preorders', 'transactions', 'settlements', 'merchants', 'einvoices', 'corporate_portal'] },
     ],
   },
   {

@@ -33,7 +33,7 @@ import { GqlArgumentsHost, GqlContextType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
 import { I18nService } from '@core/i18n/I18n.service';
 import type { SupportedLocale } from '@core/i18n/locale.util';
-import { DEFAULT_LOCALE } from '@core/i18n/locale.util';
+import { DEFAULT_LOCALE, pickLocaleFromAcceptLanguage } from '@core/i18n/locale.util';
 import { DomainError, defaultStatusForCode } from '@core/errors/DomainError';
 import { ErrorCode } from '@core/errors/errorCodes';
 
@@ -158,8 +158,10 @@ export class DomainExceptionFilter implements ExceptionFilter {
 
     if (host.getType<GqlContextType>() === 'graphql') {
       const gqlHost = GqlArgumentsHost.create(host);
-      const ctx = gqlHost.getContext<{ locale?: SupportedLocale; requestId?: string }>();
-      const locale = ctx?.locale ?? DEFAULT_LOCALE;
+      const ctx = gqlHost.getContext<{ locale?: SupportedLocale; acceptLanguage?: string; requestId?: string }>();
+      const locale = ctx?.locale
+        ?? pickLocaleFromAcceptLanguage(ctx?.acceptLanguage)
+        ?? DEFAULT_LOCALE;
       const message = this.i18n.message({
         domain: normalized.domain,
         kind: 'error',

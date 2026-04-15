@@ -1,106 +1,128 @@
+import { useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { MapPin, Bell, Fingerprint } from 'lucide-react-native';
+import { PrimaryButton } from '@shared/ui';
+import { colors, typography, spacing, radius, shadows } from '@shared/ui/tokens';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+
+interface PermissionStepProps {
+  onNext: () => void;
+}
 
 interface PermissionCardProps {
   icon: ReactNode;
   title: string;
   description: string;
   enabled: boolean;
+  onToggle: () => void;
 }
 
-function PermissionCard({ icon, title, description, enabled }: PermissionCardProps) {
+function PermissionCard({ icon, title, description, enabled, onToggle }: PermissionCardProps) {
   return (
-    <View className="flex flex-row items-center gap-3 rounded-xl bg-white p-4 border border-gray-100 shadow-sm">
+    <Pressable
+      className="flex flex-row items-center active:bg-gray-50"
+      style={{ gap: spacing.elementGap, borderRadius: radius.md, backgroundColor: colors.bgCard, padding: spacing.cardPaddingCompact, ...shadows.card }}
+      onPress={onToggle}
+    >
       {/* Icon */}
-      <View className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50">
+      <View className="flex flex-shrink-0 items-center justify-center" style={{ height: 40, width: 40, borderRadius: radius.md, backgroundColor: colors.primaryLight }}>
         {icon}
       </View>
 
       {/* Text */}
       <View className="flex-1 min-w-0">
-        <Text className="text-sm font-medium text-gray-900">{title}</Text>
-        <Text className="mt-0.5 text-xs text-gray-400 leading-tight">{description}</Text>
+        <Text style={typography.cardTitle}>{title}</Text>
+        <Text style={{ ...typography.caption, marginTop: 2, lineHeight: 16 }}>{description}</Text>
       </View>
 
       {/* Toggle */}
-      <View
-        className={`relative h-[28px] w-[48px] flex-shrink-0 rounded-full ${
-          enabled ? 'bg-[#3B82F6]' : 'bg-gray-200'
-        }`}
-      >
+      <Pressable onPress={onToggle} hitSlop={8}>
         <View
-          className={`absolute top-[3px] h-[22px] w-[22px] rounded-full bg-white shadow-sm ${
-            enabled ? 'left-[23px]' : 'left-[3px]'
-          }`}
-        />
-      </View>
-    </View>
+          className="relative flex-shrink-0"
+          style={{
+            height: 28, width: 48, borderRadius: radius.full,
+            backgroundColor: enabled ? colors.primary : colors.border,
+          }}
+        >
+          <View
+            className="absolute"
+            style={{
+              top: 3, height: 22, width: 22, borderRadius: 11,
+              backgroundColor: colors.bgWhite,
+              left: enabled ? 23 : 3,
+            }}
+          />
+        </View>
+      </Pressable>
+    </Pressable>
   );
 }
 
-export function PermissionStep() {
+export function PermissionStep({ onNext }: PermissionStepProps) {
   const { t } = useTranslation();
 
-  const PERMISSIONS = [
-    {
-      icon: <MapPin size={20} color="#3B82F6" />,
-      title: t('auth.permission.location'),
-      description: t('auth.permission.locationDesc'),
-      enabled: true,
-    },
-    {
-      icon: <Bell size={20} color="#3B82F6" />,
-      title: t('auth.permission.notification'),
-      description: t('auth.permission.notificationDesc'),
-      enabled: true,
-    },
-    {
-      icon: <Fingerprint size={20} color="#3B82F6" />,
-      title: t('auth.permission.biometric'),
-      description: t('auth.permission.biometricDesc'),
-      enabled: false,
-    },
-  ];
+  const [locationEnabled, setLocationEnabled] = useState(true);
+  const [notificationEnabled, setNotificationEnabled] = useState(true);
+  const [biometricEnabled, setBiometricEnabled] = useState(false);
 
   return (
-    <View className="flex flex-col px-5 pt-6">
+    <View className="flex flex-col" style={{ paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.xxl }}>
       {/* Step indicator */}
-      <View className="flex flex-row items-center gap-2">
-        <Text className="text-xs font-medium text-[#3B82F6]">{t('auth.step', { current: 3, total: 4 })}</Text>
+      <View className="flex flex-row items-center" style={{ gap: spacing.sm }}>
+        <Text style={{ ...typography.caption, fontWeight: '500', color: colors.primary }}>{t('auth.step', { current: 3, total: 4 })}</Text>
       </View>
-      <View className="mt-2 h-1 w-full rounded-full bg-gray-200">
-        <View className="h-1 w-3/4 rounded-full bg-[#3B82F6]" />
+      <View style={{ marginTop: spacing.sm, height: 4, width: '100%', borderRadius: radius.full, backgroundColor: colors.border }}>
+        <View style={{ height: 4, width: '75%', borderRadius: radius.full, backgroundColor: colors.primary }} />
       </View>
 
       {/* Title */}
-      <Text className="mt-6 text-xl font-bold text-gray-900">
+      <Text style={{ ...typography.sectionTitle, fontSize: 20, fontWeight: '700', marginTop: spacing.xxl }}>
         {t('auth.permission.title')}
       </Text>
-      <Text className="mt-2 text-sm text-gray-500">
-        Cho ph\u00E9p \u1EE9ng d\u1EE5ng truy c\u1EADp \u0111\u1EC3 tr\u1EA3i nghi\u1EC7m t\u1ED1t h\u01A1n
+      <Text style={{ ...typography.body, marginTop: spacing.sm }}>
+        Cho ph{'\u00E9'}p {'\u1EE9'}ng d{'\u1EE5'}ng truy c{'\u1EAD'}p {'\u0111'}{'\u1EC3'} tr{'\u1EA3'}i nghi{'\u1EC7'}m t{'\u1ED1'}t h{'\u01A1'}n
       </Text>
 
       {/* Permission cards */}
-      <View className="mt-6 gap-3">
-        {PERMISSIONS.map((p) => (
-          <PermissionCard
-            key={p.title}
-            icon={p.icon}
-            title={p.title}
-            description={p.description}
-            enabled={p.enabled}
-          />
-        ))}
+      <View style={{ marginTop: spacing.xxl, gap: spacing.elementGap }}>
+        <PermissionCard
+          icon={<MapPin size={20} color={colors.primary} />}
+          title={t('auth.permission.location')}
+          description={t('auth.permission.locationDesc')}
+          enabled={locationEnabled}
+          onToggle={() => setLocationEnabled((v) => !v)}
+        />
+        <PermissionCard
+          icon={<Bell size={20} color={colors.primary} />}
+          title={t('auth.permission.notification')}
+          description={t('auth.permission.notificationDesc')}
+          enabled={notificationEnabled}
+          onToggle={() => setNotificationEnabled((v) => !v)}
+        />
+        <PermissionCard
+          icon={<Fingerprint size={20} color={colors.primary} />}
+          title={t('auth.permission.biometric')}
+          description={t('auth.permission.biometricDesc')}
+          enabled={biometricEnabled}
+          onToggle={() => setBiometricEnabled((v) => !v)}
+        />
       </View>
 
+      {/* Later note */}
+      <Text style={{ ...typography.caption, textAlign: 'center', marginTop: spacing.lg }}>
+        {t('auth.permission.laterNote')}
+      </Text>
+
       {/* Continue button */}
-      <Pressable className="mt-8 flex h-[52px] w-full items-center justify-center rounded-xl bg-[#3B82F6]">
-        <Text className="text-[15px] font-semibold text-white">
-          {t('common.continue')}
-        </Text>
-      </Pressable>
+      <View style={{ marginTop: spacing.xxl }}>
+        <PrimaryButton
+          title={t('common.continue')}
+          onPress={onNext}
+          size="lg"
+          className="w-full"
+        />
+      </View>
     </View>
   );
 }

@@ -32,8 +32,9 @@ import { MenuCategoriesTab } from './components/MenuCategoriesTab';
 import { MenuItemsTab } from './components/MenuItemsTab';
 import { PricePoliciesTab } from './components/PricePoliciesTab';
 import { PromotionsTab } from './components/PromotionsTab';
+import { LicenseSection } from '@screens/common/LicenseSection';
 
-type TabKey = 'overview' | 'branches' | 'entitlements' | 'menuCategories' | 'menuItems' | 'pricePolicies' | 'promotions';
+type TabKey = 'overview' | 'licenses' | 'branches' | 'entitlements' | 'menuCategories' | 'menuItems' | 'pricePolicies' | 'promotions';
 
 export function BrandDetailScreen() {
   const { t } = useI18n();
@@ -70,7 +71,7 @@ export function BrandDetailScreen() {
   const branchColumns: DataTableColumn<BrandBranchRow>[] = [
     { key: 'code', header: t('field.code'), width: '140px', render: (r) => <span className="font-mono text-[12px]">{r.branchCode}</span> },
     { key: 'name', header: t('field.name'), render: (r) => <span className="font-medium text-fg">{r.branchName}</span> },
-    { key: 'type', header: t('brand.col.type'), width: '110px', render: (r) => <Badge tone="info" variant="soft">{r.branchType}</Badge> },
+    { key: 'type', header: t('brand.col.type'), width: '110px', render: (r) => <Badge tone="info" variant="soft">{t(`branch.branchType.${r.branchType}`)}</Badge> },
     { key: 'country', header: t('tenant.country'), width: '80px', render: (r) => <span className="font-mono text-[12px] uppercase">{r.countryCode}</span> },
     { key: 'status', header: t('field.status'), width: '120px', render: (r) => <StatusBadge status={r.status} /> },
   ];
@@ -105,6 +106,8 @@ export function BrandDetailScreen() {
             </div>
           </SectionCard>
         ) : null;
+      case 'licenses':
+        return id ? <LicenseSection scopeType="BRAND_HQ" scopeId={id} entityName={b?.brandName ?? ''} /> : null;
       case 'branches':
         return (
           <SectionCard title={t('brand.tab.branches')} description={`${branches.length} ${t('brand.branchCount')}`} padding="none">
@@ -182,6 +185,7 @@ export function BrandDetailScreen() {
         <Tabs
           items={[
             { key: 'overview', label: t('brand.tab.overview') },
+            { key: 'licenses', label: t('brand.tab.licenses') },
             { key: 'branches', label: `${t('brand.tab.branches')} (${branches.length})` },
             { key: 'entitlements', label: `${t('brand.tab.entitlements')} (${entitlements.length})` },
             { key: 'menuCategories', label: `${t('brand.tab.menuCategories')} (${menuCategoriesCount})` },

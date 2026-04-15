@@ -1,6 +1,7 @@
 import { View, Text } from 'react-native';
 import { Star, MapPin, Clock, Phone, Navigation } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
+import { colors, typography, spacing } from '@shared/ui/tokens';
 import type { MockMerchant } from '@shared/mock/types';
 
 interface InfoSectionProps {
@@ -10,44 +11,44 @@ interface InfoSectionProps {
 export function InfoSection({ merchant }: InfoSectionProps) {
   const { t } = useTranslation();
   return (
-    <View className="gap-3 px-5 pt-4">
+    <View style={{ gap: spacing.elementGap, paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.lg }}>
       {/* Name */}
-      <Text className="text-xl font-bold text-gray-900">{merchant.branchName}</Text>
+      <Text style={typography.sectionTitle}>{merchant.branchName}</Text>
 
       {/* Rating row */}
-      <View className="flex-row items-center gap-1.5">
-        <Star size={14} color="#F59E0B" fill="#F59E0B" />
-        <Text className="text-sm font-medium text-gray-900">{merchant.rating}</Text>
-        <Text className="text-sm text-gray-400">
+      <View className="flex-row items-center" style={{ gap: 6 }}>
+        <Star size={14} color={colors.warning} fill={colors.warning} />
+        <Text style={{ ...typography.body, fontWeight: '500', color: colors.textPrimary }}>{merchant.rating}</Text>
+        <Text style={typography.body}>
           ({merchant.reviewCount} {t('merchant.rating')})
         </Text>
-        <Text className="text-sm text-gray-300">{'\u00B7'}</Text>
-        <Text className="text-sm text-gray-600">{merchant.cuisineType}</Text>
+        <Text style={{ ...typography.body, color: colors.textPlaceholder }}>{'\u00B7'}</Text>
+        <Text style={typography.body}>{merchant.cuisineType}</Text>
       </View>
 
       {/* Address */}
-      <View className="flex-row items-start gap-2.5">
+      <View className="flex-row items-start" style={{ gap: spacing.itemGap }}>
         <View className="mt-0.5 shrink-0">
-          <MapPin size={16} color="#9CA3AF" />
+          <MapPin size={16} color={colors.textTertiary} />
         </View>
-        <Text className="text-sm text-gray-600">{merchant.address}</Text>
+        <Text style={typography.body}>{merchant.address}</Text>
       </View>
 
       {/* Hours */}
-      <View className="flex-row items-center gap-2.5">
+      <View className="flex-row items-center" style={{ gap: spacing.itemGap }}>
         <View className="shrink-0">
-          <Clock size={16} color="#9CA3AF" />
+          <Clock size={16} color={colors.textTertiary} />
         </View>
-        <Text className="text-sm text-gray-600">{merchant.operatingHours}</Text>
+        <Text style={typography.body}>{merchant.operatingHours}</Text>
         {merchant.isOpen ? (
-          <View className="rounded-full bg-[#10B981]/10 px-2 py-0.5">
-            <Text className="text-[11px] font-medium text-[#10B981]">
+          <View style={{ borderRadius: 9999, backgroundColor: colors.successLight, paddingHorizontal: spacing.sm, paddingVertical: 2 }}>
+            <Text style={{ fontSize: 11, fontWeight: '500', color: colors.success }}>
               {t('merchant.open')}
             </Text>
           </View>
         ) : (
-          <View className="rounded-full bg-gray-100 px-2 py-0.5">
-            <Text className="text-[11px] font-medium text-gray-400">
+          <View style={{ borderRadius: 9999, backgroundColor: colors.border, paddingHorizontal: spacing.sm, paddingVertical: 2 }}>
+            <Text style={{ fontSize: 11, fontWeight: '500', color: colors.textTertiary }}>
               {t('merchant.closed')}
             </Text>
           </View>
@@ -55,19 +56,19 @@ export function InfoSection({ merchant }: InfoSectionProps) {
       </View>
 
       {/* Phone */}
-      <View className="flex-row items-center gap-2.5">
+      <View className="flex-row items-center" style={{ gap: spacing.itemGap }}>
         <View className="shrink-0">
-          <Phone size={16} color="#9CA3AF" />
+          <Phone size={16} color={colors.textTertiary} />
         </View>
-        <Text className="text-sm text-gray-600">{merchant.phone}</Text>
+        <Text style={typography.body}>{merchant.phone}</Text>
       </View>
 
       {/* Distance */}
-      <View className="flex-row items-center gap-2.5">
+      <View className="flex-row items-center" style={{ gap: spacing.itemGap }}>
         <View className="shrink-0">
-          <Navigation size={16} color="#9CA3AF" />
+          <Navigation size={16} color={colors.textTertiary} />
         </View>
-        <Text className="text-sm text-gray-600">{merchant.distanceKm} km</Text>
+        <Text style={typography.body}>{merchant.distanceKm} km</Text>
       </View>
     </View>
   );

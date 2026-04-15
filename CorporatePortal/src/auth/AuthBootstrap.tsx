@@ -82,10 +82,12 @@ export function AuthBootstrap() {
       return () => undefined;
     }
 
-    const unsubscribe = subscribeSession((payload) => {
-      if (!payload && typeof window !== 'undefined' && !isAuthRoute(window.location.pathname)) {
-        window.location.href = buildLoginUrl('session-expired');
-      }
+    // Session listener syncs Redux only.
+    // Redirect to login is handled exclusively by handleAuthFailure() — not here.
+    // A null payload can result from server errors (not auth errors), so
+    // redirecting on every null would cause unwanted logouts.
+    const unsubscribe = subscribeSession(() => {
+      // no-op: Redux sync happens in bootstrapSession then-block
     });
 
     if (existing) {
@@ -96,10 +98,13 @@ export function AuthBootstrap() {
     } else {
       // Cookie-based: refreshSession validates the HttpOnly cookie.
       // If valid, server returns user info + sets new cookies.
-      // If invalid/expired, server returns error -> redirect to login.
+      // If invalid/expired (AuthError), redirect to login.
+      // If server error (non-AuthError), stay on page — do NOT logout.
       void bootstrapSession()
         .then(async (payload) => {
           if (!payload) {
+            // Server returned no payload but no auth error either (e.g. server 500).
+            // Stay on page, don't redirect — will retry on next navigation.
             dispatch(markHydrated());
             return;
           }
@@ -110,7 +115,11 @@ export function AuthBootstrap() {
         .catch((err: unknown) => {
           dispatch(markHydrated());
           if (isAuthError(err)) {
+            // Real auth failure (expired, revoked, etc.) → redirect to login
             handleAuthFailure('session-expired');
+          } else {
+            // Server error (500, network, etc.) → stay on page, log warning
+            console.warn('[AuthBootstrap] server error during bootstrap, staying on page:', err);
           }
         });
     }

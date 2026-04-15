@@ -3,7 +3,7 @@
  *   PLATFORM_SUPER_ADMIN 만 grant/revoke 가능. 조회는 SUPPORT_ENGINEER 까지 허용.
  * Tiếng Việt: GraphQL resolver cho quản lý RBAC.
  */
-import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { RequirePermission } from '@core/rbac/decorators/RequirePermission.decorator';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '@core/auth/guards/GqlAuth.guard';
@@ -11,6 +11,10 @@ import {
   CurrentUser,
   JwtPayload,
 } from '@core/auth/decorators/CurrentUser.decorator';
+import type { CentralGraphQLContext } from '@core/graphql/loaders/graphqlContext';
+import { resolveLocalizedRows, PERMISSION_FIELDS, ROLE_FIELDS } from '@core/i18n/resolveLocalizedFields';
+import type { SupportedLocale } from '@core/i18n/locale.util';
+import { DEFAULT_LOCALE } from '@core/i18n/locale.util';
 import { PermissionService } from '@core/rbac/Permission.service';
 import { PermissionModel } from './models/Permission.model';
 import { RoleModel } from './models/Role.model';
@@ -49,14 +53,18 @@ export class PermissionResolver {
 
   @Query(() => PermissionModel__ListResp, { name: 'rbacPermissions' })
   @RequirePermission('roles:list')
-  async listPermissions() {
-    return this.service.listPermissions();
+  async listPermissions(@Context() ctx: CentralGraphQLContext) {
+    const locale = (ctx.locale ?? DEFAULT_LOCALE) as SupportedLocale;
+    const rows = await this.service.listPermissions();
+    return resolveLocalizedRows(rows as unknown as Record<string, unknown>[], locale, PERMISSION_FIELDS);
   }
 
   @Query(() => RoleModel__ListResp, { name: 'rbacRoles' })
   @RequirePermission('roles:list')
-  async listRoles() {
-    return this.service.listRoles();
+  async listRoles(@Context() ctx: CentralGraphQLContext) {
+    const locale = (ctx.locale ?? DEFAULT_LOCALE) as SupportedLocale;
+    const rows = await this.service.listRoles();
+    return resolveLocalizedRows(rows as unknown as Record<string, unknown>[], locale, ROLE_FIELDS);
   }
 
   @Query(() => StringListResponse, { name: 'rbacEffectivePermissions' })

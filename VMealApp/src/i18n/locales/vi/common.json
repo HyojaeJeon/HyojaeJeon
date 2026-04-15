@@ -26,7 +26,11 @@
     "tomorrow": "Ngày mai",
     "companyPercent": "({{pct}}%)",
     "error": "Đã xảy ra lỗi",
-    "offline": "Đang ngoại tuyến"
+    "offline": "Đang ngoại tuyến",
+    "ok": "OK",
+    "notification": "Thông báo",
+    "comingSoon": "Sắp ra mắt",
+    "comingSoonMessage": "Tính năng này đang được phát triển. Vui lòng quay lại sau."
   },
   "splash": {
     "tagline": "Phiếu ăn doanh nghiệp",
@@ -41,6 +45,16 @@
     "version": "Phiên bản"
   },
   "auth": {
+    "login": {
+      "title": "Đăng nhập",
+      "subtitle": "Chọn phương thức đăng nhập",
+      "google": "Đăng nhập bằng Google",
+      "apple": "Đăng nhập bằng Apple",
+      "email": "Đăng nhập bằng Email",
+      "phone": "Đăng nhập bằng Số điện thoại",
+      "orContinueWith": "hoặc đăng nhập với",
+      "agreement": "Bằng việc đăng nhập, bạn đồng ý với Điều khoản dịch vụ và Chính sách bảo mật"
+    },
     "step": "Bước {{current}}/{{total}}",
     "tabs": { "phone": "Điện thoại", "info": "Thông tin", "permission": "Quyền" },
     "phoneVerify": {
@@ -80,7 +94,9 @@
     "recentTxn": "Giao dịch gần đây",
     "nearbyMerchants": "Quán ăn gần đây",
     "map": "Bản đồ",
-    "personalTopUp": "Nạp tiền cá nhân"
+    "personalTopUp": "Nạp tiền cá nhân",
+    "noRecentTxn": "Chưa có giao dịch nào",
+    "noNearbyMerchants": "Chưa có quán ăn gần đây"
   },
   "order": {
     "menu": "Thực đơn",
@@ -113,7 +129,10 @@
     "orderDetails": "Chi tiết đơn",
     "goHome": "Về trang chủ",
     "shareReceipt": "Chia sẻ hoá đơn",
-    "orderCode": "Mã đơn"
+    "orderCode": "Mã đơn",
+    "companyShare": "Công ty",
+    "table": "Bàn",
+    "scheduledTime": "Hẹn"
   },
   "status": {
     "PAID_PENDING_ACCEPT": "Đang chờ xác nhận...",
@@ -153,9 +172,15 @@
     "dinner": "Tối",
     "subscribe": "Đăng ký nhận thực đơn",
     "subscribed": "Đã đăng ký",
-    "dailySpecial": "Thực đơn trưa đặc biệt"
+    "dailySpecial": "Thực đơn trưa đặc biệt",
+    "subscribeTitle": "Đăng ký thực đơn",
+    "subscribeConfirm": "Bạn muốn đăng ký nhận thực đơn từ {{name}}?",
+    "unsubscribeTitle": "Huỷ đăng ký",
+    "unsubscribeConfirm": "Bạn muốn huỷ đăng ký nhận thực đơn từ {{name}}?",
+    "unsubscribe": "Huỷ đăng ký"
   },
   "transaction": {
+    "title": "Lịch sử giao dịch",
     "monthlyTotal": "Tổng chi tiêu",
     "company": "Công ty",
     "personal": "Cá nhân",
@@ -165,6 +190,7 @@
     "refund": "Hoàn tiền",
     "declined": "Từ chối",
     "companyFull": "100% công ty",
+    "yesterday": "Hôm qua",
     "detail": {
       "title": "Chi tiết giao dịch",
       "success": "Giao dịch thành công",
@@ -177,7 +203,10 @@
       "transactionId": "Mã giao dịch",
       "orderId": "Mã đơn hàng",
       "saveImage": "Lưu ảnh",
-      "reportIssue": "Báo cáo vấn đề"
+      "reportIssue": "Báo cáo vấn đề",
+      "saveImageComingSoon": "Tính năng lưu ảnh đang được phát triển.",
+      "shareComingSoon": "Tính năng chia sẻ đang được phát triển.",
+      "reportIssueConfirm": "Bạn có chắc chắn muốn báo cáo vấn đề với giao dịch này không?"
     }
   },
   "topUp": {
@@ -191,7 +220,12 @@
     "linked": "Đã liên kết",
     "notLinked": "Chưa liên kết",
     "linkNow": "Liên kết",
-    "topUpBtn": "Nạp {{amount}}"
+    "topUpBtn": "Nạp {{amount}}",
+    "successTitle": "Nạp tiền thành công",
+    "successMessage": "Đã nạp {{amount}} vào tài khoản.",
+    "errorTitle": "Nạp tiền thất bại",
+    "errorMessage": "Đã xảy ra lỗi. Vui lòng thử lại.",
+    "noPaymentMethods": "Chưa có phương thức thanh toán"
   },
   "settings": {
     "mealManagement": "Quản lý phiếu ăn",
@@ -202,6 +236,8 @@
     "notification": "Thông báo",
     "language": "Ngôn ngữ",
     "languageVi": "Tiếng Việt",
+    "languageKo": "한국어",
+    "languageEn": "English",
     "biometric": "Sinh trắc học",
     "other": "Khác",
     "support": "Trung tâm hỗ trợ",
@@ -209,7 +245,15 @@
     "logout": "Đăng xuất",
     "version": "Phiên bản {{ver}} (build {{build}})",
     "activeAccount": "Tài khoản hoạt động",
-    "momoLinked": "MoMo đã liên kết"
+    "momoLinked": "MoMo đã liên kết",
+    "comingSoon": "Sắp ra mắt",
+    "comingSoonMessage": "Tính năng này đang được phát triển. Vui lòng quay lại sau.",
+    "logoutConfirmTitle": "Đăng xuất",
+    "logoutConfirmMessage": "Bạn có chắc chắn muốn đăng xuất không?",
+    "languagePickerTitle": "Chọn ngôn ngữ",
+    "appInfoTitle": "Thông tin ứng dụng",
+    "appInfoMessage": "VMeal v1.0.0 (build 100)\n\nPhiếu ăn doanh nghiệp thông minh.",
+    "profileComingSoon": "Chỉnh sửa hồ sơ đang được phát triển."
   },
   "badge": {
     "title": "Liên kết thẻ RFID",
@@ -225,7 +269,9 @@
     "step3": "Thanh toán tự động từ tài khoản VMeal",
     "adminInfo": "Việc cấp và liên kết thẻ RFID do quản trị viên công ty thực hiện. Nếu cần thay đổi, vui lòng liên hệ phòng nhân sự.",
     "reportLost": "Báo mất thẻ",
-    "lostWarning": "Thẻ sẽ bị vô hiệu hoá ngay lập tức"
+    "lostWarning": "Thẻ sẽ bị vô hiệu hoá ngay lập tức",
+    "lostConfirmMessage": "Thẻ sẽ bị vô hiệu hoá ngay lập tức. Bạn chắc chắn?",
+    "lostSuccess": "Đã báo mất thẻ thành công"
   },
   "policy": {
     "title": "Chính sách áp dụng",
@@ -256,7 +302,9 @@
     "preOrderBtn": "Đặt trước",
     "morningSlot": "Sáng 06:00–09:00",
     "lunchSlot": "Trưa 11:00–14:00",
-    "dinnerSlot": "Tối 17:00–21:00"
+    "dinnerSlot": "Tối 17:00–21:00",
+    "successTitle": "Đặt trước thành công",
+    "successMessage": "Đơn đặt trước của bạn đã được gửi thành công."
   },
   "myPreOrders": {
     "title": "Đơn đặt trước",
@@ -265,7 +313,10 @@
     "cancelled": "Đã huỷ",
     "confirmed": "Đã xác nhận",
     "pending": "Chờ xác nhận",
-    "cancelOrder": "Huỷ đơn"
+    "cancelOrder": "Huỷ đơn",
+    "cancelConfirmTitle": "Huỷ đơn đặt trước",
+    "cancelConfirmMessage": "Bạn có chắc chắn muốn huỷ đơn đặt trước này không?",
+    "empty": "Không có đơn đặt trước nào"
   },
   "groupPay": {
     "title": "Cùng trả",
@@ -281,6 +332,114 @@
     "startPayment": "Bắt đầu thanh toán",
     "you": "Bạn",
     "waiting": "Chờ",
-    "todayAt": "hôm nay"
+    "todayAt": "hôm nay",
+    "addMember": "Thêm thành viên",
+    "namePlaceholder": "Nhập tên"
+  },
+  "profileEdit": {
+    "title": "Chỉnh sửa hồ sơ",
+    "changePhoto": "Thay ảnh",
+    "photoOptions": "Chọn ảnh",
+    "openCamera": "Mở camera",
+    "name": "Họ tên",
+    "namePlaceholder": "Nhập họ tên",
+    "phone": "Số điện thoại",
+    "email": "Email",
+    "emailPlaceholder": "Nhập email",
+    "department": "Phòng ban",
+    "employeeCode": "Mã nhân viên",
+    "company": "Công ty",
+    "save": "Lưu thay đổi",
+    "saved": "Đã lưu",
+    "savedMessage": "Thông tin đã được cập nhật"
+  },
+  "eWallet": {
+    "title": "Ví điện tử",
+    "linked": "Đã liên kết",
+    "notLinked": "Chưa liên kết",
+    "linkAction": "Liên kết",
+    "unlinkAction": "Huỷ liên kết",
+    "linkConfirmTitle": "Liên kết ví",
+    "linkConfirmMessage": "Bạn muốn liên kết ví này?",
+    "unlinkConfirmTitle": "Huỷ liên kết",
+    "unlinkConfirmMessage": "Bạn muốn huỷ liên kết ví này?",
+    "info": "Ví đã liên kết có thể dùng để nạp tiền cá nhân"
+  },
+  "notificationSetting": {
+    "title": "Cài đặt thông báo",
+    "pushNotifications": "Thông báo đẩy",
+    "pushDesc": "Bật/tắt tất cả thông báo",
+    "orderUpdates": "Cập nhật đơn hàng",
+    "orderUpdatesDesc": "Nhận thông báo khi trạng thái đơn thay đổi",
+    "paymentConfirm": "Xác nhận thanh toán",
+    "paymentConfirmDesc": "Nhận thông báo khi thanh toán thành công",
+    "dailyLimit": "Nhắc hạn mức",
+    "dailyLimitDesc": "Nhận cảnh báo khi gần hết hạn mức ngày",
+    "dailyMenu": "Thực đơn hàng ngày",
+    "dailyMenuDesc": "Nhận thực đơn mới từ quán đã đăng ký",
+    "quietHours": "Giờ im lặng",
+    "quietHoursDesc": "Không nhận thông báo trong khoảng thời gian này",
+    "quietHoursLabel": "22:00 – 07:00"
+  },
+  "languageSetting": {
+    "title": "Ngôn ngữ",
+    "subtitle": "Chọn ngôn ngữ hiển thị"
+  },
+  "support": {
+    "title": "Trung tâm hỗ trợ",
+    "searchPlaceholder": "Tìm câu hỏi...",
+    "faqTitle": "Câu hỏi thường gặp",
+    "contactTitle": "Liên hệ",
+    "email": "Email hỗ trợ",
+    "phone": "Hotline",
+    "noResults": "Không tìm thấy kết quả",
+    "faq1Q": "Làm sao để đặt hàng?",
+    "faq1A": "Nhấn nút Đặt món trên trang chủ, chọn quán ăn, chọn món và thanh toán.",
+    "faq2Q": "Làm sao để nạp tiền?",
+    "faq2A": "Vào mục Nạp tiền, chọn số tiền và phương thức thanh toán.",
+    "faq3Q": "Split Payment là gì?",
+    "faq3A": "Khi đơn hàng vượt hạn mức công ty, phần chênh lệch sẽ trừ từ số dư cá nhân.",
+    "faq4Q": "Sử dụng thẻ RFID như thế nào?",
+    "faq4A": "Quẹt thẻ tại máy POS của quán ăn, xác nhận đơn hàng trên màn hình POS.",
+    "faq5Q": "Huỷ đơn hàng như thế nào?",
+    "faq5A": "Đơn hàng có thể huỷ trước khi quán xác nhận, tuỳ theo chính sách huỷ của quán."
+  },
+  "appInfo": {
+    "title": "Thông tin ứng dụng",
+    "version": "Phiên bản",
+    "copyright": "© 2026 Partners LN Company Limited",
+    "platform": "Nền tảng",
+    "osVersion": "Phiên bản OS"
+  },
+  "topUpResult": {
+    "amountCharged": "Số tiền nạp",
+    "newBalance": "Số dư mới",
+    "paymentMethod": "Phương thức",
+    "timestamp": "Thời gian",
+    "goHome": "Về trang chủ",
+    "topUpAgain": "Nạp thêm",
+    "viewDetails": "Xem chi tiết",
+    "failTitle": "Nạp tiền thất bại",
+    "failMessage": "Đã xảy ra lỗi. Vui lòng thử lại."
+  },
+  "merchantNavigate": {
+    "title": "Chỉ đường",
+    "openWith": "Mở bằng",
+    "open": "Mở"
+  },
+  "notification": {
+    "title": "Thông báo",
+    "unreadCount": "{{count}} chưa đọc",
+    "empty": "Chưa có thông báo",
+    "orderAccepted": "Quán đã nhận đơn",
+    "orderAcceptedBody": "Đơn hàng của bạn đã được quán xác nhận",
+    "paymentSuccess": "Thanh toán thành công",
+    "paymentSuccessBody": "Giao dịch 100.000₫ tại Phở 24 đã hoàn tất",
+    "orderReady": "Đơn hàng sẵn sàng",
+    "orderReadyBody": "Đơn hàng của bạn đã sẵn sàng để nhận",
+    "policyUpdated": "Chính sách cập nhật",
+    "policyUpdatedBody": "Chính sách ăn trưa đã được cập nhật bởi quản trị viên",
+    "topUpSuccess": "Nạp tiền thành công",
+    "topUpSuccessBody": "Đã nạp 200.000₫ vào tài khoản cá nhân"
   }
 }

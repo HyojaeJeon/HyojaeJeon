@@ -95,6 +95,9 @@ const LOGOUT_MUTATION = `
 let sessionPayload: AuthSessionPayload | null = null;
 let refreshTimer: number | null = null;
 let refreshInFlight: Promise<AuthSessionPayload | null> | null = null;
+const REFRESH_COOLDOWN_MS = 5_000;
+let lastRefreshAt = 0;
+let lastRefreshResult: AuthSessionPayload | null = null;
 const listeners = new Set<SessionListener>();
 
 function notify(payload: AuthSessionPayload | null): void {
@@ -205,6 +208,10 @@ export function getAccessToken(): string | null {
 }
 
 export async function refreshSession(): Promise<AuthSessionPayload | null> {
+  // Cooldown: skip if recently refreshed successfully
+  if (lastRefreshResult && Date.now() - lastRefreshAt < REFRESH_COOLDOWN_MS) {
+    return lastRefreshResult;
+  }
   if (refreshInFlight) return refreshInFlight;
 
   refreshInFlight = (async () => {
@@ -225,6 +232,8 @@ export async function refreshSession(): Promise<AuthSessionPayload | null> {
       }
 
       applyAuthPayload(payload as AuthSessionPayload);
+      lastRefreshResult = payload as AuthSessionPayload;
+      lastRefreshAt = Date.now();
       return payload as AuthSessionPayload;
     } catch (err) {
       if (err instanceof AuthError) throw err;

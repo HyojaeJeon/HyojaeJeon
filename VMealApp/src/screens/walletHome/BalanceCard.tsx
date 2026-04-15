@@ -1,69 +1,106 @@
 import { View, Text, Pressable } from 'react-native';
 import { Eye } from 'lucide-react-native';
-import { MOCK_WALLET, formatVnd } from '@shared/mock/mockData';
-import LinearGradient from 'react-native-linear-gradient';
+import { formatVnd } from '@shared/utils/format';
 import { useTranslation } from 'react-i18next';
+import type { MockMealWallet } from '@shared/mock/types';
+import { Card } from '@shared/ui';
+import { colors, typography, spacing, radius } from '@shared/ui/tokens';
 
-export function BalanceCard() {
+interface BalanceCardProps {
+  wallet: MockMealWallet | null;
+}
+
+export function BalanceCard({ wallet }: BalanceCardProps) {
   const { t } = useTranslation();
+
+  if (!wallet) return null;
+
   const {
     balanceVnd,
     companyAllowanceVnd,
     personalTopUpVnd,
     dailySpentVnd,
     dailyLimitVnd,
-  } = MOCK_WALLET;
+  } = wallet;
 
   const spentRatio = Math.min(dailySpentVnd / dailyLimitVnd, 1);
 
   return (
-    <LinearGradient
-      colors={['#3B82F6', '#6366F1']}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      className="rounded-3xl p-6"
-    >
+    <Card variant="balance" style={{ padding: spacing.cardPadding }}>
       {/* Top row: label + eye */}
       <View className="flex flex-row items-center justify-between">
-        <Text className="text-sm text-white/70">{t('wallet.balance')}</Text>
-        <Pressable className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
-          <Eye size={16} color="rgba(255,255,255,0.7)" />
+        <Text style={[typography.overline, { color: colors.textTertiary }]}>
+          {t('wallet.balance')}
+        </Text>
+        <Pressable
+          className="items-center justify-center"
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: radius.full,
+            backgroundColor: colors.primaryLight,
+          }}
+        >
+          <Eye size={16} color={colors.primary} />
         </Pressable>
       </View>
 
       {/* Main balance */}
-      <Text className="mt-2 text-3xl font-bold text-white">
+      <Text style={[typography.displayLarge, { color: colors.primary, marginTop: spacing.sm }]}>
         {formatVnd(balanceVnd)}
       </Text>
 
-      {/* Sub rows */}
-      <View className="mt-3 gap-1">
-        <View className="flex flex-row items-center gap-2">
-          <View className="h-1.5 w-1.5 rounded-full bg-white/60" />
-          <Text className="text-xs text-white/80">
-            {t('wallet.companyFund')}: {formatVnd(companyAllowanceVnd)}
+      {/* Divider */}
+      <View style={{ height: 1, backgroundColor: colors.border, marginTop: spacing.lg, marginBottom: spacing.md }} />
+
+      {/* Company / Personal split */}
+      <View style={{ gap: spacing.sm }}>
+        <View className="flex flex-row items-center justify-between">
+          <View className="flex flex-row items-center" style={{ gap: spacing.sm }}>
+            <View style={{ width: 8, height: 8, borderRadius: radius.full, backgroundColor: colors.primary }} />
+            <Text style={typography.body}>{t('wallet.companyFund')}</Text>
+          </View>
+          <Text style={[typography.cardTitle, { color: colors.textPrimary }]}>
+            {formatVnd(companyAllowanceVnd)}
           </Text>
         </View>
-        <View className="flex flex-row items-center gap-2">
-          <View className="h-1.5 w-1.5 rounded-full bg-white/60" />
-          <Text className="text-xs text-white/80">
-            {t('wallet.personalFund')}: {formatVnd(personalTopUpVnd)}
+        <View className="flex flex-row items-center justify-between">
+          <View className="flex flex-row items-center" style={{ gap: spacing.sm }}>
+            <View style={{ width: 8, height: 8, borderRadius: radius.full, backgroundColor: colors.success }} />
+            <Text style={typography.body}>{t('wallet.personalFund')}</Text>
+          </View>
+          <Text style={[typography.cardTitle, { color: colors.textPrimary }]}>
+            {formatVnd(personalTopUpVnd)}
           </Text>
         </View>
       </View>
 
       {/* Daily progress */}
-      <View className="mt-4">
-        <Text className="text-xs text-white/60">
-          {t('wallet.todaySpent')}: {formatVnd(dailySpentVnd)}/{formatVnd(dailyLimitVnd)}
-        </Text>
-        <View className="mt-1.5 h-1 w-full rounded-full bg-white/20">
+      <View style={{ marginTop: spacing.lg }}>
+        <View className="flex flex-row items-center justify-between">
+          <Text style={typography.caption}>{t('wallet.todaySpent')}</Text>
+          <Text style={[typography.caption, { color: colors.textSecondary, fontWeight: '600' }]}>
+            {formatVnd(dailySpentVnd)} / {formatVnd(dailyLimitVnd)}
+          </Text>
+        </View>
+        <View
+          style={{
+            marginTop: spacing.sm,
+            height: 6,
+            borderRadius: radius.full,
+            backgroundColor: colors.primaryLight,
+          }}
+        >
           <View
-            className="h-1 rounded-full bg-white"
-            style={{ width: `${spentRatio * 100}%` }}
+            style={{
+              height: 6,
+              borderRadius: radius.full,
+              backgroundColor: colors.primary,
+              width: `${spentRatio * 100}%`,
+            }}
           />
         </View>
       </View>
-    </LinearGradient>
+    </Card>
   );
 }

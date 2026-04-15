@@ -28,6 +28,7 @@
  *      - Truy vấn doanh nghiệp cần phát hành hóa đơn tự động (listCorporatesForInvoiceGeneration).
  */
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '@core/prisma/Prisma.service';
 import { PermissionService } from '@core/rbac/Permission.service';
 import {
@@ -46,6 +47,7 @@ export class MealCorporateService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly permission: PermissionService,
+    private readonly jwtService: JwtService,
   ) {}
 
   // ───── Corporate
@@ -511,5 +513,118 @@ export class MealCorporateService {
         ],
       },
     });
+  }
+
+  // ───── VMealApp Employee Login
+
+  /**
+   * [KO] 임직원 전화번호 로그인 (VMealApp dev-friendly 버전)
+   *      1. phone + corporateId + ACTIVE + deletedAt=null 조건으로 임직원을 조회한다.
+   *      2. 존재하지 않으면 EMPLOYEE_NOT_FOUND 에러를 던진다.
+   *      3. JWT 토큰을 발급하여 accessToken, employee, wallet 을 반환한다.
+   *
+   * [VI] Dang nhap nhan vien bang so dien thoai (phien ban dev-friendly cho VMealApp)
+   *      1. Tim nhan vien theo phone + corporateId + ACTIVE + deletedAt=null.
+   *      2. Neu khong ton tai thi nem loi EMPLOYEE_NOT_FOUND.
+   *      3. Cap JWT token va tra ve accessToken, employee, wallet.
+   */
+  async employeeLogin(phone: string, corporateId: string) {
+    const employee = await this.prisma.mealEmployee.findFirst({
+      where: { phone, corporateId, status: 'ACTIVE', deletedAt: null },
+      include: { wallet: true, department: true, corporate: true },
+    });
+
+    if (!employee) {
+      throw new DomainError({ code: 'EMPLOYEE_NOT_FOUND', params: { phone } });
+    }
+
+    const payload = {
+      sub: employee.id,
+      loginId: employee.phone,
+      displayName: employee.fullName,
+      userType: 'MEAL_EMPLOYEE',
+      corporateId: employee.corporateId,
+      employeeId: employee.id,
+      walletId: employee.wallet?.id ?? null,
+    };
+
+    const accessToken = this.jwtService.sign(payload);
+
+    return {
+      accessToken,
+      employee,
+      wallet: employee.wallet,
+    };
+  }
+
+  // ───── Employee Status Management
+
+  async updateEmployee(
+    ctx: MealCallerCtx,
+    id: string,
+    data: { fullName?: string; email?: string; phone?: string; departmentId?: string | null },
+  ) {
+    const emp = await this.prisma.mealEmployee.findUnique({ where: { id } });
+    if (!emp) throw new Error('RESOURCE_NOT_FOUND');
+    assertCorporateScope(ctx, emp.corporateId);
+
+    return this.prisma.mealEmployee.update({
+      where: { id },
+      data: {
+        ...(data.fullName !== undefined && { fullName: data.fullName }),
+        ...(data.email !== undefined && { email: data.email }),
+        ...(data.phone !== undefined && { phone: data.phone }),
+        ...(data.departmentId !== undefined && { departmentId: data.departmentId }),
+      },
+    });
+  }
+
+  async suspendEmployee(ctx: MealCallerCtx, id: string) {
+    const emp = await this.prisma.mealEmployee.findUnique({ where: { id } });
+    if (!emp) throw new Error('RESOURCE_NOT_FOUND');
+    assertCorporateScope(ctx, emp.corporateId);
+    if (emp.status !== 'ACTIVE') throw new Error('Employee is not ACTIVE');
+
+    const updated = await this.prisma.mealEmployee.update({
+      where: { id },
+      data: { status: 'SUSPENDED' },
+    });
+
+    // Suspend wallet too
+    await this.prisma.mealWallet.updateMany({
+      where: { employeeId: id },
+      data: { status: 'SUSPENDED' },
+    });
+
+    return updated;
+  }
+
+  async terminateEmployee(ctx: MealCallerCtx, id: string) {
+    const emp = await this.prisma.mealEmployee.findUnique({ where: { id } });
+    if (!emp) throw new Error('RESOURCE_NOT_FOUND');
+    assertCorporateScope(ctx, emp.corporateId);
+
+    const updated = await this.prisma.mealEmployee.update({
+      where: { id },
+      data: { status: 'TERMINATED', deletedAt: new Date() },
+    });
+
+    // Freeze wallet
+    await this.prisma.mealWallet.updateMany({
+      where: { employeeId: id },
+      data: { status: 'FROZEN' },
+    });
+
+    return updated;
+  }
+
+  // ───── Corporate Admins
+
+  async listAdmins(corporateId: string) {
+    const admins = await this.prisma.corporateAdminUser.findMany({
+      where: { corporateId, deletedAt: null },
+      orderBy: { createdAt: 'desc' },
+    });
+    return { data: admins, totalCount: admins.length };
   }
 }

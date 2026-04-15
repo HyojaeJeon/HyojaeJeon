@@ -16,7 +16,7 @@ import {
   type BrandMenuItemRow,
 } from '@graphql/queries/governance';
 import { useI18n } from '@i18n/I18nProvider';
-import { formatDateTime } from '@shared/utils/format';
+import { formatDateTime, formatNumber, toLocaleTag } from '@shared/utils/format';
 
 const PAGE_SIZE = 20;
 
@@ -25,7 +25,8 @@ interface MenuItemsTabProps {
 }
 
 export function MenuItemsTab({ brandHQId }: MenuItemsTabProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const localeTag = toLocaleTag(locale);
   const [skip, setSkip] = useState(0);
 
   const { data, loading } = useQuery<BrandMenuItemsData>(BRAND_MENU_ITEMS_QUERY, {
@@ -39,9 +40,9 @@ export function MenuItemsTab({ brandHQId }: MenuItemsTabProps) {
   const columns: DataTableColumn<BrandMenuItemRow>[] = [
     { key: 'code', header: t('brand.col.itemCode'), width: '140px', render: (r) => <span className="font-mono text-[12px]">{r.itemCode}</span> },
     { key: 'name', header: t('brand.col.itemName'), render: (r) => <span className="font-medium text-fg">{r.itemName}</span> },
-    { key: 'type', header: t('brand.col.itemType'), width: '110px', render: (r) => <Badge tone="info" variant="soft">{r.itemType}</Badge> },
-    { key: 'price', header: t('brand.col.basePrice'), width: '120px', align: 'right', render: (r) => <span className="num font-mono text-[12px]">{r.basePrice}</span> },
-    { key: 'tax', header: t('brand.col.taxRate'), width: '80px', align: 'right', render: (r) => <span className="num font-mono text-[11px] text-fg-muted">{r.taxRate}</span> },
+    { key: 'type', header: t('brand.col.itemType'), width: '110px', render: (r) => <Badge tone="info" variant="soft">{t(`enum.itemType.${r.itemType}`)}</Badge> },
+    { key: 'price', header: t('brand.col.basePrice'), width: '120px', align: 'right', render: (r) => <span className="num font-mono text-[12px]">{formatNumber(r.basePrice, localeTag)}</span> },
+    { key: 'tax', header: t('brand.col.taxRate'), width: '80px', align: 'right', render: (r) => <span className="num font-mono text-[11px] text-fg-muted">{typeof r.taxRate === 'number' ? `${r.taxRate}%` : '—'}</span> },
     { key: 'unit', header: t('brand.col.unitType'), width: '80px', render: (r) => <span className="text-[12px] text-fg-muted">{r.unitType ?? '—'}</span> },
     { key: 'active', header: t('field.status'), width: '100px', align: 'center', render: (r) => r.isActive ? <Badge tone="success" startDot>{t('enum.status.ACTIVE')}</Badge> : <Badge tone="neutral" variant="soft">{t('enum.status.INACTIVE')}</Badge> },
     { key: 'sold', header: t('brand.col.soldOut'), width: '90px', align: 'center', render: (r) => r.isSoldOut ? <Badge tone="warning" variant="soft">{t('brand.col.soldOut')}</Badge> : <span className="text-fg-subtle">—</span> },

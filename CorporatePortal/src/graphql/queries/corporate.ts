@@ -17,16 +17,6 @@ export const CORPORATE_PROFILE_QUERY = gql`
           contactName
           contactEmail
           contactPhone
-          addressCity
-          addressDistrict
-          addressWard
-          addressDetail
-          addressFull
-          contactFax
-          bankAccountNumber
-          bankName
-          einvoiceConsolidationStrategy
-          einvoiceReviewDays
           status
           createdAt
           updatedAt
@@ -51,7 +41,6 @@ export const UPDATE_CORPORATE_MUTATION = gql`
           contactName
           contactEmail
           contactPhone
-          addressFull
         }
       }
       error {
@@ -77,16 +66,6 @@ export interface CorporateProfile {
   contactName: string | null;
   contactEmail: string | null;
   contactPhone: string | null;
-  addressCity: string | null;
-  addressDistrict: string | null;
-  addressWard: string | null;
-  addressDetail: string | null;
-  addressFull: string | null;
-  contactFax: string | null;
-  bankAccountNumber: string | null;
-  bankName: string | null;
-  einvoiceConsolidationStrategy: string | null;
-  einvoiceReviewDays: number | null;
   status: string;
   createdAt: string;
   updatedAt: string;

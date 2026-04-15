@@ -2,6 +2,68 @@ import { gql } from '@apollo/client';
 
 /* ─────────────────────────── Queries ─────────────────────────── */
 
+export const FUNDING_STATUS_QUERY = gql`
+  query FundingStatus($id: ID!) {
+    mealCorporate(id: $id) {
+      success {
+        data {
+          id
+          companyName
+          fundingModel
+          depositBalanceVnd
+          creditLimitVnd
+          monthlyBudgetVnd
+          status
+        }
+      }
+      error { code message }
+    }
+  }
+`;
+
+export interface FundingStatusData {
+  mealCorporate: {
+    success: {
+      data: {
+        id: string;
+        companyName: string;
+        fundingModel: string | null;
+        depositBalanceVnd: string | null;
+        creditLimitVnd: string | null;
+        monthlyBudgetVnd: string | null;
+        status: string;
+      };
+    } | null;
+    error: { code: string; message: string } | null;
+  };
+}
+
+/* ─────────────────────────── Mutations ─────────────────────────── */
+
+export const FUND_WALLET_MUTATION = gql`
+  mutation FundWallet($input: FundMealWalletInput!) {
+    mealWalletFund(input: $input) {
+      success {
+        data { id balanceVnd companyAllowanceVnd status }
+      }
+      error { code message }
+    }
+  }
+`;
+
+export const CONFIRM_DEPOSIT_MUTATION = gql`
+  mutation ConfirmDeposit($corporateId: ID!, $amountVnd: BigInt!, $referenceNo: String!) {
+    mealDepositConfirm(corporateId: $corporateId, amountVnd: $amountVnd, referenceNo: $referenceNo) {
+      success {
+        data { id balanceVnd }
+      }
+      error { code message }
+    }
+  }
+`;
+
+/* ─────────────────────────── Queries ─────────────────────────── */
+
 export const WALLETS_QUERY = gql`
   query Wallets($corporateId: ID!, $skip: Int!, $take: Int!) {
     mealWalletsByCorporate(corporateId: $corporateId, skip: $skip, take: $take) {
@@ -17,6 +79,12 @@ export const WALLETS_QUERY = gql`
           status
           createdAt
           updatedAt
+          employee {
+            fullName
+            employeeCode
+            departmentId
+            departmentName
+          }
         }
       }
       error {
@@ -147,10 +215,14 @@ export const TRANSACTIONS_FILTERED_QUERY = gql`
           employeeShareVnd
           status
           declineReason
-          idempotencyKey
+          orderId
           authorizedAt
           settledAt
           createdAt
+          brandName
+          branchName
+          employeeName
+          departmentName
         }
         totalCount
       }
@@ -175,6 +247,12 @@ export interface WalletRow {
   status: string;
   createdAt: string;
   updatedAt: string;
+  employee?: {
+    fullName: string;
+    employeeCode: string | null;
+    departmentId: string | null;
+    departmentName: string | null;
+  } | null;
 }
 
 export interface WalletFundingEntry {
@@ -205,10 +283,14 @@ export interface TransactionRow {
   employeeShareVnd: string;
   status: string;
   declineReason: string | null;
-  idempotencyKey: string;
+  orderId: string | null;
   authorizedAt: string | null;
   settledAt: string | null;
   createdAt: string;
+  brandName: string | null;
+  branchName: string | null;
+  employeeName: string | null;
+  departmentName: string | null;
 }
 
 export interface WalletsData {
@@ -227,7 +309,7 @@ export interface WalletDetailData {
 
 export interface WalletFundingEntriesData {
   mealWalletFundingEntriesByWallet: {
-    success: { data: WalletFundingEntry[] } | null;
+    success: { data: WalletFundingEntry[]; totalCount: number } | null;
     error: { code: string; message: string } | null;
   };
 }

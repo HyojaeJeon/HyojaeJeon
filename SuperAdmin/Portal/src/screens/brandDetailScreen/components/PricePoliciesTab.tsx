@@ -40,7 +40,7 @@ export function PricePoliciesTab({ brandHQId }: PricePoliciesTabProps) {
   const columns: DataTableColumn<BrandPricePolicyRow>[] = [
     { key: 'code', header: t('brand.col.policyCode'), width: '160px', render: (r) => <span className="font-mono text-[12px]">{r.policyCode}</span> },
     { key: 'name', header: t('brand.col.policyName'), render: (r) => <span className="font-medium text-fg">{r.policyName}</span> },
-    { key: 'type', header: t('brand.col.policyType'), width: '130px', render: (r) => <Badge tone="info" variant="soft">{r.policyType}</Badge> },
+    { key: 'type', header: t('brand.col.policyType'), width: '130px', render: (r) => <Badge tone="info" variant="soft">{t(`enum.policyType.${r.policyType}`)}</Badge> },
     { key: 'from', header: t('brand.col.effectiveFrom'), width: '160px', render: (r) => <span className="num text-[12px] text-fg-muted">{formatDateTime(r.effectiveFrom)}</span> },
     { key: 'to', header: t('brand.col.effectiveTo'), width: '160px', render: (r) => <span className="num text-[12px] text-fg-muted">{r.effectiveTo ? formatDateTime(r.effectiveTo) : '—'}</span> },
     { key: 'status', header: t('field.status'), width: '120px', render: (r) => <StatusBadge status={r.status} /> },

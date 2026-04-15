@@ -23,10 +23,20 @@
  *        có thể tra cứu thông tin doanh nghiệp.
  */
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { createJwtModuleOptions } from '@core/auth/JwtOptions.factory';
 import { MealCorporateService } from './Corporate.service';
 import { MealCorporateResolver } from './Corporate.resolver';
 
 @Module({
+  imports: [
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: createJwtModuleOptions,
+    }),
+  ],
   providers: [MealCorporateService, MealCorporateResolver],
   exports: [MealCorporateService],
 })

@@ -32,6 +32,12 @@ export class MealMerchantEnrollmentModel {
   /** [KO] 브랜드명 (조회 시 BrandProfile 에서 JOIN) / [VI] Tên thương hiệu (JOIN từ BrandProfile khi truy vấn) */
   @Field(() => String, { nullable: true }) brandName?: string | null;
 
+  /** [KO] 요리 카테고리 (JOIN) / [VI] Loại ẩm thực (JOIN) */
+  @Field(() => String, { nullable: true }) cuisineType?: string | null;
+
+  /** [KO] 로고 이미지 URL (JOIN) / [VI] URL ảnh logo (JOIN) */
+  @Field(() => String, { nullable: true }) logoUrl?: string | null;
+
   /**
    * [KO] 활성 상태. true 면 식권 거래 가능, false 면 거래 차단.
    *      activate/deactivate mutation 으로 전환합니다.

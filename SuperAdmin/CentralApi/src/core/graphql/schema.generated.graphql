@@ -168,12 +168,20 @@ type BranchModel {
   countryCode: String!
   createdAt: DateTime!
   defaultLanguageCode: String!
+  description: String
   distributorId: String
   edgePosTerminals: [EdgePosTerminalModel!]!
   id: ID!
+  latitude: Float
+  logoUrl: String
+  longitude: Float
   openingDate: DateTime
+  phone: String
   postalCode: String
+  profileImageUrl: String
+  rating: Float
   regionCode: String
+  reviewCount: Int
   status: String!
   timeZoneCode: String!
   updatedAt: DateTime!
@@ -285,16 +293,22 @@ type BrandMenuCategoryModelResponseSuccess {
 type BrandMenuItemModel {
   basePrice: Float!
   brandHQId: String!
+  calories: Int
   categoryId: String!
   createdAt: DateTime!
+  description: String
   displayOrder: Int!
   id: ID!
   isActive: Boolean!
+  isBestSeller: Boolean!
+  isFeatured: Boolean!
   isSoldOut: Boolean!
   itemCode: String!
   itemName: String!
   itemType: String!
+  profileImageUrl: String
   searchKeywords: String
+  spicyLevel: Int
   taxRate: Float!
   unitType: String!
   updatedAt: DateTime!
@@ -546,6 +560,32 @@ type ContractTemplateModelResponseSuccess {
   requestId: String
 }
 
+type CorporateAdminUserModel {
+  corporateId: String!
+  createdAt: DateTime!
+  displayName: String!
+  email: String
+  id: ID!
+  lastLoginAt: DateTime
+  loginId: String!
+  phone: String
+  status: String!
+  updatedAt: DateTime!
+}
+
+type CorporateAdminUserModelListResponse {
+  error: ErrorPayload
+  success: CorporateAdminUserModelListResponseSuccess
+}
+
+type CorporateAdminUserModelListResponseSuccess {
+  code: String!
+  data: [CorporateAdminUserModel!]!
+  message: String!
+  requestId: String
+  totalCount: Int
+}
+
 input CreateAuthAccountInput {
   brandHqId: String
   corporateId: String
@@ -603,7 +643,7 @@ input CreateContractTemplateInput {
   bodyJson: JSON!
   clausesJson: JSON
   contractType: String!
-  templateCode: String!
+  templateCode: String
   title: String!
   titleEn: String
   titleKo: String
@@ -663,6 +703,21 @@ input CreateMealCorporateInput {
   tenantCode: String!
 }
 
+input CreateMealDailyMenuInput {
+  branchId: ID!
+  date: DateTime!
+  items: [CreateMealDailyMenuItemInput!]!
+  mealType: String!
+}
+
+input CreateMealDailyMenuItemInput {
+  calories: Int
+  imageUrl: String
+  name: String!
+  priceVnd: BigInt!
+  sortOrder: Int! = 0
+}
+
 input CreateMealDepartmentInput {
   corporateId: ID!
   departmentCode: String!
@@ -680,22 +735,49 @@ input CreateMealEmployeeInput {
   phone: String
 }
 
+input CreateMealOrderInput {
+  branchId: ID!
+  brandHqId: ID!
+  diningType: String!
+  idempotencyKey: String!
+  items: [MealOrderItemInput!]!
+  orderType: String!
+  scheduledAt: DateTime
+  tableNo: String
+  userLatitude: Float
+  userLongitude: Float
+  walletId: ID!
+}
+
 input CreateMealPolicyInput {
   allowSplitPayment: Boolean! = true
   allowedDayOfWeek: [Int!]! = [1, 2, 3, 4, 5]
-  allowedMealTypes: [String!]! = []
+  allowedMealTypes: [String!]
   allowedTimeEnd: String! = "22:00"
   allowedTimeStart: String! = "06:00"
-  appliesToDepartmentIds: [String!]! = []
-  appliesToRoleCodes: [String!]! = []
+  appliesToDepartmentIds: [String!]
+  appliesToRoleCodes: [String!]
   corporateId: ID!
   dailyLimitVnd: BigInt! = 0
   effectiveFrom: DateTime!
   effectiveTo: DateTime
   maxPerTransactionVnd: BigInt! = 0
-  merchantCategoryRestrictions: [String!]! = []
-  policyCode: String!
+  merchantCategoryRestrictions: [String!]
+  policyCode: String
   policyName: String!
+}
+
+input CreateMealPreOrderInput {
+  dailyMenuId: ID!
+  idempotencyKey: String!
+  items: [CreateMealPreOrderItemInput!]!
+  pickupSlot: String!
+  walletId: ID!
+}
+
+input CreateMealPreOrderItemInput {
+  dailyMenuItemId: ID!
+  quantity: Int! = 1
 }
 
 input CreateMealWalletInput {
@@ -1327,6 +1409,71 @@ type MealCorporateModelResponseSuccess {
   requestId: String
 }
 
+type MealDailyMenuItemModel {
+  calories: Int
+  createdAt: DateTime!
+  dailyMenuId: String!
+  id: ID!
+  imageUrl: String
+  name: String!
+  priceVnd: BigInt!
+  sortOrder: Int!
+}
+
+type MealDailyMenuModel {
+  branchId: String!
+  createdAt: DateTime!
+  date: DateTime!
+  id: ID!
+  items: [MealDailyMenuItemModel!]
+  mealType: String!
+  status: String!
+  updatedAt: DateTime!
+}
+
+type MealDailyMenuModelListResponse {
+  error: ErrorPayload
+  success: MealDailyMenuModelListResponseSuccess
+}
+
+type MealDailyMenuModelListResponseSuccess {
+  code: String!
+  data: [MealDailyMenuModel!]!
+  message: String!
+  requestId: String
+  totalCount: Int
+}
+
+type MealDailyMenuModelResponse {
+  error: ErrorPayload
+  success: MealDailyMenuModelResponseSuccess
+}
+
+type MealDailyMenuModelResponseSuccess {
+  code: String!
+  data: MealDailyMenuModel!
+  message: String!
+  requestId: String
+}
+
+type MealEmployeeLoginPayload {
+  accessToken: String!
+  employee: MealEmployeeModel!
+  wallet: MealWalletModel
+}
+
+type MealEmployeeLoginResponse {
+  error: ErrorPayload
+  success: MealEmployeeLoginResponseSuccess
+}
+
+type MealEmployeeLoginResponseSuccess {
+  code: String!
+  data: MealEmployeeLoginPayload!
+  message: String!
+  requestId: String
+}
+
 type MealEmployeeModel {
   badgeRfid: String
   corporateId: String!
@@ -1421,9 +1568,11 @@ type MealMerchantEnrollmentModel {
   brandName: String
   contractEndsAt: DateTime
   createdAt: DateTime!
+  cuisineType: String
   enrolledAt: DateTime!
   id: ID!
   isActive: Boolean!
+  logoUrl: String
   loopType: String!
   updatedAt: DateTime!
 }
@@ -1477,6 +1626,114 @@ type MealMerchantSettlementAccountModelResponseSuccess {
   requestId: String
 }
 
+type MealMerchantSubscriptionModel {
+  branchId: String!
+  createdAt: DateTime!
+  employeeId: String!
+  id: ID!
+  isActive: Boolean!
+  notifyBreakfast: Boolean!
+  notifyDinner: Boolean!
+  notifyLunch: Boolean!
+  updatedAt: DateTime!
+}
+
+type MealMerchantSubscriptionModelListResponse {
+  error: ErrorPayload
+  success: MealMerchantSubscriptionModelListResponseSuccess
+}
+
+type MealMerchantSubscriptionModelListResponseSuccess {
+  code: String!
+  data: [MealMerchantSubscriptionModel!]!
+  message: String!
+  requestId: String
+  totalCount: Int
+}
+
+type MealMerchantSubscriptionModelResponse {
+  error: ErrorPayload
+  success: MealMerchantSubscriptionModelResponseSuccess
+}
+
+type MealMerchantSubscriptionModelResponseSuccess {
+  code: String!
+  data: MealMerchantSubscriptionModel!
+  message: String!
+  requestId: String
+}
+
+input MealOrderItemInput {
+  menuItemName: String!
+  optionsJson: JSON
+  quantity: Int!
+  unitPriceVnd: BigInt!
+}
+
+type MealOrderItemModel {
+  createdAt: DateTime!
+  id: ID!
+  menuItemName: String!
+  optionsJson: JSON!
+  orderId: String!
+  quantity: Int!
+  unitPriceVnd: BigInt!
+}
+
+type MealOrderListResponse {
+  error: ErrorPayload
+  success: MealOrderListResponseSuccess
+}
+
+type MealOrderListResponseSuccess {
+  code: String!
+  data: [MealOrderModel!]!
+  message: String!
+  requestId: String
+  totalCount: Int
+}
+
+type MealOrderModel {
+  acceptedAt: DateTime
+  branchId: String!
+  brandHqId: String!
+  cancelReason: String
+  cancelledAt: DateTime
+  checkedInAt: DateTime
+  companyShareVnd: BigInt!
+  completedAt: DateTime
+  corporateId: String!
+  createdAt: DateTime!
+  diningType: String!
+  employeeShareVnd: BigInt!
+  expiresAt: DateTime
+  id: ID!
+  idempotencyKey: String!
+  items: [MealOrderItemModel!]!
+  orderNo: String!
+  orderType: String!
+  scheduledAt: DateTime!
+  status: String!
+  tableNo: String
+  totalAmountVnd: BigInt!
+  updatedAt: DateTime!
+  userLatitude: Float
+  userLongitude: Float
+  walletId: String!
+}
+
+type MealOrderResponse {
+  error: ErrorPayload
+  success: MealOrderResponseSuccess
+}
+
+type MealOrderResponseSuccess {
+  code: String!
+  data: MealOrderModel!
+  message: String!
+  requestId: String
+}
+
 type MealPolicyModel {
   allowSplitPayment: Boolean!
   allowedDayOfWeek: [Int!]
@@ -1520,6 +1777,57 @@ type MealPolicyModelResponse {
 type MealPolicyModelResponseSuccess {
   code: String!
   data: MealPolicyModel!
+  message: String!
+  requestId: String
+}
+
+type MealPreOrderItemModel {
+  createdAt: DateTime!
+  dailyMenuItemId: String!
+  id: ID!
+  preOrderId: String!
+  quantity: Int!
+}
+
+type MealPreOrderModel {
+  branchId: String!
+  companyShareVnd: BigInt!
+  corporateId: String!
+  createdAt: DateTime!
+  dailyMenuId: String!
+  employeeShareVnd: BigInt!
+  id: ID!
+  idempotencyKey: String!
+  items: [MealPreOrderItemModel!]
+  mealType: String!
+  pickupSlot: String!
+  status: String!
+  totalAmountVnd: BigInt!
+  updatedAt: DateTime!
+  walletId: String!
+}
+
+type MealPreOrderModelListResponse {
+  error: ErrorPayload
+  success: MealPreOrderModelListResponseSuccess
+}
+
+type MealPreOrderModelListResponseSuccess {
+  code: String!
+  data: [MealPreOrderModel!]!
+  message: String!
+  requestId: String
+  totalCount: Int
+}
+
+type MealPreOrderModelResponse {
+  error: ErrorPayload
+  success: MealPreOrderModelResponseSuccess
+}
+
+type MealPreOrderModelResponseSuccess {
+  code: String!
+  data: MealPreOrderModel!
   message: String!
   requestId: String
 }
@@ -1598,7 +1906,9 @@ type MealTransactionModel {
   authMethod: String!
   authorizedAt: DateTime
   branchId: String!
+  branchName: String
   brandHqId: String!
+  brandName: String
   companyShareVnd: BigInt!
   corporateId: String!
   createdAt: DateTime!
@@ -1609,6 +1919,7 @@ type MealTransactionModel {
   id: ID!
   idempotencyKey: String!
   loopType: String!
+  orderId: String
   requestedAmountVnd: BigInt!
   settledAt: DateTime
   status: String!
@@ -1639,6 +1950,13 @@ type MealTransactionModelResponseSuccess {
   data: MealTransactionModel!
   message: String!
   requestId: String
+}
+
+type MealWalletEmployeeInfo {
+  departmentId: String
+  departmentName: String
+  employeeCode: String
+  fullName: String!
 }
 
 type MealWalletFundingEntryModel {
@@ -1674,6 +1992,7 @@ type MealWalletModel {
   corporateId: String!
   createdAt: DateTime!
   dailyLimitVnd: BigInt!
+  employee: MealWalletEmployeeInfo
   employeeId: String!
   id: ID!
   personalTopUpVnd: BigInt!
@@ -1757,20 +2076,37 @@ type Mutation {
   mealCorporateDelete(id: ID!): BooleanResponse!
   mealCorporateUpdate(id: ID!, input: UpdateMealCorporateInput!): MealCorporateModelResponse!
   mealCorporateUpdateInvoiceSchedule(autoGenerate: Boolean, autoSubmit: Boolean, corporateId: ID!, notifyEmail: String, scheduleDay: Int, scheduleType: String!): MealCorporateModelResponse!
+  mealDailyMenuCreate(input: CreateMealDailyMenuInput!): MealDailyMenuModelResponse!
   mealDepartmentCreate(input: CreateMealDepartmentInput!): MealCorporateDepartmentModelResponse!
   mealDepositConfirm(amountVnd: BigInt!, corporateId: ID!, referenceNo: String!): MealFundingAccountModelResponse!
   mealEmployeeCreate(input: CreateMealEmployeeInput!): MealEmployeeModelResponse!
+  mealEmployeeLogin(corporateId: ID!, phone: String!): MealEmployeeLoginResponse!
+  mealEmployeeSuspend(id: ID!): MealEmployeeModelResponse!
+  mealEmployeeTerminate(id: ID!): MealEmployeeModelResponse!
+  mealEmployeeUpdate(departmentId: String, email: String, fullName: String, id: ID!, phone: String): MealEmployeeModelResponse!
   mealMerchantActivate(enrollmentId: ID!): MealMerchantEnrollmentModelResponse!
   mealMerchantDeactivate(enrollmentId: ID!): MealMerchantEnrollmentModelResponse!
   mealMerchantEnroll(input: EnrollMealMerchantInput!): MealMerchantEnrollmentModelResponse!
   mealMerchantSetCommission(input: SetMealMerchantCommissionInput!): MealMerchantCommissionRateModelResponse!
   mealMerchantSetSettlementAccount(input: SetMealMerchantSettlementAccountInput!): MealMerchantSettlementAccountModelResponse!
+  mealMerchantSubscribe(branchId: ID!, employeeId: ID!, notifyBreakfast: Boolean, notifyDinner: Boolean, notifyLunch: Boolean): MealMerchantSubscriptionModelResponse!
+  mealMerchantUnsubscribe(branchId: ID!, employeeId: ID!): MealMerchantSubscriptionModelResponse!
+  mealOrderAccept(id: ID!): MealOrderResponse!
+  mealOrderCancel(id: ID!, reason: String): MealOrderResponse!
+  mealOrderCheckin(id: ID!): MealOrderResponse!
+  mealOrderCreate(input: CreateMealOrderInput!): MealOrderResponse!
+  mealOrderReject(id: ID!, reason: String): MealOrderResponse!
+  mealOrderUpdateStatus(id: ID!, status: String!): MealOrderResponse!
   mealPolicyCreate(input: CreateMealPolicyInput!): MealPolicyModelResponse!
   mealPolicyDeactivate(id: ID!): MealPolicyModelResponse!
   mealPolicyDelete(id: ID!): BooleanResponse!
   mealPolicyPause(id: ID!): MealPolicyModelResponse!
   mealPolicyPublish(id: ID!): MealPolicyModelResponse!
   mealPolicyUpdate(id: ID!, input: UpdateMealPolicyInput!): MealPolicyModelResponse!
+  mealPreOrderCancel(id: ID!): MealPreOrderModelResponse!
+  mealPreOrderComplete(id: ID!): MealPreOrderModelResponse!
+  mealPreOrderConfirm(id: ID!): MealPreOrderModelResponse!
+  mealPreOrderCreate(input: CreateMealPreOrderInput!): MealPreOrderModelResponse!
   mealSettlementApprove(batchId: ID!, memo: String): MealSettlementBatchModelResponse!
   mealSettlementMarkPaid(id: ID!): MealSettlementBatchModelResponse!
   mealSettlementRequestPayout(batchId: ID!): MealSettlementBatchModelResponse!
@@ -2169,6 +2505,7 @@ type Query {
   contractActivities(contractId: ID!, skip: Int! = 0, take: Int! = 20): ContractActivityModelListResponse!
   contractTemplates(contractType: String): ContractTemplateModelListResponse!
   contracts(contractType: String, partyBId: ID, partyBType: String, skip: Int! = 0, status: String, take: Int! = 20): ContractModelListResponse!
+  corporateAdmins(corporateId: ID!): CorporateAdminUserModelListResponse!
   currencies(skip: Int! = 0, take: Int! = 20): CurrencyModelListResponse!
   currency(id: ID!): CurrencyModelResponse
   deployPackage(id: ID!): DeployPackageModelResponse
@@ -2195,21 +2532,29 @@ type Query {
   me: AuthAccountModelResponse!
   mealCorporate(id: ID!): MealCorporateModelResponse!
   mealCorporates(skip: Int! = 0, take: Int! = 20): MealCorporateModelListResponse!
+  mealDailyMenu(id: ID!): MealDailyMenuModelResponse!
+  mealDailyMenus(branchId: ID!, date: DateTime, mealType: String): MealDailyMenuModelListResponse!
+  mealDailyMenusForSubscribed(date: DateTime, employeeId: ID!): MealDailyMenuModelListResponse!
   mealDepartment(id: ID!): MealCorporateDepartmentModelResponse!
   mealDepartments(corporateId: ID!): MealCorporateDepartmentModelListResponse!
   mealEmployee(id: ID!): MealEmployeeModelResponse!
   mealEmployees(corporateId: ID!, skip: Int! = 0, take: Int! = 20): MealEmployeeModelListResponse!
   mealMerchantEnrollment(brandHqId: ID!): MealMerchantEnrollmentModelResponse
   mealMerchantEnrollments(skip: Int! = 0, take: Int! = 20): MealMerchantEnrollmentModelListResponse!
+  mealMerchantSubscriptions(employeeId: ID!): MealMerchantSubscriptionModelListResponse!
+  mealOrder(id: ID!): MealOrderResponse!
+  mealOrdersByBranch(branchId: ID!, skip: Int! = 0, status: String, take: Int! = 20): MealOrderListResponse!
+  mealOrdersByWallet(skip: Int! = 0, status: String, take: Int! = 20, walletId: ID!): MealOrderListResponse!
   mealPoliciesByCorporate(corporateId: ID!): MealPolicyModelListResponse!
   mealPolicy(id: ID!): MealPolicyModelResponse!
+  mealPreOrdersByWallet(skip: Int! = 0, take: Int! = 20, walletId: ID!): MealPreOrderModelListResponse!
   mealSettlementBatch(id: ID!): MealSettlementBatchModelResponse!
   mealSettlementBatches(periodEnd: String, periodStart: String, skip: Int = 0, status: String, take: Int = 50): MealSettlementBatchModelListResponse!
   mealSettlementBatchesByBrand(brandHqId: ID!): MealSettlementBatchModelListResponse!
   mealSettlementDashboard(batchSkip: Int = 0, batchStatus: String, batchTake: Int = 50, periodEnd: String!, periodStart: String!): SettlementDashboardResponse!
   mealTransaction(id: ID!): MealTransactionModelResponse!
   mealTransactionsByBrand(brandHqId: ID!, periodEnd: String, periodStart: String, skip: Int! = 0, status: String, take: Int! = 20): MealTransactionModelListResponse!
-  mealTransactionsByCorporate(corporateId: ID!, skip: Int! = 0, take: Int! = 20): MealTransactionModelListResponse!
+  mealTransactionsByCorporate(corporateId: ID!, dateFrom: String, dateTo: String, employeeId: String, merchantId: String, skip: Int! = 0, statuses: [String!], take: Int! = 20): MealTransactionModelListResponse!
   mealUnsettledByBrand(periodEnd: String!, periodStart: String!): UnsettledBrandSummaryListResponse!
   mealWallet(id: ID!): MealWalletModelResponse
   mealWalletFundingEntriesByWallet(skip: Int! = 0, take: Int! = 20, walletId: ID!): MealWalletFundingEntryModelListResponse!
@@ -2436,6 +2781,11 @@ type StringResponseSuccess {
 }
 
 type Subscription {
+  mealOrderReceived(branchId: ID!): MealOrderModel!
+  mealOrderStatusChanged(orderId: ID!): MealOrderModel!
+  mealPolicyChanged(corporateId: ID!): MealPolicyModel!
+  mealTransactionResult(walletId: ID!): MealTransactionModel!
+  mealWalletUpdated(walletId: ID!): MealWalletModel!
   syncEventReceived(edgePosId: ID, eventType: String): SyncEventModel!
 }
 

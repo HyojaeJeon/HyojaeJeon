@@ -1,20 +1,35 @@
-import { View, TextInput } from 'react-native';
+import { useRef } from 'react';
+import { View, TextInput, Pressable } from 'react-native';
 import { Search } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
+import { colors, radius, components } from '@shared/ui/tokens';
 
 export function SearchBar() {
   const { t } = useTranslation();
+  const inputRef = useRef<TextInput>(null);
+
   return (
-    <View className="relative">
-      <View className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
-        <Search size={18} color="#9CA3AF" />
+    <Pressable onPress={() => inputRef.current?.focus()}>
+      <View className="relative">
+        <View className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
+          <Search size={18} color={colors.textTertiary} />
+        </View>
+        <TextInput
+          ref={inputRef}
+          placeholder={t('merchant.searchPlaceholder')}
+          placeholderTextColor={colors.textTertiary}
+          style={{
+            height: components.input.height,
+            width: '100%',
+            borderRadius: radius.lg,
+            backgroundColor: colors.bgInput,
+            paddingLeft: 44,
+            paddingRight: components.input.paddingHorizontal,
+            fontSize: components.input.fontSize,
+            color: colors.textPrimary,
+          }}
+        />
       </View>
-      <TextInput
-        editable={false}
-        placeholder={t('merchant.searchPlaceholder')}
-        placeholderTextColor="#9CA3AF"
-        className="h-[48px] w-full rounded-xl border border-gray-200 bg-white pl-11 pr-4 text-sm text-gray-900"
-      />
-    </View>
+    </Pressable>
   );
 }

@@ -1,5 +1,7 @@
-import { View, Text, Pressable } from 'react-native';
-import { formatVnd } from '@shared/mock/mockData';
+import { View, Text } from 'react-native';
+import { Card, PrimaryButton } from '@shared/ui';
+import { formatVnd } from '@shared/utils/format';
+import { colors, typography, spacing, radius } from '@shared/ui/tokens';
 import { useTranslation } from 'react-i18next';
 
 interface PaymentSummaryProps {
@@ -7,6 +9,9 @@ interface PaymentSummaryProps {
   companyShareVnd: number;
   employeeShareVnd: number;
   gpsVerified: boolean;
+  onOrder?: () => void;
+  loading?: boolean;
+  disabled?: boolean;
 }
 
 export function PaymentSummary({
@@ -14,51 +19,63 @@ export function PaymentSummary({
   companyShareVnd,
   employeeShareVnd,
   gpsVerified,
+  onOrder,
+  loading = false,
+  disabled = false,
 }: PaymentSummaryProps) {
   const { t } = useTranslation();
   const companyPercent = totalVnd > 0 ? Math.round((companyShareVnd / totalVnd) * 100) : 0;
 
   return (
-    <View className="rounded-t-3xl border-t border-gray-100 bg-white px-5 pb-6 pt-4 shadow-lg">
-      <Text className="text-[15px] font-semibold text-gray-900">{t('order.paymentDetails')}</Text>
+    <Card
+      className="rounded-b-none rounded-t-3xl border-t border-gray-100"
+      style={{ paddingHorizontal: spacing.screenHorizontal, paddingBottom: 24, paddingTop: spacing.lg }}
+    >
+      <Text style={typography.cardTitle}>{t('order.paymentDetails')}</Text>
 
-      <View className="mt-3 gap-2">
+      <View style={{ marginTop: spacing.elementGap, gap: spacing.sm }}>
         {/* Total */}
         <View className="flex-row items-center justify-between">
-          <Text className="text-[14px] text-gray-600">{t('common.total')}</Text>
-          <Text className="text-[14px] font-semibold text-gray-900">{formatVnd(totalVnd)}</Text>
+          <Text style={typography.body}>{t('common.total')}</Text>
+          <Text style={{ ...typography.body, fontWeight: '600', color: colors.textPrimary }}>{formatVnd(totalVnd)}</Text>
         </View>
 
         {/* Company share */}
         <View className="flex-row items-center justify-between">
-          <Text className="text-[14px] text-gray-600">{t('order.companyPay')}</Text>
-          <Text className="text-[14px] font-medium text-[#3B82F6]">
+          <Text style={typography.body}>{t('order.companyPay')}</Text>
+          <Text style={{ ...typography.body, fontWeight: '500', color: colors.primary }}>
             {formatVnd(companyShareVnd)}{' '}
-            <Text className="text-[12px]">({companyPercent}%)</Text>
+            <Text style={typography.caption}>({companyPercent}%)</Text>
           </Text>
         </View>
 
         {/* Employee share */}
         <View className="flex-row items-center justify-between">
-          <Text className="text-[14px] text-gray-600">{t('order.personalPay')}</Text>
-          <Text className="text-[14px] text-gray-400">{formatVnd(employeeShareVnd)}</Text>
+          <Text style={typography.body}>{t('order.personalPay')}</Text>
+          <Text style={{ ...typography.body, color: colors.textTertiary }}>{formatVnd(employeeShareVnd)}</Text>
         </View>
       </View>
 
       {/* GPS status */}
       {gpsVerified && (
-        <View className="mt-3 flex-row items-center gap-1.5">
-          <View className="h-2 w-2 rounded-full bg-[#10B981]" />
-          <Text className="text-[12px] text-[#10B981]">{t('order.gpsVerified')}</Text>
+        <View className="flex-row items-center" style={{ marginTop: spacing.elementGap, gap: 6 }}>
+          <View style={{ height: 8, width: 8, borderRadius: radius.full, backgroundColor: colors.success }} />
+          <Text style={{ ...typography.caption, color: colors.success }}>{t('order.gpsVerified')}</Text>
         </View>
       )}
 
       {/* CTA */}
-      <Pressable className="mt-4 flex h-[52px] w-full items-center justify-center rounded-xl bg-[#3B82F6]">
-        <Text className="text-[15px] font-semibold text-white">
-          {t('order.orderBtn')} · {formatVnd(totalVnd)}
-        </Text>
-      </Pressable>
-    </View>
+      <View style={{ marginTop: spacing.lg }}>
+        <PrimaryButton
+          title={loading ? '' : `${t('order.orderBtn')} · ${formatVnd(totalVnd)}`}
+          onPress={onOrder ?? (() => {})}
+          variant="primary"
+          size="lg"
+          loading={loading}
+          disabled={disabled}
+          className="w-full"
+        />
+      </View>
+    </Card>
   );
 }

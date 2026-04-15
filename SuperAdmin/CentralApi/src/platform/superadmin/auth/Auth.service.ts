@@ -36,6 +36,17 @@ import { UpdateAuthAccountInput } from './dto/UpdateUser.input';
 import { AuthAccountModel } from './models/AuthAccount.model';
 import { DomainError } from '@core/errors/DomainError';
 
+/** refresh session rotate 시 쿠키를 삭제해야 하는 인증 에러 코드 */
+const SESSION_AUTH_ERROR_CODES = new Set([
+  'INVALID_REFRESH_SESSION',
+  'SESSION_REVOKED',
+  'REFRESH_SESSION_EXPIRED',
+  'REFRESH_SESSION_REUSED',
+]);
+function isSessionAuthError(code: string): boolean {
+  return SESSION_AUTH_ERROR_CODES.has(code);
+}
+
 export interface AuthActor {
   userType: AuthUserType;
   userId: string;
@@ -749,7 +760,11 @@ export class AuthService {
         this.requestMetadata(context.req),
       );
     } catch (error) {
-      queueClearRefreshTokenCookie(context.responseCookies);
+      // 인증 에러(세션 만료/폐기/재사용)만 쿠키 삭제. 인프라 에러(DB 장애 등)는 쿠키를 보존하여
+      // 서버 복구 후 사용자가 재로그인 없이 세션을 유지할 수 있도록 한다.
+      if (error instanceof DomainError && isSessionAuthError(error.code)) {
+        queueClearRefreshTokenCookie(context.responseCookies);
+      }
       throw error;
     }
     queueRefreshTokenCookie(context.responseCookies, rotated.refreshToken);

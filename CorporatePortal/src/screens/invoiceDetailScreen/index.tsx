@@ -25,6 +25,7 @@ import {
   Input,
   type DataTableColumn,
   DataTable,
+  Pagination,
 } from '@platform/shared-ui';
 import { useI18n } from '@i18n/I18nProvider';
 import { useHasPermission } from '@rbac/useHasPermission';
@@ -95,6 +96,8 @@ export function InvoiceDetailScreen() {
   const [disputeReason, setDisputeReason] = useState('');
   const [showDisputeForm, setShowDisputeForm] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [lineSkip, setLineSkip] = useState(0);
+  const linePageSize = 20;
 
   const { data, loading, refetch } = useQuery<InvoiceDetailData>(INVOICE_DETAIL_QUERY, {
     variables: { id: params?.id },
@@ -542,9 +545,9 @@ export function InvoiceDetailScreen() {
         </SectionCard>
       </div>
 
-      {/* Section 4: Line Items */}
+      {/* Section 4: Line Items (client-side pagination) */}
       <div className="mt-4">
-        <SectionCard title={t('invoice.linesTitle')} description={`${lines.length}건`} padding="none">
+        <SectionCard title={t('invoice.linesTitle')} description={`${lines.length}${t('common.count')}`} padding="none">
           {loading ? (
             <div className="space-y-2 p-4">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -552,13 +555,25 @@ export function InvoiceDetailScreen() {
               ))}
             </div>
           ) : (
-            <DataTable
-              columns={lineItemCols}
-              rows={lines}
-              rowKey={(r) => r.id}
-              compact
-              emptyState={t('invoice.linesEmpty')}
-            />
+            <>
+              <DataTable
+                columns={lineItemCols}
+                rows={lines.slice(lineSkip, lineSkip + linePageSize)}
+                rowKey={(r) => r.id}
+                compact
+                emptyState={t('invoice.linesEmpty')}
+              />
+              {lines.length > linePageSize && (
+                <div className="p-4">
+                  <Pagination
+                    skip={lineSkip}
+                    take={linePageSize}
+                    total={lines.length}
+                    onPageChange={setLineSkip}
+                  />
+                </div>
+              )}
+            </>
           )}
         </SectionCard>
       </div>

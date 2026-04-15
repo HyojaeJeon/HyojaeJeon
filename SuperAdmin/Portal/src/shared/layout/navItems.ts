@@ -14,6 +14,10 @@ export interface NavItem {
 /**
  * NavigationRail 구성. 권한 없는 항목은 자동 hide.
  * permissions 는 '해당 영역 진입에 필요한 최소 권한' 을 뜻한다.
+ *
+ * 통합 구조:
+ *   사업자 관리 = 유통사 + 브랜드 + 기업고객 + 라이선스/거버넌스 + 계약
+ *   (기존 tenants + governance 를 단일 메뉴로 통합)
  */
 export const NAV_ITEMS: NavItem[] = [
   {
@@ -51,6 +55,20 @@ export const NAV_ITEMS: NavItem[] = [
         icon: 'Ticket',
         permissions: [PERMISSIONS.CORPORATE_PROFILE_READ],
       },
+      {
+        key: 'tenants.governance',
+        labelKey: 'nav.tenants.governance',
+        href: '/governance',
+        icon: 'ShieldCheck',
+        permissions: [PERMISSIONS.LICENSE_READ],
+      },
+      {
+        key: 'tenants.contracts',
+        labelKey: 'nav.tenants.contracts',
+        href: '/governance/contracts',
+        icon: 'FileText',
+        permissions: [PERMISSIONS.CONTRACT_READ],
+      },
     ],
   },
   {
@@ -68,22 +86,6 @@ export const NAV_ITEMS: NavItem[] = [
       { key: 'deploy.packages', labelKey: 'nav.deploy.packages', href: '/deploy/packages', icon: 'Package' },
       { key: 'deploy.releases', labelKey: 'nav.deploy.releases', href: '/deploy/releases', icon: 'GitBranch' },
       { key: 'deploy.rollouts', labelKey: 'nav.deploy.rollouts', href: '/deploy/rollouts', icon: 'Activity' },
-    ],
-  },
-  {
-    key: 'governance',
-    labelKey: 'nav.governance',
-    href: '/governance',
-    icon: 'ShieldCheck',
-    children: [
-      { key: 'governance.hub', labelKey: 'nav.governance.hub', href: '/governance', icon: 'LayoutGrid' },
-      {
-        key: 'governance.contracts',
-        labelKey: 'nav.governance.contracts',
-        href: '/governance/contracts',
-        icon: 'FileText',
-        permissions: [PERMISSIONS.CONTRACT_READ],
-      },
     ],
   },
   {

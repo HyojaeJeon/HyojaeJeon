@@ -56,68 +56,87 @@ const authLink = setContext(async (_operation, { headers }) => ({
 
 /**
  * Error link: UNAUTHENTICATED/SESSION_REVOKED triggers session refresh + retry.
- * - Session operations (login/refresh/logout) are not retried
- * - Each operation is retried at most ONCE to prevent infinite refresh loops
- * - Cookie-based: refresh sets new cookies server-side, no header update needed on retry
- * - Network errors are logged only — never trigger logout
- * - Server 500 / rate limit errors — never trigger logout
+ *
+ * Logout-triggering conditions (exhaustive):
+ *   1. UNAUTHENTICATED / SESSION_REVOKED on a session operation → immediate logout
+ *   2. UNAUTHENTICATED / SESSION_REVOKED on a normal operation + refresh fails with auth_expired → logout
+ *
+ * Everything else (500, VALIDATION_ERROR, INTERNAL_SERVER_ERROR, network errors, etc.)
+ * is NEVER a reason to logout. These are operational errors, not identity errors.
  */
 const REFRESH_RETRIED_KEY = '__refreshRetried';
 
+/** Only these extension codes are genuine identity/session errors that may warrant logout. */
+const IDENTITY_ERROR_CODES = new Set(['UNAUTHENTICATED', 'SESSION_REVOKED']);
+
+function isIdentityError(code: string | undefined): boolean {
+  return !!code && IDENTITY_ERROR_CODES.has(code);
+}
+
 const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
   if (graphQLErrors) {
-    for (const err of graphQLErrors) {
-      const code = err.extensions?.code as string | undefined;
+    // Find the first identity error (if any) — ignore all others for auth purposes
+    const identityErr = graphQLErrors.find((e) =>
+      isIdentityError(e.extensions?.code as string | undefined),
+    );
 
-      if (code === 'UNAUTHENTICATED' || code === 'SESSION_REVOKED') {
-        if (isSessionOperation(operation.operationName)) {
-          handleAuthFailure();
-          return;
-        }
+    if (identityErr) {
+      const code = identityErr.extensions?.code as string;
 
-        // Guard: 이미 refresh+retry 한 operation이면 무한 루프 방지 → 즉시 에러 전파
-        const context = operation.getContext();
-        if (context[REFRESH_RETRIED_KEY]) {
-          // 이미 1회 retry 했는데 또 UNAUTHENTICATED → 세션 완전 만료
-          handleAuthFailure();
-          return;
-        }
-
-        // Mark this operation as retried
-        operation.setContext({ ...context, [REFRESH_RETRIED_KEY]: true });
-
-        return new Observable<FetchResult>((observer) => {
-          refreshSessionWithOutcome().then((outcome) => {
-            switch (outcome.kind) {
-              case 'renewed':
-                // Retry ONCE — cookies are updated automatically
-                forward(operation).subscribe({
-                  next: observer.next.bind(observer),
-                  error: observer.error.bind(observer),
-                  complete: observer.complete.bind(observer),
-                });
-                break;
-              case 'auth_expired':
-                handleAuthFailure();
-                observer.error(err);
-                break;
-              case 'server_error':
-                // 서버 에러 (500, rate limit 등) → 로그아웃하지 않고 에러만 전파
-                observer.error(err);
-                break;
-            }
-          });
-        });
+      // Session operations (login/refresh/logout) should never retry
+      if (isSessionOperation(operation.operationName)) {
+        handleAuthFailure();
+        return;
       }
 
-      console.error('[GraphQL error]', err.message, err.path);
+      // Guard: already retried once → session truly expired
+      const context = operation.getContext();
+      if (context[REFRESH_RETRIED_KEY]) {
+        handleAuthFailure();
+        return;
+      }
+
+      operation.setContext({ ...context, [REFRESH_RETRIED_KEY]: true });
+
+      return new Observable<FetchResult>((observer) => {
+        refreshSessionWithOutcome().then((outcome) => {
+          switch (outcome.kind) {
+            case 'renewed':
+              forward(operation).subscribe({
+                next: observer.next.bind(observer),
+                error: observer.error.bind(observer),
+                complete: observer.complete.bind(observer),
+              });
+              break;
+            case 'auth_expired':
+              handleAuthFailure();
+              observer.error(identityErr);
+              break;
+            case 'server_error':
+              // Refresh failed due to server issue — propagate original error, do NOT logout
+              observer.error(identityErr);
+              break;
+          }
+        });
+      });
+    }
+
+    // Non-identity errors → toast only, never logout
+    for (const err of graphQLErrors) {
+      const errCode = err.extensions?.code as string | undefined;
+      console.error(`[GraphQL error] ${errCode ?? 'UNKNOWN'}: ${err.message}`, err.path);
       if (typeof window !== 'undefined') {
         toast.error(`[${operation.operationName}] ${err.message}`, { duration: 5000 });
       }
     }
   }
+
   if (networkError) {
+    // Network errors (timeout, DNS, CORS, etc.) are NEVER logout triggers
     console.error('[Network error]', networkError);
+    if (typeof window !== 'undefined') {
+      toast.error(`Network error: ${networkError.message}`, { duration: 5000 });
+    }
   }
 });
 

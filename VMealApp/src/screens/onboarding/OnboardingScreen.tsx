@@ -1,87 +1,97 @@
 import { View, Text, Pressable, TextInput } from 'react-native';
 import { UtensilsCrossed, Coffee, Salad, QrCode } from 'lucide-react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import { colors, typography, spacing, radius, components } from '@shared/ui/tokens';
 import { useTranslation } from 'react-i18next';
+import { useNavigation } from '@react-navigation/native';
 
 export default function OnboardingScreen() {
   const { t } = useTranslation();
+  const navigation = useNavigation<any>();
   return (
-    <View className="flex h-full min-h-[700px] flex-col bg-[#F8FAFC] px-5 pt-2">
+    <View className="flex flex-col" style={{ flex: 1, minHeight: 700, backgroundColor: colors.bg, paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.sm }}>
       {/* Top section: Logo + heading */}
-      <View className="flex flex-col items-center pt-8">
+      <View className="flex flex-col items-center" style={{ paddingTop: spacing.sectionGap }}>
         {/* Small logo */}
         <LinearGradient
-          colors={['#3B82F6', '#6366F1']}
+          colors={[colors.primary, '#6366F1']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          className="flex h-[56px] w-[56px] items-center justify-center rounded-2xl"
+          className="flex items-center justify-center"
+          style={{ height: 56, width: 56, borderRadius: radius.xl }}
         >
-          <Text className="text-[28px] font-extrabold leading-none text-white">V</Text>
+          <Text style={{ fontSize: 28, fontWeight: '800', color: colors.textInverse }}>V</Text>
         </LinearGradient>
 
-        <Text className="mt-4 text-[22px] font-bold text-gray-900">
+        <Text style={{ ...typography.displayMedium, fontSize: 22, marginTop: spacing.lg }}>
           {t('onboarding.welcome')}
         </Text>
-        <Text className="mt-1 text-sm text-gray-500">
+        <Text style={{ ...typography.body, marginTop: spacing.xs }}>
           {t('splash.tagline')}
         </Text>
       </View>
 
       {/* Illustration area */}
       <LinearGradient
-        colors={['#EFF6FF', '#EEF2FF']}
+        colors={[colors.primaryLight, '#EEF2FF']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        className="mx-auto mt-8 flex h-[180px] w-full max-w-[280px] items-center justify-center rounded-3xl"
+        className="flex items-center justify-center"
+        style={{ alignSelf: 'center', marginTop: spacing.sectionGap, height: 180, width: '100%', maxWidth: 280, borderRadius: radius.xxl }}
       >
-        <View className="flex flex-row items-center gap-6">
-          <View className="flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-100">
+        <View className="flex flex-row items-center" style={{ gap: spacing.xxl }}>
+          <View className="flex items-center justify-center bg-orange-100" style={{ height: 56, width: 56, borderRadius: radius.xl }}>
             <UtensilsCrossed size={28} color="#F97316" />
           </View>
-          <View className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100">
+          <View className="flex items-center justify-center bg-amber-100" style={{ height: 56, width: 56, borderRadius: radius.xl }}>
             <Coffee size={28} color="#D97706" />
           </View>
-          <View className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100">
-            <Salad size={28} color="#10B981" />
+          <View className="flex items-center justify-center bg-emerald-100" style={{ height: 56, width: 56, borderRadius: radius.xl }}>
+            <Salad size={28} color={colors.success} />
           </View>
         </View>
       </LinearGradient>
 
       {/* Company code input */}
-      <View className="mt-8">
-        <Text className="text-sm font-medium text-gray-700">
+      <View style={{ marginTop: spacing.sectionGap }}>
+        <Text style={{ ...typography.body, fontWeight: '500', color: colors.textPrimary }}>
           {t('onboarding.enterCode')}
         </Text>
-        <View className="mt-2 flex h-[52px] flex-row items-center rounded-xl border border-gray-200 bg-white px-4">
+        <View className="flex flex-row items-center" style={{ marginTop: spacing.sm, height: components.input.height, borderRadius: components.input.borderRadius, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bgWhite, paddingHorizontal: spacing.lg }}>
           <TextInput
-            className="flex-1 text-[15px] text-gray-900"
+            className="flex-1"
+            style={{ fontSize: components.input.fontSize, color: colors.textPrimary }}
             placeholder={t('onboarding.codePlaceholder')}
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={colors.textTertiary}
           />
         </View>
-        <Text className="mt-2 text-xs text-gray-400">
+        <Text style={{ ...typography.caption, marginTop: spacing.sm }}>
           {t('onboarding.codeHelper')}
         </Text>
       </View>
 
       {/* QR code link */}
-      <Pressable className="mx-auto mt-4 flex flex-row items-center gap-2">
-        <QrCode size={16} color="#3B82F6" />
-        <Text className="text-sm font-medium text-[#3B82F6]">{t('onboarding.orScanQR')}</Text>
+      <Pressable className="flex flex-row items-center" style={{ alignSelf: 'center', marginTop: spacing.lg, gap: spacing.sm }}>
+        <QrCode size={16} color={colors.primary} />
+        <Text style={{ ...typography.body, fontWeight: '500', color: colors.primary }}>{t('onboarding.orScanQR')}</Text>
       </Pressable>
 
       {/* Spacer to push button down */}
       <View className="flex-1" />
 
-      {/* CTA button */}
-      <Pressable className="mb-4 flex h-[52px] w-full items-center justify-center rounded-xl bg-[#3B82F6]">
-        <Text className="text-[15px] font-semibold text-white">
+      {/* CTA → Login 화면으로 이동 (기획서 §4.1 인증 흐름) */}
+      <Pressable
+        onPress={() => navigation.navigate('Login')}
+        className="flex w-full items-center justify-center"
+        style={{ marginBottom: spacing.lg, height: components.input.height, borderRadius: radius.md, backgroundColor: colors.primary }}
+      >
+        <Text style={{ ...typography.button, color: colors.textInverse }}>
           {t('common.continue')}
         </Text>
       </Pressable>
 
       {/* Footer version */}
-      <Text className="mb-6 text-center text-[11px] text-gray-300">
+      <Text style={{ ...typography.caption, textAlign: 'center', color: colors.textPlaceholder, marginBottom: spacing.xxl }}>
         {t('onboarding.version')} 1.0.0
       </Text>
     </View>

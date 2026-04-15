@@ -54,6 +54,7 @@
 - NestJS suffix (`.module`, `.service`, `.resolver`, `.guard`, `.model`, `.input`, `.args` 등) 는 소문자 dot 표기를 유지한다 (예: `AuthSession.module.ts`)
 - `index.ts` 는 public export 용도로만 사용한다. feature 내부 barrel 은 최소화한다.
 - 다국어 필드는 `name` (베트남어 기본) / `nameKo` / `nameEn` 3 컬럼 조합만 사용한다. `description` 이 다국어가 필요하면 `description` / `descriptionKo` / `descriptionEn` 을 쓴다. 그 외 suffix (`_vi`, `_kr`, `Vn` 등) 금지.
+- **다국어 필드 응답 규칙**: GraphQL 응답 시 서버가 `Accept-Language` 헤더 기반으로 기본 필드(`name`, `title`, `description`)에 해석된 값을 담아 반환한다. 클라이언트는 `Ko`/`En` suffix 필드를 직접 읽지 않는다. 원본: `core/i18n/resolveLocalizedFields.ts`.
 - TypeScript / JavaScript / JSON / GraphQL field: `camelCase`
 - Type / Interface / Class / C++ method: `PascalCase`
 - constant / enum value: `UPPER_SNAKE_CASE`

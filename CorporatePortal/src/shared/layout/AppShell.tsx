@@ -8,6 +8,23 @@ import { TopBar } from './TopBar';
 import { useAppSelector } from '@store/index';
 import { isAuthRoute, getSessionSnapshot } from '@auth/session';
 
+/**
+ * Auth hydration guard.
+ *
+ * Redirect to /login ONLY when:
+ *   1. Bootstrap has completed (hydrated=true)
+ *   2. Redux user is null (not set by AuthBootstrap)
+ *   3. In-memory session is also null (no accessToken in module state)
+ *   4. handleAuthFailure was explicitly called (which sets window.location directly)
+ *
+ * If bootstrap failed due to server error (not auth error), both user and
+ * memory session will be null but handleAuthFailure was NOT called, so the
+ * page stays put and doesn't redirect. The user can retry by navigating.
+ *
+ * To distinguish "auth expired" (should redirect) from "server error" (should stay),
+ * we rely on handleAuthFailure() doing the redirect directly via window.location.href.
+ * This useEffect only handles the "already logged in → redirect away from /login" case.
+ */
 function useAuthHydration() {
   const router = useRouter();
   const pathname = usePathname();
@@ -19,23 +36,20 @@ function useAuthHydration() {
   useEffect(() => {
     if (!hydrated) return;
 
-    // 서버 에러로 Redux user 가 비어있어도 메모리에 accessToken 이 있으면 로그인 유지
-    const hasMemorySession = !!getSessionSnapshot();
-
-    if (!user && !hasMemorySession && !chromeless) {
-      router.replace('/login');
-      return;
-    }
+    // If user is logged in and on auth page, redirect to dashboard
     if (user && authRoute) {
       router.replace('/dashboard');
     }
+    // Note: redirect to /login for expired sessions is handled by
+    // handleAuthFailure() in session.ts, NOT here.
+    // This prevents server errors from triggering unwanted logouts.
   }, [chromeless, authRoute, hydrated, router, user]);
 
-  return { chromeless, hydrated };
+  return { chromeless, hydrated, user };
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { chromeless, hydrated } = useAuthHydration();
+  const { chromeless, hydrated, user } = useAuthHydration();
 
   if (chromeless) {
     return <>{children}</>;

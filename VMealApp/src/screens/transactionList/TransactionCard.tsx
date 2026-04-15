@@ -1,10 +1,12 @@
-import { View, Text } from 'react-native';
-import { formatVnd, formatTime } from '@shared/mock/mockData';
+import { View, Text, Pressable } from 'react-native';
+import { formatVnd, formatTime } from '@shared/utils/format';
 import { useTranslation } from 'react-i18next';
 import type { MockMealTransaction } from '@shared/mock/types';
+import { colors, typography, spacing, shadows, radius } from '@shared/ui/tokens';
 
 interface TransactionCardProps {
   transaction: MockMealTransaction;
+  onPress?: (transaction: MockMealTransaction) => void;
 }
 
 function getAvatarColor(type: MockMealTransaction['type'], status: MockMealTransaction['status']): string {
@@ -15,12 +17,12 @@ function getAvatarColor(type: MockMealTransaction['type'], status: MockMealTrans
 }
 
 function getInitial(transaction: MockMealTransaction): string {
-  if (transaction.type === 'TOP_UP') return '₫';
+  if (transaction.type === 'TOP_UP') return '\u20AB';
   if (transaction.type === 'REFUND') return 'H';
   return transaction.merchantName.charAt(0);
 }
 
-export function TransactionCard({ transaction }: TransactionCardProps) {
+export function TransactionCard({ transaction, onPress }: TransactionCardProps) {
   const { t } = useTranslation();
 
   const getDisplayName = (txn: MockMealTransaction): string => {
@@ -38,7 +40,7 @@ export function TransactionCard({ transaction }: TransactionCardProps) {
       };
     }
     return {
-      text: `−${formatVnd(txn.amountVnd)}`,
+      text: `\u2212${formatVnd(txn.amountVnd)}`,
       className: isDeclined ? 'text-gray-400 line-through' : 'text-gray-900 font-medium',
     };
   };
@@ -62,33 +64,46 @@ export function TransactionCard({ transaction }: TransactionCardProps) {
   const isDeclined = transaction.status === 'DECLINED';
 
   return (
-    <View className="flex-row items-center gap-3 bg-white rounded-xl p-3">
+    <Pressable
+      onPress={() => onPress?.(transaction)}
+      className="flex-row items-center active:opacity-80"
+      style={{
+        backgroundColor: colors.bgCard,
+        borderRadius: radius.md,
+        padding: spacing.cardPaddingCompact,
+        gap: spacing.md,
+        ...shadows.card,
+      }}
+    >
       {/* Avatar */}
-      <View className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${avatarColor}`}>
-        <Text className="text-white text-sm font-semibold">{initial}</Text>
+      <View className={`flex shrink-0 items-center justify-center rounded-full ${avatarColor}`} style={{ height: 40, width: 40 }}>
+        <Text style={{ color: colors.textInverse, fontSize: 14, fontWeight: '600' }}>{initial}</Text>
       </View>
 
       {/* Center */}
       <View className="flex-1 min-w-0">
-        <Text className="text-sm font-medium text-gray-900" numberOfLines={1}>
+        <Text style={typography.cardTitle} numberOfLines={1}>
           {displayName}
         </Text>
-        <Text className="text-xs text-gray-400 mt-0.5">{formatTime(transaction.createdAt)}</Text>
+        <Text style={{ ...typography.caption, marginTop: 2 }}>{formatTime(transaction.createdAt)}</Text>
       </View>
 
       {/* Right */}
       <View className="flex-col items-end shrink-0">
         <Text className={`text-sm ${amount.className}`}>{amount.text}</Text>
         {isDeclined ? (
-          <View className="mt-0.5 flex-row items-center rounded-full bg-[#EF4444]/10 px-2 py-0.5">
-            <Text className="text-[10px] font-medium text-[#EF4444]">
+          <View
+            className="flex-row items-center"
+            style={{ marginTop: 2, borderRadius: radius.full, backgroundColor: colors.dangerLight, paddingHorizontal: 8, paddingVertical: 2 }}
+          >
+            <Text style={{ fontSize: 10, fontWeight: '500', color: colors.danger }}>
               {t('transaction.declined')}
             </Text>
           </View>
         ) : sourceLabel ? (
-          <Text className="text-[10px] text-gray-400 mt-0.5">{sourceLabel}</Text>
+          <Text style={{ fontSize: 10, color: colors.textTertiary, marginTop: 2 }}>{sourceLabel}</Text>
         ) : null}
       </View>
-    </View>
+    </Pressable>
   );
 }

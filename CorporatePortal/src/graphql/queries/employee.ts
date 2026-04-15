@@ -77,19 +77,39 @@ export const CREATE_EMPLOYEE_MUTATION = gql`
 `;
 
 export const UPDATE_EMPLOYEE_MUTATION = gql`
-  mutation UpdateEmployee($id: ID!, $input: UpdateMealEmployeeInput!) {
-    mealEmployeeUpdate(id: $id, input: $input) {
+  mutation UpdateEmployee($id: ID!, $fullName: String, $email: String, $phone: String, $departmentId: String) {
+    mealEmployeeUpdate(id: $id, fullName: $fullName, email: $email, phone: $phone, departmentId: $departmentId) {
       success {
         data {
           id
           employeeCode
           fullName
+          email
+          phone
+          departmentId
+          status
         }
       }
       error {
         code
         message
-        details
+      }
+    }
+  }
+`;
+
+export const SUSPEND_EMPLOYEE_MUTATION = gql`
+  mutation SuspendEmployee($id: ID!) {
+    mealEmployeeSuspend(id: $id) {
+      success {
+        data {
+          id
+          status
+        }
+      }
+      error {
+        code
+        message
       }
     }
   }

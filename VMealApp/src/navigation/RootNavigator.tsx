@@ -7,10 +7,32 @@ import { useAppSelector } from '@store/index';
 import { MainTabNavigator } from './MainTabNavigator';
 import SplashScreen from '@screens/splash/SplashScreen';
 import OnboardingScreen from '@screens/onboarding/OnboardingScreen';
+import LoginScreen from '@screens/login/LoginScreen';
+import AuthScreen from '@screens/auth/AuthScreen';
+import TopUpScreen from '@screens/topUp/TopUpScreen';
+import MerchantDetailScreen from '@screens/merchantDetail/MerchantDetailScreen';
+import TransactionDetailScreen from '@screens/transactionDetail/TransactionDetailScreen';
+import GroupPayScreen from '@screens/groupPay/GroupPayScreen';
+import BadgeLinkScreen from '@screens/badgeLink/BadgeLinkScreen';
+import PolicyViewScreen from '@screens/policyView/PolicyViewScreen';
+import DailyMenuListScreen from '@screens/dailyMenuList/DailyMenuListScreen';
+import PreOrderScreen from '@screens/preOrder/PreOrderScreen';
+import MyPreOrdersScreen from '@screens/myPreOrders/MyPreOrdersScreen';
+import EWalletLinkScreen from '@screens/eWalletLink/EWalletLinkScreen';
+import SupportScreen from '@screens/support/SupportScreen';
+import AppInfoScreen from '@screens/appInfo/AppInfoScreen';
+import ProfileEditScreen from '@screens/profileEdit/ProfileEditScreen';
+import NotificationSettingScreen from '@screens/notificationSetting/NotificationSettingScreen';
+import LanguageSettingScreen from '@screens/languageSetting/LanguageSettingScreen';
+import TopUpResultScreen from '@screens/topUpResult/TopUpResultScreen';
+import MerchantNavigateScreen from '@screens/merchantNavigate/MerchantNavigateScreen';
+import NotificationListScreen from '@screens/notificationList/NotificationListScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
   Onboarding: undefined;
+  Login: undefined;
+  Auth: undefined;
   Main: undefined;
   OrderScreen: { merchantId: string; branchId: string };
   OrderStatusScreen: { orderId: string };
@@ -24,6 +46,15 @@ export type RootStackParamList = {
   PreOrderScreen: { branchId: string; mealType: string };
   MyPreOrdersScreen: undefined;
   GroupPayScreen: { merchantId: string };
+  ProfileEditScreen: undefined;
+  EWalletLinkScreen: undefined;
+  NotificationListScreen: undefined;
+  NotificationSettingScreen: undefined;
+  LanguageSettingScreen: undefined;
+  SupportScreen: undefined;
+  AppInfoScreen: undefined;
+  TopUpResultScreen: { amount: number; success: boolean; balanceAfter: number };
+  MerchantNavigateScreen: { latitude: number; longitude: number; address: string; merchantName: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -51,11 +82,33 @@ export function RootNavigator() {
           {!hydrated ? (
             <Stack.Screen name="Splash" component={SplashScreen} />
           ) : !user ? (
-            <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+            <>
+              {/* 기획서 §4.1 인증 흐름: Onboarding → Login → Auth(OTP/매핑/권한) */}
+              <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+              <Stack.Screen name="Login" component={LoginScreen} />
+              <Stack.Screen name="Auth" component={AuthScreen} />
+            </>
           ) : (
             <>
               <Stack.Screen name="Main" component={MainTabNavigator} />
-              {/* Full-screen modals / detail screens */}
+              <Stack.Screen name="TopUpScreen" component={TopUpScreen} />
+              <Stack.Screen name="MerchantDetailScreen" component={MerchantDetailScreen} />
+              <Stack.Screen name="TransactionDetailScreen" component={TransactionDetailScreen} />
+              <Stack.Screen name="GroupPayScreen" component={GroupPayScreen} />
+              <Stack.Screen name="BadgeLinkScreen" component={BadgeLinkScreen} />
+              <Stack.Screen name="PolicyViewScreen" component={PolicyViewScreen} />
+              <Stack.Screen name="DailyMenuListScreen" component={DailyMenuListScreen} />
+              <Stack.Screen name="PreOrderScreen" component={PreOrderScreen} />
+              <Stack.Screen name="MyPreOrdersScreen" component={MyPreOrdersScreen} />
+              <Stack.Screen name="EWalletLinkScreen" component={EWalletLinkScreen} />
+              <Stack.Screen name="SupportScreen" component={SupportScreen} />
+              <Stack.Screen name="AppInfoScreen" component={AppInfoScreen} />
+              <Stack.Screen name="ProfileEditScreen" component={ProfileEditScreen} />
+              <Stack.Screen name="NotificationListScreen" component={NotificationListScreen} />
+              <Stack.Screen name="NotificationSettingScreen" component={NotificationSettingScreen} />
+              <Stack.Screen name="LanguageSettingScreen" component={LanguageSettingScreen} />
+              <Stack.Screen name="TopUpResultScreen" component={TopUpResultScreen} />
+              <Stack.Screen name="MerchantNavigateScreen" component={MerchantNavigateScreen} />
             </>
           )}
         </Stack.Navigator>

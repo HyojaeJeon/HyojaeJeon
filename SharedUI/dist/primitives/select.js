@@ -16,18 +16,26 @@ export function Select({ value, onChange, options, placeholder = '— select —
     const rootRef = useRef(null);
     const panelRef = useRef(null);
     const [panelPos, setPanelPos] = useState(null);
-    useLayoutEffect(() => {
-        if (!open || !rootRef.current)
+    const reposition = () => {
+        if (!rootRef.current)
             return;
         const rect = rootRef.current.getBoundingClientRect();
-        const PANEL_H = 280;
+        const panelH = panelRef.current?.offsetHeight ?? 280;
         const margin = 4;
         const spaceBelow = window.innerHeight - rect.bottom - margin;
         const spaceAbove = rect.top - margin;
-        const top = spaceBelow >= PANEL_H || spaceBelow >= spaceAbove
+        const top = spaceBelow >= panelH || spaceBelow >= spaceAbove
             ? rect.bottom + margin
-            : Math.max(8, rect.top - PANEL_H - margin);
+            : Math.max(8, rect.top - panelH - margin);
         setPanelPos({ top, left: rect.left, width: rect.width });
+    };
+    useLayoutEffect(() => {
+        if (!open)
+            return;
+        reposition();
+        // re-measure after panel renders and gets its real height
+        const raf = requestAnimationFrame(reposition);
+        return () => cancelAnimationFrame(raf);
     }, [open]);
     useEffect(() => {
         if (!open)
@@ -39,26 +47,13 @@ export function Select({ value, onChange, options, placeholder = '— select —
             if (!insideTrigger && !insidePanel)
                 setOpen(false);
         };
-        const onScroll = () => {
-            if (!rootRef.current)
-                return;
-            const rect = rootRef.current.getBoundingClientRect();
-            const PANEL_H = 280;
-            const margin = 4;
-            const spaceBelow = window.innerHeight - rect.bottom - margin;
-            const spaceAbove = rect.top - margin;
-            const top = spaceBelow >= PANEL_H || spaceBelow >= spaceAbove
-                ? rect.bottom + margin
-                : Math.max(8, rect.top - PANEL_H - margin);
-            setPanelPos({ top, left: rect.left, width: rect.width });
-        };
         document.addEventListener('mousedown', onDocClick);
-        window.addEventListener('scroll', onScroll, true);
-        window.addEventListener('resize', onScroll);
+        window.addEventListener('scroll', reposition, true);
+        window.addEventListener('resize', reposition);
         return () => {
             document.removeEventListener('mousedown', onDocClick);
-            window.removeEventListener('scroll', onScroll, true);
-            window.removeEventListener('resize', onScroll);
+            window.removeEventListener('scroll', reposition, true);
+            window.removeEventListener('resize', reposition);
         };
     }, [open]);
     const selected = options.find((o) => o.value === value);

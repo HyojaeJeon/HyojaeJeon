@@ -1,6 +1,7 @@
 import { View, Text } from 'react-native';
 import { CheckCircle } from 'lucide-react-native';
-import { formatVnd, formatDateTime } from '@shared/mock/mockData';
+import { colors, typography, spacing, radius, shadows } from '@shared/ui/tokens';
+import { formatVnd, formatDateTime } from '@shared/utils/format';
 import { useTranslation } from 'react-i18next';
 import type { MockMealTransaction } from '@shared/mock/types';
 
@@ -11,9 +12,9 @@ interface ReceiptCardProps {
 
 function DetailRow({ label, value, valueClassName }: { label: string; value: string; valueClassName?: string }) {
   return (
-    <View className="flex-row items-center justify-between py-2">
-      <Text className="text-sm text-gray-400">{label}</Text>
-      <Text className={`text-sm font-medium ${valueClassName ?? 'text-gray-900'}`}>{value}</Text>
+    <View className="flex-row items-center justify-between" style={{ paddingVertical: spacing.sm }}>
+      <Text style={typography.body}>{label}</Text>
+      <Text className={valueClassName} style={{ ...typography.body, fontWeight: '500', color: colors.textPrimary }}>{value}</Text>
     </View>
   );
 }
@@ -22,30 +23,30 @@ export function ReceiptCard({ transaction, merchantAddress }: ReceiptCardProps) 
   const { t } = useTranslation();
 
   return (
-    <View className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <View style={{ backgroundColor: colors.bgCard, borderRadius: radius.xl, overflow: 'hidden', ...shadows.card }}>
       {/* Top - Success section */}
-      <View className="flex-col items-center px-5 pt-6 pb-5">
-        <View className="flex h-14 w-14 items-center justify-center rounded-full bg-[#10B981]/10">
-          <CheckCircle size={28} color="#10B981" />
+      <View className="flex-col items-center" style={{ paddingHorizontal: spacing.cardPadding, paddingTop: spacing.xxl, paddingBottom: spacing.cardPadding }}>
+        <View className="flex items-center justify-center" style={{ height: 56, width: 56, borderRadius: 28, backgroundColor: colors.successLight }}>
+          <CheckCircle size={28} color={colors.success} />
         </View>
-        <Text className="mt-3 text-lg font-semibold text-gray-900">{t('transaction.detail.success')}</Text>
-        <Text className="mt-1 text-3xl font-bold text-gray-900">{formatVnd(transaction.amountVnd)}</Text>
-        <Text className="mt-1 text-xs text-gray-400">{formatDateTime(transaction.createdAt)}</Text>
+        <Text style={{ ...typography.sectionTitle, marginTop: spacing.elementGap }}>{t('transaction.detail.success')}</Text>
+        <Text style={{ ...typography.displayLarge, marginTop: spacing.xs }}>{formatVnd(transaction.amountVnd)}</Text>
+        <Text style={{ ...typography.caption, marginTop: spacing.xs }}>{formatDateTime(transaction.createdAt)}</Text>
       </View>
 
       {/* Dashed divider */}
-      <View className="mx-5 border-t border-gray-200" style={{ borderStyle: 'dashed' }} />
+      <View style={{ marginHorizontal: spacing.cardPadding, borderTopWidth: 1, borderTopColor: colors.divider, borderStyle: 'dashed' }} />
 
       {/* Detail rows */}
-      <View className="px-5 py-3">
+      <View style={{ paddingHorizontal: spacing.cardPadding, paddingVertical: spacing.elementGap }}>
         <DetailRow label={t('transaction.detail.restaurant')} value={transaction.branchName || transaction.merchantName} />
         <DetailRow label={t('transaction.detail.address')} value={merchantAddress} />
         <DetailRow label={t('transaction.detail.type')} value={t('transaction.payment')} />
-        <View className="flex-row items-center justify-between py-2">
-          <Text className="text-sm text-gray-400">{t('transaction.detail.status')}</Text>
-          <View className="flex-row items-center gap-1.5">
-            <View className="h-1.5 w-1.5 rounded-full bg-[#10B981]" />
-            <Text className="text-sm font-medium text-[#10B981]">
+        <View className="flex-row items-center justify-between" style={{ paddingVertical: spacing.sm }}>
+          <Text style={typography.body}>{t('transaction.detail.status')}</Text>
+          <View className="flex-row items-center" style={{ gap: 6 }}>
+            <View style={{ height: 6, width: 6, borderRadius: 3, backgroundColor: colors.success }} />
+            <Text style={{ ...typography.body, fontWeight: '500', color: colors.success }}>
               {t('transaction.detail.approved')}
             </Text>
           </View>
@@ -53,18 +54,18 @@ export function ReceiptCard({ transaction, merchantAddress }: ReceiptCardProps) 
       </View>
 
       {/* Dashed divider */}
-      <View className="mx-5 border-t border-gray-200" style={{ borderStyle: 'dashed' }} />
+      <View style={{ marginHorizontal: spacing.cardPadding, borderTopWidth: 1, borderTopColor: colors.divider, borderStyle: 'dashed' }} />
 
       {/* Payment breakdown */}
-      <View className="px-5 py-3">
-        <DetailRow label={t('common.total')} value={formatVnd(transaction.amountVnd)} valueClassName="text-gray-900 font-bold" />
-        <View className="flex-row items-center justify-between py-2">
-          <Text className="text-sm text-gray-400">{t('transaction.company')}</Text>
+      <View style={{ paddingHorizontal: spacing.cardPadding, paddingVertical: spacing.elementGap }}>
+        <DetailRow label={t('common.total')} value={formatVnd(transaction.amountVnd)} valueClassName="font-bold" />
+        <View className="flex-row items-center justify-between" style={{ paddingVertical: spacing.sm }}>
+          <Text style={typography.body}>{t('transaction.company')}</Text>
           <View className="flex-row items-center">
-            <Text className="text-sm font-medium text-[#3B82F6]">
+            <Text style={{ ...typography.body, fontWeight: '500', color: colors.primary }}>
               {formatVnd(transaction.companyShareVnd)}{' '}
             </Text>
-            <Text className="text-sm text-gray-400 font-normal">
+            <Text style={typography.body}>
               ({Math.round((transaction.companyShareVnd / transaction.amountVnd) * 100)}%)
             </Text>
           </View>
@@ -73,21 +74,21 @@ export function ReceiptCard({ transaction, merchantAddress }: ReceiptCardProps) 
       </View>
 
       {/* Dashed divider */}
-      <View className="mx-5 border-t border-gray-200" style={{ borderStyle: 'dashed' }} />
+      <View style={{ marginHorizontal: spacing.cardPadding, borderTopWidth: 1, borderTopColor: colors.divider, borderStyle: 'dashed' }} />
 
       {/* Reference info */}
-      <View className="px-5 py-3">
-        <View className="flex-row items-center justify-between py-2">
-          <Text className="text-xs text-gray-400">{t('transaction.detail.policy')}</Text>
-          <Text className="text-xs text-gray-500">{transaction.policyName ?? '—'}</Text>
+      <View style={{ paddingHorizontal: spacing.cardPadding, paddingVertical: spacing.elementGap }}>
+        <View className="flex-row items-center justify-between" style={{ paddingVertical: spacing.sm }}>
+          <Text style={typography.caption}>{t('transaction.detail.policy')}</Text>
+          <Text style={{ ...typography.caption, color: colors.textSecondary }}>{transaction.policyName ?? '—'}</Text>
         </View>
-        <View className="flex-row items-center justify-between py-2">
-          <Text className="text-xs text-gray-400">{t('transaction.detail.transactionId')}</Text>
-          <Text className="text-xs text-gray-500">{transaction.id}</Text>
+        <View className="flex-row items-center justify-between" style={{ paddingVertical: spacing.sm }}>
+          <Text style={typography.caption}>{t('transaction.detail.transactionId')}</Text>
+          <Text style={{ ...typography.caption, color: colors.textSecondary }}>{transaction.id}</Text>
         </View>
-        <View className="flex-row items-center justify-between py-2">
-          <Text className="text-xs text-gray-400">{t('transaction.detail.orderId')}</Text>
-          <Text className="text-xs text-gray-500">{transaction.orderId ?? '—'}</Text>
+        <View className="flex-row items-center justify-between" style={{ paddingVertical: spacing.sm }}>
+          <Text style={typography.caption}>{t('transaction.detail.orderId')}</Text>
+          <Text style={{ ...typography.caption, color: colors.textSecondary }}>{transaction.orderId ?? '—'}</Text>
         </View>
       </View>
     </View>

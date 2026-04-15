@@ -1,77 +1,117 @@
 import { View, Text, Pressable, ScrollView } from 'react-native';
-import { ChevronRight, Star, MapPin, UtensilsCrossed } from 'lucide-react-native';
-import { MOCK_MERCHANTS } from '@shared/mock/mockData';
+import { ChevronRight, Star, MapPin, UtensilsCrossed, Store } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '@navigation/RootNavigator';
+import { colors, typography, spacing, shadows, radius } from '@shared/ui/tokens';
+import type { MockMerchant } from '@shared/mock/types';
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 /** Color palette for merchant card placeholders */
-const CARD_COLORS = ['#EF4444', '#F59E0B', '#10B981', '#6366F1'];
+const CARD_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#6366F1'];
 
-export function NearbyMerchants() {
+interface NearbyMerchantsProps {
+  merchants: MockMerchant[];
+}
+
+export function NearbyMerchants({ merchants }: NearbyMerchantsProps) {
   const { t } = useTranslation();
-  const merchants = MOCK_MERCHANTS.slice(0, 4);
+  const navigation = useNavigation<NavigationProp>();
 
   return (
     <View>
       {/* Section header */}
       <View className="flex flex-row items-center justify-between">
-        <Text className="text-[15px] font-semibold text-gray-900">
+        <Text style={typography.sectionTitle}>
           {t('wallet.nearbyMerchants')}
         </Text>
-        <Pressable className="flex flex-row items-center gap-0.5">
-          <Text className="text-xs font-medium text-[#3B82F6]">
+        <Pressable
+          className="flex flex-row items-center"
+          style={{ gap: spacing.xs }}
+          onPress={() => navigation.navigate('Main', { screen: 'MerchantMap' } as never)}
+        >
+          <Text style={[typography.body, { color: colors.primary, fontWeight: '500' }]}>
             {t('wallet.map')}
           </Text>
-          <ChevronRight size={14} color="#3B82F6" />
+          <ChevronRight size={16} color={colors.primary} />
         </Pressable>
       </View>
 
       {/* Horizontal scroll */}
+      {merchants.length === 0 ? (
+        <View style={{ marginTop: spacing.lg, alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.lg }}>
+          <Store size={32} color={colors.textTertiary} />
+          <Text style={[typography.body, { color: colors.textTertiary }]}>
+            {t('wallet.noNearbyMerchants')}
+          </Text>
+        </View>
+      ) : (
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        className="mt-3 -mx-5 px-5"
-        contentContainerClassName="gap-3 pr-5"
+        style={{ marginTop: spacing.md, marginHorizontal: -spacing.screenHorizontal }}
+        contentContainerStyle={{ gap: spacing.md, paddingHorizontal: spacing.screenHorizontal }}
       >
-        {merchants.map((m, i) => (
-          <View
-            key={m.id}
-            className="w-[140px] rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden"
-          >
-            {/* Image placeholder */}
-            <View
-              className="flex h-[80px] items-center justify-center"
-              style={{ backgroundColor: CARD_COLORS[i % CARD_COLORS.length] + '18' }}
-            >
-              <UtensilsCrossed
-                size={28}
-                color={CARD_COLORS[i % CARD_COLORS.length]}
-                opacity={0.6}
-              />
-            </View>
+        {merchants.map((m, i) => {
+          const accentColor = CARD_COLORS[i % CARD_COLORS.length];
 
-            {/* Info */}
-            <View className="p-2.5">
-              <Text className="text-xs font-semibold text-gray-900" numberOfLines={1}>
-                {m.brandName}
-              </Text>
-              <View className="mt-1 flex flex-row items-center gap-2">
-                <View className="flex flex-row items-center gap-0.5">
-                  <MapPin size={10} color="#9CA3AF" />
-                  <Text className="text-[10px] text-gray-400">
-                    {m.distanceKm === 0 ? 'T\u1EA1i ch\u1ED7' : `${m.distanceKm}km`}
-                  </Text>
+          return (
+            <Pressable
+              key={m.id}
+              onPress={() =>
+                navigation.navigate('MerchantDetailScreen', {
+                  enrollmentId: m.id,
+                })
+              }
+            >
+              <View
+                style={{
+                  width: 160,
+                  borderRadius: radius.lg,
+                  backgroundColor: colors.bgCard,
+                  overflow: 'hidden',
+                  ...shadows.card,
+                }}
+              >
+                {/* Image placeholder */}
+                <View
+                  className="items-center justify-center"
+                  style={{
+                    height: 90,
+                    backgroundColor: accentColor + '14',
+                  }}
+                >
+                  <UtensilsCrossed size={30} color={accentColor} opacity={0.5} />
                 </View>
-                <View className="flex flex-row items-center gap-0.5">
-                  <Star size={10} color="#FBBF24" />
-                  <Text className="text-[10px] text-gray-600 font-medium">
-                    {m.rating}
+
+                {/* Info */}
+                <View style={{ padding: spacing.md }}>
+                  <Text style={typography.cardTitle} numberOfLines={1}>
+                    {m.brandName}
                   </Text>
+                  <View className="flex flex-row items-center" style={{ marginTop: spacing.sm, gap: spacing.md }}>
+                    <View className="flex flex-row items-center" style={{ gap: spacing.xs }}>
+                      <MapPin size={11} color={colors.textTertiary} />
+                      <Text style={typography.caption}>
+                        {m.distanceKm === 0 ? 'T\u1EA1i ch\u1ED7' : `${m.distanceKm}km`}
+                      </Text>
+                    </View>
+                    <View className="flex flex-row items-center" style={{ gap: spacing.xs }}>
+                      <Star size={11} color={colors.warning} />
+                      <Text style={[typography.caption, { color: colors.textSecondary, fontWeight: '500' }]}>
+                        {m.rating}
+                      </Text>
+                    </View>
+                  </View>
                 </View>
               </View>
-            </View>
-          </View>
-        ))}
+            </Pressable>
+          );
+        })}
       </ScrollView>
+      )}
     </View>
   );
 }

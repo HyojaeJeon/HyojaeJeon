@@ -97,6 +97,11 @@ export class MealTransactionResolver {
   listByCorporate(
     @Args('corporateId', { type: () => ID }) corporateId: string,
     @Args() pagination: PaginationArgs,
+    @Args('dateFrom', { type: () => String, nullable: true }) dateFrom: string | null,
+    @Args('dateTo', { type: () => String, nullable: true }) dateTo: string | null,
+    @Args('merchantId', { type: () => String, nullable: true }) merchantId: string | null,
+    @Args('employeeId', { type: () => String, nullable: true }) employeeId: string | null,
+    @Args('statuses', { type: () => [String], nullable: true }) statuses: string[] | null,
     @CurrentUser() user: JwtPayload,
   ) {
     return this.service.listByCorporate(
@@ -104,6 +109,7 @@ export class MealTransactionResolver {
       corporateId,
       pagination.skip,
       pagination.take,
+      { dateFrom, dateTo, merchantId, employeeId, statuses },
     );
   }
 

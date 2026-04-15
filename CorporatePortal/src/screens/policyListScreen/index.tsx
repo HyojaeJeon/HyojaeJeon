@@ -16,7 +16,7 @@ import { useI18n } from '@i18n/I18nProvider';
 import { useHasPermission } from '@rbac/useHasPermission';
 import { PERMISSIONS } from '@rbac/permissions';
 import { LockedScreen } from '@screens/common/LockedScreen';
-import { formatCurrency } from '@shared/utils/format';
+import { formatCurrency, formatDateTime, toLocaleTag } from '@shared/utils/format';
 import {
   POLICIES_QUERY,
   type PoliciesData,
@@ -36,7 +36,8 @@ const STATUS_TONE: Record<PolicyStatus, 'success' | 'info' | 'warning' | 'neutra
 };
 
 export function PolicyListScreen() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const localeTag = toLocaleTag(locale);
   const router = useRouter();
   const hydrated = useAppSelector((s) => s.auth.hydrated);
   const canRead = useHasPermission(PERMISSIONS.POLICY_READ);
@@ -109,7 +110,7 @@ export function PolicyListScreen() {
       width: '200px',
       render: (r) => (
         <span className="text-[12px] text-fg-muted">
-          {r.effectiveFrom} ~ {r.effectiveTo ?? '무기한'}
+          {formatDateTime(r.effectiveFrom, localeTag)} ~ {r.effectiveTo ? formatDateTime(r.effectiveTo, localeTag) : t('common.indefinite')}
         </span>
       ),
     },

@@ -1,9 +1,17 @@
+import { useCallback, useState } from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { MapPin, Clock, Check } from 'lucide-react-native';
-import { AppHeader } from '@shared/ui/AppHeader';
-import { formatVnd } from '@shared/mock/mockData';
+import { AppHeader, useModal, PrimaryButton } from '@shared/ui';
+import { colors, typography, spacing, radius, shadows } from '@shared/ui/tokens';
+import { formatVnd } from '@shared/utils/format';
 import { useTranslation } from 'react-i18next';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '@navigation/RootNavigator';
 import { ParticipantList } from './ParticipantList';
+import { useGroupPayData } from './useGroupPayData';
+
+type SplitMethod = 'EQUAL' | 'CUSTOM';
 
 const TOTAL_AMOUNT = 350_000;
 const PER_PERSON = Math.ceil(TOTAL_AMOUNT / 3);
@@ -17,59 +25,143 @@ const PARTICIPANTS = [
 
 export default function GroupPayScreen() {
   const { t } = useTranslation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const modal = useModal();
+  const { creating, handleCreateAllGroupOrders } = useGroupPayData();
+  const [splitMethod, setSplitMethod] = useState<SplitMethod>('EQUAL');
+
+  const executePayment = useCallback(async () => {
+    const orders = PARTICIPANTS.map((p) => ({
+      participantName: p.name,
+      input: {
+        walletId: '', // Provided by auth context at runtime
+        branchId: '', // Provided by route params at runtime
+        diningType: 'DINE_IN',
+        scheduledAt: new Date().toISOString(),
+        idempotencyKey: `group-${p.name}-${Date.now()}`,
+        items: [
+          {
+            menuItemName: 'Group order item',
+            quantity: 1,
+            unitPriceVnd: p.amountVnd,
+          },
+        ],
+      },
+    }));
+
+    const results = await handleCreateAllGroupOrders(orders);
+    const firstSuccess = results.find((r) => r.orderId);
+    const hasError = results.some((r) => r.error);
+
+    if (firstSuccess?.orderId) {
+      navigation.navigate('OrderStatusScreen', { orderId: firstSuccess.orderId });
+    }
+    if (hasError) {
+      const failedNames = results.filter((r) => r.error).map((r) => r.participantName).join(', ');
+      modal.show({
+        title: t('common.error'),
+        message: `${t('groupPay.partialError', { defaultValue: 'Some orders failed' })}: ${failedNames}`,
+        confirmText: t('common.ok', { defaultValue: 'OK' }),
+      });
+    }
+  }, [handleCreateAllGroupOrders, navigation, t, modal]);
+
+  const onStartPayment = useCallback(() => {
+    modal.show({
+      title: t('groupPay.confirmTitle', { defaultValue: 'Confirm Group Payment' }),
+      message: t('groupPay.confirmMessage', {
+        defaultValue: `Start payment for ${PARTICIPANTS.length} members?`,
+        count: PARTICIPANTS.length,
+      }),
+      confirmText: t('groupPay.startPayment'),
+      cancelText: t('common.cancel'),
+      onConfirm: executePayment,
+    });
+  }, [modal, t, executePayment]);
 
   return (
-    <View className="flex-1 bg-[#F8FAFC]">
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       {/* Header */}
-      <AppHeader title={t('groupPay.title')} onBack={() => {}} />
+      <AppHeader title={t('groupPay.title')} onBack={() => navigation.goBack()} />
 
       {/* Scrollable content */}
-      <ScrollView className="flex-1" contentContainerClassName="px-5 pt-2 pb-[160px] gap-4">
+      <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.sm, paddingBottom: 160, gap: spacing.lg }}>
         {/* Restaurant selection card */}
-        <View className="flex-row items-center gap-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-          <View className="flex h-[40px] w-[40px] items-center justify-center rounded-xl bg-[#3B82F6]/10">
-            <MapPin size={20} color="#3B82F6" />
+        <View className="flex-row items-center" style={{ gap: spacing.elementGap, borderRadius: radius.xl, backgroundColor: colors.bgCard, padding: spacing.cardPaddingCompact, ...shadows.card }}>
+          <View className="flex items-center justify-center" style={{ height: 40, width: 40, borderRadius: radius.md, backgroundColor: colors.primaryLight }}>
+            <MapPin size={20} color={colors.primary} />
           </View>
           <View className="flex-1">
-            <Text className="text-[14px] font-medium text-gray-900">Pho 24 - Nguyen Hue</Text>
-            <View className="mt-0.5 flex-row items-center gap-1">
-              <Clock size={12} color="#9CA3AF" />
-              <Text className="text-[12px] text-gray-400">{t('groupPay.todayAt')} 12:00</Text>
+            <Text style={typography.cardTitle}>Pho 24 - Nguyen Hue</Text>
+            <View className="flex-row items-center" style={{ marginTop: 2, gap: spacing.xs }}>
+              <Clock size={12} color={colors.textTertiary} />
+              <Text style={typography.caption}>{t('groupPay.todayAt')} 12:00</Text>
             </View>
           </View>
         </View>
 
         {/* Total amount */}
-        <View className="items-center py-4">
-          <Text className="text-[13px] text-gray-400">{t('groupPay.totalBill')}</Text>
-          <Text className="mt-2 text-3xl font-bold text-gray-900">{formatVnd(TOTAL_AMOUNT)}</Text>
-          <View className="mt-1 h-[2px] w-[120px] rounded-full bg-[#3B82F6]/30" />
+        <View className="items-center" style={{ paddingVertical: spacing.lg }}>
+          <Text style={typography.caption}>{t('groupPay.totalBill')}</Text>
+          <Text style={{ ...typography.displayLarge, marginTop: spacing.sm }}>{formatVnd(TOTAL_AMOUNT)}</Text>
+          <View style={{ marginTop: spacing.xs, height: 2, width: 120, borderRadius: 1, backgroundColor: `${colors.primary}4D` }} />
         </View>
 
         {/* Split method */}
-        <View className="gap-3">
-          <Text className="text-[15px] font-semibold text-gray-900">{t('groupPay.splitMethod')}</Text>
-          <View className="gap-2">
-            {/* Option 1: Equal split - selected */}
-            <Pressable className="flex-row w-full items-center gap-3 rounded-xl border-2 border-[#3B82F6] bg-[#3B82F6]/5 p-4">
-              <View className="flex h-[20px] w-[20px] items-center justify-center rounded-full border-2 border-[#3B82F6]">
-                <View className="h-[10px] w-[10px] rounded-full bg-[#3B82F6]" />
+        <View style={{ gap: spacing.elementGap }}>
+          <Text style={typography.cardTitle}>{t('groupPay.splitMethod')}</Text>
+          <View style={{ gap: spacing.sm }}>
+            {/* Option 1: Equal split */}
+            <Pressable
+              onPress={() => setSplitMethod('EQUAL')}
+              className="flex-row w-full items-center"
+              style={{
+                gap: spacing.elementGap,
+                borderRadius: radius.md,
+                padding: spacing.cardPaddingCompact,
+                borderWidth: splitMethod === 'EQUAL' ? 2 : 0,
+                borderColor: splitMethod === 'EQUAL' ? colors.primary : 'transparent',
+                backgroundColor: splitMethod === 'EQUAL' ? colors.primaryLight : colors.bgCard,
+              }}
+            >
+              <View className="flex items-center justify-center" style={{ height: 20, width: 20, borderRadius: 10, borderWidth: 2, borderColor: splitMethod === 'EQUAL' ? colors.primary : colors.textPlaceholder }}>
+                {splitMethod === 'EQUAL' && (
+                  <View style={{ height: 10, width: 10, borderRadius: 5, backgroundColor: colors.primary }} />
+                )}
               </View>
               <View className="flex-1">
-                <View className="flex-row items-center gap-2">
-                  <Text className="text-[14px] font-medium text-gray-900">{t('groupPay.equalSplit')}</Text>
-                  <Check size={14} color="#3B82F6" />
+                <View className="flex-row items-center" style={{ gap: spacing.sm }}>
+                  <Text style={typography.cardTitle}>{t('groupPay.equalSplit')}</Text>
+                  {splitMethod === 'EQUAL' && <Check size={14} color={colors.primary} />}
                 </View>
-                <Text className="text-[12px] text-gray-400">{t('groupPay.equalDesc')}</Text>
+                <Text style={typography.caption}>{t('groupPay.equalDesc')}</Text>
               </View>
             </Pressable>
 
             {/* Option 2: Custom */}
-            <Pressable className="flex-row w-full items-center gap-3 rounded-xl border border-gray-200 bg-white p-4">
-              <View className="flex h-[20px] w-[20px] items-center justify-center rounded-full border-2 border-gray-300" />
+            <Pressable
+              onPress={() => setSplitMethod('CUSTOM')}
+              className="flex-row w-full items-center"
+              style={{
+                gap: spacing.elementGap,
+                borderRadius: radius.md,
+                padding: spacing.cardPaddingCompact,
+                borderWidth: splitMethod === 'CUSTOM' ? 2 : 0,
+                borderColor: splitMethod === 'CUSTOM' ? colors.primary : 'transparent',
+                backgroundColor: splitMethod === 'CUSTOM' ? colors.primaryLight : colors.bgCard,
+              }}
+            >
+              <View className="flex items-center justify-center" style={{ height: 20, width: 20, borderRadius: 10, borderWidth: 2, borderColor: splitMethod === 'CUSTOM' ? colors.primary : colors.textPlaceholder }}>
+                {splitMethod === 'CUSTOM' && (
+                  <View style={{ height: 10, width: 10, borderRadius: 5, backgroundColor: colors.primary }} />
+                )}
+              </View>
               <View className="flex-1">
-                <Text className="text-[14px] font-medium text-gray-900">{t('groupPay.custom')}</Text>
-                <Text className="text-[12px] text-gray-400">{t('groupPay.customDesc')}</Text>
+                <View className="flex-row items-center" style={{ gap: spacing.sm }}>
+                  <Text style={typography.cardTitle}>{t('groupPay.custom')}</Text>
+                  {splitMethod === 'CUSTOM' && <Check size={14} color={colors.primary} />}
+                </View>
+                <Text style={typography.caption}>{t('groupPay.customDesc')}</Text>
               </View>
             </Pressable>
           </View>
@@ -80,17 +172,25 @@ export default function GroupPayScreen() {
       </ScrollView>
 
       {/* Sticky bottom */}
-      <View className="absolute bottom-0 left-0 right-0 border-t border-gray-100 bg-white px-5 pb-6 pt-4 gap-2">
-        <Text className="text-center text-[13px] text-gray-400">
+      <View className="absolute bottom-0 left-0 right-0" style={{ borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.bgWhite, paddingHorizontal: spacing.screenHorizontal, paddingBottom: spacing.xxl, paddingTop: spacing.lg, gap: spacing.sm }}>
+        <Text style={{ ...typography.caption, textAlign: 'center' }}>
           {t('groupPay.yourShare')}: {formatVnd(PER_PERSON)}
         </Text>
-        <Pressable className="flex h-[52px] w-full items-center justify-center rounded-xl bg-[#3B82F6]">
-          <Text className="text-[15px] font-semibold text-white">
-            {t('groupPay.startPayment')}
-          </Text>
-        </Pressable>
-        <Pressable className="flex h-[40px] w-full items-center justify-center">
-          <Text className="text-[14px] font-medium text-gray-400">
+        <PrimaryButton
+          title={t('groupPay.startPayment')}
+          onPress={onStartPayment}
+          variant="primary"
+          size="lg"
+          loading={creating}
+          disabled={creating}
+          className="w-full"
+        />
+        <Pressable
+          onPress={() => navigation.goBack()}
+          className="flex w-full items-center justify-center active:opacity-70"
+          style={{ height: 40 }}
+        >
+          <Text style={{ ...typography.body, fontWeight: '500', color: colors.textTertiary }}>
             {t('common.cancel')}
           </Text>
         </Pressable>

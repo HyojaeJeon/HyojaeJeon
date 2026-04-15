@@ -1,86 +1,108 @@
+import { useState } from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { Check } from 'lucide-react-native';
 import { AppHeader } from '@shared/ui/AppHeader';
+import { useModal } from '@shared/ui';
+import { colors, typography, spacing, radius } from '@shared/ui/tokens';
 import { useTranslation } from 'react-i18next';
 import { PreOrderCard } from './PreOrderCard';
 import type { PreOrderData } from './PreOrderCard';
-
-const MOCK_PRE_ORDERS: PreOrderData[] = [
-  {
-    id: 'po-001',
-    merchantName: 'Canteen TechCorp',
-    merchantInitial: 'C',
-    merchantColor: '#3B82F6',
-    items: 'Bún bò Huế đặc biệt + Chả giò',
-    amount: 60_000,
-    dateLabel: 'Ngày mai, 13/04 · 12:00',
-    status: 'CONFIRMED',
-  },
-  {
-    id: 'po-002',
-    merchantName: 'Phở 24 - Nguyễn Huệ',
-    merchantInitial: 'P',
-    merchantColor: '#F59E0B',
-    items: 'Phở Đặc Biệt + Nước Chanh Muối',
-    amount: 110_000,
-    dateLabel: '14/04 · 12:00',
-    status: 'PENDING',
-  },
-  {
-    id: 'po-003',
-    merchantName: 'Canteen TechCorp',
-    merchantInitial: 'C',
-    merchantColor: '#3B82F6',
-    items: 'Cơm sườn nướng',
-    amount: 40_000,
-    dateLabel: '10/04 · 12:00',
-    status: 'COMPLETED',
-    muted: true,
-  },
-];
+import { useMyPreOrdersData } from './useMyPreOrdersData';
 
 export default function MyPreOrdersScreen() {
   const { t } = useTranslation();
+  const modal = useModal();
+  // TODO: walletId 를 auth/wallet state 에서 받아올 것
+  const { preOrders, handleCancel } = useMyPreOrdersData('wallet-001');
 
-  const TABS = [
-    { label: t('myPreOrders.upcoming'), active: true },
-    { label: t('myPreOrders.completed'), active: false },
-    { label: t('myPreOrders.cancelled'), active: false },
+  const TAB_OPTIONS = [
+    { key: 'upcoming', label: t('myPreOrders.upcoming') },
+    { key: 'completed', label: t('myPreOrders.completed') },
+    { key: 'cancelled', label: t('myPreOrders.cancelled') },
   ];
 
+  const [activeTab, setActiveTab] = useState('upcoming');
+
+  // Filter pre-orders based on active tab
+  const filteredOrders = preOrders.filter((order: PreOrderData) => {
+    if (activeTab === 'upcoming') {
+      return order.status === 'CONFIRMED' || order.status === 'PENDING';
+    }
+    if (activeTab === 'completed') return order.status === 'COMPLETED';
+    if (activeTab === 'cancelled') return order.status === 'CANCELLED';
+    return true;
+  });
+
+  const handleCancelPress = (orderId: string) => {
+    modal.show({
+      title: t('myPreOrders.cancelConfirmTitle'),
+      message: t('myPreOrders.cancelConfirmMessage'),
+      confirmText: t('myPreOrders.cancelOrder'),
+      cancelText: t('common.cancel'),
+      variant: 'danger',
+      onConfirm: async () => {
+        await handleCancel(orderId);
+      },
+    });
+  };
+
   return (
-    <View className="flex-1 bg-[#F8FAFC]">
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <AppHeader title={t('myPreOrders.title')} />
 
-      <ScrollView className="flex-1 px-5 pt-4 pb-6">
-        <View className="gap-4">
+      <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.lg, paddingBottom: spacing.xxl }}>
+        <View style={{ gap: spacing.lg }}>
           {/* Filter tabs */}
-          <View className="flex-row gap-2">
-            {TABS.map((tab) => (
-              <Pressable
-                key={tab.label}
-                className={`flex-row items-center gap-1.5 rounded-full px-4 py-2 ${
-                  tab.active
-                    ? 'bg-[#3B82F6]'
-                    : 'bg-white border border-gray-200'
-                }`}
-              >
-                {tab.active && <Check size={14} color="#FFFFFF" />}
-                <Text
-                  className={`text-[13px] font-medium ${
-                    tab.active ? 'text-white' : 'text-gray-600'
-                  }`}
+          <View className="flex-row" style={{ gap: spacing.sm }}>
+            {TAB_OPTIONS.map((tab) => {
+              const isActive = tab.key === activeTab;
+              return (
+                <Pressable
+                  key={tab.key}
+                  onPress={() => setActiveTab(tab.key)}
+                  className="flex-row items-center"
+                  style={{
+                    gap: 6,
+                    borderRadius: radius.full,
+                    paddingHorizontal: spacing.lg,
+                    paddingVertical: spacing.sm,
+                    backgroundColor: isActive ? colors.primary : colors.bgCard,
+                    borderWidth: isActive ? 0 : 1,
+                    borderColor: colors.border,
+                  }}
                 >
-                  {tab.label}
-                </Text>
-              </Pressable>
-            ))}
+                  {isActive && <Check size={14} color={colors.textInverse} />}
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      fontWeight: '500',
+                      color: isActive ? colors.textInverse : colors.textSecondary,
+                    }}
+                  >
+                    {tab.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
           </View>
 
           {/* Pre-order cards */}
-          {MOCK_PRE_ORDERS.map((order) => (
-            <PreOrderCard key={order.id} order={order} />
+          {filteredOrders.map((order: PreOrderData) => (
+            <PreOrderCard
+              key={order.id}
+              order={order}
+              onCancel={handleCancelPress}
+            />
           ))}
+
+          {/* Empty state */}
+          {filteredOrders.length === 0 && (
+            <View className="items-center" style={{ paddingVertical: spacing.xxxl }}>
+              <Text style={typography.body}>
+                {t('myPreOrders.empty')}
+              </Text>
+            </View>
+          )}
         </View>
       </ScrollView>
     </View>

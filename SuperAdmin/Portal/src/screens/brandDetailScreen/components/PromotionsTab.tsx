@@ -40,7 +40,7 @@ export function PromotionsTab({ brandHQId }: PromotionsTabProps) {
   const columns: DataTableColumn<BrandPromotionRow>[] = [
     { key: 'code', header: t('brand.col.promotionCode'), width: '160px', render: (r) => <span className="font-mono text-[12px]">{r.promotionCode}</span> },
     { key: 'name', header: t('brand.col.promotionName'), render: (r) => <span className="font-medium text-fg">{r.promotionName}</span> },
-    { key: 'type', header: t('brand.col.promotionType'), width: '130px', render: (r) => <Badge tone="info" variant="soft">{r.promotionType}</Badge> },
+    { key: 'type', header: t('brand.col.promotionType'), width: '130px', render: (r) => <Badge tone="info" variant="soft">{t(`enum.promotionType.${r.promotionType}`)}</Badge> },
     { key: 'start', header: t('brand.col.startAt'), width: '160px', render: (r) => <span className="num text-[12px] text-fg-muted">{formatDateTime(r.startAt)}</span> },
     { key: 'end', header: t('brand.col.endAt'), width: '160px', render: (r) => <span className="num text-[12px] text-fg-muted">{r.endAt ? formatDateTime(r.endAt) : '—'}</span> },
     { key: 'status', header: t('field.status'), width: '120px', render: (r) => <StatusBadge status={r.status} /> },

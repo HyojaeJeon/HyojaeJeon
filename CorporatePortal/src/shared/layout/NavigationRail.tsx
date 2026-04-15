@@ -17,6 +17,9 @@ import {
   Settings,
   ShieldCheck,
   User,
+  PiggyBank,
+  BookOpen,
+  ArrowLeftRight,
   ChevronLeft,
   ChevronRight,
   type LucideIcon,
@@ -41,6 +44,9 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Settings,
   ShieldCheck,
   User,
+  PiggyBank,
+  BookOpen,
+  ArrowLeftRight,
 };
 
 function isPathInItem(item: NavItem, pathname: string): boolean {
@@ -95,8 +101,11 @@ function NavLink({
   const Icon = ICON_MAP[item.icon] ?? LayoutDashboard;
   const allowed = useHasPermission(item.permissions ?? [], item.permissionMode ?? 'any');
 
-  const active = pathname === item.href || pathname.startsWith(item.href + '/');
-  const hasChildInPath = !!item.children?.some((c) => isPathInItem(c, pathname));
+  const hasChildInPath = !!item.children?.some((c) => c.href !== item.href && isPathInItem(c, pathname));
+  // For leaf items or items whose href differs from children: standard matching.
+  // For items sharing href with a child (e.g. /budget overview): active only if exact match AND no other child is active.
+  const rawActive = pathname === item.href || pathname.startsWith(item.href + '/');
+  const active = item.children && hasChildInPath ? false : rawActive;
 
   const [open, setOpen] = useState<boolean>(hasChildInPath);
   useEffect(() => {
@@ -108,7 +117,11 @@ function NavLink({
   if (!allowed) return null;
 
   if (!item.children || item.children.length === 0) {
-    return <LeafLink item={item} collapsed={collapsed} depth={depth} active={active} />;
+    // For leaf items at depth > 0 (sub-menu), use exact match to avoid siblings both being active
+    const leafActive = depth > 0
+      ? pathname === item.href
+      : active;
+    return <LeafLink item={item} collapsed={collapsed} depth={depth} active={leafActive} />;
   }
 
   return (

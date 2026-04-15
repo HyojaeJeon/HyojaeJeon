@@ -12,8 +12,6 @@ export const ADMINS_QUERY = gql`
           displayName
           email
           phone
-          userType
-          roleCode
           status
           lastLoginAt
           createdAt
@@ -156,8 +154,6 @@ export interface AdminRow {
   displayName: string;
   email: string | null;
   phone: string | null;
-  userType: string;
-  roleCode: string | null;
   status: string;
   lastLoginAt: string | null;
   createdAt: string;

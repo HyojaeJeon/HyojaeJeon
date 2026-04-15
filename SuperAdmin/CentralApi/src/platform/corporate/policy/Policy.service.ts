@@ -253,16 +253,18 @@ export class MealPolicyService {
   async create(ctx: MealCallerCtx, input: CreateMealPolicyInput) {
     assertCorporateScope(ctx, input.corporateId);
     const targetCtx = withTargetCorporate(ctx, input.corporateId);
-    await this.entitlement.requireCapability(targetCtx, 'MEAL_TICKET');
+    if (ctx.brandHqId) await this.entitlement.requireCapability(targetCtx, 'MEAL_TICKET');
     await this.permission.require(targetCtx, 'corporate.policy.write');
+
+    const policyCode = input.policyCode?.trim() || await this.generatePolicyCode(input.corporateId);
 
     const row = await this.prisma.mealPolicy.create({
       data: {
         corporateId: input.corporateId,
-        policyCode: input.policyCode,
+        policyCode,
         policyName: input.policyName,
-        appliesToDepartmentIds: input.appliesToDepartmentIds,
-        appliesToRoleCodes: input.appliesToRoleCodes,
+        appliesToDepartmentIds: input.appliesToDepartmentIds ?? [],
+        appliesToRoleCodes: input.appliesToRoleCodes ?? [],
         ruleJson: buildRuleJson(input),
         maxPerTransactionVnd: input.maxPerTransactionVnd,
         dailyLimitVnd: input.dailyLimitVnd,
@@ -305,7 +307,7 @@ export class MealPolicyService {
     if (!before) throw new DomainError({ code: 'RESOURCE_NOT_FOUND', params: { resource: 'Policy' }, details: { reason: 'Policy not found' } });
     assertCorporateScope(ctx, before.corporateId);
     const targetCtx = withTargetCorporate(ctx, before.corporateId);
-    await this.entitlement.requireCapability(targetCtx, 'MEAL_TICKET');
+    if (ctx.brandHqId) await this.entitlement.requireCapability(targetCtx, 'MEAL_TICKET');
     await this.permission.require(targetCtx, 'corporate.policy.write');
 
     /**
@@ -369,7 +371,7 @@ export class MealPolicyService {
     }
     assertCorporateScope(ctx, before.corporateId);
     const targetCtx = withTargetCorporate(ctx, before.corporateId);
-    await this.entitlement.requireCapability(targetCtx, 'MEAL_TICKET');
+    if (ctx.brandHqId) await this.entitlement.requireCapability(targetCtx, 'MEAL_TICKET');
     await this.permission.require(targetCtx, 'corporate.policy.write');
 
     const row = await this.prisma.mealPolicy.update({
@@ -399,9 +401,10 @@ export class MealPolicyService {
       throw new DomainError({ code: 'INVALID_STATUS_TRANSITION', params: { from: before.status, to: 'PAUSED' } });
     }
     assertCorporateScope(ctx, before.corporateId);
-    const targetCtx = withTargetCorporate(ctx, before.corporateId);
-    await this.entitlement.requireCapability(targetCtx, 'MEAL_TICKET');
-    await this.permission.require(targetCtx, 'corporate.policy.write');
+    if (ctx.brandHqId) {
+      const targetCtx = withTargetCorporate(ctx, before.corporateId);
+      await this.entitlement.requireCapability(targetCtx, 'MEAL_TICKET');
+    }
 
     const row = await this.prisma.mealPolicy.update({
       where: { id },
@@ -428,7 +431,7 @@ export class MealPolicyService {
     if (!before) throw new DomainError({ code: 'RESOURCE_NOT_FOUND', params: { resource: 'Policy' }, details: { reason: 'Policy not found' } });
     assertCorporateScope(ctx, before.corporateId);
     const targetCtx = withTargetCorporate(ctx, before.corporateId);
-    await this.entitlement.requireCapability(targetCtx, 'MEAL_TICKET');
+    if (ctx.brandHqId) await this.entitlement.requireCapability(targetCtx, 'MEAL_TICKET');
     await this.permission.require(targetCtx, 'corporate.policy.write');
 
     const row = await this.prisma.mealPolicy.update({
@@ -456,7 +459,7 @@ export class MealPolicyService {
     if (!before) throw new DomainError({ code: 'RESOURCE_NOT_FOUND', params: { resource: 'Policy' }, details: { reason: 'Policy not found' } });
     assertCorporateScope(ctx, before.corporateId);
     const targetCtx = withTargetCorporate(ctx, before.corporateId);
-    await this.entitlement.requireCapability(targetCtx, 'MEAL_TICKET');
+    if (ctx.brandHqId) await this.entitlement.requireCapability(targetCtx, 'MEAL_TICKET');
     await this.permission.require(targetCtx, 'corporate.policy.write');
 
     await this.prisma.mealPolicy.update({
@@ -617,5 +620,11 @@ export class MealPolicyService {
       isTimeWindowValid: isDayAllowed && isTimeInRange,
       allowedMerchantCategoryIds: rule.merchantCategoryRestrictions ?? [],
     };
+  }
+
+  private async generatePolicyCode(corporateId: string): Promise<string> {
+    const count = await this.prisma.mealPolicy.count({ where: { corporateId } });
+    const seq = String(count + 1).padStart(4, '0');
+    return `POL-${seq}`;
   }
 }

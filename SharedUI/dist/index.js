@@ -22,6 +22,7 @@ export * from './primitives/empty-state';
 export * from './primitives/pagination';
 export * from './primitives/phone-input';
 export * from './primitives/asyncSearchSelect';
+export * from './primitives/toggle';
 // Composites
 export * from './composites/page-header';
 export * from './composites/section-card';

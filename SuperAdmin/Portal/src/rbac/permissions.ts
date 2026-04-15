@@ -41,6 +41,12 @@ export const PERMISSIONS = {
   CORPORATE_INVOICE_REQUEST: 'einvoices:request',
   CORPORATE_INVOICE_DISPUTE: 'einvoices:read',
 
+  // Governance — Licenses
+  LICENSE_READ: 'licenses:read',
+  LICENSE_CREATE: 'licenses:create',
+  LICENSE_UPDATE: 'licenses:update',
+  LICENSE_DELETE: 'licenses:delete',
+
   // Contracts
   CONTRACT_READ: 'contracts:read',
   CONTRACT_CREATE: 'contracts:create',

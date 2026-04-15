@@ -4,7 +4,7 @@
  *
  * Tiếng Việt: Resolver GraphQL hợp đồng — điểm vào quản lý hợp đồng.
  */
-import { Args, ID, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, ID, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import {
   CurrentUser,
   JwtPayload,
@@ -14,6 +14,10 @@ import {
   createListResponse,
   createObjectResponse,
 } from '@core/response/OperationResponse.factory';
+import type { CentralGraphQLContext } from '@core/graphql/loaders/graphqlContext';
+import { resolveLocalizedRows, resolveLocalizedRow, CONTRACT_FIELDS, CONTRACT_ACTIVITY_FIELDS } from '@core/i18n/resolveLocalizedFields';
+import type { SupportedLocale } from '@core/i18n/locale.util';
+import { DEFAULT_LOCALE } from '@core/i18n/locale.util';
 import { ContractService } from './Contract.service';
 import { ContractModel } from './models/Contract.model';
 import { ContractActivityModel } from './models/ContractActivity.model';
@@ -40,46 +44,53 @@ export class ContractResolver {
 
   @RequirePermission('contracts:read')
   @Query(() => ContractModel__ListResp, { name: 'contracts' })
-  contracts(
+  async contracts(
     @Args('skip', { type: () => Int, defaultValue: 0 }) skip: number,
     @Args('take', { type: () => Int, defaultValue: 20 }) take: number,
     @Args('contractType', { type: () => String, nullable: true }) contractType: string | null,
     @Args('status', { type: () => String, nullable: true }) status: string | null,
     @Args('partyBType', { type: () => String, nullable: true }) partyBType: string | null,
     @Args('partyBId', { type: () => ID, nullable: true }) partyBId: string | null,
+    @Context() ctx: CentralGraphQLContext,
   ) {
-    return this.service.listContracts(skip, take, {
-      contractType,
-      status,
-      partyBType,
-      partyBId,
-    });
+    const locale = (ctx.locale ?? DEFAULT_LOCALE) as SupportedLocale;
+    const result = await this.service.listContracts(skip, take, { contractType, status, partyBType, partyBId });
+    return { ...result, data: resolveLocalizedRows(result.data as unknown as Record<string, unknown>[], locale, CONTRACT_FIELDS) };
   }
 
   @RequirePermission('contracts:read')
   @Query(() => ContractModel__Resp, { name: 'contract' })
-  contract(
+  async contract(
     @Args('id', { type: () => ID }) id: string,
+    @Context() ctx: CentralGraphQLContext,
   ) {
-    return this.service.findById(id);
+    const locale = (ctx.locale ?? DEFAULT_LOCALE) as SupportedLocale;
+    const data = await this.service.findById(id);
+    return resolveLocalizedRow(data as unknown as Record<string, unknown>, locale, CONTRACT_FIELDS);
   }
 
   @RequirePermission('contracts:read')
   @Query(() => ContractActivityModel__ListResp, { name: 'contractActivities' })
-  contractActivities(
+  async contractActivities(
     @Args('contractId', { type: () => ID }) contractId: string,
     @Args('skip', { type: () => Int, defaultValue: 0 }) skip: number,
     @Args('take', { type: () => Int, defaultValue: 20 }) take: number,
+    @Context() ctx: CentralGraphQLContext,
   ) {
-    return this.service.getActivities(contractId, skip, take);
+    const locale = (ctx.locale ?? DEFAULT_LOCALE) as SupportedLocale;
+    const result = await this.service.getActivities(contractId, skip, take);
+    return { ...result, data: resolveLocalizedRows(result.data as unknown as Record<string, unknown>[], locale, CONTRACT_ACTIVITY_FIELDS) };
   }
 
   @RequirePermission('contracts:read')
   @Query(() => ContractTemplateModel__ListResp, { name: 'contractTemplates' })
-  contractTemplates(
+  async contractTemplates(
     @Args('contractType', { type: () => String, nullable: true }) contractType: string | null,
+    @Context() ctx: CentralGraphQLContext,
   ) {
-    return this.service.listTemplates(contractType);
+    const locale = (ctx.locale ?? DEFAULT_LOCALE) as SupportedLocale;
+    const rows = await this.service.listTemplates(contractType);
+    return resolveLocalizedRows(rows as unknown as Record<string, unknown>[], locale, CONTRACT_FIELDS);
   }
 
   // ───────────────────────────────────────── Mutation

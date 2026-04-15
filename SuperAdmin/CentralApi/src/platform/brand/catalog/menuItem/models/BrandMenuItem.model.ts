@@ -63,6 +63,24 @@ export class BrandMenuItemModel {
   @Field(() => String, { nullable: true })
   searchKeywords?: string | null;
 
+  @Field(() => String, { nullable: true })
+  profileImageUrl?: string | null;
+
+  @Field(() => String, { nullable: true })
+  description?: string | null;
+
+  @Field(() => Int, { nullable: true })
+  calories?: number | null;
+
+  @Field(() => Int, { nullable: true })
+  spicyLevel?: number | null;
+
+  @Field()
+  isFeatured!: boolean;
+
+  @Field()
+  isBestSeller!: boolean;
+
   /** 한국어: 활성 상태 여부 / Tiếng Việt: Trạng thái kích hoạt */
   @Field()
   isActive!: boolean;

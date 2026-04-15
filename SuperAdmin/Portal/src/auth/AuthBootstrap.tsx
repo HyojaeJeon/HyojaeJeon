@@ -60,12 +60,12 @@ export function AuthBootstrap() {
       return () => undefined;
     }
 
+    // Session listener syncs Redux state.
+    // Redirect to login is handled ONLY by handleAuthFailure() — not here.
+    // A null payload can also result from server errors (clearAccessSession not called),
+    // so redirecting on every null payload would cause unwanted logouts.
     const unsubscribe = subscribeSession((payload) => {
       syncRedux(payload, dispatch);
-
-      if (!payload && typeof window !== 'undefined' && !isAuthRoute(window.location.pathname)) {
-        window.location.href = buildLoginUrl('session-expired');
-      }
     });
 
     if (existing) {

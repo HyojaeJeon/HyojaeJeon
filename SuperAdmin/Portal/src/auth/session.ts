@@ -163,18 +163,27 @@ async function postGraphql<T>(query: string): Promise<T> {
   };
 
   const firstError = body.errors?.[0];
+  const errorCode = firstError?.extensions?.code;
 
   if (!response.ok) {
+    // HTTP-level errors: distinguish auth errors from server errors
+    if (errorCode && isAuthError(errorCode)) {
+      throw new GraphQLResponseError(errorCode, firstError?.message || `HTTP ${response.status}`);
+    }
     throw new GraphQLTransportError(
       firstError?.message || `HTTP ${response.status}`,
-      firstError?.extensions?.code,
+      errorCode,
       firstError?.extensions?.retryAfterSeconds,
     );
   }
   if (body.errors?.length) {
+    // GraphQL-level errors: distinguish auth errors from other errors
+    if (errorCode && isAuthError(errorCode)) {
+      throw new GraphQLResponseError(errorCode, firstError?.message || 'Auth error');
+    }
     throw new GraphQLTransportError(
       firstError?.message || 'GraphQL transport error',
-      firstError?.extensions?.code,
+      errorCode,
       firstError?.extensions?.retryAfterSeconds,
     );
   }
@@ -264,9 +273,6 @@ export async function refreshSessionWithOutcome(): Promise<RefreshOutcome> {
   }
 
   console.debug('[refresh] starting NEW fetch');
-  if (process.env.NODE_ENV !== 'production') {
-    console.trace('[refresh] call site');
-  }
 
   outcomeInFlight = (async (): Promise<RefreshOutcome> => {
     try {

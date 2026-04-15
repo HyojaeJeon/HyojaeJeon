@@ -1,45 +1,50 @@
 import { View, Text, Pressable } from 'react-native';
+import { colors, typography, spacing, radius } from '@shared/ui/tokens';
 import { useTranslation } from 'react-i18next';
 
 interface DiningTypeSelectorProps {
   selected: 'DINE_IN' | 'TAKEOUT';
   tableNo: string;
   scheduledTime: string;
+  onTypeChange?: (type: 'DINE_IN' | 'TAKEOUT') => void;
 }
 
-export function DiningTypeSelector({ selected, tableNo, scheduledTime }: DiningTypeSelectorProps) {
+export function DiningTypeSelector({ selected, tableNo, scheduledTime, onTypeChange }: DiningTypeSelectorProps) {
   const { t } = useTranslation();
+
+  const toggleStyle = (isActive: boolean) => ({
+    height: 40,
+    borderRadius: radius.md,
+    backgroundColor: isActive ? colors.primary : colors.bgWhite,
+    borderWidth: isActive ? 0 : 1,
+    borderColor: colors.border,
+  });
+
+  const toggleTextStyle = (isActive: boolean) => ({
+    ...typography.body,
+    fontWeight: '500' as const,
+    color: isActive ? colors.textInverse : colors.textSecondary,
+  });
+
   return (
-    <View className="gap-3">
+    <View style={{ gap: spacing.elementGap }}>
       {/* Toggle buttons */}
-      <View className="flex-row gap-2">
+      <View className="flex-row" style={{ gap: spacing.sm }}>
         <Pressable
-          className={`flex-1 h-[40px] items-center justify-center rounded-xl ${
-            selected === 'DINE_IN'
-              ? 'bg-[#3B82F6]'
-              : 'border border-gray-200 bg-white'
-          }`}
+          onPress={() => onTypeChange?.('DINE_IN')}
+          className="flex-1 items-center justify-center"
+          style={toggleStyle(selected === 'DINE_IN')}
         >
-          <Text
-            className={`text-[14px] font-medium ${
-              selected === 'DINE_IN' ? 'text-white' : 'text-gray-600'
-            }`}
-          >
+          <Text style={toggleTextStyle(selected === 'DINE_IN')}>
             {t('order.dineIn')}
           </Text>
         </Pressable>
         <Pressable
-          className={`flex-1 h-[40px] items-center justify-center rounded-xl ${
-            selected === 'TAKEOUT'
-              ? 'bg-[#3B82F6]'
-              : 'border border-gray-200 bg-white'
-          }`}
+          onPress={() => onTypeChange?.('TAKEOUT')}
+          className="flex-1 items-center justify-center"
+          style={toggleStyle(selected === 'TAKEOUT')}
         >
-          <Text
-            className={`text-[14px] font-medium ${
-              selected === 'TAKEOUT' ? 'text-white' : 'text-gray-600'
-            }`}
-          >
+          <Text style={toggleTextStyle(selected === 'TAKEOUT')}>
             {t('order.takeout')}
           </Text>
         </Pressable>
@@ -47,7 +52,7 @@ export function DiningTypeSelector({ selected, tableNo, scheduledTime }: DiningT
 
       {/* Table + time info */}
       {selected === 'DINE_IN' && tableNo && (
-        <Text className="text-center text-[13px] text-gray-400">
+        <Text style={{ textAlign: 'center', ...typography.caption }}>
           {t('order.table')} {tableNo} · {t('order.scheduledAt')} {scheduledTime}
         </Text>
       )}

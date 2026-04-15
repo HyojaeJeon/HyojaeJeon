@@ -120,7 +120,7 @@ export function UnsettledBrandDetailScreen() {
     { key: 'method', header: t('settlement.modal.txMethod'), width: '80px', render: (r) => <span className="text-[11px]">{t(`settlement.txEnum.${r.authMethod}`)}</span> },
     { key: 'amount', header: t('settlement.modal.txAmount'), align: 'right', render: (r) => <span className="num font-mono text-[11px]">{fmt.decimal(r.approvedAmountVnd)}</span> },
     { key: 'company', header: t('settlement.modal.txCompanyShare'), align: 'right', render: (r) => <span className="num font-mono text-[11px] text-fg-muted">{fmt.decimal(r.companyShareVnd)}</span> },
-    { key: 'employee', header: t('settlement.txEnum.employeeShare'), align: 'right', render: (r) => <span className="num font-mono text-[11px] text-fg-muted">{fmt.decimal(r.employeeShareVnd)}</span> },
+    { key: 'employeeShare', header: t('settlement.txEnum.employeeShare'), align: 'right', render: (r) => <span className="num font-mono text-[11px] text-fg-muted">{fmt.decimal(r.employeeShareVnd)}</span> },
     { key: 'date', header: t('settlement.modal.txDate'), width: '140px', render: (r) => <span className="text-[10px] text-fg-muted">{formatDateTime(r.createdAt, localeTag)}</span> },
   ];
 

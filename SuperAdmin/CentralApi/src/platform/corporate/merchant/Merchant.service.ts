@@ -70,9 +70,27 @@ export class MealMerchantService {
    */
   async findEnrollmentByBrand(ctx: MealCallerCtx, brandHqId: string) {
     assertBrandScope(ctx, brandHqId);
-    return this.prisma.mealMerchantEnrollment.findUnique({
+    const row = await this.prisma.mealMerchantEnrollment.findUnique({
       where: { brandHqId },
     });
+    if (!row) return null;
+
+    const brand = await this.prisma.brandProfile.findUnique({
+      where: { id: brandHqId },
+      select: { brandName: true, cuisineType: true },
+    });
+    const branch = await this.prisma.branch.findFirst({
+      where: { brandHQId: brandHqId, deletedAt: null, logoUrl: { not: null } },
+      select: { logoUrl: true },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    return {
+      ...row,
+      brandName: brand?.brandName ?? null,
+      cuisineType: brand?.cuisineType ?? null,
+      logoUrl: branch?.logoUrl ?? null,
+    };
   }
 
   /**
@@ -91,21 +109,36 @@ export class MealMerchantService {
       this.prisma.mealMerchantEnrollment.count(),
     ]);
 
-    // brandHqId → brandName join
+    // brandHqId → brandName + cuisineType + logoUrl(from Branch) join
     const brandIds = [...new Set(rows.map((r) => r.brandHqId))];
     const brands = brandIds.length > 0
       ? await this.prisma.brandProfile.findMany({
           where: { id: { in: brandIds } },
-          select: { id: true, brandName: true },
+          select: { id: true, brandName: true, cuisineType: true },
         })
       : [];
-    const brandMap = new Map(brands.map((b) => [b.id, b.brandName]));
+    // Branch logoUrl: 각 brand의 첫 번째 branch에서 logoUrl 가져오기
+    const branches = brandIds.length > 0
+      ? await this.prisma.branch.findMany({
+          where: { brandHQId: { in: brandIds }, deletedAt: null, logoUrl: { not: null } },
+          select: { brandHQId: true, logoUrl: true },
+          orderBy: { createdAt: 'asc' },
+          distinct: ['brandHQId'],
+        })
+      : [];
+    const brandMap = new Map(brands.map((b) => [b.id, b]));
+    const logoMap = new Map(branches.map((b) => [b.brandHQId, b.logoUrl]));
 
     return {
-      data: rows.map((r) => ({
-        ...r,
-        brandName: brandMap.get(r.brandHqId) ?? null,
-      })),
+      data: rows.map((r) => {
+        const brand = brandMap.get(r.brandHqId);
+        return {
+          ...r,
+          brandName: brand?.brandName ?? null,
+          cuisineType: brand?.cuisineType ?? null,
+          logoUrl: logoMap.get(r.brandHqId) ?? null,
+        };
+      }),
       totalCount,
     };
   }

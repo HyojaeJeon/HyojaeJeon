@@ -8,9 +8,10 @@ import { GraphQLJSON } from 'graphql-scalars';
 
 @InputType()
 export class CreateContractTemplateInput {
-  @Field()
+  @Field(() => String, { nullable: true })
+  @IsOptional()
   @IsString()
-  templateCode!: string;
+  templateCode?: string | null;
 
   @Field()
   @IsString()

@@ -16,9 +16,10 @@
 import { Module } from '@nestjs/common';
 import { MealWalletService } from './Wallet.service';
 import { MealWalletResolver } from './Wallet.resolver';
+import { MealWalletSubscriptionResolver } from './Wallet.subscription';
 
 @Module({
-  providers: [MealWalletService, MealWalletResolver],
+  providers: [MealWalletService, MealWalletResolver, MealWalletSubscriptionResolver],
   exports: [MealWalletService],
 })
 export class WalletModule {}

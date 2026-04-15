@@ -127,6 +127,12 @@ model MealEmployee {
   email        String?   @db.VarChar(200)
   phone        String?   @db.VarChar(30)
   badgeRfid    String?   @db.VarChar(120)
+  // 앱 디바이스 정보 + 알림 설정 (기획서 §9, §14)
+  fcmToken                 String?  @db.VarChar(500)
+  deviceId                 String?  @db.VarChar(200)
+  platform                 String?  @db.VarChar(10) // IOS | ANDROID
+  notificationSettingsJson Json?    // { orderStatus: true, payment: true, dailyLimit: true, promotion: false }
+  languageCode             String   @default("vi") @db.VarChar(5)
   status       String    @default("ACTIVE") @db.VarChar(20)
   createdAt    DateTime  @default(now()) @db.Timestamptz()
   updatedAt    DateTime  @updatedAt @db.Timestamptz()
@@ -246,6 +252,12 @@ model MealMerchantEnrollment {
   loopType       String    @default("OPEN_LOOP") @db.VarChar(20) // OPEN_LOOP | CLOSED_LOOP
   enrolledAt     DateTime  @default(now()) @db.Timestamptz()
   contractEndsAt DateTime? @db.Timestamptz()
+  // 체크인/취소 설정 (기획서 §5.2.3, §5.2.5)
+  tableCheckInMode       String @default("QR_CHECKIN") @db.VarChar(30) // QR_CHECKIN | POS_CONFIRM | NONE
+  cancellationMode       String @default("FREE_UNTIL_ACCEPTED") @db.VarChar(30) // FREE_UNTIL_ACCEPTED | FREE_UNTIL_DEADLINE | NO_CANCEL
+  cancellationDeadlineMin Int   @default(30)
+  slotIntervalMin        Int   @default(30)
+  slotCutoffMin          Int   @default(30)
   // 정산 인보이스 스케줄
   settlementInvoiceScheduleType String  @default("MONTHLY") @db.VarChar(20)
   settlementInvoiceScheduleDay  Int?
@@ -295,6 +307,161 @@ model MealMerchantSettlementAccount {
   @@index([enrollmentId, isPrimary], name: "idx_meal_settlacc_enrollment")
 }
 
+// ─────────────────────────────────────────────
+// MealOrder Domain (주문 + 사전주문 + 일일메뉴 + 가맹점구독)
+// 기획서 §5, §10, §19 기반 신규 모델
+// ─────────────────────────────────────────────
+
+// 한국어: 주문 — 앱 내 주문+결제 또는 사전주문의 단위.
+// Tiếng Việt: Đơn hàng — đơn vị đặt hàng qua app.
+model MealOrder {
+  id                 String    @id @default(uuid()) @db.Uuid
+  walletId           String    @db.Uuid
+  corporateId        String    @db.Uuid
+  brandHqId          String    @db.Uuid
+  branchId           String    @db.Uuid
+  orderNo            String    @unique @db.VarChar(30)
+  orderType          String    @default("ONSITE") @db.VarChar(20) // ONSITE | PRE_ORDER
+  diningType         String    @db.VarChar(20) // DINE_IN | TAKEOUT
+  status             String    @default("PAID_PENDING_ACCEPT") @db.VarChar(30)
+  // PAID_PENDING_ACCEPT → ACCEPTED → PREPARING → READY → COMPLETED
+  // 또는 → CANCELLED_BY_USER | REJECTED | EXPIRED
+  totalAmountVnd     BigInt
+  companyShareVnd    BigInt    @default(0)
+  employeeShareVnd   BigInt    @default(0)
+  scheduledAt        DateTime  @db.Timestamptz()
+  tableNo            String?   @db.VarChar(20)
+  checkedInAt        DateTime? @db.Timestamptz()
+  reminderSentAt     DateTime? @db.Timestamptz()
+  userLatitude       Float?
+  userLongitude      Float?
+  idempotencyKey     String    @db.VarChar(120)
+  acceptedAt         DateTime? @db.Timestamptz()
+  completedAt        DateTime? @db.Timestamptz()
+  cancelledAt        DateTime? @db.Timestamptz()
+  cancelReason       String?   @db.VarChar(200)
+  expiresAt          DateTime? @db.Timestamptz()
+  createdAt          DateTime  @default(now()) @db.Timestamptz()
+  updatedAt          DateTime  @updatedAt @db.Timestamptz()
+
+  items MealOrderItem[]
+
+  @@unique([idempotencyKey], name: "uq_meal_order_idempotency")
+  @@index([walletId, status, createdAt(sort: Desc)], name: "idx_meal_order_wallet")
+  @@index([branchId, status, createdAt(sort: Desc)], name: "idx_meal_order_branch")
+  @@index([corporateId, createdAt(sort: Desc)], name: "idx_meal_order_corporate")
+}
+
+// 한국어: 주문 항목 — 메뉴 아이템 × 수량.
+// Tiếng Việt: Mục trong đơn hàng.
+model MealOrderItem {
+  id           String @id @default(uuid()) @db.Uuid
+  orderId      String @db.Uuid
+  menuItemName String @db.VarChar(200)
+  quantity     Int    @default(1)
+  unitPriceVnd BigInt
+  optionsJson  Json   @default("[]")
+  createdAt    DateTime @default(now()) @db.Timestamptz()
+
+  order MealOrder @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([orderId], name: "idx_meal_order_item_order")
+}
+
+// 한국어: 일일 메뉴 — 가맹점이 날짜+식사 유형별로 제공하는 메뉴판.
+// Tiếng Việt: Thực đơn hàng ngày.
+model MealDailyMenu {
+  id        String   @id @default(uuid()) @db.Uuid
+  branchId  String   @db.Uuid
+  date      DateTime @db.Date
+  mealType  String   @db.VarChar(20) // BREAKFAST | LUNCH | DINNER
+  status    String   @default("ACTIVE") @db.VarChar(20)
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+
+  items MealDailyMenuItem[]
+
+  @@unique([branchId, date, mealType], name: "uq_meal_daily_menu_branch_date_meal")
+  @@index([branchId, date], name: "idx_meal_daily_menu_branch_date")
+}
+
+// 한국어: 일일 메뉴 항목.
+// Tiếng Việt: Mục thực đơn hàng ngày.
+model MealDailyMenuItem {
+  id          String  @id @default(uuid()) @db.Uuid
+  dailyMenuId String  @db.Uuid
+  name        String  @db.VarChar(200)
+  priceVnd    BigInt
+  imageUrl    String? @db.VarChar(500)
+  calories    Int?
+  sortOrder   Int     @default(0)
+  createdAt   DateTime @default(now()) @db.Timestamptz()
+
+  dailyMenu MealDailyMenu @relation(fields: [dailyMenuId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([dailyMenuId], name: "idx_meal_daily_menu_item")
+}
+
+// 한국어: 사전 주문 — 일일 메뉴 기반 미리 주문.
+// Tiếng Việt: Đặt hàng trước — đặt trước dựa trên thực đơn hàng ngày.
+model MealPreOrder {
+  id           String    @id @default(uuid()) @db.Uuid
+  walletId     String    @db.Uuid
+  corporateId  String    @db.Uuid
+  branchId     String    @db.Uuid
+  dailyMenuId  String    @db.Uuid
+  mealType     String    @db.VarChar(20)
+  pickupSlot   String    @db.VarChar(20) // "12:00" 형식
+  status       String    @default("PENDING") @db.VarChar(20) // PENDING | CONFIRMED | COMPLETED | CANCELLED
+  totalAmountVnd     BigInt    @default(0)
+  companyShareVnd    BigInt    @default(0)
+  employeeShareVnd   BigInt    @default(0)
+  idempotencyKey     String    @db.VarChar(120)
+  createdAt    DateTime  @default(now()) @db.Timestamptz()
+  updatedAt    DateTime  @updatedAt @db.Timestamptz()
+
+  items MealPreOrderItem[]
+
+  @@unique([idempotencyKey], name: "uq_meal_preorder_idempotency")
+  @@index([walletId, createdAt(sort: Desc)], name: "idx_meal_preorder_wallet")
+}
+
+// 한국어: 사전 주문 항목.
+// Tiếng Việt: Mục đặt hàng trước.
+model MealPreOrderItem {
+  id              String @id @default(uuid()) @db.Uuid
+  preOrderId      String @db.Uuid
+  dailyMenuItemId String @db.Uuid
+  quantity        Int    @default(1)
+  createdAt       DateTime @default(now()) @db.Timestamptz()
+
+  preOrder MealPreOrder @relation(fields: [preOrderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([preOrderId], name: "idx_meal_preorder_item")
+}
+
+// 한국어: 가맹점 구독 — 임직원이 특정 가맹점의 일일 메뉴를 구독.
+// Tiếng Việt: Đăng ký thực đơn — nhân viên đăng ký nhận thực đơn hàng ngày của nhà hàng.
+model MealMerchantSubscription {
+  id              String   @id @default(uuid()) @db.Uuid
+  employeeId      String   @db.Uuid
+  branchId        String   @db.Uuid
+  isActive        Boolean  @default(true)
+  notifyBreakfast Boolean  @default(false)
+  notifyLunch     Boolean  @default(true)
+  notifyDinner    Boolean  @default(false)
+  createdAt       DateTime @default(now()) @db.Timestamptz()
+  updatedAt       DateTime @updatedAt @db.Timestamptz()
+
+  @@unique([employeeId, branchId], name: "uq_meal_merchant_sub_emp_branch")
+  @@index([employeeId, isActive], name: "idx_meal_merchant_sub_emp")
+  @@index([branchId, isActive], name: "idx_meal_merchant_sub_branch")
+}
+
+// ─────────────────────────────────────────────
+// 기존 모델 (수정 없음 — 필드 확장은 직접 편집)
+// ─────────────────────────────────────────────
+
 // 한국어: 결제 트랜잭션 (Open Loop QR / Closed Loop RFID/생체).
 //   3-Way Matching 의 핵심 원장.
 // Tiếng Việt: Giao dịch thanh toán.
@@ -313,6 +480,7 @@ model MealTransaction {
   employeeShareVnd   BigInt    @default(0)
   status             String    @default("PENDING") @db.VarChar(20) // PENDING | APPROVED | DECLINED | REVERSED | SETTLED
   declineReason      String?   @db.VarChar(50)
+  orderId            String?   @db.Uuid // 앱 주문 연동 시 MealOrder.id
   idempotencyKey     String    @db.VarChar(120)
   authorizedAt       DateTime? @db.Timestamptz()
   settledAt          DateTime? @db.Timestamptz()

@@ -1,10 +1,12 @@
-import { View, Text } from 'react-native';
+import { View, Text, Pressable, ActivityIndicator } from 'react-native';
 import { ChevronRight } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import type { MockMealEmployee } from '@shared/mock/types';
+import { colors, typography, spacing, shadows, radius, components } from '@shared/ui/tokens';
 
 interface ProfileCardProps {
-  employee: MockMealEmployee;
+  employee: MockMealEmployee | null;
+  onPress?: () => void;
 }
 
 function getInitials(name: string): string {
@@ -15,38 +17,74 @@ function getInitials(name: string): string {
   return name.slice(0, 2).toUpperCase();
 }
 
-export function ProfileCard({ employee }: ProfileCardProps) {
+export function ProfileCard({ employee, onPress }: ProfileCardProps) {
   const { t } = useTranslation();
+
+  if (!employee) {
+    return (
+      <View
+        style={{
+          backgroundColor: colors.bgCard,
+          borderRadius: radius.xl,
+          padding: spacing.cardPadding,
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: 80,
+          ...shadows.card,
+        }}
+      >
+        <ActivityIndicator size="small" color={colors.primary} />
+      </View>
+    );
+  }
+
   const initials = getInitials(employee.name);
 
   return (
     <View>
-      <View className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <View className="flex-row items-center gap-4">
-          {/* Avatar */}
-          <View className="flex h-[64px] w-[64px] shrink-0 items-center justify-center rounded-full bg-[#3B82F6]">
-            <Text className="text-white text-xl font-bold">{initials}</Text>
-          </View>
+      <Pressable onPress={onPress} className="active:opacity-90">
+        <View
+          style={{
+            backgroundColor: colors.bgCard,
+            borderRadius: radius.xl,
+            padding: spacing.cardPadding,
+            ...shadows.card,
+          }}
+        >
+          <View className="flex-row items-center" style={{ gap: spacing.lg }}>
+            {/* Avatar */}
+            <View
+              className="flex shrink-0 items-center justify-center"
+              style={{
+                height: components.avatar.xl.size,
+                width: components.avatar.xl.size,
+                borderRadius: radius.full,
+                backgroundColor: colors.primary,
+              }}
+            >
+              <Text style={{ color: colors.textInverse, fontSize: components.avatar.xl.fontSize, fontWeight: '700' }}>{initials}</Text>
+            </View>
 
-          {/* Info */}
-          <View className="flex-1 min-w-0">
-            <Text className="text-[16px] font-semibold text-gray-900" numberOfLines={1}>
-              {employee.name}
-            </Text>
-            <Text className="text-sm text-gray-400 mt-0.5">{employee.department}</Text>
-            <Text className="text-xs text-gray-400 mt-0.5">{employee.employeeCode}</Text>
-            <Text className="text-xs text-gray-400 mt-0.5">{employee.corporateName}</Text>
-          </View>
+            {/* Info */}
+            <View className="flex-1 min-w-0">
+              <Text style={typography.sectionTitle} numberOfLines={1}>
+                {employee.name}
+              </Text>
+              <Text style={{ ...typography.body, marginTop: 2 }}>{employee.department}</Text>
+              <Text style={{ ...typography.caption, marginTop: 2 }}>{employee.employeeCode}</Text>
+              <Text style={{ ...typography.caption, marginTop: 2 }}>{employee.corporateName}</Text>
+            </View>
 
-          {/* Chevron */}
-          <ChevronRight size={20} color="#D1D5DB" />
+            {/* Chevron */}
+            <ChevronRight size={20} color={colors.textPlaceholder} />
+          </View>
         </View>
-      </View>
+      </Pressable>
 
       {/* Account status */}
-      <View className="flex-row items-center gap-1.5 mt-2 px-1">
-        <View className="h-1.5 w-1.5 rounded-full bg-[#10B981]" />
-        <Text className="text-xs text-[#10B981]">{t('settings.activeAccount')}</Text>
+      <View className="flex-row items-center" style={{ gap: 6, marginTop: spacing.sm, paddingHorizontal: 4 }}>
+        <View style={{ height: 6, width: 6, borderRadius: radius.full, backgroundColor: colors.success }} />
+        <Text style={{ ...typography.caption, color: colors.success }}>{t('settings.activeAccount')}</Text>
       </View>
     </View>
   );

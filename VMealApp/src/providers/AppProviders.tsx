@@ -10,6 +10,7 @@ import { store, persistor } from '@store/index';
 import { markHydrated } from '@store/slices/authSlice';
 import { apolloClient } from '@graphql/client';
 import { i18n } from '@i18n/index';
+import { ModalProvider } from '@shared/ui';
 
 /**
  * fooding-app 참고: react-native-css-interop 에서 displayName 없으면 경고 발생
@@ -36,6 +37,11 @@ export function AppProviders({ children }: Props) {
    * RootNavigator 가 Splash → Onboarding/Main 으로 전환되도록 한다.
    */
   const handleBeforeLift = useCallback(() => {
+    // Redux persist 복원 완료 → 저장된 locale로 i18n 동기화
+    const savedLocale = store.getState().settings.locale;
+    if (savedLocale && savedLocale !== i18n.language) {
+      i18n.changeLanguage(savedLocale);
+    }
     store.dispatch(markHydrated());
   }, []);
 
@@ -50,7 +56,9 @@ export function AppProviders({ children }: Props) {
           <ApolloProvider client={apolloClient}>
             <I18nextProvider i18n={i18n}>
               <SafeAreaProvider>
-                {children}
+                <ModalProvider>
+                  {children}
+                </ModalProvider>
               </SafeAreaProvider>
             </I18nextProvider>
           </ApolloProvider>

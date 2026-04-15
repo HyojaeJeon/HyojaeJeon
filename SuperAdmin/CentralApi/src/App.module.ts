@@ -62,6 +62,9 @@ import { PolicyModule } from '@platform/corporate/policy/Policy.module';
 import { TransactionModule } from '@platform/corporate/transaction/Transaction.module';
 import { SettlementModule } from '@platform/corporate/settlement/Settlement.module';
 import { MerchantModule } from '@platform/corporate/merchant/Merchant.module';
+import { MerchantSubscriptionModule } from '@platform/corporate/merchantSubscription/MerchantSubscription.module';
+import { OrderModule } from '@platform/corporate/order/Order.module';
+import { DailyMenuModule } from '@platform/corporate/dailyMenu/DailyMenu.module';
 import { EInvoiceModule } from '@shared/einvoice/Einvoice.module';
 
 // Shared (플랫폼 간 공유 도메인)
@@ -196,13 +199,22 @@ function headerValue(
            *   - tenantContext: user.tenantContext (존재 시)
            *   - loaders:       request-scoped DataLoader bag
            */
-          context: (rawContext: {
-            req?: IncomingHttpRequest;
-            request?: IncomingHttpRequest;
-            reply?: { raw?: { setHeader?: (name: string, value: string | string[]) => void } };
-          }) => {
-            const req = rawContext.req ?? rawContext.request;
-            const reply = (rawContext as Record<string, unknown>).reply as typeof rawContext.reply;
+          context: (...args: unknown[]) => {
+            // @as-integrations/fastify calls context(FastifyRequest, FastifyReply) directly.
+            // @nestjs/apollo wrapContextResolver passes args through.
+            // Detect: is args[0] a FastifyRequest (has .raw, .id, .headers)?
+            const firstArg = args[0] as Record<string, unknown> | undefined;
+            const isFastifyRequest = firstArg && 'raw' in firstArg && 'id' in firstArg;
+
+            const req = isFastifyRequest
+              ? (firstArg as unknown as IncomingHttpRequest)
+              : ((firstArg as { req?: IncomingHttpRequest; request?: IncomingHttpRequest } | undefined)?.req
+                ?? (firstArg as { request?: IncomingHttpRequest } | undefined)?.request);
+
+            const reply = isFastifyRequest
+              ? (args[1] as { raw?: { setHeader?: (name: string, value: string | string[]) => void } } | undefined)
+              : (firstArg as { reply?: { raw?: { setHeader?: (name: string, value: string | string[]) => void } } } | undefined)?.reply;
+
             const requestId =
               headerValue(req?.headers, 'x-request-id') ?? randomUUID();
             const fastifyRequestId =
@@ -274,6 +286,9 @@ function headerValue(
     TransactionModule,
     SettlementModule,
     MerchantModule,
+    MerchantSubscriptionModule,
+    OrderModule,
+    DailyMenuModule,
     EInvoiceModule,
     // Shared
     EntitlementModule,

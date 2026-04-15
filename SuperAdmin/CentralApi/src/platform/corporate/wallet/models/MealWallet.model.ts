@@ -15,6 +15,14 @@ import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { GraphQLBigInt } from 'graphql-scalars';
 
 @ObjectType()
+export class MealWalletEmployeeInfo {
+  @Field() fullName!: string;
+  @Field(() => String, { nullable: true }) employeeCode?: string | null;
+  @Field(() => String, { nullable: true }) departmentId?: string | null;
+  @Field(() => String, { nullable: true }) departmentName?: string | null;
+}
+
+@ObjectType()
 export class MealWalletModel {
   /** [KO] 지갑 고유 ID (UUID) / [VI] ID duy nhất của ví (UUID) */
   @Field(() => ID) id!: string;
@@ -66,4 +74,6 @@ export class MealWalletModel {
 
   /** [KO] 지갑 최종 수정 시각 / [VI] Thời điểm cập nhật ví lần cuối */
   @Field() updatedAt!: Date;
+
+  @Field(() => MealWalletEmployeeInfo, { nullable: true }) employee?: MealWalletEmployeeInfo | null;
 }

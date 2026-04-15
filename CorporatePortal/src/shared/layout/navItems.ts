@@ -19,18 +19,28 @@ export const NAV_ITEMS: NavItem[] = [
     icon: 'LayoutDashboard',
   },
   {
-    key: 'departments',
-    labelKey: 'nav.departments',
+    key: 'organization',
+    labelKey: 'nav.organization',
     href: '/departments',
-    icon: 'Network',
-    permissions: [PERMISSIONS.DEPARTMENT_READ],
-  },
-  {
-    key: 'employees',
-    labelKey: 'nav.employees',
-    href: '/employees',
-    icon: 'Users',
-    permissions: [PERMISSIONS.EMPLOYEE_READ],
+    icon: 'Building2',
+    permissions: [PERMISSIONS.DEPARTMENT_READ, PERMISSIONS.EMPLOYEE_READ],
+    permissionMode: 'any',
+    children: [
+      {
+        key: 'organization.departments',
+        labelKey: 'nav.departments',
+        href: '/departments',
+        icon: 'Network',
+        permissions: [PERMISSIONS.DEPARTMENT_READ],
+      },
+      {
+        key: 'organization.employees',
+        labelKey: 'nav.employees',
+        href: '/employees',
+        icon: 'Users',
+        permissions: [PERMISSIONS.EMPLOYEE_READ],
+      },
+    ],
   },
   {
     key: 'policies',
@@ -45,6 +55,12 @@ export const NAV_ITEMS: NavItem[] = [
     href: '/budget',
     icon: 'Wallet',
     permissions: [PERMISSIONS.WALLET_READ],
+    children: [
+      { key: 'budget.overview', labelKey: 'nav.budget.overview', href: '/budget', icon: 'LayoutDashboard', permissions: [PERMISSIONS.WALLET_READ] },
+      { key: 'budget.funding', labelKey: 'nav.budget.funding', href: '/budget/funding', icon: 'PiggyBank', permissions: [PERMISSIONS.WALLET_READ] },
+      { key: 'budget.wallets', labelKey: 'nav.budget.wallets', href: '/budget/wallets', icon: 'Users', permissions: [PERMISSIONS.WALLET_READ] },
+      { key: 'budget.ledger', labelKey: 'nav.budget.ledger', href: '/budget/ledger', icon: 'BookOpen', permissions: [PERMISSIONS.WALLET_READ] },
+    ],
   },
   {
     key: 'transactions',

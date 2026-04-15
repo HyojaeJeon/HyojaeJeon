@@ -90,16 +90,6 @@ export function SettingsAdminsScreen() {
       render: (r) => <span className="text-[12px] text-fg-muted">{r.email ?? '—'}</span>,
     },
     {
-      key: 'roleCode',
-      header: '역할',
-      width: '140px',
-      render: (r) => (
-        <Badge tone={ROLE_TONE[r.roleCode as AdminRole] ?? 'neutral'} size="sm">
-          {ROLE_LABEL[r.roleCode as AdminRole] ?? r.roleCode ?? '—'}
-        </Badge>
-      ),
-    },
-    {
       key: 'status',
       header: '상태',
       width: '120px',

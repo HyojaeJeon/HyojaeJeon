@@ -78,22 +78,15 @@ export function SettingsCompanyScreen() {
   // Tab 1: Legal info
   const [companyName, setCompanyName] = useState('');
   const [taxCode, setTaxCode] = useState('');
-  const [addressCity, setAddressCity] = useState('');
-  const [addressDistrict, setAddressDistrict] = useState('');
-  const [addressWard, setAddressWard] = useState('');
-  const [addressDetail, setAddressDetail] = useState('');
 
   // Tab 2: Contact info
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
   const [contactPhone, setContactPhone] = useState('');
-  const [contactFax, setContactFax] = useState('');
-  const [bankAccountNumber, setBankAccountNumber] = useState('');
-  const [bankName, setBankName] = useState('');
 
   // Tab 3: e-Invoice settings
-  const [consolidationStrategy, setConsolidationStrategy] =
-    useState<ConsolidationStrategy>('BY_MERCHANT');
+  // einvoiceConsolidationStrategy: 서버 모델에 추가 후 활성화
+  const consolidationStrategy: ConsolidationStrategy = 'BY_MERCHANT';
 
   // Tab 4: Invoice schedule settings
   const [scheduleType, setScheduleType] = useState<ScheduleType>('MONTHLY');
@@ -109,19 +102,9 @@ export function SettingsCompanyScreen() {
     if (profile) {
       setCompanyName(profile.companyName ?? '');
       setTaxCode(profile.taxCode ?? '');
-      setAddressCity(profile.addressCity ?? '');
-      setAddressDistrict(profile.addressDistrict ?? '');
-      setAddressWard(profile.addressWard ?? '');
-      setAddressDetail(profile.addressDetail ?? '');
       setContactName(profile.contactName ?? '');
       setContactEmail(profile.contactEmail ?? '');
       setContactPhone(profile.contactPhone ?? '');
-      setContactFax(profile.contactFax ?? '');
-      setBankAccountNumber(profile.bankAccountNumber ?? '');
-      setBankName(profile.bankName ?? '');
-      setConsolidationStrategy(
-        (profile.einvoiceConsolidationStrategy as ConsolidationStrategy) ?? 'BY_MERCHANT',
-      );
     }
   }, [profile]);
 
@@ -136,17 +119,6 @@ export function SettingsCompanyScreen() {
           input: {
             companyName,
             taxCode,
-            addressCity,
-            addressDistrict,
-            addressWard,
-            addressDetail,
-            contactName,
-            contactEmail,
-            contactPhone,
-            contactFax,
-            bankAccountNumber,
-            bankName,
-            einvoiceConsolidationStrategy: consolidationStrategy,
           },
         },
       });
@@ -194,19 +166,9 @@ export function SettingsCompanyScreen() {
     if (profile) {
       setCompanyName(profile.companyName ?? '');
       setTaxCode(profile.taxCode ?? '');
-      setAddressCity(profile.addressCity ?? '');
-      setAddressDistrict(profile.addressDistrict ?? '');
-      setAddressWard(profile.addressWard ?? '');
-      setAddressDetail(profile.addressDetail ?? '');
       setContactName(profile.contactName ?? '');
       setContactEmail(profile.contactEmail ?? '');
       setContactPhone(profile.contactPhone ?? '');
-      setContactFax(profile.contactFax ?? '');
-      setBankAccountNumber(profile.bankAccountNumber ?? '');
-      setBankName(profile.bankName ?? '');
-      setConsolidationStrategy(
-        (profile.einvoiceConsolidationStrategy as ConsolidationStrategy) ?? 'BY_MERCHANT',
-      );
     }
     setSaveError(null);
     setEditing(false);
@@ -255,58 +217,7 @@ export function SettingsCompanyScreen() {
           <span className="text-[11px] text-danger">세금코드는 10~13자리 숫자입니다.</span>
         )}
       </div>
-      <div className="flex flex-col gap-1.5">
-        <label className="text-[12px] font-semibold text-fg-muted">시/성 (City/Province)</label>
-        {loading ? (
-          <Skeleton height={36} />
-        ) : (
-          <Input
-            value={addressCity}
-            onChange={(e) => setAddressCity(e.target.value)}
-            placeholder="Ho Chi Minh City"
-            readOnly={readOnly}
-          />
-        )}
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <label className="text-[12px] font-semibold text-fg-muted">구/군 (District)</label>
-        {loading ? (
-          <Skeleton height={36} />
-        ) : (
-          <Input
-            value={addressDistrict}
-            onChange={(e) => setAddressDistrict(e.target.value)}
-            placeholder="District 1"
-            readOnly={readOnly}
-          />
-        )}
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <label className="text-[12px] font-semibold text-fg-muted">동/면 (Ward)</label>
-        {loading ? (
-          <Skeleton height={36} />
-        ) : (
-          <Input
-            value={addressWard}
-            onChange={(e) => setAddressWard(e.target.value)}
-            placeholder="Ward Ben Nghe"
-            readOnly={readOnly}
-          />
-        )}
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <label className="text-[12px] font-semibold text-fg-muted">상세주소</label>
-        {loading ? (
-          <Skeleton height={36} />
-        ) : (
-          <Input
-            value={addressDetail}
-            onChange={(e) => setAddressDetail(e.target.value)}
-            placeholder="123 Nguyen Hue, Floor 5"
-            readOnly={readOnly}
-          />
-        )}
-      </div>
+      {/* 주소 필드: addressFull이 GraphQL 모델에 추가되면 활성화 */}
     </div>
   );
 
@@ -357,45 +268,7 @@ export function SettingsCompanyScreen() {
           />
         )}
       </div>
-      <div className="flex flex-col gap-1.5">
-        <label className="text-[12px] font-semibold text-fg-muted">팩스</label>
-        {loading ? (
-          <Skeleton height={36} />
-        ) : (
-          <Input
-            value={contactFax}
-            onChange={(e) => setContactFax(e.target.value)}
-            placeholder="+84 28 1234 5679"
-            readOnly={readOnly}
-          />
-        )}
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <label className="text-[12px] font-semibold text-fg-muted">은행 계좌번호</label>
-        {loading ? (
-          <Skeleton height={36} />
-        ) : (
-          <Input
-            value={bankAccountNumber}
-            onChange={(e) => setBankAccountNumber(e.target.value)}
-            placeholder="1234567890"
-            readOnly={readOnly}
-          />
-        )}
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <label className="text-[12px] font-semibold text-fg-muted">은행명</label>
-        {loading ? (
-          <Skeleton height={36} />
-        ) : (
-          <Input
-            value={bankName}
-            onChange={(e) => setBankName(e.target.value)}
-            placeholder="Vietcombank"
-            readOnly={readOnly}
-          />
-        )}
-      </div>
+      {/* 팩스/은행 필드: GraphQL 모델에 추가되면 활성화 */}
     </div>
   );
 
@@ -410,7 +283,7 @@ export function SettingsCompanyScreen() {
         ) : (
           <Select
             value={consolidationStrategy}
-            onChange={(val) => setConsolidationStrategy(val as ConsolidationStrategy)}
+            onChange={() => {}}
             options={(Object.keys(CONSOLIDATION_LABELS) as ConsolidationStrategy[]).map((key) => ({
               value: key,
               label: CONSOLIDATION_LABELS[key],

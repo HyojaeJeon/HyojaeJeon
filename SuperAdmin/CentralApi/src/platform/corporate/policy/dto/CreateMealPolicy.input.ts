@@ -38,7 +38,7 @@
  */
 import { Field, ID, InputType, Int } from '@nestjs/graphql';
 import { GraphQLBigInt } from 'graphql-scalars';
-import { IsBoolean, IsString, IsUUID } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, IsUUID } from 'class-validator';
 
 /**
  * [KO] 식권 정책 생성용 GraphQL InputType
@@ -60,7 +60,7 @@ export class CreateMealPolicyInput {
    * [VI] Ma chinh sach - ma dinh danh duy nhat trong doanh nghiep (bat buoc)
    *      Vi du: "MEAL-STD-2024", "MEAL-EXEC-Q1"
    */
-  @Field() @IsString() policyCode!: string;
+  @Field(() => String, { nullable: true }) @IsOptional() @IsString() policyCode?: string | null;
 
   /**
    * [KO] 정책 이름 - 관리자가 구분할 수 있는 이름 (필수)
@@ -76,7 +76,7 @@ export class CreateMealPolicyInput {
    * [VI] Danh sach ID phong ban ap dung (mac dinh: [] = tat ca phong ban)
    *      Vi du: ["dept-dev", "dept-mkt"] → chi ap dung phong Dev, Marketing
    */
-  @Field(() => [String], { defaultValue: [] }) appliesToDepartmentIds!: string[];
+  @Field(() => [String], { nullable: true }) appliesToDepartmentIds?: string[];
 
   /**
    * [KO] 적용 대상 직급 코드 목록 (기본값: [] = 전체 직급)
@@ -84,7 +84,7 @@ export class CreateMealPolicyInput {
    * [VI] Danh sach ma chuc vu ap dung (mac dinh: [] = tat ca chuc vu)
    *      Vi du: ["STAFF", "INTERN"] → chi ap dung cho nhan vien, thuc tap sinh
    */
-  @Field(() => [String], { defaultValue: [] }) appliesToRoleCodes!: string[];
+  @Field(() => [String], { nullable: true }) appliesToRoleCodes?: string[];
 
   /**
    * [KO] 1회 결제 최대 한도 VND (기본값: 0n = 무제한)
@@ -164,7 +164,7 @@ export class CreateMealPolicyInput {
    * [VI] Loai bua an duoc phep (mac dinh: [] = khong gioi han)
    *      Vi du: ["LUNCH", "DINNER"] → chi an trua va an toi
    */
-  @Field(() => [String], { defaultValue: [] }) allowedMealTypes!: string[];
+  @Field(() => [String], { nullable: true }) allowedMealTypes?: string[];
 
   /**
    * [KO] 가맹점 카테고리 제한 (기본값: [] = 모든 카테고리 허용)
@@ -172,5 +172,5 @@ export class CreateMealPolicyInput {
    * [VI] Gioi han danh muc cua hang (mac dinh: [] = cho phep tat ca)
    *      Vi du: ["KOREAN", "VIETNAMESE"] → chi dung tai nha hang Han, Viet
    */
-  @Field(() => [String], { defaultValue: [] }) merchantCategoryRestrictions!: string[];
+  @Field(() => [String], { nullable: true }) merchantCategoryRestrictions?: string[];
 }

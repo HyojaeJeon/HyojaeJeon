@@ -1,5 +1,8 @@
-import { View, Text, Pressable } from 'react-native';
+import { useState } from 'react';
+import { View, Text, Pressable, Platform, StatusBar } from 'react-native';
 import { ChevronLeft, Heart, UtensilsCrossed } from 'lucide-react-native';
+import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import type { MockMerchant } from '@shared/mock/types';
 
@@ -8,8 +11,13 @@ interface PhotoHeaderProps {
 }
 
 export function PhotoHeader({ merchant }: PhotoHeaderProps) {
+  const navigation = useNavigation();
+  const [isFavorite, setIsFavorite] = useState(false);
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = Platform.OS === 'android' ? (StatusBar.currentHeight ?? 0) : insets.top;
+
   return (
-    <View className="relative h-[200px] w-full">
+    <View className="relative w-full" style={{ height: 200 + statusBarHeight, paddingTop: statusBarHeight }}>
       {/* Background gradient placeholder */}
       <LinearGradient
         colors={['#FEF3C7', '#FFEDD5']}
@@ -34,13 +42,25 @@ export function PhotoHeader({ merchant }: PhotoHeaderProps) {
       </LinearGradient>
 
       {/* Back button */}
-      <Pressable className="absolute left-4 top-4 flex h-[36px] w-[36px] items-center justify-center rounded-full bg-white/90 shadow-sm">
+      <Pressable
+        onPress={() => navigation.goBack()}
+        className="absolute left-4 flex h-[36px] w-[36px] items-center justify-center rounded-full bg-white/90 shadow-sm active:bg-gray-200"
+        style={{ top: statusBarHeight + 12 }}
+      >
         <ChevronLeft size={20} color="#111827" />
       </Pressable>
 
       {/* Heart button */}
-      <Pressable className="absolute right-4 top-4 flex h-[36px] w-[36px] items-center justify-center rounded-full bg-white/90 shadow-sm">
-        <Heart size={18} color="#9CA3AF" />
+      <Pressable
+        onPress={() => setIsFavorite((prev) => !prev)}
+        className="absolute right-4 flex h-[36px] w-[36px] items-center justify-center rounded-full bg-white/90 shadow-sm active:bg-gray-200"
+        style={{ top: statusBarHeight + 12 }}
+      >
+        <Heart
+          size={18}
+          color={isFavorite ? '#EF4444' : '#9CA3AF'}
+          fill={isFavorite ? '#EF4444' : 'none'}
+        />
       </Pressable>
     </View>
   );

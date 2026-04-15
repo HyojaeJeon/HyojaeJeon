@@ -41,6 +41,9 @@ import { GrantCapabilityModal } from '@screens/entitlementsOverviewScreen/GrantC
 import { SuspendModal } from '@screens/entitlementsOverviewScreen/SuspendModal';
 import { ResumeModal } from '@screens/entitlementsOverviewScreen/ResumeModal';
 import { RevokeModal } from '@screens/entitlementsOverviewScreen/RevokeModal';
+import { useHasPermission } from '@rbac/useHasPermission';
+import { PERMISSIONS } from '@rbac/permissions';
+import { IssueLicenseModal } from './IssueLicenseModal';
 
 const ENTITY_TYPE_MAP: Record<string, { scopeType: string; userType: string; label: string }> = {
   distributor: { scopeType: 'REGIONAL_DISTRIBUTOR', userType: 'DISTRIBUTOR_USER', label: 'governanceHub.tab.distributor' },
@@ -145,7 +148,7 @@ export function GovernanceDetailScreen() {
         })()}
 
         {section === 'license' && (
-          <LicenseContent data={licenseQuery.data} loading={licenseQuery.loading} refetch={licenseQuery.refetch} />
+          <LicenseContent data={licenseQuery.data} loading={licenseQuery.loading} refetch={licenseQuery.refetch} scopeType={config.scopeType} scopeId={entityId} />
         )}
         {section === 'brands' && isDistributor && (
           <BrandsContent data={brandsQuery.data} loading={brandsQuery.loading} distributorId={entityId} />
@@ -163,12 +166,14 @@ export function GovernanceDetailScreen() {
 
 /* ─────────────────────────── License Content ─────────────────────────── */
 
-function LicenseContent({ data, loading, refetch }: { data?: GovDetailLicenseData; loading: boolean; refetch: () => void }) {
+function LicenseContent({ data, loading, refetch, scopeType, scopeId }: { data?: GovDetailLicenseData; loading: boolean; refetch: () => void; scopeType: string; scopeId: string }) {
   const { t } = useI18n();
+  const canCreate = useHasPermission(PERMISSIONS.LICENSE_CREATE);
   const [updateStatus, { loading: updating }] = useMutation(UPDATE_LICENSE_STATUS_MUTATION);
   const [deleteLicense, { loading: deleting }] = useMutation(DELETE_LICENSE_MUTATION);
   const [nextStatus, setNextStatus] = useState('ACTIVE');
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [issueOpen, setIssueOpen] = useState(false);
 
   const licenses = data?.licensesByScope.success?.data ?? [];
 
@@ -203,9 +208,19 @@ function LicenseContent({ data, loading, refetch }: { data?: GovDetailLicenseDat
 
   if (licenses.length === 0) {
     return (
-      <SectionCard title={t('governanceHub.section.license')}>
-        <EmptyState icon={<Trash2 size={24} />} title={t('governanceHub.noLicense')} size="md" tone="neutral" />
-      </SectionCard>
+      <>
+        <SectionCard title={t('governanceHub.section.license')}>
+          <EmptyState icon={<Trash2 size={24} />} title={t('governanceHub.noLicense')} size="md" tone="neutral" />
+          {canCreate && (
+            <div className="mt-4 flex justify-center">
+              <Button variant="primary" size="md" startIcon={<Plus size={14} />} onClick={() => setIssueOpen(true)}>
+                {t('license.action.issue')}
+              </Button>
+            </div>
+          )}
+        </SectionCard>
+        <IssueLicenseModal open={issueOpen} onClose={() => setIssueOpen(false)} scopeType={scopeType} scopeId={scopeId} onCreated={refetch} />
+      </>
     );
   }
 
@@ -232,6 +247,14 @@ function LicenseContent({ data, loading, refetch }: { data?: GovDetailLicenseDat
           </div>
         </SectionCard>
       ))}
+      {canCreate && (
+        <div className="flex justify-end">
+          <Button variant="primary" size="sm" startIcon={<Plus size={13} />} onClick={() => setIssueOpen(true)}>
+            {t('license.action.issue')}
+          </Button>
+        </div>
+      )}
+      <IssueLicenseModal open={issueOpen} onClose={() => setIssueOpen(false)} scopeType={scopeType} scopeId={scopeId} onCreated={refetch} />
       <ConfirmModal
         open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}

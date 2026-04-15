@@ -1,8 +1,10 @@
-import { View, Text } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { Star } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { formatVnd } from '@shared/mock/mockData';
+import { formatVnd } from '@shared/utils/format';
 import type { MockMerchant } from '@shared/mock/types';
+import { Card } from '@shared/ui';
+import { colors, typography, spacing, radius, components } from '@shared/ui/tokens';
 
 const BRAND_COLORS = [
   'bg-amber-500',
@@ -18,61 +20,70 @@ const BRAND_COLORS = [
 interface MerchantListItemProps {
   merchant: MockMerchant;
   index: number;
+  onPress?: (merchant: MockMerchant) => void;
 }
 
-export function MerchantListItem({ merchant, index }: MerchantListItemProps) {
+export function MerchantListItem({ merchant, index, onPress }: MerchantListItemProps) {
   const { t } = useTranslation();
   const initial = merchant.brandName.charAt(0);
   const colorClass = BRAND_COLORS[index % BRAND_COLORS.length];
 
   return (
-    <View
-      className={`flex-row items-center gap-3 rounded-xl bg-white p-3 border border-gray-100 shadow-sm ${
-        !merchant.isOpen ? 'opacity-60' : ''
-      }`}
-    >
-      {/* Brand circle */}
-      <View
-        className={`flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-full ${colorClass}`}
+    <Pressable onPress={() => onPress?.(merchant)} className="active:opacity-80">
+      <Card
+        className={`${!merchant.isOpen ? 'opacity-60' : ''}`}
+        style={{ padding: spacing.cardPaddingCompact }}
       >
-        <Text className="text-white font-bold text-lg">{initial}</Text>
-      </View>
+        <View className="flex-row items-center" style={{ gap: spacing.md }}>
+          {/* Brand circle */}
+          <View
+            className={`flex shrink-0 items-center justify-center ${colorClass}`}
+            style={{
+              height: components.avatar.md.size,
+              width: components.avatar.md.size,
+              borderRadius: radius.full,
+            }}
+          >
+            <Text style={{ color: colors.textInverse, fontWeight: '700', fontSize: components.avatar.md.fontSize }}>{initial}</Text>
+          </View>
 
-      {/* Info */}
-      <View className="min-w-0 flex-1">
-        <Text className="text-sm font-medium text-gray-900" numberOfLines={1}>
-          {merchant.brandName}
-        </Text>
-        <Text className="mt-0.5 text-xs text-gray-400" numberOfLines={1}>
-          {merchant.address}
-        </Text>
-        <View className="mt-1 flex-row items-center gap-1">
-          <Star size={12} color="#F59E0B" fill="#F59E0B" />
-          <Text className="text-xs text-gray-500">{merchant.rating}</Text>
-          <Text className="text-xs text-gray-300">({merchant.reviewCount})</Text>
-          <Text className="text-xs text-gray-300">{'\u00B7'}</Text>
-          <Text className="text-xs text-gray-500">{merchant.distanceKm} km</Text>
-          <Text className="text-xs text-gray-300">{'\u00B7'}</Text>
-          <Text className="text-xs text-gray-500">{formatVnd(merchant.avgPriceVnd)}</Text>
+          {/* Info */}
+          <View className="min-w-0 flex-1">
+            <Text style={typography.cardTitle} numberOfLines={1}>
+              {merchant.brandName}
+            </Text>
+            <Text style={{ ...typography.caption, marginTop: 2 }} numberOfLines={1}>
+              {merchant.address}
+            </Text>
+            <View className="flex-row items-center" style={{ marginTop: 4, gap: 4 }}>
+              <Star size={12} color={colors.warning} fill={colors.warning} />
+              <Text style={{ ...typography.caption, color: colors.textSecondary }}>{merchant.rating}</Text>
+              <Text style={typography.caption}>({merchant.reviewCount})</Text>
+              <Text style={typography.caption}>{'\u00B7'}</Text>
+              <Text style={{ ...typography.caption, color: colors.textSecondary }}>{merchant.distanceKm} km</Text>
+              <Text style={typography.caption}>{'\u00B7'}</Text>
+              <Text style={{ ...typography.caption, color: colors.textSecondary }}>{formatVnd(merchant.avgPriceVnd)}</Text>
+            </View>
+          </View>
+
+          {/* Status badge */}
+          <View className="shrink-0">
+            {merchant.isOpen ? (
+              <View style={{ borderRadius: radius.full, backgroundColor: colors.successLight, paddingHorizontal: 10, paddingVertical: 4 }}>
+                <Text style={{ fontSize: 11, fontWeight: '500', color: colors.success }}>
+                  {t('merchant.open')}
+                </Text>
+              </View>
+            ) : (
+              <View style={{ borderRadius: radius.full, backgroundColor: colors.bgInput, paddingHorizontal: 10, paddingVertical: 4 }}>
+                <Text style={{ fontSize: 11, fontWeight: '500', color: colors.textTertiary }}>
+                  {t('merchant.closed')}
+                </Text>
+              </View>
+            )}
+          </View>
         </View>
-      </View>
-
-      {/* Status badge */}
-      <View className="shrink-0">
-        {merchant.isOpen ? (
-          <View className="rounded-full bg-[#10B981]/10 px-2.5 py-1">
-            <Text className="text-[11px] font-medium text-[#10B981]">
-              {t('merchant.open')}
-            </Text>
-          </View>
-        ) : (
-          <View className="rounded-full bg-gray-100 px-2.5 py-1">
-            <Text className="text-[11px] font-medium text-gray-400">
-              {t('merchant.closed')}
-            </Text>
-          </View>
-        )}
-      </View>
-    </View>
+      </Card>
+    </Pressable>
   );
 }

@@ -75,27 +75,29 @@ export function EmployeeListScreen() {
 
   if (hydrated && !canRead) return <LockedScreen />;
 
+  const deptMap = new Map(departments.map((d) => [d.id, d.departmentName]));
+
   const cols: DataTableColumn<EmployeeRow>[] = [
     {
       key: 'employeeCode',
-      header: '사번',
+      header: t('employee.col.code'),
       width: '120px',
       render: (r) => <span className="font-mono text-[12px]">{r.employeeCode}</span>,
     },
     {
       key: 'fullName',
-      header: '이름',
+      header: t('employee.col.name'),
       render: (r) => <span className="font-semibold text-fg">{r.fullName}</span>,
     },
     {
       key: 'departmentId',
-      header: '부서',
+      header: t('employee.col.department'),
       width: '160px',
-      render: (r) => <span className="text-fg-muted">{r.departmentId ?? '—'}</span>,
+      render: (r) => <span className="text-fg-muted">{(r.departmentId && deptMap.get(r.departmentId)) ?? '—'}</span>,
     },
     {
       key: 'status',
-      header: '상태',
+      header: t('employee.col.status'),
       width: '120px',
       render: (r) => (
         <Badge tone={r.status === 'ACTIVE' ? 'success' : r.status === 'SUSPENDED' ? 'warning' : 'neutral'} size="sm" startDot>
@@ -105,7 +107,7 @@ export function EmployeeListScreen() {
     },
     {
       key: 'badgeRfid',
-      header: '배지번호',
+      header: t('employee.col.badge'),
       width: '120px',
       render: (r) => <span className="font-mono text-[12px] text-fg-muted">{maskBadge(r.badgeRfid)}</span>,
     },

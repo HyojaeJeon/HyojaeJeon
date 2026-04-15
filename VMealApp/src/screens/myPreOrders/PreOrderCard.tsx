@@ -1,6 +1,7 @@
 import { View, Text, Pressable } from 'react-native';
 import { Calendar } from 'lucide-react-native';
-import { formatVnd } from '@shared/mock/mockData';
+import { colors, typography, spacing, radius, shadows } from '@shared/ui/tokens';
+import { formatVnd } from '@shared/utils/format';
 import { useTranslation } from 'react-i18next';
 
 type PreOrderStatus = 'CONFIRMED' | 'PENDING' | 'COMPLETED' | 'CANCELLED';
@@ -19,6 +20,7 @@ interface PreOrderData {
 
 interface PreOrderCardProps {
   order: PreOrderData;
+  onCancel?: (id: string) => void;
 }
 
 const STATUS_STYLE: Record<PreOrderStatus, { bg: string; text: string }> = {
@@ -37,47 +39,47 @@ const STATUS_LABEL_KEY: Record<PreOrderStatus, string> = {
 
 export type { PreOrderData, PreOrderStatus };
 
-export function PreOrderCard({ order }: PreOrderCardProps) {
+export function PreOrderCard({ order, onCancel }: PreOrderCardProps) {
   const { t } = useTranslation();
   const statusStyle = STATUS_STYLE[order.status];
 
   return (
-    <View className={`bg-white rounded-2xl p-4 shadow-sm border border-gray-100 ${order.muted ? 'opacity-70' : ''}`}>
+    <View style={{ backgroundColor: colors.bgCard, borderRadius: radius.xl, padding: spacing.cardPaddingCompact, opacity: order.muted ? 0.7 : 1, ...shadows.card }}>
       {/* Top row: merchant + status */}
       <View className="flex-row items-start justify-between">
-        <View className="flex-row items-center gap-3">
+        <View className="flex-row items-center" style={{ gap: spacing.elementGap }}>
           <View
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
-            style={{ backgroundColor: order.merchantColor }}
+            className="flex shrink-0 items-center justify-center"
+            style={{ height: 40, width: 40, borderRadius: radius.full, backgroundColor: order.merchantColor }}
           >
-            <Text className="text-white text-sm font-semibold">{order.merchantInitial}</Text>
+            <Text style={{ color: colors.textInverse, fontSize: 14, fontWeight: '600' }}>{order.merchantInitial}</Text>
           </View>
-          <Text className="text-sm font-medium text-gray-900">{order.merchantName}</Text>
+          <Text style={typography.cardTitle}>{order.merchantName}</Text>
         </View>
-        <View className={`flex-row items-center rounded-full px-2.5 py-1 ${statusStyle.bg}`}>
-          <Text className={`text-[11px] font-medium ${statusStyle.text}`}>
+        <View className={`flex-row items-center ${statusStyle.bg}`} style={{ borderRadius: radius.full, paddingHorizontal: 10, paddingVertical: 4 }}>
+          <Text className={statusStyle.text} style={{ fontSize: 11, fontWeight: '500' }}>
             {t(STATUS_LABEL_KEY[order.status])}
           </Text>
         </View>
       </View>
 
       {/* Items summary */}
-      <Text className="text-sm text-gray-600 mt-3">{order.items}</Text>
+      <Text style={{ ...typography.body, marginTop: spacing.elementGap }}>{order.items}</Text>
 
       {/* Amount */}
-      <Text className="text-[16px] font-bold text-gray-900 mt-1">{formatVnd(order.amount)}</Text>
+      <Text style={{ ...typography.cardTitle, fontSize: 16, fontWeight: '700', marginTop: spacing.xs }}>{formatVnd(order.amount)}</Text>
 
       {/* Date */}
-      <View className="flex-row items-center gap-1.5 mt-2">
-        <Calendar size={14} color="#9CA3AF" />
-        <Text className="text-xs text-gray-400">{order.dateLabel}</Text>
+      <View className="flex-row items-center" style={{ gap: 6, marginTop: spacing.sm }}>
+        <Calendar size={14} color={colors.textTertiary} />
+        <Text style={typography.caption}>{order.dateLabel}</Text>
       </View>
 
       {/* Cancel action (only for upcoming) */}
       {(order.status === 'CONFIRMED' || order.status === 'PENDING') && (
-        <View className="mt-3 pt-3 border-t border-gray-100">
-          <Pressable>
-            <Text className="text-xs font-medium text-[#EF4444]">{t('myPreOrders.cancelOrder')}</Text>
+        <View style={{ marginTop: spacing.elementGap, paddingTop: spacing.elementGap, borderTopWidth: 1, borderTopColor: colors.border }}>
+          <Pressable onPress={() => onCancel?.(order.id)} className="active:opacity-70">
+            <Text style={{ ...typography.caption, fontWeight: '500', color: colors.danger }}>{t('myPreOrders.cancelOrder')}</Text>
           </Pressable>
         </View>
       )}

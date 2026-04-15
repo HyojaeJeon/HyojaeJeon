@@ -384,9 +384,10 @@ export class ContractService {
   }
 
   async createTemplate(input: CreateContractTemplateInput) {
+    const templateCode = input.templateCode?.trim() || await this.generateTemplateCode(input.contractType);
     return this.prisma.contractTemplate.create({
       data: {
-        templateCode: input.templateCode,
+        templateCode,
         contractType: input.contractType,
         title: input.title,
         titleKo: input.titleKo ?? null,
@@ -428,6 +429,20 @@ export class ContractService {
       select: { revisionNo: true },
     });
     return (last?.revisionNo ?? 0) + 1;
+  }
+
+  private async generateTemplateCode(contractType: string): Promise<string> {
+    const prefix =
+      contractType === 'MERCHANT'
+        ? 'TPL-M'
+        : contractType === 'DISTRIBUTOR'
+          ? 'TPL-D'
+          : 'TPL-C';
+    const count = await this.prisma.contractTemplate.count({
+      where: { contractType },
+    });
+    const seq = String(count + 1).padStart(4, '0');
+    return `${prefix}-${seq}`;
   }
 
   private async generateContractCode(contractType: string): Promise<string> {

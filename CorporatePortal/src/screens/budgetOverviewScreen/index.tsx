@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@apollo/client';
+import { useRouter } from 'next/navigation';
 import { RefreshCw } from 'lucide-react';
 import {
   DetailPageTemplate,
@@ -31,6 +32,7 @@ import { useAppSelector } from '@store/index';
 
 export function BudgetOverviewScreen() {
   const { t } = useI18n();
+  const router = useRouter();
   const hydrated = useAppSelector((s) => s.auth.hydrated);
   const canRead = useHasPermission(PERMISSIONS.WALLET_READ);
 
@@ -52,11 +54,22 @@ export function BudgetOverviewScreen() {
 
   const walletColumns: DataTableColumn<WalletRow>[] = [
     {
+      key: 'employeeName',
+      header: t('budget.employeeName'),
+      render: (r) => <span className="font-medium text-fg">{r.employee?.fullName ?? '—'}</span>,
+    },
+    {
+      key: 'department',
+      header: t('budget.department'),
+      width: '140px',
+      render: (r) => <span className="text-[12px] text-fg-muted">{r.employee?.departmentName ?? '—'}</span>,
+    },
+    {
       key: 'employeeId',
       header: t('budget.employeeId'),
-      width: '180px',
+      width: '100px',
       render: (r) => (
-        <span className="font-mono text-[13px] text-fg">{r.employeeId}</span>
+        <span className="font-mono text-[10px] text-fg-muted">{r.employeeId.slice(0, 8)}</span>
       ),
     },
     {
@@ -169,6 +182,7 @@ export function BudgetOverviewScreen() {
                 rowKey={(r) => r.id}
                 compact
                 emptyState={t('budget.walletEmpty')}
+                onRowClick={(r) => router.push(`/employees/${r.employeeId}`)}
               />
               <div className="p-4">
                 <Pagination

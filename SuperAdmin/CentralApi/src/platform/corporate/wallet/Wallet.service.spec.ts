@@ -47,8 +47,12 @@ describe('MealWalletService', () => {
   const permission = {
     require: jest.fn(async () => undefined),
   } as unknown as import('@core/rbac/Permission.service').PermissionService;
+  const pubsub = {
+    publish: jest.fn(async () => undefined),
+    asyncIterator: jest.fn(),
+  } as unknown as import('@core/graphql/subscriptions/GraphqlSubscriptionBus.service').GraphqlSubscriptionBusService;
 
-  const service = new MealWalletService(prisma as never, entitlement, permission);
+  const service = new MealWalletService(prisma as never, entitlement, permission, pubsub);
 
   beforeEach(() => jest.clearAllMocks());
 

@@ -136,6 +136,14 @@ export function AsyncSearchSelect({
     if (open) updatePos();
   }, [open, updatePos]);
 
+  /* ── lock body scroll while open ── */
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, [open]);
+
   /* ── outside click / scroll ── */
   useEffect(() => {
     if (!open) return;
@@ -169,7 +177,10 @@ export function AsyncSearchSelect({
       try {
         const page = await onSearch(q, offset);
         if (append) {
-          setOptions((prev) => [...prev, ...page.items]);
+          setOptions((prev) => {
+            const seen = new Set(prev.map((o) => o.value));
+            return [...prev, ...page.items.filter((o) => !seen.has(o.value))];
+          });
         } else {
           setOptions(page.items);
         }

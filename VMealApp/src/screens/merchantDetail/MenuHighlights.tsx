@@ -1,6 +1,7 @@
 import { View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { formatVnd } from '@shared/mock/mockData';
+import { colors, typography, spacing, radius, shadows } from '@shared/ui/tokens';
+import { formatVnd } from '@shared/utils/format';
 import type { MockMenuItem } from '@shared/mock/types';
 
 const ITEM_COLORS = [
@@ -20,36 +21,44 @@ export function MenuHighlights({ items }: MenuHighlightsProps) {
   const popular = items.filter((item) => item.isPopular);
 
   return (
-    <View className="px-5 gap-3">
-      <Text className="text-base font-semibold text-gray-900">{t('merchant.popularItems')}</Text>
+    <View style={{ paddingHorizontal: spacing.screenHorizontal, gap: spacing.elementGap }}>
+      <Text style={typography.sectionTitle}>{t('merchant.popularItems')}</Text>
 
-      <View className="gap-2">
+      <View style={{ gap: spacing.sm }}>
         {popular.map((item, i) => (
           <View
             key={item.id}
-            className="flex-row items-center gap-3 rounded-xl bg-white p-3 border border-gray-100 shadow-sm"
+            className="flex-row items-center"
+            style={{
+              gap: spacing.elementGap,
+              borderRadius: radius.md,
+              backgroundColor: colors.bgCard,
+              padding: spacing.elementGap,
+              ...shadows.card,
+            }}
           >
             {/* Color placeholder */}
             <View
-              className={`flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-lg ${ITEM_COLORS[i % ITEM_COLORS.length]}`}
+              className={`flex shrink-0 items-center justify-center ${ITEM_COLORS[i % ITEM_COLORS.length]}`}
+              style={{ height: 48, width: 48, borderRadius: radius.sm }}
             >
-              <Text className="text-lg">
+              <Text style={{ fontSize: 18 }}>
                 {item.category === 'Khai vi' ? '\u{1F960}' : '\u{1F35C}'}
               </Text>
             </View>
 
             {/* Info */}
             <View className="flex-1 min-w-0">
-              <Text className="text-sm font-medium text-gray-900" numberOfLines={1}>
+              <Text style={typography.cardTitle} numberOfLines={1}>
                 {item.nameVi}
               </Text>
-              <Text className="mt-0.5 text-xs text-gray-400" numberOfLines={1}>
+              <Text style={{ ...typography.caption, marginTop: 2 }} numberOfLines={1}>
                 {item.descriptionVi}
               </Text>
             </View>
 
             {/* Price */}
-            <Text className="shrink-0 text-sm font-semibold text-gray-900">
+            <Text className="shrink-0" style={{ ...typography.cardTitle, fontWeight: '600' }}>
               {formatVnd(item.priceVnd)}
             </Text>
           </View>

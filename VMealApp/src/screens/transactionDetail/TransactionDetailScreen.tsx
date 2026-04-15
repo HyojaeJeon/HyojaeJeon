@@ -1,45 +1,85 @@
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { Download, Share2 } from 'lucide-react-native';
 import { AppHeader } from '@shared/ui/AppHeader';
-import { MOCK_TRANSACTIONS } from '@shared/mock/mockData';
+import { PrimaryButton, useModal } from '@shared/ui';
+import { colors, typography, spacing } from '@shared/ui/tokens';
 import { useTranslation } from 'react-i18next';
+import { useRoute, type RouteProp } from '@react-navigation/native';
+import type { RootStackParamList } from '@navigation/RootNavigator';
+import { useTransactionDetailData } from './useTransactionDetailData';
 import { ReceiptCard } from './ReceiptCard';
 
 export default function TransactionDetailScreen() {
   const { t } = useTranslation();
-  const transaction = MOCK_TRANSACTIONS[0]; // Pho 24 payment
+  const route = useRoute<RouteProp<RootStackParamList, 'TransactionDetailScreen'>>();
+  const transactionId = route.params?.transactionId ?? 'txn-001';
+  const { transaction } = useTransactionDetailData(transactionId);
+  const modal = useModal();
+
+  const handleSaveImage = () => {
+    modal.show({
+      title: t('common.comingSoon'),
+      message: t('transaction.detail.saveImageComingSoon'),
+      confirmText: 'OK',
+    });
+  };
+
+  const handleShare = () => {
+    modal.show({
+      title: t('common.comingSoon'),
+      message: t('transaction.detail.shareComingSoon'),
+      confirmText: 'OK',
+    });
+  };
+
+  const handleReportIssue = () => {
+    modal.show({
+      title: t('transaction.detail.reportIssue'),
+      message: t('transaction.detail.reportIssueConfirm'),
+      confirmText: t('transaction.detail.reportIssue'),
+      cancelText: t('common.cancel'),
+      variant: 'danger',
+      onConfirm: () => {
+        // TODO: call report issue mutation
+      },
+    });
+  };
 
   return (
-    <View className="flex-1 bg-[#F8FAFC]">
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <AppHeader title={t('transaction.detail.title')} />
 
-      <ScrollView className="flex-1 px-5 pt-4 pb-6">
-        <View className="gap-5">
+      <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.lg, paddingBottom: spacing.xxl }}>
+        <View style={{ gap: spacing.cardPadding }}>
           {/* Receipt card */}
-          <ReceiptCard
-            transaction={transaction}
-            merchantAddress="123 Nguyễn Huệ, Q.1, TP.HCM"
-          />
+          {transaction && (
+            <ReceiptCard
+              transaction={transaction}
+              merchantAddress=""
+            />
+          )}
 
           {/* Action buttons */}
-          <View className="flex-row gap-3">
-            <Pressable className="flex-1 flex-row items-center justify-center gap-2 h-[44px] rounded-xl border border-gray-200 bg-white">
-              <Download size={16} color="#6B7280" />
-              <Text className="text-sm font-medium text-gray-700">
-                {t('transaction.detail.saveImage')}
-              </Text>
-            </Pressable>
-            <Pressable className="flex-1 flex-row items-center justify-center gap-2 h-[44px] rounded-xl border border-gray-200 bg-white">
-              <Share2 size={16} color="#6B7280" />
-              <Text className="text-sm font-medium text-gray-700">
-                {t('common.share')}
-              </Text>
-            </Pressable>
+          <View className="flex-row" style={{ gap: spacing.elementGap }}>
+            <PrimaryButton
+              title={t('transaction.detail.saveImage')}
+              variant="outline"
+              onPress={handleSaveImage}
+              icon={<Download size={16} color={colors.textSecondary} />}
+              className="flex-1"
+            />
+            <PrimaryButton
+              title={t('common.share')}
+              variant="outline"
+              onPress={handleShare}
+              icon={<Share2 size={16} color={colors.textSecondary} />}
+              className="flex-1"
+            />
           </View>
 
           {/* Report issue */}
-          <Pressable className="w-full items-center">
-            <Text className="text-sm text-[#EF4444] font-medium">
+          <Pressable onPress={handleReportIssue} className="w-full items-center active:opacity-70">
+            <Text style={{ ...typography.body, fontWeight: '500', color: colors.danger }}>
               {t('transaction.detail.reportIssue')}
             </Text>
           </Pressable>

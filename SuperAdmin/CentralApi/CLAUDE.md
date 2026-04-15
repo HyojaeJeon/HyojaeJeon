@@ -8,6 +8,7 @@
 
 ## 구현 규칙
 - 다국어 라벨이 필요한 DB 컬럼 / GraphQL 필드 / DTO 필드는 `name` (vi 기본) / `nameKo` / `nameEn` 및 `description` / `descriptionKo` / `descriptionEn` 쌍만 사용한다. 기타 suffix 금지.
+- **다국어 필드 서버 해석**: GraphQL 응답에서 `title`, `name`, `description` 등 기본 필드에 클라이언트 `Accept-Language` 헤더 기반으로 해석된 값을 담아 반환한다. `resolveLocalizedRow/Rows()` (`core/i18n/resolveLocalizedFields.ts`) 헬퍼를 resolver에서 호출. 클라이언트는 `Ko`/`En` suffix 필드를 직접 읽지 않고 기본 필드만 사용한다. locale 우선순위: Accept-Language → userLanguage → tenantLanguage → `'en'`.
 - 기본 API 표면은 GraphQL이다. REST는 예외만 허용한다.
 - auth / rbac / tenancy / policy / audit / sync / entitlement 계약은 `SharedContracts`를 따른다.
 - 멀티테넌트 스코프와 capability 체크는 서비스/쿼리 레이어에서 강제한다.

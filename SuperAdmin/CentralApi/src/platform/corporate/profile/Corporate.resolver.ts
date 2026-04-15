@@ -21,12 +21,15 @@ import {
   CurrentUser,
   JwtPayload,
 } from '@core/auth/decorators/CurrentUser.decorator';
+import { Public } from '@core/auth/decorators/Public.decorator';
 import { RequirePermission } from '@core/rbac/decorators/RequirePermission.decorator';
 import { mealCtxFromUser } from '../_internal/callerCtx';
 import { MealCorporateService } from './Corporate.service';
 import { MealCorporateModel } from './models/MealCorporate.model';
 import { MealCorporateDepartmentModel } from './models/MealCorporateDepartment.model';
 import { MealEmployeeModel } from './models/MealEmployee.model';
+import { MealEmployeeLoginPayload } from './models/MealEmployeeLogin.model';
+import { CorporateAdminUserModel } from './models/CorporateAdminUser.model';
 import { CreateMealCorporateInput } from './dto/CreateMealCorporate.input';
 import { UpdateMealCorporateInput } from './dto/UpdateMealCorporate.input';
 import { CreateMealDepartmentInput } from './dto/CreateMealDepartment.input';
@@ -48,6 +51,8 @@ const MealCorporateModel__ListResp = createListResponse(MealCorporateModel, 'Mea
 const MealCorporateModel__Resp = createObjectResponse(MealCorporateModel, 'MealCorporateModelResponse');
 const MealEmployeeModel__ListResp = createListResponse(MealEmployeeModel, 'MealEmployeeModelListResponse');
 const MealEmployeeModel__Resp = createObjectResponse(MealEmployeeModel, 'MealEmployeeModelResponse');
+const MealEmployeeLoginResp = createObjectResponse(MealEmployeeLoginPayload, 'MealEmployeeLoginResponse');
+const CorporateAdminUserModel__ListResp = createListResponse(CorporateAdminUserModel, 'CorporateAdminUserModelListResponse');
 
 @Resolver(() => MealCorporateModel)
 export class MealCorporateResolver {
@@ -257,6 +262,42 @@ export class MealCorporateResolver {
     return this.service.createEmployee(mealCtxFromUser(user), input);
   }
 
+  @RequirePermission('employees:update')
+  @Mutation(() => MealEmployeeModel__Resp, { name: 'mealEmployeeUpdate' })
+  async mealEmployeeUpdate(
+    @Args('id', { type: () => ID }) id: string,
+    @Args('fullName', { type: () => String, nullable: true }) fullName: string | null,
+    @Args('email', { type: () => String, nullable: true }) email: string | null,
+    @Args('phone', { type: () => String, nullable: true }) phone: string | null,
+    @Args('departmentId', { type: () => String, nullable: true }) departmentId: string | null,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const data: Record<string, string | null | undefined> = {};
+    if (fullName !== null) data.fullName = fullName;
+    if (email !== null) data.email = email;
+    if (phone !== null) data.phone = phone;
+    if (departmentId !== undefined) data.departmentId = departmentId;
+    return this.service.updateEmployee(mealCtxFromUser(user), id, data);
+  }
+
+  @RequirePermission('employees:update')
+  @Mutation(() => MealEmployeeModel__Resp, { name: 'mealEmployeeSuspend' })
+  mealEmployeeSuspend(
+    @Args('id', { type: () => ID }) id: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.service.suspendEmployee(mealCtxFromUser(user), id);
+  }
+
+  @RequirePermission('employees:update')
+  @Mutation(() => MealEmployeeModel__Resp, { name: 'mealEmployeeTerminate' })
+  mealEmployeeTerminate(
+    @Args('id', { type: () => ID }) id: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.service.terminateEmployee(mealCtxFromUser(user), id);
+  }
+
   // ─── Invoice Schedule ───
 
   /**
@@ -302,5 +343,32 @@ export class MealCorporateResolver {
       autoSubmit,
       notifyEmail,
     );
+  }
+
+  // ─── VMealApp Employee Login (dev-friendly, phone-based) ───
+
+  /**
+   * [KO] Mutation: mealEmployeeLogin - 임직원 전화번호 로그인 (VMealApp 전용)
+   *      인증 불필요(@Public). 전화번호 + corporateId로 임직원을 조회하여 JWT를 발급한다.
+   *
+   * [VI] Mutation: mealEmployeeLogin - Dang nhap nhan vien bang so dien thoai (danh cho VMealApp)
+   *      Khong can xac thuc (@Public). Tim nhan vien bang so dien thoai + corporateId va cap JWT.
+   */
+  @Public()
+  @Mutation(() => MealEmployeeLoginResp)
+  async mealEmployeeLogin(
+    @Args('phone', { type: () => String }) phone: string,
+    @Args('corporateId', { type: () => ID }) corporateId: string,
+  ) {
+    return this.service.employeeLogin(phone, corporateId);
+  }
+
+  // ───── Corporate Admins
+
+  @Query(() => CorporateAdminUserModel__ListResp, { name: 'corporateAdmins' })
+  async corporateAdmins(
+    @Args('corporateId', { type: () => ID }) corporateId: string,
+  ) {
+    return this.service.listAdmins(corporateId);
   }
 }

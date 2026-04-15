@@ -73,44 +73,49 @@ function usePartyBSearch(partyBType: string) {
     async (query: string, offset: number): Promise<AsyncSearchSelectPage> => {
       const q = query.toLowerCase();
       const PAGE = 10;
+      // Server doesn't support search param — fetch max (100) with cache, filter client-side
+      const FETCH_SIZE = 100;
 
       if (partyBType === 'BRAND_HQ') {
         const { data } = await client.query<BrandListData>({
           query: BRAND_LIST_QUERY,
-          variables: { skip: 0, take: 200 },
+          variables: { skip: 0, take: FETCH_SIZE },
           fetchPolicy: 'cache-first',
         });
-        const rows = (data?.brands?.success?.data ?? []).filter(
-          (r) => !q || r.brandName.toLowerCase().includes(q) || r.brandCode.toLowerCase().includes(q),
-        );
-        const slice = rows.slice(offset, offset + PAGE);
-        return { items: slice.map((r) => ({ value: r.id, label: r.brandName, description: `${r.brandCode} · ${r.status}` })), hasMore: offset + PAGE < rows.length };
+        const all = data?.brands?.success?.data ?? [];
+        const filtered = q
+          ? all.filter((r) => r.brandName.toLowerCase().includes(q) || r.brandCode.toLowerCase().includes(q))
+          : all;
+        const slice = filtered.slice(offset, offset + PAGE);
+        return { items: slice.map((r) => ({ value: r.id, label: r.brandName, description: `${r.brandCode} · ${r.status}` })), hasMore: offset + PAGE < filtered.length };
       }
 
       if (partyBType === 'DISTRIBUTOR') {
         const { data } = await client.query<DistributorListData>({
           query: DISTRIBUTOR_LIST_QUERY,
-          variables: { skip: 0, take: 200 },
+          variables: { skip: 0, take: FETCH_SIZE },
           fetchPolicy: 'cache-first',
         });
-        const rows = (data?.distributors?.success?.data ?? []).filter(
-          (r) => !q || r.companyName.toLowerCase().includes(q) || r.distributorCode.toLowerCase().includes(q),
-        );
-        const slice = rows.slice(offset, offset + PAGE);
-        return { items: slice.map((r) => ({ value: r.id, label: r.companyName, description: `${r.distributorCode} · ${r.status}` })), hasMore: offset + PAGE < rows.length };
+        const all = data?.distributors?.success?.data ?? [];
+        const filtered = q
+          ? all.filter((r) => r.companyName.toLowerCase().includes(q) || r.distributorCode.toLowerCase().includes(q))
+          : all;
+        const slice = filtered.slice(offset, offset + PAGE);
+        return { items: slice.map((r) => ({ value: r.id, label: r.companyName, description: `${r.distributorCode} · ${r.status}` })), hasMore: offset + PAGE < filtered.length };
       }
 
       if (partyBType === 'CORPORATE') {
         const { data } = await client.query<CorporateListData>({
           query: CORPORATE_LIST_QUERY,
-          variables: { skip: 0, take: 200 },
+          variables: { skip: 0, take: FETCH_SIZE },
           fetchPolicy: 'cache-first',
         });
-        const rows = (data?.mealCorporates?.success?.data ?? []).filter(
-          (r) => !q || r.companyName.toLowerCase().includes(q) || r.tenantCode.toLowerCase().includes(q),
-        );
-        const slice = rows.slice(offset, offset + PAGE);
-        return { items: slice.map((r) => ({ value: r.id, label: r.companyName, description: `${r.tenantCode}${r.taxCode ? ` · ${r.taxCode}` : ''} · ${r.status}` })), hasMore: offset + PAGE < rows.length };
+        const all = data?.mealCorporates?.success?.data ?? [];
+        const filtered = q
+          ? all.filter((r) => r.companyName.toLowerCase().includes(q) || r.tenantCode.toLowerCase().includes(q) || (r.taxCode && r.taxCode.includes(q)))
+          : all;
+        const slice = filtered.slice(offset, offset + PAGE);
+        return { items: slice.map((r) => ({ value: r.id, label: r.companyName, description: `${r.tenantCode}${r.taxCode ? ` · ${r.taxCode}` : ''} · ${r.status}` })), hasMore: offset + PAGE < filtered.length };
       }
 
       return { items: [], hasMore: false };

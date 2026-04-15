@@ -29,6 +29,7 @@ export const AUTH_USER_TYPES = [
   'DISTRIBUTOR_USER',
   'BRAND_ADMIN',
   'CORPORATE_ADMIN',
+  'MEAL_EMPLOYEE',
 ] as const;
 
 // 배열의 요소들로부터 유니온 타입을 자동 생성: 'SUPER_ADMIN' | 'DISTRIBUTOR_USER' | ...

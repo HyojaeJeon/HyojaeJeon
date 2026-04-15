@@ -104,13 +104,26 @@ export class MealTransactionService {
   async findById(ctx: MealCallerCtx, id: string) {
     const t = await this.prisma.mealTransaction.findUnique({ where: { id } });
     if (!t) throw new DomainError({ code: 'RESOURCE_NOT_FOUND', params: { resource: 'Transaction' }, details: { reason: 'Transaction not found' } });
-    // [KO] 트랜잭션은 corporate ↔ brand 양쪽에 속한다.
-    // CORPORATE_ADMIN 은 자기 corporate row 만, BRAND_ADMIN 은 자기 brand row 만.
-    // [VI] Giao dịch thuộc cả hai trục corporate ↔ brand.
-    // CORPORATE_ADMIN chỉ xem row corporate mình, BRAND_ADMIN chỉ xem row brand mình.
     if (ctx.userType === 'CORPORATE_ADMIN') assertCorporateScope(ctx, t.corporateId);
     else if (ctx.userType !== 'SUPER_ADMIN') assertBrandScope(ctx, t.brandHqId);
-    return t;
+
+    // Enrich with names
+    const [brand, branch, wallet] = await Promise.all([
+      this.prisma.brandProfile.findUnique({ where: { id: t.brandHqId }, select: { brandName: true } }),
+      this.prisma.branch.findUnique({ where: { id: t.branchId }, select: { branchName: true } }),
+      this.prisma.mealWallet.findUnique({
+        where: { id: t.walletId },
+        select: { employee: { select: { fullName: true, department: { select: { departmentName: true } } } } },
+      }),
+    ]);
+
+    return {
+      ...t,
+      brandName: brand?.brandName ?? null,
+      branchName: branch?.branchName ?? null,
+      employeeName: wallet?.employee?.fullName ?? null,
+      departmentName: (wallet?.employee as unknown as { department?: { departmentName?: string } })?.department?.departmentName ?? null,
+    };
   }
 
   /**
@@ -124,10 +137,44 @@ export class MealTransactionService {
     corporateId: string,
     skip: number,
     take: number,
+    filters?: {
+      dateFrom?: string | null;
+      dateTo?: string | null;
+      merchantId?: string | null;
+      employeeId?: string | null;
+      statuses?: string[] | null;
+    },
   ) {
     assertCorporateScope(ctx, corporateId);
-    const where = { corporateId };
-    const [data, totalCount] = await Promise.all([
+
+    const where: Record<string, unknown> = { corporateId };
+
+    if (filters?.dateFrom || filters?.dateTo) {
+      const createdAt: Record<string, Date> = {};
+      if (filters.dateFrom) createdAt.gte = new Date(filters.dateFrom);
+      if (filters.dateTo) createdAt.lte = new Date(filters.dateTo);
+      where.createdAt = createdAt;
+    }
+    if (filters?.merchantId) {
+      where.brandHqId = filters.merchantId;
+    }
+    if (filters?.employeeId) {
+      // employeeId → walletId 를 통해 필터 (wallet.employeeId)
+      const wallet = await this.prisma.mealWallet.findUnique({
+        where: { employeeId: filters.employeeId },
+        select: { id: true },
+      });
+      if (wallet) {
+        where.walletId = wallet.id;
+      } else {
+        return { data: [], totalCount: 0 };
+      }
+    }
+    if (filters?.statuses && filters.statuses.length > 0) {
+      where.status = { in: filters.statuses };
+    }
+
+    const [rawData, totalCount] = await Promise.all([
       this.prisma.mealTransaction.findMany({
         where,
         skip,
@@ -136,6 +183,42 @@ export class MealTransactionService {
       }),
       this.prisma.mealTransaction.count({ where }),
     ]);
+
+    // Enrich with brand/branch names + employee/department names
+    const brandIds = [...new Set(rawData.map((t) => t.brandHqId).filter(Boolean))];
+    const branchIds = [...new Set(rawData.map((t) => t.branchId).filter(Boolean))];
+    const walletIds = [...new Set(rawData.map((t) => t.walletId))];
+
+    const [brands, branches, wallets] = await Promise.all([
+      brandIds.length > 0
+        ? this.prisma.brandProfile.findMany({ where: { id: { in: brandIds } }, select: { id: true, brandName: true } })
+        : [],
+      branchIds.length > 0
+        ? this.prisma.branch.findMany({ where: { id: { in: branchIds } }, select: { id: true, branchName: true } })
+        : [],
+      walletIds.length > 0
+        ? this.prisma.mealWallet.findMany({
+            where: { id: { in: walletIds } },
+            select: { id: true, employee: { select: { fullName: true, department: { select: { departmentName: true } } } } },
+          })
+        : [],
+    ]);
+
+    const brandMap = new Map(brands.map((b) => [b.id, b.brandName]));
+    const branchMap = new Map(branches.map((b) => [b.id, b.branchName]));
+    const walletMap = new Map(wallets.map((w) => [w.id, w.employee]));
+
+    const data = rawData.map((t) => {
+      const emp = walletMap.get(t.walletId);
+      return {
+        ...t,
+        brandName: brandMap.get(t.brandHqId) ?? null,
+        branchName: branchMap.get(t.branchId) ?? null,
+        employeeName: emp?.fullName ?? null,
+        departmentName: (emp as unknown as { department?: { departmentName?: string } })?.department?.departmentName ?? null,
+      };
+    });
+
     return { data, totalCount };
   }
 

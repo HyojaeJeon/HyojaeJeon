@@ -1094,6 +1094,34 @@ async function seedGovernanceMock() {
     }
   }
 
+  // ── Test Employee for VMealApp dev login ──
+  const testEmployee = await prisma.mealEmployee.upsert({
+    where: { uq_meal_emp_corp: { corporateId: corp1.id, employeeCode: 'NV-2024-0156' } },
+    update: {},
+    create: {
+      corporateId: corp1.id,
+      employeeCode: 'NV-2024-0156',
+      fullName: 'Nguyễn Minh Tuấn',
+      phone: '+84795050727',
+      email: 'tuan.nguyen@samsung.vn',
+      status: 'ACTIVE',
+    },
+  });
+
+  await prisma.mealWallet.upsert({
+    where: { employeeId: testEmployee.id },
+    update: {},
+    create: {
+      corporateId: corp1.id,
+      employeeId: testEmployee.id,
+      status: 'ACTIVE',
+      balanceVnd: BigInt(2450000),
+      companyAllowanceVnd: BigInt(2000000),
+      personalTopUpVnd: BigInt(450000),
+      dailyLimitVnd: BigInt(200000),
+    },
+  });
+
   // ── Corporate Admin UserRoleAssignment (SP-B4: CORPORATE_OWNER 역할 부여) ──
   const allRolesGov = await prisma.role.findMany();
   const roleByCodeGov = new Map(allRolesGov.map((r) => [r.roleCode, r.id]));

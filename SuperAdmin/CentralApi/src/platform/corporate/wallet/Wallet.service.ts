@@ -33,6 +33,7 @@ import {
 import { PrismaService } from '@core/prisma/Prisma.service';
 import { EntitlementService } from '@shared/entitlement/Entitlement.service';
 import { PermissionService } from '@core/rbac/Permission.service';
+import { GraphqlSubscriptionBusService } from '@core/graphql/subscriptions/GraphqlSubscriptionBus.service';
 import {
   MealCallerCtx,
   assertCorporateScope,
@@ -47,6 +48,7 @@ import {
   PERSONAL_TOP_UP_SOURCE_TYPE,
   applyMealWalletFunding,
 } from './_internal/walletLedger';
+import { MEAL_WALLET_UPDATED } from './Wallet.subscription';
 
 @Injectable()
 export class MealWalletService {
@@ -57,6 +59,8 @@ export class MealWalletService {
     private readonly entitlement: EntitlementService,
     /** [KO] RBAC 권한 서비스 — 세부 작업 권한 검증 / [VI] Service quyền RBAC — kiểm tra quyền thao tác chi tiết */
     private readonly permission: PermissionService,
+    /** [KO] GraphQL Subscription PubSub 버스 — 실시간 이벤트 발행 / [VI] PubSub bus GraphQL Subscription — phát sự kiện real-time */
+    private readonly pubsub: GraphqlSubscriptionBusService,
   ) {}
 
   /**
@@ -109,15 +113,27 @@ export class MealWalletService {
   ) {
     assertCorporateScope(ctx, corporateId);
     const where = { corporateId };
-    const [data, totalCount] = await Promise.all([
+    const [rawData, totalCount] = await Promise.all([
       this.prisma.mealWallet.findMany({
         where,
         skip,
         take,
         orderBy: { createdAt: 'desc' },
+        include: { employee: { include: { department: true } } },
       }),
       this.prisma.mealWallet.count({ where }),
     ]);
+    const data = rawData.map((w) => ({
+      ...w,
+      employee: w.employee
+        ? {
+            fullName: w.employee.fullName,
+            employeeCode: w.employee.employeeCode,
+            departmentId: w.employee.departmentId,
+            departmentName: (w.employee as unknown as { department?: { departmentName?: string } }).department?.departmentName ?? null,
+          }
+        : null,
+    }));
     return { data, totalCount };
   }
 
@@ -214,7 +230,7 @@ export class MealWalletService {
     await this.entitlement.requireCapability(targetCtx, 'MEAL_TICKET');
     await this.permission.require(targetCtx, 'corporate.wallet.fund');
 
-    return this.prisma.$transaction(async (tx) => {
+    const updatedWallet = await this.prisma.$transaction(async (tx) => {
       const corp = await tx.mealCorporate.findUnique({
         where: { id: wallet.corporateId },
       });
@@ -245,7 +261,7 @@ export class MealWalletService {
 
       // [KO] 지갑 잔액 업데이트 (3개 필드 동시 갱신)
       // [VI] Cập nhật số dư ví (cập nhật đồng thời 3 trường)
-      const updatedWallet = await tx.mealWallet.update({
+      const result = await tx.mealWallet.update({
         where: { id: wallet.id },
         data: {
           balanceVnd: nextState.balanceVnd,
@@ -267,8 +283,13 @@ export class MealWalletService {
         },
       });
 
-      return updatedWallet;
+      return result;
     });
+
+    // [KO] 지갑 잔액 변경 이벤트 발행 — 구독 중인 클라이언트에 실시간 전달
+    // [VI] Phát sự kiện thay đổi số dư ví — gửi real-time tới client đang đăng ký
+    await this.pubsub.publish(MEAL_WALLET_UPDATED, updatedWallet);
+    return updatedWallet;
   }
 
   /**
@@ -315,14 +336,14 @@ export class MealWalletService {
     await this.entitlement.requireCapability(targetCtx, 'MEAL_TICKET');
     await this.permission.require(targetCtx, 'corporate.wallet.topup');
 
-    return this.prisma.$transaction(async (tx) => {
+    const updatedWallet = await this.prisma.$transaction(async (tx) => {
       const nextState = applyMealWalletFunding(
         wallet,
         input.amountVnd,
         PERSONAL_TOP_UP_SOURCE_TYPE,
       );
 
-      const updatedWallet = await tx.mealWallet.update({
+      const result = await tx.mealWallet.update({
         where: { id: wallet.id },
         data: {
           balanceVnd: nextState.balanceVnd,
@@ -344,8 +365,13 @@ export class MealWalletService {
         },
       });
 
-      return updatedWallet;
+      return result;
     });
+
+    // [KO] 지갑 잔액 변경 이벤트 발행 — 구독 중인 클라이언트에 실시간 전달
+    // [VI] Phát sự kiện thay đổi số dư ví — gửi real-time tới client đang đăng ký
+    await this.pubsub.publish(MEAL_WALLET_UPDATED, updatedWallet);
+    return updatedWallet;
   }
 
   /**

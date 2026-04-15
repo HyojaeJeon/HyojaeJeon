@@ -202,9 +202,18 @@ export class MealTransactionModel {
    */
   @Field() createdAt!: Date;
 
+  /** [KO] 주문 ID (앱 기반 주문 시) / [VI] ID đơn hàng (đặt qua app) */
+  @Field(() => String, { nullable: true }) orderId?: string | null;
+
   /** [KO] 직원명 (가상 필드 — wallet → employee resolve) / [VI] Tên nhân viên (trường ảo) */
   @Field(() => String, { nullable: true }) employeeName?: string | null;
 
   /** [KO] 부서명 (가상 필드 — wallet → employee → department resolve) / [VI] Tên phòng ban (trường ảo) */
   @Field(() => String, { nullable: true }) departmentName?: string | null;
+
+  /** [KO] 브랜드명 (가상 필드) / [VI] Tên thương hiệu (trường ảo) */
+  @Field(() => String, { nullable: true }) brandName?: string | null;
+
+  /** [KO] 지점명 (가상 필드) / [VI] Tên chi nhánh (trường ảo) */
+  @Field(() => String, { nullable: true }) branchName?: string | null;
 }

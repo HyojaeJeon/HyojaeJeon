@@ -1,5 +1,6 @@
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { Check } from 'lucide-react-native';
+import { colors, radius } from '@shared/ui/tokens';
 
 interface FilterChip {
   label: string;
@@ -8,26 +9,35 @@ interface FilterChip {
 
 interface SourceFilterProps {
   filters: FilterChip[];
+  onFilterPress?: (label: string) => void;
 }
 
-export function SourceFilter({ filters }: SourceFilterProps) {
+export function SourceFilter({ filters, onFilterPress }: SourceFilterProps) {
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} className="pb-1">
-      <View className="flex-row gap-2">
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ paddingBottom: 4 }}>
+      <View className="flex-row" style={{ gap: 8 }}>
         {filters.map((f) => (
           <Pressable
             key={f.label}
-            className={`flex-row shrink-0 items-center gap-1.5 rounded-full px-4 py-2 ${
-              f.active
-                ? 'bg-[#3B82F6]'
-                : 'bg-white border border-gray-200'
-            }`}
+            onPress={() => onFilterPress?.(f.label)}
+            className="flex-row shrink-0 items-center"
+            style={{
+              height: 36,
+              borderRadius: radius.full,
+              paddingHorizontal: 16,
+              gap: 6,
+              backgroundColor: f.active ? colors.primary : colors.bgWhite,
+              borderWidth: f.active ? 0 : 1,
+              borderColor: f.active ? undefined : colors.border,
+            }}
           >
-            {f.active && <Check size={14} color="#FFFFFF" />}
+            {f.active && <Check size={14} color={colors.textInverse} />}
             <Text
-              className={`text-[13px] font-medium ${
-                f.active ? 'text-white' : 'text-gray-600'
-              }`}
+              style={{
+                fontSize: 13,
+                fontWeight: '500',
+                color: f.active ? colors.textInverse : colors.textSecondary,
+              }}
             >
               {f.label}
             </Text>

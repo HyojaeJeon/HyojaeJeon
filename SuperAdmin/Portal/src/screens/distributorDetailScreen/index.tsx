@@ -11,6 +11,7 @@ import { PERMISSIONS } from '@rbac/permissions';
 import { LockedScreen } from '@screens/common/LockedScreen';
 import { StatusBadge } from '@shared/ui/StatusBadge';
 import { formatDateTime } from '@shared/utils/format';
+import { LicenseSection } from '@screens/common/LicenseSection';
 
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -87,6 +88,13 @@ export function DistributorDetailScreen() {
           <div className="text-fg-subtle text-[12.5px]">{t('common.empty')}</div>
         )}
       </SectionCard>
+
+      {/* License Management */}
+      {id && d && (
+        <div className="mt-4">
+          <LicenseSection scopeType="REGIONAL_DISTRIBUTOR" scopeId={id} entityName={d.companyName} />
+        </div>
+      )}
     </DetailPageTemplate>
   );
 }
